@@ -1,0 +1,52 @@
+# OTORAPORT - Automatyzacja Raportowania Cen Mieszkań
+# Zgodność z ustawą o ochronie nabywcy
+
+User-agent: *
+Allow: /
+Allow: /landing
+Allow: /auth/signin
+Allow: /auth/signup
+
+# Disallow private areas
+Disallow: /dashboard
+Disallow: /api/private/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /uploads/
+
+# Sitemap location
+Sitemap: https://otoraport.pl/sitemap.xml
+
+# Crawl-delay for all bots (optional)
+Crawl-delay: 1
+
+# Specific bot instructions
+User-agent: Googlebot
+Crawl-delay: 1
+
+User-agent: Bingbot
+Crawl-delay: 1
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /landing
+Disallow: /dashboard
+Disallow: /api/private/
+
+User-agent: CCBot
+Allow: /
+Allow: /landing
+Disallow: /dashboard
+Disallow: /api/private/
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /landing
+Disallow: /dashboard
+Disallow: /api/private/
+
+User-agent: Claude-Web
+Allow: /
+Allow: /landing
+Disallow: /dashboard
+Disallow: /api/private/
