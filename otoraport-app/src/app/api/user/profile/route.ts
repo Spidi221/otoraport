@@ -31,32 +31,72 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check if user exists in our database with complete profile
-    const { data: user, error } = await supabase
-      .from('users')
-      .select(`
-        id,
-        email,
-        name,
-        company_name,
-        nip,
-        phone,
-        plan,
-        subscription_status,
-        trial_ends_at,
-        created_at,
-        onboarding_completed
-      `)
-      .eq('email', session.user.email)
-      .single()
+    // Use session user ID directly (from NextAuth token)
+    const userId = session.user.id
 
-    if (error) {
-      // User doesn't exist in database - needs to complete registration
+    if (!userId) {
       return NextResponse.json({
         profile_completed: false,
-        reason: 'user_not_found',
-        message: 'Użytkownik musi ukończyć proces rejestracji'
+        reason: 'invalid_session',
+        message: 'Błąd sesji użytkownika'
       })
+    }
+
+    // Get developer profile using bridge table
+    const { data: bridgeData, error: bridgeError } = await supabase
+      .rpc('get_developer_by_nextauth_user', { user_id: userId })
+      .single()
+
+    if (bridgeError || !bridgeData) {
+      console.log('No developer profile found for user:', userId, 'Error:', bridgeError)
+      
+      // Check if user exists in NextAuth users table
+      const { data: authUser } = await supabase
+        .from('users')
+        .select('id, email, name, image')
+        .eq('id', userId)
+        .single()
+
+      return NextResponse.json({
+        profile_completed: false,
+        reason: 'incomplete_profile',
+        message: 'Użytkownik musi ukończyć profil dewelopera',
+        oauth_user: authUser ? {
+          id: authUser.id,
+          email: authUser.email,
+          name: authUser.name,
+          image: authUser.image
+        } : null
+      })
+    }
+
+    // Build user object from bridge data
+    const user = {
+      id: userId,
+      developer_id: bridgeData.developer_id,
+      email: bridgeData.email,
+      name: bridgeData.name,
+      company_name: bridgeData.company_name,
+      nip: bridgeData.nip,
+      plan: bridgeData.subscription_plan,
+      subscription_status: bridgeData.subscription_status,
+      trial_ends_at: null, // Will calculate from created_at + 14 days if trial
+      onboarding_completed: bridgeData.registration_completed,
+      profile_image_url: bridgeData.profile_image_url
+    }
+
+    // Calculate trial end date (14 days from developer profile creation)
+    if (user.subscription_status === 'trial') {
+      const { data: devData } = await supabase
+        .from('developers')
+        .select('created_at')
+        .eq('id', user.developer_id)
+        .single()
+      
+      if (devData?.created_at) {
+        const createdAt = new Date(devData.created_at)
+        user.trial_ends_at = new Date(createdAt.getTime() + 14 * 24 * 60 * 60 * 1000)
+      }
     }
 
     // Check if user has completed onboarding

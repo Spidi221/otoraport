@@ -19,10 +19,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { plan, period } = body
 
-    // Validate plan and period
+    // Validate plan and period - SYNCHRONIZED WITH UI PRICING (PHASE 2: Updated Enterprise)
     const plans = {
-      starter: { monthly: 9900, yearly: 99000 }, // 99 zł, 990 zł (with 20% discount)
-      professional: { monthly: 19900, yearly: 199000 } // 199 zł, 1990 zł
+      basic: { monthly: 14900, yearly: 119000 }, // 149 zł, 1190 zł (20% discount)
+      pro: { monthly: 24900, yearly: 199200 }, // 249 zł, 1992 zł (20% discount) 
+      enterprise: { monthly: 49900, yearly: 399200 } // 499 zł, 3992 zł (20% discount) - covers Vercel domains $20/month
     }
 
     if (!plans[plan as keyof typeof plans] || !['monthly', 'yearly'].includes(period)) {

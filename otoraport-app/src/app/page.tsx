@@ -90,8 +90,8 @@ export default function LandingPage() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed" itemProp="description">
-              Spełnij wymogi <strong>ustawy z 21 maja 2025 roku</strong> o codziennym raportowaniu cen mieszkań. 
-              <span className="font-semibold text-gray-900">Jeden upload miesięcznie</span> - system automatycznie generuje 
+              Spełnij wymogi <strong>ustawy z 21 maja 2025 roku</strong> o codziennym raportowaniu cen mieszkań.{" "}
+              <span className="font-semibold text-gray-900">Jedno przesyłanie miesięcznie</span> - system automatycznie generuje 
               pliki XML w formacie 1.13 i publikuje na <strong>portalu dane.gov.pl</strong>.
             </p>
             
@@ -121,7 +121,7 @@ export default function LandingPage() {
                 <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                Setup w 10 minut
+                Konfiguracja w 10 minut
               </div>
             </div>
             
@@ -252,9 +252,9 @@ export default function LandingPage() {
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center icon-glow group-hover:bg-green-200 transition-colors duration-300">
                     <span className="text-green-600 font-bold group-hover:text-green-700">✓</span>
                   </div>
-                  <h3 className="ml-3 font-semibold text-gray-900 text-enhance group-hover:text-green-600 transition-colors duration-300">Setup poniżej 10 minut</h3>
+                  <h3 className="ml-3 font-semibold text-gray-900 text-enhance group-hover:text-green-600 transition-colors duration-300">Konfiguracja poniżej 10 minut</h3>
                 </div>
-                <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">najszybszy onboarding na polskim rynku compliance</p>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">najszybsze wdrożenie na polskim rynku compliance</p>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover-lift card-gentle-hover group">
                 <div className="flex items-center mb-4">
@@ -307,12 +307,12 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Najszybszy setup na rynku</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Najszybsza konfiguracja na rynku</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Mniej niż 10 minut od rejestracji do pierwszego raportu. Inne rozwiązania wymagają godzin konfiguracji.
+                  Mniej niż 10 minut od rejestracji do pierwszego raportu. Inne rozwiązania wymagają godzin wdrożenia.
                 </p>
                 <div className="flex items-center text-sm font-semibold text-blue-600">
-                  <span className="mr-2">Rekordowy czas wdrożenia</span>
+                  <span className="mr-2">Rekordowy czas konfiguracji</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -471,7 +471,7 @@ export default function LandingPage() {
               <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Dashboard - OTORAPORT</h3>
+                    <h3 className="text-2xl font-bold text-white">Panel sterowania - OTORAPORT</h3>
                     <p className="text-blue-100">Witaj ponownie, Jan Kowalski</p>
                   </div>
                   <div className="flex items-center space-x-4">
@@ -624,7 +624,7 @@ export default function LandingPage() {
               <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white font-bold text-xl">1</span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Wgraj plik z cenami</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Prześlij plik z cenami</h3>
               <p className="text-gray-600">CSV, XML lub Excel - system rozpozna format automatycznie</p>
             </div>
             

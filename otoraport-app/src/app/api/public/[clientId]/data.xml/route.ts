@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateXMLForMinistry, createSampleData } from '@/lib/generators'
+import { generateAggregatedXML } from '@/lib/multi-project-xml'
 import { supabaseAdmin } from '@/lib/supabase'
 import { validateClientId, applySecurityHeaders, checkRateLimit } from '@/lib/security'
 
@@ -38,67 +39,31 @@ export async function GET(
 
     console.log(`Ministry XML request for client: ${clientId}`)
 
-    let data: any = null
+    let xmlContent: string
     
     try {
-      // Try to get real data from database
+      // PHASE 2: Try multi-project XML aggregation first
       const { data: developer, error: devError } = await supabaseAdmin
         .from('developers')
-        .select('*')
+        .select('id, company_name, subscription_plan')
         .eq('client_id', clientId)
         .single()
       
       if (devError || !developer) {
         console.log('Developer not found, using sample data')
-        data = createSampleData(clientId)
+        const sampleData = createSampleData(clientId)
+        xmlContent = generateXMLForMinistry(sampleData)
       } else {
-        // Get projects for this developer
-        const { data: projects } = await supabaseAdmin
-          .from('projects')
-          .select('*')
-          .eq('developer_id', developer.id)
-
-        // Get properties for these projects
-        const projectIds = projects?.map(p => p.id) || []
-        const { data: properties } = await supabaseAdmin
-          .from('properties')
-          .select('*')
-          .in('project_id', projectIds)
-
-        data = { 
-          developer: {
-            id: developer.id,
-            email: developer.email,
-            name: developer.name,
-            company_name: developer.company_name,
-            nip: developer.nip,
-            phone: developer.phone
-          }, 
-          projects: projects || [], 
-          properties: (properties || []).map(prop => ({
-            id: prop.id,
-            property_number: prop.property_number || 'N/A',
-            property_type: prop.property_type || 'mieszkanie',
-            price_per_m2: prop.price_per_m2,
-            total_price: prop.total_price,
-            final_price: prop.final_price || prop.total_price,
-            area: prop.area,
-            parking_space: prop.parking_space,
-            parking_price: prop.parking_price,
-            status: prop.status || 'dostępne',
-            raw_data: prop
-          }))
-        }
+        console.log(`Generating aggregated XML for developer: ${developer.company_name} (${developer.subscription_plan})`)
         
-        console.log(`Found real data: ${properties?.length || 0} properties for ${developer.company_name}`)
+        // Use multi-project aggregation for all plans (Phase 2 feature)
+        xmlContent = await generateAggregatedXML(developer.id)
       }
     } catch (dbError) {
-      console.log('Database query failed, using sample data:', dbError)
-      data = createSampleData(clientId)
+      console.error('Multi-project XML generation failed, fallback to sample:', dbError)
+      const sampleData = createSampleData(clientId)
+      xmlContent = generateXMLForMinistry(sampleData)
     }
-
-    // Generate XML according to ministry schema 1.13
-    const xmlContent = generateXMLForMinistry(data)
 
     // SECURITY: Set appropriate headers for XML response with security headers
     const headers = applySecurityHeaders(new Headers({

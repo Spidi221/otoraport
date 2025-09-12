@@ -166,6 +166,10 @@ Jak mogę pomóc w compliance? 🏢`,
       });
     } finally {
       setIsLoading(false);
+      // Refocus the input after sending
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   };
 
@@ -330,16 +334,17 @@ Jak mogę pomóc w compliance? 🏢`,
                   <Send className="w-4 h-4" />
                 </button>
               </div>
-              <div className="mt-3 text-xs text-gray-500 text-center leading-4">
-                <span className="inline-flex items-center">
-                  🤖 Zasilane przez AI • Dla złożonych pytań: 
+              <div className="mt-3 text-xs text-gray-500 text-center leading-4 min-h-[16px]">
+                <div className="inline-flex items-center justify-center">
+                  <span className="mr-1">🤖</span>
+                  <span>Zasilane przez AI • Dla złożonych pytań:</span>
                   <a 
                     href="mailto:support@otoraport.pl" 
-                    className="text-blue-600 hover:text-blue-700 ml-1 font-medium"
+                    className="text-blue-600 hover:text-blue-700 ml-1 font-medium underline"
                   >
                     support@otoraport.pl
                   </a>
-                </span>
+                </div>
               </div>
             </div>
           </>

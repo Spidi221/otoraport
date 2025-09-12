@@ -1,8 +1,15 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import { handleCustomDomain } from '@/lib/custom-domain-middleware'
 
 export default withAuth(
-  function middleware(req) {
+  async function middleware(req) {
+    // PHASE 2: Handle custom domains first (Enterprise feature)
+    const customDomainResponse = await handleCustomDomain(req)
+    if (customDomainResponse) {
+      return customDomainResponse
+    }
+
     const { pathname } = req.nextUrl
     const { token } = req.nextauth
 

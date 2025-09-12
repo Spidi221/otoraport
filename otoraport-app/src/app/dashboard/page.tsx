@@ -1,7 +1,8 @@
 'use client'
 
 import { useSession } from "next-auth/react";
-import { Suspense, lazy, useMemo } from "react";
+import { Suspense, lazy, useMemo, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/dashboard/header";
 import { UploadWidget } from "@/components/dashboard/upload-widget";
 import { StatusCards } from "@/components/dashboard/status-cards";
@@ -15,8 +16,48 @@ const ChartsSection = lazy(() => import("@/components/dashboard/charts-section")
 const PropertiesTable = lazy(() => import("@/components/dashboard/properties-table").then(m => ({ default: m.PropertiesTable })));
 
 export default function HomePage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [userProfile, setUserProfile] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   
+  // Check user profile and subscription status
+  useEffect(() => {
+    async function checkUserStatus() {
+      if (status === 'loading') return;
+      
+      if (status === 'unauthenticated') {
+        router.push('/auth/signin');
+        return;
+      }
+
+      if (session?.user?.email) {
+        try {
+          // Check if user has completed profile
+          const response = await fetch('/api/user/profile');
+          const data = await response.json();
+          
+          if (!response.ok || !data.profile_completed) {
+            // User logged in via Google but hasn't completed registration
+            router.push('/onboarding?reason=incomplete_profile');
+            return;
+          }
+          
+          setUserProfile(data);
+        } catch (error) {
+          console.error('Error checking user status:', error);
+          // If there's an error, redirect to onboarding to be safe
+          router.push('/onboarding?reason=profile_check_failed');
+          return;
+        }
+      }
+      
+      setIsLoading(false);
+    }
+
+    checkUserStatus();
+  }, [session, status, router]);
+
   // Memoized greeting calculation - avoiding SSR/CSR mismatch
   const greeting = useMemo(() => {
     if (!session?.user?.name) {
@@ -30,6 +71,33 @@ export default function HomePage() {
     
     return `${greetingText}, ${firstName}! 👋`;
   }, [session?.user?.name]);
+
+  // Show loading while checking user status
+  if (isLoading || status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingState message="Sprawdzanie uprawnień..." />
+      </div>
+    );
+  }
+
+  // Show access denied if not properly authenticated
+  if (!session || !userProfile) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Dostęp zabroniony</h2>
+          <p className="text-gray-600 mb-6">Musisz ukończyć proces rejestracji, aby uzyskać dostęp do dashboardu.</p>
+          <button
+            onClick={() => router.push('/onboarding')}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Ukończ rejestrację
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">

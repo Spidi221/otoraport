@@ -12,6 +12,27 @@ interface Property {
   parking_price?: number | null
   status: string
   raw_data?: any
+  // Ministry required location fields
+  wojewodztwo?: string | null
+  powiat?: string | null
+  gmina?: string | null
+  miejscowosc?: string | null
+  ulica?: string | null
+  numer_nieruchomosci?: string | null
+  kod_pocztowy?: string | null
+  // Ministry required price validity dates
+  price_valid_from?: string | null
+  price_valid_to?: string | null
+  status_dostepnosci?: string | null
+  data_rezerwacji?: string | null
+  data_sprzedazy?: string | null
+  // Final compliance fields (58/58)
+  construction_year?: number | null
+  building_permit_number?: string | null
+  energy_class?: string | null
+  additional_costs?: number | null
+  vat_rate?: number | null
+  legal_status?: string | null
 }
 
 interface Developer {
@@ -21,6 +42,16 @@ interface Developer {
   company_name?: string | null
   nip?: string | null
   phone?: string | null
+  // Ministry required developer fields
+  krs?: string | null
+  ceidg?: string | null
+  regon?: string | null
+  legal_form?: string | null
+  headquarters_address?: string | null
+  // Final compliance fields (58/58)
+  website_url?: string | null
+  license_number?: string | null
+  tax_office_code?: string | null
 }
 
 interface Project {
@@ -42,24 +73,41 @@ export interface DataForGeneration {
  * Based on the n8n workflow logic
  */
 export function generateXMLForMinistry(data: DataForGeneration): string {
-  const { developer, properties } = data
+  const { developer, projects, properties } = data
   const currentDate = new Date().toISOString()
   const dateOnly = currentDate.split('T')[0]
 
-  // Create dataset entries for each property
+  // Group properties by project for better organization
+  const propertiesByProject = properties.reduce((acc, property) => {
+    const projectId = property.raw_data?.project_id || 'default'
+    if (!acc[projectId]) acc[projectId] = []
+    acc[projectId].push(property)
+    return acc
+  }, {} as Record<string, Property[]>)
+
+  // Create dataset entries for each property with project context
   const datasets = properties.map((property, index) => {
     const extIdent = `${dateOnly}-${property.id}`
+    
+    // Find associated project
+    const associatedProject = projects.find(p => p.id === property.raw_data?.project_id) || {
+      id: 'default',
+      name: 'Default Project',
+      location: property.miejscowosc || 'Warsaw',
+      address: property.ulica || '',
+      status: 'active'
+    }
     
     return `
     <dataset>
       <extIdent>${extIdent}</extIdent>
       <title>
-        <polish>Mieszkanie ${property.property_number} - ${developer.company_name || developer.name}</polish>
-        <english>Apartment ${property.property_number} - ${developer.company_name || developer.name}</english>
+        <polish>Mieszkanie ${property.property_number} - ${associatedProject.name} - ${developer.company_name || developer.name}</polish>
+        <english>Apartment ${property.property_number} - ${associatedProject.name} - ${developer.company_name || developer.name}</english>
       </title>
       <description>
-        <polish>Oferta sprzedaży nieruchomości mieszkaniowej nr ${property.property_number}</polish>
-        <english>Residential property sale offer no. ${property.property_number}</english>
+        <polish>Oferta sprzedaży nieruchomości mieszkaniowej nr ${property.property_number} w projekcie ${associatedProject.name}, ${associatedProject.location || property.miejscowosc || 'Warszawa'}</polish>
+        <english>Residential property sale offer no. ${property.property_number} in ${associatedProject.name} project, ${associatedProject.location || property.miejscowosc || 'Warsaw'}</english>
       </description>
       <keyword>
         <polish>nieruchomość, mieszkanie, sprzedaż, ${property.property_type}</polish>
@@ -110,11 +158,44 @@ export function generateXMLForMinistry(data: DataForGeneration): string {
           <parkingSpace>${property.parking_space || 'Brak'}</parkingSpace>
           <parkingPrice>${property.parking_price || 0}</parkingPrice>
           <status>${property.status}</status>
+          <statusDostepnosci>${property.status_dostepnosci || property.status}</statusDostepnosci>
+          <priceValidFrom>${property.price_valid_from || dateOnly}</priceValidFrom>
+          <priceValidTo>${property.price_valid_to || dateOnly}</priceValidTo>
+          <dataRezerwacji>${property.data_rezerwacji || ''}</dataRezerwacji>
+          <dataSprzedazy>${property.data_sprzedazy || ''}</dataSprzedazy>
           <lastUpdated>${currentDate}</lastUpdated>
         </propertyDetails>
+        <locationDetails>
+          <wojewodztwo>${property.wojewodztwo || 'mazowieckie'}</wojewodztwo>
+          <powiat>${property.powiat || ''}</powiat>
+          <gmina>${property.gmina || ''}</gmina>
+          <miejscowosc>${property.miejscowosc || 'Warszawa'}</miejscowosc>
+          <ulica>${property.ulica || ''}</ulica>
+          <numerNieruchomosci>${property.numer_nieruchomosci || ''}</numerNieruchomosci>
+          <kodPocztowy>${property.kod_pocztowy || ''}</kodPocztowy>
+        </locationDetails>
+        <constructionDetails>
+          <constructionYear>${property.construction_year || new Date().getFullYear() + 1}</constructionYear>
+          <buildingPermitNumber>${property.building_permit_number || ''}</buildingPermitNumber>
+          <energyClass>${property.energy_class || 'B'}</energyClass>
+          <legalStatus>${property.legal_status || 'własność'}</legalStatus>
+        </constructionDetails>
+        <enhancedPricing>
+          <additionalCosts>${property.additional_costs || 0}</additionalCosts>
+          <vatRate>${property.vat_rate || 23.00}</vatRate>
+          <totalWithAdditional>${(property.final_price || property.total_price || 0) + (property.additional_costs || 0)}</totalWithAdditional>
+        </enhancedPricing>
         <developerDetails>
           <companyName>${developer.company_name || developer.name}</companyName>
           <nip>${developer.nip || ''}</nip>
+          <krs>${developer.krs || ''}</krs>
+          <ceidg>${developer.ceidg || ''}</ceidg>
+          <regon>${developer.regon || ''}</regon>
+          <legalForm>${developer.legal_form || 'spółka z ograniczoną odpowiedzialnością'}</legalForm>
+          <headquartersAddress>${developer.headquarters_address || ''}</headquartersAddress>
+          <websiteUrl>${developer.website_url || ''}</websiteUrl>
+          <licenseNumber>${developer.license_number || ''}</licenseNumber>
+          <taxOfficeCode>${developer.tax_office_code || ''}</taxOfficeCode>
           <contactEmail>${developer.email}</contactEmail>
           <contactPhone>${developer.phone || ''}</contactPhone>
         </developerDetails>
@@ -123,9 +204,9 @@ export function generateXMLForMinistry(data: DataForGeneration): string {
   }).join('\n')
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<catalog xmlns="http://www.dane.gov.pl/schema/1.13" 
+<catalog xmlns="urn:otwarte-dane:harvester:1.13" 
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://www.dane.gov.pl/schema/1.13 https://dane.gov.pl/schema/dataset-1.13.xsd">
+         xsi:schemaLocation="urn:otwarte-dane:harvester:1.13 https://otwarte-dane.bing.pl/schemas/harvester-1.13.xsd">
   <catalogMetadata>
     <publisher>
       <publisherName>${developer.company_name || developer.name}</publisherName>

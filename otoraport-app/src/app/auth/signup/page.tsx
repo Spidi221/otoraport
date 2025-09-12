@@ -15,8 +15,10 @@ export default function SignUpPage() {
     company_name: '',
     nip: '',
     phone: '',
-    plan: 'basic' // basic, pro, enterprise
+    plan: 'pro', // basic, pro, enterprise
+    billing: 'monthly' // monthly, annual
   })
+  const [billingPeriod, setBillingPeriod] = useState('monthly')
   const [nipData, setNipData] = useState(null)
   const [errors, setErrors] = useState({})
 
@@ -141,6 +143,15 @@ export default function SignUpPage() {
     setFormData(prev => ({ ...prev, plan }))
   }
 
+  const getPlanPrice = (plan, billing) => {
+    const prices = {
+      basic: { monthly: 149, annual: 119 },
+      pro: { monthly: 249, annual: 199 },
+      enterprise: { monthly: 399, annual: 319 }
+    }
+    return prices[plan][billing]
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -154,27 +165,28 @@ export default function SignUpPage() {
           
           {/* Progress indicator */}
           <div className="mt-4 flex justify-center">
-            <div className="flex space-x-2">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    i === step
-                      ? 'bg-blue-600 text-white'
-                      : i < step
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-200 text-gray-600'
-                  }`}
-                >
-                  {i < step ? '✓' : i}
+            <div className="flex items-center space-x-4">
+              {[
+                { step: 1, label: 'Konto' },
+                { step: 2, label: 'Firma' }, 
+                { step: 3, label: 'Plan' }
+              ].map(({ step: stepNum, label }) => (
+                <div key={stepNum} className="flex flex-col items-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                      stepNum === step
+                        ? 'bg-blue-600 text-white'
+                        : stepNum < step
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {stepNum < step ? '✓' : stepNum}
+                  </div>
+                  <span className="mt-2 text-xs text-gray-500">{label}</span>
                 </div>
               ))}
             </div>
-          </div>
-          <div className="mt-2 flex justify-between text-xs text-gray-500 max-w-48 mx-auto">
-            <span>Konto</span>
-            <span>Firma</span>
-            <span>Plan</span>
           </div>
         </div>
 
@@ -332,6 +344,32 @@ export default function SignUpPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-gray-900 text-center">Wybierz plan</h3>
               
+              {/* Billing Toggle */}
+              <div className="flex justify-center items-center space-x-4 mb-6">
+                <span className={`text-gray-500 ${billingPeriod === 'monthly' ? 'font-semibold text-gray-900' : ''}`}>Miesięcznie</span>
+                <div className="relative">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only" 
+                    id="billing-toggle" 
+                    checked={billingPeriod === 'annual'}
+                    onChange={(e) => {
+                      const period = e.target.checked ? 'annual' : 'monthly'
+                      setBillingPeriod(period)
+                      setFormData(prev => ({ ...prev, billing: period }))
+                    }}
+                  />
+                  <label htmlFor="billing-toggle" className="flex items-center cursor-pointer">
+                    <div className="relative">
+                      <div className={`w-12 h-6 rounded-full shadow-inner transition-colors ${billingPeriod === 'annual' ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+                      <div className={`absolute w-4 h-4 bg-white rounded-full shadow top-1 transition-transform ${billingPeriod === 'annual' ? 'translate-x-7' : 'translate-x-1'}`}></div>
+                    </div>
+                  </label>
+                </div>
+                <span className={`text-gray-500 ${billingPeriod === 'annual' ? 'font-semibold text-gray-900' : ''}`}>Rocznie</span>
+                <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full">-20%</span>
+              </div>
+              
               <div className="space-y-3">
                 {/* Basic Plan */}
                 <div
@@ -346,7 +384,12 @@ export default function SignUpPage() {
                     <div>
                       <h4 className="font-semibold text-gray-900">Basic</h4>
                       <p className="text-sm text-gray-600">Podstawowy compliance</p>
-                      <p className="text-lg font-bold text-blue-600 mt-1">149 zł/mies</p>
+                      <p className="text-lg font-bold text-blue-600 mt-1">{getPlanPrice('basic', billingPeriod)} zł/mies</p>
+                      {billingPeriod === 'annual' && (
+                        <p className="text-sm text-green-600 mt-1 font-medium">
+                          Oszczędzasz {getPlanPrice('basic', 'monthly') - getPlanPrice('basic', 'annual')} zł miesięcznie!
+                        </p>
+                      )}
                     </div>
                     <div className={`w-4 h-4 rounded-full ${
                       formData.plan === 'basic' ? 'bg-blue-500' : 'bg-gray-300'
@@ -370,7 +413,12 @@ export default function SignUpPage() {
                     <div>
                       <h4 className="font-semibold text-gray-900">Pro</h4>
                       <p className="text-sm text-gray-600">+ Strony prezentacyjne</p>
-                      <p className="text-lg font-bold text-blue-600 mt-1">249 zł/mies</p>
+                      <p className="text-lg font-bold text-blue-600 mt-1">{getPlanPrice('pro', billingPeriod)} zł/mies</p>
+                      {billingPeriod === 'annual' && (
+                        <p className="text-sm text-green-600 mt-1 font-medium">
+                          Oszczędzasz {getPlanPrice('pro', 'monthly') - getPlanPrice('pro', 'annual')} zł miesięcznie!
+                        </p>
+                      )}
                     </div>
                     <div className={`w-4 h-4 rounded-full ${
                       formData.plan === 'pro' ? 'bg-blue-500' : 'bg-gray-300'
@@ -391,7 +439,12 @@ export default function SignUpPage() {
                     <div>
                       <h4 className="font-semibold text-gray-900">Enterprise</h4>
                       <p className="text-sm text-gray-600">+ API, white-label</p>
-                      <p className="text-lg font-bold text-blue-600 mt-1">399 zł/mies</p>
+                      <p className="text-lg font-bold text-blue-600 mt-1">{getPlanPrice('enterprise', billingPeriod)} zł/mies</p>
+                      {billingPeriod === 'annual' && (
+                        <p className="text-sm text-green-600 mt-1 font-medium">
+                          Oszczędzasz {getPlanPrice('enterprise', 'monthly') - getPlanPrice('enterprise', 'annual')} zł miesięcznie!
+                        </p>
+                      )}
                     </div>
                     <div className={`w-4 h-4 rounded-full ${
                       formData.plan === 'enterprise' ? 'bg-blue-500' : 'bg-gray-300'

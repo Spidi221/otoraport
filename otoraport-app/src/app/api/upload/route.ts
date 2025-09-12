@@ -3,7 +3,7 @@ import { writeFile, mkdir } from 'fs/promises'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { parseCSVSmart, validateMinistryCompliance } from '@/lib/smart-csv-parser'
+import { parseCSVSmart, validateMinistryCompliance, parseExcelFileFromBlob, parsePropertyFile } from '@/lib/smart-csv-parser'
 import { sendComplianceNotification } from '@/lib/email-service'
 import { 
   checkRateLimit, 
@@ -84,32 +84,22 @@ export async function POST(request: NextRequest) {
     let savedToDatabase = false
 
     try {
-      if (file.name.endsWith('.csv')) {
+      // Enhanced file type detection
+      const isCSV = file.name.toLowerCase().endsWith('.csv')
+      const isExcel = /\.(xlsx?|xlsm)$/i.test(file.name.toLowerCase())
+      const isXML = file.name.toLowerCase().endsWith('.xml')
+
+      if (isCSV) {
         // Use smart CSV parser
         smartParseResult = parseCSVSmart(fileContent)
         propertiesCount = smartParseResult.totalRows
-
-        console.log(`Smart parsing result: ${smartParseResult.validRows}/${smartParseResult.totalRows} valid rows, confidence: ${Math.round(smartParseResult.confidence * 100)}%`)
-
-        if (smartParseResult.success) {
-          // Validate compliance
-          const validation = validateMinistryCompliance(smartParseResult.data)
-          
-          if (validation.valid) {
-            // Get developer ID and save to database
-            const developerId = await getDeveloperIdFromSession(session)
-            if (developerId) {
-              await savePropertiesToDatabase(developerId, smartParseResult.data, file.name)
-              savedToDatabase = true
-              console.log(`Saved ${smartParseResult.validRows} properties to database for developer ${developerId}`)
-            }
-          } else {
-            processingErrors = [...validation.errors, ...validation.warnings]
-          }
-        } else {
-          processingErrors = smartParseResult.errors
-        }
-      } else if (file.name.endsWith('.xml')) {
+      } else if (isExcel) {
+        // NEW: Use Excel parser
+        smartParseResult = await parseExcelFileFromBlob(file)
+        propertiesCount = smartParseResult.totalRows
+        
+        console.log(`Excel parsing result: ${smartParseResult.validRows}/${smartParseResult.totalRows} valid rows, confidence: ${Math.round(smartParseResult.confidence * 100)}%`)
+      } else if (isXML) {
         // Legacy XML parsing
         const xmlPreview = parseXMLPreview(fileContent)
         propertiesCount = xmlPreview.totalRows

@@ -1,5 +1,5 @@
-// Smart CSV/Excel parser with intelligent column mapping for Polish real estate data
-import * as XLSX from 'xlsx';
+// Universal file parser supporting CSV, Excel (.xlsx), and future formats
+import * as XLSX from 'xlsx'
 
 interface ColumnMapping {
   property_number: string[]
@@ -21,79 +21,83 @@ interface ColumnMapping {
   investment_city: string[]
 }
 
-// Polish real estate field variations - key competitive advantage
+// Enhanced Polish real estate field variations
 const COLUMN_PATTERNS: ColumnMapping = {
   property_number: [
     'nr lokalu', 'numer lokalu', 'nr mieszkania', 'numer mieszkania', 
     'lokal', 'mieszkanie', 'nr', 'property_number', 'apartment_number',
-    'nr_lokalu', 'numer_lokalu', 'mieszkanie_nr'
+    'nr_lokalu', 'numer_lokalu', 'mieszkanie_nr', 'lok', 'l.p.'
   ],
   property_type: [
     'typ', 'typ lokalu', 'typ mieszkania', 'rodzaj', 'property_type',
-    'type', 'kategoria', 'typ_lokalu', 'rodzaj_lokalu'
+    'type', 'kategoria', 'typ_lokalu', 'rodzaj_lokalu', 'rodzaj nieruchomości'
   ],
   price_per_m2: [
     'cena za m²', 'cena za m2', 'cena m2', 'cena m²', 'cena/m2', 'cena/m²',
-    'price_per_m2', 'price_per_sqm', 'cena_za_m2', 'cena_m2', 'cena za metr'
+    'price_per_m2', 'price_per_sqm', 'cena_za_m2', 'cena_m2', 'cena za metr',
+    'cena jednostkowa', 'cena za metr kwadratowy'
   ],
   total_price: [
     'cena całkowita', 'cena', 'cena brutto', 'cena bazowa', 'total_price',
-    'price', 'cena_calkowita', 'cena_bazowa', 'cena_brutto'
+    'price', 'cena_calkowita', 'cena_bazowa', 'cena_brutto', 'wartość'
   ],
   final_price: [
     'cena finalna', 'cena końcowa', 'cena ostateczna', 'final_price',
-    'cena_finalna', 'cena_koncowa', 'cena_ostateczna'
+    'cena_finalna', 'cena_koncowa', 'cena_ostateczna', 'cena sprzedaży'
   ],
   area: [
     'powierzchnia', 'powierzchnia użytkowa', 'powierzchnia m²', 'powierzchnia m2',
-    'area', 'size', 'metraż', 'pow', 'powierzchnia_uzytkowa', 'm2', 'm²'
+    'area', 'size', 'metraż', 'pow', 'powierzchnia_uzytkowa', 'm2', 'm²',
+    'pow. użytkowa', 'pow użytkowa'
   ],
   parking_space: [
     'parking', 'miejsce parkingowe', 'garaż', 'parking space', 'parking_space',
-    'miejsce_parkingowe', 'mp', 'parking_spot', 'garage'
+    'miejsce_parkingowe', 'mp', 'parking_spot', 'garage', 'miejsce postojowe'
   ],
   parking_price: [
     'cena parkingu', 'cena garażu', 'parking price', 'parking_price',
-    'cena_parkingu', 'cena_garazu', 'parking_cost'
+    'cena_parkingu', 'cena_garazu', 'parking_cost', 'koszt parkingu'
   ],
   status: [
     'status', 'dostępność', 'stan', 'availability', 'dostepnosc',
-    'stan_sprzedaży', 'stan_sprzedazy'
+    'stan_sprzedaży', 'stan_sprzedazy', 'dostępny'
   ],
   developer_name: [
     'deweloper', 'nazwa dewelopera', 'developer', 'developer_name',
-    'firma', 'nazwa_dewelopera'
+    'firma', 'nazwa_dewelopera', 'inwestor'
   ],
   company_name: [
     'nazwa firmy', 'company', 'company_name', 'nazwa_firmy',
-    'firma', 'spółka', 'spolka'
+    'firma', 'spółka', 'spolka', 'nazwa spółki'
   ],
   nip: [
-    'nip', 'nr nip', 'numer nip', 'tax_id', 'vat_id', 'nr_nip'
+    'nip', 'nr nip', 'numer nip', 'tax_id', 'vat_id', 'nr_nip',
+    'numer NIP', 'NIP'
   ],
   phone: [
     'telefon', 'tel', 'phone', 'numer telefonu', 'kontakt',
-    'tel.', 'telefon_kontaktowy', 'numer_telefonu'
+    'tel.', 'telefon_kontaktowy', 'numer_telefonu', 'tel kontaktowy'
   ],
   email: [
     'email', 'e-mail', 'mail', 'adres email', 'contact_email',
-    'email_kontaktowy', 'adres_email'
+    'email_kontaktowy', 'adres_email', 'e-mail kontaktowy'
   ],
   investment_name: [
     'inwestycja', 'nazwa inwestycji', 'project', 'investment',
-    'investment_name', 'projekt', 'nazwa_inwestycji', 'osiedle'
+    'investment_name', 'projekt', 'nazwa_inwestycji', 'osiedle',
+    'nazwa osiedla', 'budynek'
   ],
   investment_address: [
     'adres', 'ulica', 'adres inwestycji', 'address', 'street',
-    'investment_address', 'adres_inwestycji', 'lokalizacja'
+    'investment_address', 'adres_inwestycji', 'lokalizacja', 'położenie'
   ],
   investment_city: [
     'miasto', 'miejscowość', 'city', 'town', 'gmina',
-    'miejscowosc', 'investment_city'
+    'miejscowosc', 'investment_city', 'powiat'
   ]
 }
 
-export interface SmartParseResult {
+export interface UniversalParseResult {
   success: boolean
   data: ParsedProperty[]
   mappings: { [key: string]: string }
@@ -102,6 +106,12 @@ export interface SmartParseResult {
   confidence: number
   totalRows: number
   validRows: number
+  fileInfo: {
+    type: 'csv' | 'excel' | 'unknown'
+    sheets?: string[]
+    selectedSheet?: string
+    encoding?: string
+  }
 }
 
 export interface ParsedProperty {
@@ -114,6 +124,10 @@ export interface ParsedProperty {
   parking_space?: string
   parking_price?: number
   status?: string
+  // Multi-project support
+  project_name?: string
+  project_address?: string
+  project_city?: string
   raw_data: { [key: string]: any }
 }
 
@@ -129,21 +143,73 @@ export interface DeveloperInfo {
 }
 
 /**
- * Smart CSV parser with fuzzy matching and intelligent column detection
+ * Universal parser supporting CSV, Excel, and future formats
  */
-export class SmartCSVParser {
-  private csvContent: string
+export class UniversalFileParser {
+  private fileBuffer: ArrayBuffer | null = null
+  private csvContent: string | null = null
+  private workbook: XLSX.WorkBook | null = null
   private headers: string[] = []
-  private rows: string[][] = []
+  private rows: any[][] = []
   private mappings: { [key: string]: string } = {}
   private confidence: number = 0
+  private fileInfo: UniversalParseResult['fileInfo']
 
-  constructor(csvContent: string) {
-    this.csvContent = csvContent
-    this.parseCSV()
+  constructor(file: File | ArrayBuffer | string, fileName?: string) {
+    this.fileInfo = { type: 'unknown' }
+    
+    if (typeof file === 'string') {
+      // CSV content
+      this.csvContent = file
+      this.fileInfo.type = 'csv'
+      this.parseCSV()
+    } else if (file instanceof ArrayBuffer) {
+      // Excel file
+      this.fileBuffer = file
+      this.fileInfo.type = 'excel'
+      this.parseExcel()
+    } else if (file instanceof File) {
+      // Auto-detect file type
+      if (file.name.endsWith('.csv')) {
+        file.text().then(content => {
+          this.csvContent = content
+          this.fileInfo.type = 'csv'
+          this.parseCSV()
+        })
+      } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        file.arrayBuffer().then(buffer => {
+          this.fileBuffer = buffer
+          this.fileInfo.type = 'excel'
+          this.parseExcel()
+        })
+      }
+    }
+  }
+
+  /**
+   * Static factory method for async file parsing
+   */
+  static async fromFile(file: File): Promise<UniversalFileParser> {
+    const parser = new UniversalFileParser('', file.name)
+    
+    if (file.name.endsWith('.csv')) {
+      const content = await file.text()
+      parser.csvContent = content
+      parser.fileInfo.type = 'csv'
+      parser.parseCSV()
+    } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+      const buffer = await file.arrayBuffer()
+      parser.fileBuffer = buffer
+      parser.fileInfo.type = 'excel'
+      parser.parseExcel()
+    }
+    
+    return parser
   }
 
   private parseCSV() {
+    if (!this.csvContent) return
+
     const lines = this.csvContent
       .split('\n')
       .map(line => line.trim())
@@ -160,8 +226,56 @@ export class SmartCSVParser {
     this.rows = lines.slice(1).map(line => this.parseCSVLine(line))
   }
 
+  private parseExcel(sheetName?: string) {
+    if (!this.fileBuffer) return
+
+    try {
+      // Parse Excel file
+      this.workbook = XLSX.read(this.fileBuffer, { 
+        type: 'array',
+        cellText: false,
+        cellDates: true
+      })
+
+      // Get sheet names
+      this.fileInfo.sheets = this.workbook.SheetNames
+      
+      // Select sheet (first sheet or specified)
+      const selectedSheet = sheetName || this.workbook.SheetNames[0]
+      this.fileInfo.selectedSheet = selectedSheet
+
+      const worksheet = this.workbook.Sheets[selectedSheet]
+      
+      // Convert to array of arrays
+      const rawData: any[][] = XLSX.utils.sheet_to_json(worksheet, { 
+        header: 1,
+        defval: '',
+        blankrows: false
+      })
+
+      if (rawData.length === 0) {
+        throw new Error('Arkusz Excel jest pusty')
+      }
+
+      // Extract headers and data
+      this.headers = rawData[0].map(cell => String(cell || '').trim())
+      this.rows = rawData.slice(1).map(row => 
+        row.map(cell => {
+          // Handle different cell types
+          if (cell instanceof Date) {
+            return cell.toISOString().split('T')[0]
+          }
+          return String(cell || '').trim()
+        })
+      )
+
+    } catch (error) {
+      throw new Error(`Błąd parsowania pliku Excel: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
   private parseCSVLine(line: string): string[] {
-    // Simple CSV parser - handles quoted fields and semicolon/comma separation
+    // Enhanced CSV parser with better quote handling
     const result: string[] = []
     let current = ''
     let inQuotes = false
@@ -172,9 +286,17 @@ export class SmartCSVParser {
 
     while (i < line.length) {
       const char = line[i]
+      const nextChar = line[i + 1]
       
       if (char === '"') {
-        inQuotes = !inQuotes
+        if (inQuotes && nextChar === '"') {
+          // Escaped quote
+          current += '"'
+          i += 2
+          continue
+        } else {
+          inQuotes = !inQuotes
+        }
       } else if (char === separator && !inQuotes) {
         result.push(current.trim())
         current = ''
@@ -189,9 +311,9 @@ export class SmartCSVParser {
   }
 
   /**
-   * Intelligent column mapping using fuzzy string matching
+   * Intelligent column mapping with multi-project support
    */
-  public analyzeColumns(): SmartParseResult {
+  public analyzeColumns(): UniversalParseResult {
     const mappings: { [key: string]: string } = {}
     const suggestions: { [key: string]: string[] } = {}
     const errors: string[] = []
@@ -260,23 +382,138 @@ export class SmartCSVParser {
       suggestions,
       confidence,
       totalRows: this.rows.length,
-      validRows: data.filter(row => row.property_number).length
+      validRows: data.filter(row => row.property_number).length,
+      fileInfo: this.fileInfo
     }
   }
 
   /**
-   * Fuzzy string matching for column detection
+   * Parse data with multi-project support
    */
-  private fuzzyMatch(str1: string, str2: string): number {
-    // Exact match
-    if (str1 === str2) return 1.0
+  private parseData(): ParsedProperty[] {
+    const results: ParsedProperty[] = []
 
-    // Contains match
-    if (str1.includes(str2) || str2.includes(str1)) {
-      return 0.9
+    for (const row of this.rows) {
+      if (row.length !== this.headers.length) {
+        continue // Skip malformed rows
+      }
+
+      const property: ParsedProperty = {
+        raw_data: {}
+      }
+
+      // Build raw data object
+      this.headers.forEach((header, index) => {
+        property.raw_data[header] = row[index]
+      })
+
+      // Map known fields with multi-project support
+      for (const [fieldName, headerName] of Object.entries(this.mappings)) {
+        const headerIndex = this.headers.indexOf(headerName)
+        if (headerIndex !== -1 && headerIndex < row.length) {
+          const value = row[headerIndex]?.toString()?.trim()
+          
+          if (value) {
+            switch (fieldName) {
+              case 'price_per_m2':
+              case 'total_price':
+              case 'final_price':
+              case 'area':
+              case 'parking_price':
+                // Parse numbers, handle Polish number format
+                const numValue = this.parseNumber(value)
+                if (numValue !== null) {
+                  ;(property as any)[fieldName] = numValue
+                }
+                break
+              
+              // Multi-project fields
+              case 'investment_name':
+                property.project_name = value
+                break
+              case 'investment_address':
+                property.project_address = value
+                break
+              case 'investment_city':
+                property.project_city = value
+                break
+              
+              default:
+                // String fields
+                ;(property as any)[fieldName] = value
+            }
+          }
+        }
+      }
+
+      // Only include rows with at least property number
+      if (property.property_number || Object.keys(property.raw_data).length > 0) {
+        results.push(property)
+      }
     }
 
-    // Levenshtein distance normalized
+    return results
+  }
+
+  /**
+   * Enhanced number parsing for Polish formats
+   */
+  private parseNumber(value: string): number | null {
+    if (!value) return null
+
+    // Handle Polish number format (spaces as thousands separator, comma as decimal)
+    let cleaned = value
+      .replace(/[^\d,.\-\s]/g, '') // Remove everything except digits, comma, dot, dash, spaces
+      .trim()
+
+    // Handle different formats
+    if (cleaned.includes(',') && cleaned.includes('.')) {
+      // Both comma and dot - assume comma is thousands separator
+      cleaned = cleaned.replace(/,/g, '').replace('.', '.')
+    } else if (cleaned.includes(',')) {
+      // Check if comma is decimal separator or thousands separator
+      const commaIndex = cleaned.lastIndexOf(',')
+      const afterComma = cleaned.substring(commaIndex + 1)
+      
+      if (afterComma.length <= 2 && /^\d+$/.test(afterComma)) {
+        // Likely decimal separator
+        cleaned = cleaned.replace(',', '.')
+      } else {
+        // Likely thousands separator
+        cleaned = cleaned.replace(/,/g, '')
+      }
+    }
+    
+    // Remove spaces used as thousands separators
+    cleaned = cleaned.replace(/\s+/g, '')
+
+    const parsed = parseFloat(cleaned)
+    return isNaN(parsed) ? null : parsed
+  }
+
+  /**
+   * Get available Excel sheets for sheet selection
+   */
+  public getAvailableSheets(): string[] {
+    return this.fileInfo.sheets || []
+  }
+
+  /**
+   * Switch to different Excel sheet
+   */
+  public switchSheet(sheetName: string): boolean {
+    if (this.fileInfo.type === 'excel' && this.fileBuffer && this.fileInfo.sheets?.includes(sheetName)) {
+      this.parseExcel(sheetName)
+      return true
+    }
+    return false
+  }
+
+  // ... (keep existing fuzzy matching methods)
+  private fuzzyMatch(str1: string, str2: string): number {
+    if (str1 === str2) return 1.0
+    if (str1.includes(str2) || str2.includes(str1)) return 0.9
+    
     const distance = this.levenshteinDistance(str1, str2)
     const maxLength = Math.max(str1.length, str2.length)
     return 1 - (distance / maxLength)
@@ -316,87 +553,17 @@ export class SmartCSVParser {
   }
 
   /**
-   * Parse actual data using discovered column mappings
-   */
-  private parseData(): ParsedProperty[] {
-    const results: ParsedProperty[] = []
-
-    for (const row of this.rows) {
-      if (row.length !== this.headers.length) {
-        continue // Skip malformed rows
-      }
-
-      const property: ParsedProperty = {
-        raw_data: {}
-      }
-
-      // Build raw data object
-      this.headers.forEach((header, index) => {
-        property.raw_data[header] = row[index]
-      })
-
-      // Map known fields
-      for (const [fieldName, headerName] of Object.entries(this.mappings)) {
-        const headerIndex = this.headers.indexOf(headerName)
-        if (headerIndex !== -1 && headerIndex < row.length) {
-          const value = row[headerIndex]?.trim()
-          
-          if (value) {
-            switch (fieldName) {
-              case 'price_per_m2':
-              case 'total_price':
-              case 'final_price':
-              case 'area':
-              case 'parking_price':
-                // Parse numbers, handle Polish number format
-                const numValue = this.parseNumber(value)
-                if (numValue !== null) {
-                  ;(property as any)[fieldName] = numValue
-                }
-                break
-              
-              default:
-                // String fields
-                ;(property as any)[fieldName] = value
-            }
-          }
-        }
-      }
-
-      // Only include rows with at least property number
-      if (property.property_number || property.raw_data.length > 0) {
-        results.push(property)
-      }
-    }
-
-    return results
-  }
-
-  private parseNumber(value: string): number | null {
-    if (!value) return null
-
-    // Handle Polish number format (spaces as thousands separator, comma as decimal)
-    const cleaned = value
-      .replace(/[^\d,.-]/g, '') // Remove everything except digits, comma, dot, dash
-      .replace(/\s+/g, '') // Remove spaces
-      .replace(',', '.') // Convert comma to dot
-
-    const parsed = parseFloat(cleaned)
-    return isNaN(parsed) ? null : parsed
-  }
-
-  /**
-   * Extract developer information from the data
+   * Extract developer and project information
    */
   public extractDeveloperInfo(): DeveloperInfo {
     const developerInfo: DeveloperInfo = {}
 
     // Look for developer info in first few rows or in consistent fields
-    for (const row of this.rows.slice(0, 5)) {
+    for (const row of this.rows.slice(0, 10)) {
       for (const [fieldName, headerName] of Object.entries(this.mappings)) {
         const headerIndex = this.headers.indexOf(headerName)
         if (headerIndex !== -1 && headerIndex < row.length) {
-          const value = row[headerIndex]?.trim()
+          const value = row[headerIndex]?.toString()?.trim()
           
           if (value && ['developer_name', 'company_name', 'nip', 'phone', 'email', 'investment_name', 'investment_address', 'investment_city'].includes(fieldName)) {
             if (!(fieldName in developerInfo) || !developerInfo[fieldName as keyof DeveloperInfo]) {
@@ -428,11 +595,11 @@ export class SmartCSVParser {
 }
 
 /**
- * Main entry point for smart CSV parsing
+ * Main entry point for universal file parsing
  */
-export function parseCSVSmart(csvContent: string): SmartParseResult {
+export async function parseFileSmart(file: File): Promise<UniversalParseResult> {
   try {
-    const parser = new SmartCSVParser(csvContent)
+    const parser = await UniversalFileParser.fromFile(file)
     return parser.analyzeColumns()
   } catch (error) {
     return {
@@ -443,7 +610,32 @@ export function parseCSVSmart(csvContent: string): SmartParseResult {
       suggestions: {},
       confidence: 0,
       totalRows: 0,
-      validRows: 0
+      validRows: 0,
+      fileInfo: { type: 'unknown' }
+    }
+  }
+}
+
+/**
+ * Legacy CSV support
+ */
+export function parseCSVSmart(csvContent: string): UniversalParseResult {
+  try {
+    const parser = new UniversalFileParser(csvContent)
+    const result = parser.analyzeColumns()
+    result.fileInfo.type = 'csv'
+    return result
+  } catch (error) {
+    return {
+      success: false,
+      data: [],
+      mappings: {},
+      errors: [error instanceof Error ? error.message : 'Unknown parsing error'],
+      suggestions: {},
+      confidence: 0,
+      totalRows: 0,
+      validRows: 0,
+      fileInfo: { type: 'csv' }
     }
   }
 }
@@ -489,148 +681,5 @@ export function validateMinistryCompliance(data: ParsedProperty[]): {
     valid: errors.length === 0,
     errors,
     warnings
-  }
-}
-
-/**
- * Parse Excel file using XLSX library
- */
-export function parseExcelFile(buffer: Buffer, sheetName?: string): SmartParseResult {
-  try {
-    // Read Excel workbook
-    const workbook = XLSX.read(buffer, { 
-      type: 'buffer',
-      cellDates: true,
-      cellNF: false,
-      cellText: false
-    })
-    
-    // Get first sheet or specified sheet
-    const sheet = sheetName && workbook.Sheets[sheetName] 
-      ? workbook.Sheets[sheetName]
-      : workbook.Sheets[workbook.SheetNames[0]]
-    
-    if (!sheet) {
-      return {
-        success: false,
-        data: [],
-        mappings: {},
-        errors: ['Nie znaleziono arkusza w pliku Excel'],
-        suggestions: {},
-        confidence: 0,
-        totalRows: 0,
-        validRows: 0
-      }
-    }
-    
-    // Convert to array of arrays (like CSV)
-    const jsonData = XLSX.utils.sheet_to_json(sheet, { 
-      header: 1,
-      defval: '',
-      blankrows: false
-    }) as string[][]
-    
-    // Convert to CSV-like format for existing parser
-    const csvContent = convertExcelArrayToCSV(jsonData)
-    
-    // Use existing smart CSV parser
-    return parseCSVSmart(csvContent)
-    
-  } catch (error) {
-    return {
-      success: false,
-      data: [],
-      mappings: {},
-      errors: [error instanceof Error ? error.message : 'Błąd parsowania Excel'],
-      suggestions: {},
-      confidence: 0,
-      totalRows: 0,
-      validRows: 0
-    }
-  }
-}
-
-/**
- * Parse Excel from File object (for web upload)
- */
-export async function parseExcelFileFromBlob(file: File, sheetName?: string): Promise<SmartParseResult> {
-  try {
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-    return parseExcelFile(buffer, sheetName)
-  } catch (error) {
-    return {
-      success: false,
-      data: [],
-      mappings: {},
-      errors: [error instanceof Error ? error.message : 'Błąd odczytu pliku Excel'],
-      suggestions: {},
-      confidence: 0,
-      totalRows: 0,
-      validRows: 0
-    }
-  }
-}
-
-/**
- * Get available sheet names from Excel file
- */
-export function getExcelSheetNames(buffer: Buffer): string[] {
-  try {
-    const workbook = XLSX.read(buffer, { type: 'buffer' })
-    return workbook.SheetNames
-  } catch {
-    return []
-  }
-}
-
-/**
- * Convert Excel array data to CSV format string
- */
-function convertExcelArrayToCSV(data: string[][]): string {
-  if (data.length === 0) return ''
-  
-  // Escape and quote fields as needed
-  const escapedData = data.map(row => 
-    row.map(cell => {
-      const cellStr = String(cell || '').trim()
-      
-      // Quote if contains comma, quotes, or newlines
-      if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
-        return `"${cellStr.replace(/"/g, '""')}"`
-      }
-      
-      return cellStr
-    }).join(',')
-  )
-  
-  return escapedData.join('\n')
-}
-
-/**
- * Unified parser function that handles both CSV and Excel files
- */
-export function parsePropertyFile(
-  content: string | Buffer, 
-  filename: string,
-  sheetName?: string
-): SmartParseResult {
-  const isExcel = /\.(xlsx?|xlsm)$/i.test(filename)
-  
-  if (isExcel && Buffer.isBuffer(content)) {
-    return parseExcelFile(content, sheetName)
-  } else if (typeof content === 'string') {
-    return parseCSVSmart(content)
-  } else {
-    return {
-      success: false,
-      data: [],
-      mappings: {},
-      errors: ['Nieobsługiwany typ pliku lub błędne dane wejściowe'],
-      suggestions: {},
-      confidence: 0,
-      totalRows: 0,
-      validRows: 0
-    }
   }
 }

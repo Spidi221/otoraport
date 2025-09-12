@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
         
         // Ministry compliance URLs
         xml_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/public/${clientId}/data.xml`,
-        md_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/public/${clientId}/data.md`,
+        md5_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/public/${clientId}/data.md5`,
         
         // Trial settings
         trial_started_at: new Date().toISOString(),

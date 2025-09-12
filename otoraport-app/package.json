@@ -20,6 +20,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/react-dropzone": "^4.2.2",
     "@types/uuid": "^10.0.0",
+    "@vercel/sdk": "^1.11.1",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -33,7 +34,8 @@
     "react-dropzone": "^14.3.8",
     "resend": "^6.0.3",
     "tailwind-merge": "^3.3.1",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

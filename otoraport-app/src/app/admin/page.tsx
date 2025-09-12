@@ -3,11 +3,8 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import AdminDashboard from '@/components/admin/admin-dashboard'
 
-// Admin emails - w produkcji z bazy danych
-const ADMIN_EMAILS = [
-  'admin@otoraport.pl',
-  'bartlomiej@agencjaai.pl'
-]
+// SECURITY FIX: Admin emails from environment variables
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@otoraport.pl').split(',')
 
 export default async function AdminPage() {
   const session: any = await getServerSession(authOptions as any)

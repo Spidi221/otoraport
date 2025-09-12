@@ -10,7 +10,7 @@ const PricingSection = memo(function PricingSection() {
       name: 'Basic',
       description: 'Podstawowy compliance dla małych deweloperów',
       monthlyPrice: 149,
-      annualPrice: 119,
+      annualPrice: 119, // 149 * 12 * 0.8 / 12 = 119
       features: [
         'Do 2 inwestycji',
         'Automatyczne raporty XML/MD',
@@ -22,7 +22,7 @@ const PricingSection = memo(function PricingSection() {
       name: 'Pro',
       description: 'Compliance + strony prezentacyjne dla klientów',
       monthlyPrice: 249,
-      annualPrice: 199,
+      annualPrice: 199, // 249 * 12 * 0.8 / 12 = 199
       popular: true,
       features: [
         'Wszystko z Basic',
@@ -35,16 +35,18 @@ const PricingSection = memo(function PricingSection() {
     },
     {
       name: 'Enterprise',
-      description: 'Pełna automatyzacja dla dużych deweloperów',
-      monthlyPrice: 399,
-      annualPrice: 319,
+      description: 'Pełna automatyzacja dla dużych deweloperów + custom domain',
+      monthlyPrice: 499,
+      annualPrice: 399, // 499 * 12 * 0.8 / 12 = 399 (covers $20/month Vercel domains cost)
       features: [
         'Wszystko z Pro',
         'Nieograniczona liczba inwestycji',
-        'Custom domain',
-        'White-label',
+        'Custom domain (np. mieszkania.firma.pl)',
+        'SSL certificate included',
+        'White-label branding',
         'API access',
-        'Dedicated manager'
+        'Dedicated manager',
+        'SLA 99.9% uptime'
       ]
     }
   ], [])
@@ -138,7 +140,7 @@ const PricingSection = memo(function PricingSection() {
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-gray-900 text-white hover:bg-gray-800'
               }`}>
-                Rozpocznij 14-dniowy trial
+                Rozpocznij 14-dniowy okres próbny
               </button>
             </div>
           ))}

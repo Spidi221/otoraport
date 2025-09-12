@@ -2,19 +2,126 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function OnboardingPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const reason = searchParams.get('reason')
+  
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
+  const [showProfileForm, setShowProfileForm] = useState(false)
+  const [error, setError] = useState('')
+  
+  // Form data for OAuth profile completion
+  const [formData, setFormData] = useState({
+    company_name: '',
+    nip: '',
+    phone: '',
+    plan: 'pro',
+    billing: 'monthly'
+  })
+  const [nipData, setNipData] = useState(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin')
+      return
     }
-  }, [status, router])
+    
+    // Check if user needs to complete profile (Google OAuth scenario)
+    if (reason === 'incomplete_profile' && session?.user?.provider === 'google') {
+      setShowProfileForm(true)
+    }
+  }, [status, router, reason, session])
+
+  // Handle different onboarding scenarios based on URL params
+  useEffect(() => {
+    if (reason === 'incomplete_profile') {
+      console.log('User needs to complete profile after Google login')
+      setShowProfileForm(true)
+    } else if (reason === 'subscription_expired') {
+      console.log('User needs to renew subscription')
+    } else if (reason === 'profile_check_failed') {
+      console.log('Profile check failed, showing form')
+      setShowProfileForm(true)
+    }
+  }, [reason])
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    setError('')
+  }
+
+  const handleNipLookup = async (nip: string) => {
+    if (nip.length === 10) {
+      try {
+        const response = await fetch('/api/nip-lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nip })
+        })
+        
+        const result = await response.json()
+        
+        if (result.success && result.data.name) {
+          setNipData(result.data)
+          setFormData(prev => ({
+            ...prev,
+            company_name: result.data.name,
+            phone: result.data.phone || prev.phone
+          }))
+        }
+      } catch (error) {
+        console.error('NIP lookup failed:', error)
+      }
+    }
+  }
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!formData.company_name || !formData.nip) {
+      setError('Company name and NIP are required')
+      return
+    }
+
+    if (formData.nip.replace(/\D/g, '').length !== 10) {
+      setError('NIP must contain exactly 10 digits')
+      return
+    }
+
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/oauth/complete-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        console.log('Profile completed successfully for OAuth user')
+        setShowProfileForm(false)
+        setStep(1) // Continue with normal onboarding
+      } else {
+        setError(result.error || 'Failed to complete profile')
+      }
+    } catch (error) {
+      console.error('Profile completion error:', error)
+      setError('An error occurred while completing your profile')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleCompleteOnboarding = async () => {
     setIsLoading(true)
@@ -40,12 +147,156 @@ export default function OnboardingPage() {
     router.push('/dashboard?tab=upload')
   }
 
+  const getPlanPrice = (plan: string, billing: string) => {
+    const prices = {
+      basic: { monthly: 149, annual: 119 },
+      pro: { monthly: 249, annual: 199 },
+      enterprise: { monthly: 399, annual: 319 }
+    }
+    return prices[plan][billing]
+  }
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Ładowanie...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show profile completion form for Google OAuth users
+  if (showProfileForm) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-gray-900 mt-4">
+              Complete Your Profile
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Please complete your company profile to access the dashboard
+            </p>
+            {session?.user?.email && (
+              <p className="text-sm text-gray-500 mt-2">
+                Logged in as: {session.user.email}
+              </p>
+            )}
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Company Details</CardTitle>
+              <CardDescription>
+                Complete your developer profile
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleProfileSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="nip" className="block text-sm font-medium text-gray-700 mb-1">
+                    Company NIP *
+                  </label>
+                  <Input
+                    id="nip"
+                    type="text"
+                    value={formData.nip}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 10)
+                      handleInputChange('nip', value)
+                      handleNipLookup(value)
+                    }}
+                    placeholder="1234567890"
+                    required
+                  />
+                  {nipData && (
+                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-sm">
+                      ✅ Found: {nipData.name}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="company_name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Company Name *
+                  </label>
+                  <Input
+                    id="company_name"
+                    type="text"
+                    value={formData.company_name}
+                    onChange={(e) => handleInputChange('company_name', e.target.value)}
+                    placeholder="Your Development Company"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone (optional)
+                  </label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder="+48 123 456 789"
+                  />
+                </div>
+
+                {/* Plan Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Select Plan *
+                  </label>
+                  <div className="space-y-2">
+                    {['basic', 'pro', 'enterprise'].map((plan) => (
+                      <div
+                        key={plan}
+                        className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                          formData.plan === plan
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-blue-300'
+                        }`}
+                        onClick={() => handleInputChange('plan', plan)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold capitalize">{plan}</h4>
+                            <p className="text-sm text-gray-600">
+                              {getPlanPrice(plan, formData.billing)} zł/month
+                            </p>
+                          </div>
+                          <div className={`w-4 h-4 rounded-full ${
+                            formData.plan === plan ? 'bg-blue-500' : 'bg-gray-300'
+                          }`} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                    {error}
+                  </div>
+                )}
+
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Creating Profile...' : 'Complete Profile'}
+                </Button>
+              </form>
+
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                🎉 14-day free trial for all plans!
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     )
