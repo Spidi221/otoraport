@@ -4,21 +4,71 @@ import { PricingCard } from '@/components/dashboard/pricing-card'
 export const metadata: Metadata = {
   title: 'Cennik - OTORAPORT',
   description: 'Wybierz plan, który najlepiej pasuje do Twoich potrzeb. Automatyczne raporty dla ministerstwa od 99 zł/mies.',
+  alternates: {
+    canonical: 'https://otoraport.pl/pricing',
+  },
 }
 
 export default function PricingPage() {
+  const pricingJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "OTORAPORT - Automatyzacja Raportowania Cen Mieszkań",
+    "description": "SaaS do automatyzacji compliance z ustawą o ochronie nabywcy mieszkań dla deweloperów",
+    "brand": {
+      "@type": "Brand",
+      "name": "OTORAPORT"
+    },
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Plan Basic",
+        "price": "149",
+        "priceCurrency": "PLN",
+        "billingPeriod": "P1M",
+        "description": "Podstawowe funkcje compliance dla małych projektów"
+      },
+      {
+        "@type": "Offer", 
+        "name": "Plan Pro",
+        "price": "249",
+        "priceCurrency": "PLN",
+        "billingPeriod": "P1M",
+        "description": "Pełne funkcje plus strony prezentacyjne dla klientów"
+      },
+      {
+        "@type": "Offer",
+        "name": "Plan Enterprise", 
+        "price": "399",
+        "priceCurrency": "PLN",
+        "billingPeriod": "P1M",
+        "description": "Zaawansowane funkcje, custom domeny, API, SLA"
+      }
+    ],
+    "category": "Real Estate Software",
+    "audience": {
+      "@type": "BusinessAudience",
+      "audienceType": "Real Estate Developers"
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">
-            Wybierz swój plan
-          </h1>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-            Automatyczne raporty cen mieszkań zgodnie z wymogami ministerstwa. 
-            Rozpocznij już dziś z 7-dniowym okresem próbnym.
-          </p>
-        </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }}
+      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-slate-900 mb-4">
+              Wybierz swój plan
+            </h1>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+              Automatyczne raporty cen mieszkań zgodnie z wymogami ministerstwa. 
+              Rozpocznij już dziś z 14-dniowym okresem próbnym.
+            </p>
+          </div>
         
         <PricingCard />
         
@@ -64,5 +114,6 @@ export default function PricingPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

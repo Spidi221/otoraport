@@ -1,26 +1,53 @@
 'use client'
 
+import { useSession } from "next-auth/react";
+import { Suspense, lazy, useMemo } from "react";
 import { Header } from "@/components/dashboard/header";
 import { UploadWidget } from "@/components/dashboard/upload-widget";
 import { StatusCards } from "@/components/dashboard/status-cards";
-import { ActionButtons } from "@/components/dashboard/action-buttons";
-import { ChartsSection } from "@/components/dashboard/charts-section";
-import { PropertiesTable } from "@/components/dashboard/properties-table";
+import { LoadingState } from "@/components/ui/loading";
 import ScrollToTop from "@/components/ScrollToTop";
 
+// Lazy load heavy components that are below the fold
+const ActionButtons = lazy(() => import("@/components/dashboard/action-buttons").then(m => ({ default: m.ActionButtons })));
+const ChartsSection = lazy(() => import("@/components/dashboard/charts-section").then(m => ({ default: m.ChartsSection })));
+const PropertiesTable = lazy(() => import("@/components/dashboard/properties-table").then(m => ({ default: m.PropertiesTable })));
+
 export default function HomePage() {
+  const { data: session } = useSession();
+  
+  // Memoized greeting calculation
+  const greeting = useMemo(() => {
+    if (!session?.user?.name) {
+      return "Dzień dobry! 👋";
+    }
+    
+    const firstName = session.user.name.split(' ')[0];
+    const hour = new Date().getHours();
+    
+    let greetingText = "Dzień dobry";
+    if (hour < 12) greetingText = "Dzień dobry";
+    else if (hour < 18) greetingText = "Dzień dobry";
+    else greetingText = "Dobry wieczór";
+    
+    return `${greetingText}, ${firstName}! 👋`;
+  }, [session?.user?.name]);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header showUserMenu={false} />
+      <Header showUserMenu={!!session} />
       
       <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-6 lg:px-6">
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">
-            Dzień dobry, Jan! 👋
+            {greeting}
           </h1>
           <p className="text-muted-foreground">
-            Wszystko działa sprawnie. Twoje raporty są aktualne i zgodne z przepisami.
+            {session ? 
+              "Wszystko działa sprawnie. Twoje raporty są aktualne i zgodne z przepisami." :
+              "Zaloguj się, aby zarządzać swoimi raportami nieruchomości."
+            }
           </p>
         </div>
 
@@ -35,13 +62,19 @@ export default function HomePage() {
           </div>
 
           {/* Action Buttons */}
-          <ActionButtons />
+          <Suspense fallback={<LoadingState message="Ładowanie akcji..." />}>
+            <ActionButtons />
+          </Suspense>
 
           {/* Charts Section */}
-          <ChartsSection />
+          <Suspense fallback={<LoadingState message="Ładowanie wykresów..." />}>
+            <ChartsSection />
+          </Suspense>
 
           {/* Properties Table */}
-          <PropertiesTable />
+          <Suspense fallback={<LoadingState message="Ładowanie tabeli nieruchomości..." />}>
+            <PropertiesTable />
+          </Suspense>
         </div>
 
         {/* Footer */}

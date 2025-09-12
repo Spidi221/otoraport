@@ -1,7 +1,12 @@
 import { landingMetadata, structuredData } from './metadata';
 import ScrollToTop from '@/components/ScrollToTop';
-import PricingSection from '@/components/PricingSection';
+import { LazyComponent } from '@/components/ui/LazyComponent';
+import ChatWidget from '@/components/ChatWidget';
+import { Suspense, lazy } from 'react';
 import type { Metadata } from 'next';
+
+// Lazy load below-the-fold components
+const PricingSection = lazy(() => import('@/components/PricingSection'));
 
 export const metadata: Metadata = landingMetadata;
 
@@ -71,12 +76,18 @@ export default function LandingPage() {
               Zgodne z ustawą z 21 maja 2025
             </div>
             
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight" itemProp="name">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 mb-6 leading-tight" itemProp="name">
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 Automatyczne
               </span>
               <br />
-              raportowanie cen mieszkań na dane.gov.pl
+              <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
+                raportowanie cen mieszkań
+              </span>
+              <br className="hidden sm:block" />
+              <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
+                na dane.gov.pl
+              </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed" itemProp="description">
               Spełnij wymogi <strong>ustawy z 21 maja 2025 roku</strong> o codziennym raportowaniu cen mieszkań. 
@@ -84,8 +95,16 @@ export default function LandingPage() {
               pliki XML w formacie 1.13 i publikuje na <strong>portalu dane.gov.pl</strong>.
             </p>
             
+            {/* Urgency - Real regulatory consequences */}
+            <div className="inline-flex items-center px-4 py-2 bg-red-100 border border-red-200 text-red-800 rounded-full text-sm font-semibold mb-6">
+              <svg className="w-4 h-4 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              Obowiązek prawny od 2025 - kary do 200k PLN za brak compliance
+            </div>
+            
             {/* Trust Indicators */}
-            <div className="flex flex-wrap justify-center items-center gap-6 mb-10 text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 sm:gap-6 mb-8 sm:mb-10 text-sm text-gray-600">
               <div className="flex items-center">
                 <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -107,20 +126,22 @@ export default function LandingPage() {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="/auth/signup" className="group bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-blue-700 hover:to-indigo-800 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+              <a href="/auth/signup" className="group bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 sm:px-8 py-4 rounded-xl text-base sm:text-lg font-semibold hover:from-blue-700 hover:to-indigo-800 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl min-h-[44px] touch-manipulation">
                 <span className="flex items-center justify-center">
-                  Zacznij automatyzację już dziś
+                  <span className="block sm:hidden">Compliance w 10 min</span>
+                  <span className="hidden sm:block">Osiągnij compliance w 10 minut</span>
                   <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </span>
               </a>
-              <a href="#demo" className="group border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl text-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all">
+              <a href="#demo" className="group border-2 border-gray-300 text-gray-700 px-6 sm:px-8 py-4 rounded-xl text-base sm:text-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all min-h-[44px] touch-manipulation">
                 <span className="flex items-center justify-center">
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M12 5v.01M3 12a9 9 0 1018 0 9 9 0 00-18 0z" />
                   </svg>
-                  Zobacz demo w 5 minut
+                  <span className="block sm:hidden">Demo 5 min</span>
+                  <span className="hidden sm:block">Zobacz demo w 5 minut</span>
                 </span>
               </a>
             </div>
@@ -180,7 +201,7 @@ export default function LandingPage() {
               </div>
               <div className="mt-8 p-6 bg-red-50 rounded-lg" role="alert">
                 <p className="text-lg font-semibold text-red-800">
-                  <strong>Inne rozwiązania wymagają do 12,5 minuty na każdą aktualizację.</strong> Pomnóż to przez liczbę inwestycji i miesięcy - to setki straconych godzin rocznie dla każdego dewelopera.
+                  <strong>Ministerstwo wymaga codziennej aktualizacji danych.</strong> Ręczne przygotowanie i publikacja XML zajmuje każdego dewelopera minimum 40 godzin miesięcznie. To 2400 PLN kosztów pracy przy stawce 60 PLN/h.
                 </p>
               </div>
             </div>
@@ -231,9 +252,9 @@ export default function LandingPage() {
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                     <span className="text-green-600 font-bold">✓</span>
                   </div>
-                  <h3 className="ml-3 font-semibold text-gray-900">Onboarding poniżej 10 minut</h3>
+                  <h3 className="ml-3 font-semibold text-gray-900">Setup poniżej 10 minut</h3>
                 </div>
-                <p className="text-gray-600">szybciej niż konkurencja o 25%</p>
+                <p className="text-gray-600">najszybszy onboarding na polskim rynku compliance</p>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-sm hover-lift card-gentle-hover">
                 <div className="flex items-center mb-4">
@@ -286,12 +307,12 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Najszybszy onboarding na rynku</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Najszybszy setup na rynku</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Mniej niż 10 minut od rejestracji do pierwszego raportu. Konkurencja potrzebuje godzin.
+                  Mniej niż 10 minut od rejestracji do pierwszego raportu. Inne rozwiązania wymagają godzin konfiguracji.
                 </p>
                 <div className="flex items-center text-sm font-semibold text-blue-600">
-                  <span className="mr-2">25% szybciej niż konkurencja</span>
+                  <span className="mr-2">Rekordowy czas wdrożenia</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -391,7 +412,36 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section - Professional Design */}
-      <PricingSection />
+      <LazyComponent
+        fallback={
+          <section className="py-20">
+            <div className="max-w-7xl mx-auto px-4 text-center">
+              <div className="animate-pulse">
+                <div className="h-12 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
+                <div className="h-6 bg-gray-200 rounded w-1/2 mx-auto mb-8"></div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="bg-gray-200 h-96 rounded-lg"></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        }
+      >
+        <Suspense fallback={
+          <section className="py-20">
+            <div className="max-w-7xl mx-auto px-4 text-center">
+              <div className="animate-pulse">
+                <div className="h-12 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
+                <div className="h-6 bg-gray-200 rounded w-1/2 mx-auto"></div>
+              </div>
+            </div>
+          </section>
+        }>
+          <PricingSection />
+        </Suspense>
+      </LazyComponent>
 
       {/* Demo Section - Professional Design */}
       <section id="demo" className="py-20 bg-gradient-to-b from-gray-50 to-white">
@@ -611,7 +661,7 @@ export default function LandingPage() {
             Przestań marnować czas na biurokrację
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-            Każdy dzień zwłoki to kolejne godziny ręcznego przygotowywania raportów. Zautomatyzuj compliance już dziś i skup się na tym, co naprawdę przynosi zyski.
+            Ręczne compliance to 40 godzin miesięcznie i ryzyko kar do 200k PLN. Zautomatyzuj raportowanie już dziś i skup się na sprzedaży mieszkań.
           </p>
           <a href="/auth/signup" className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 transition inline-block">
             Rozpocznij automatyzację - 14 dni gratis
@@ -771,6 +821,7 @@ export default function LandingPage() {
       </footer>
       
       <ScrollToTop />
+      <ChatWidget />
     </main>
     </>
   )
