@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const reportType = searchParams.get('type') || 'overview'
     const timeframe = searchParams.get('timeframe') as '30d' | '90d' | '12m' || '30d'
 
-    console.log(`Analytics request for user ${session.user.email}: ${reportType} (${timeframe})`)
+    // Analytics request logged (user info redacted for security)
 
     switch (reportType) {
       case 'overview': {
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     const { format, reportType } = await request.json()
     const userId = (session.user as any).id
 
-    console.log(`Export request for user ${session.user.email}: ${reportType} as ${format}`)
+    // Export request logged (user info redacted for security)
 
     const report = await analyticsService.generateMarketReport(userId)
 

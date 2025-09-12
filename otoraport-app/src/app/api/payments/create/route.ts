@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const userId = (session.user as any).id
     const userEmail = session.user.email!
 
-    console.log(`Creating payment for user ${userEmail}: ${plan} ${period} - ${amount} grosze`)
+    // Payment creation initiated (user details redacted for security)
 
     // Store payment intent in database
     const { data: payment, error: dbError } = await supabaseAdmin

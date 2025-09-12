@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { findRelevantKnowledge, getFallbackResponse, getGreeting } from '@/lib/chatbot-knowledge';
 import { performSecurityCheck, getSecurityMessage } from '@/lib/chatbot-security';
 import { getAIChatResponse, checkOpenAIHealth } from '@/lib/openai-integration';
+import { generalAPIRateLimit } from '@/lib/rate-limit';
 
 export interface ChatbotRequest {
   message: string;
@@ -27,6 +28,26 @@ export interface ChatbotResponse {
  */
 export async function POST(req: NextRequest) {
   try {
+    // SECURITY: Rate limiting for chatbot requests
+    const rateLimitResult = await generalAPIRateLimit(req)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { 
+          response: 'Zbyt wiele zapytań. Spróbuj ponownie za chwilę.',
+          error: 'Rate limit exceeded',
+          confidence: 0.0
+        },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.reset.toString()
+          }
+        }
+      )
+    }
+
     const body: ChatbotRequest & { sessionId?: string } = await req.json();
     
     if (!body.message || typeof body.message !== 'string') {

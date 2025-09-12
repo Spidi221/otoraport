@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { sendDeveloperWelcomeEmail } from '@/lib/email-service'
 import bcrypt from 'bcryptjs'
+import { registrationRateLimit } from '@/lib/rate-limit'
+import { verifyCaptcha } from '@/lib/captcha'
+import { validateRegistrationData } from '@/lib/input-validation'
+import { createSecureError } from '@/lib/error-handler'
 
 interface RegisterRequest {
   email: string
@@ -11,18 +15,62 @@ interface RegisterRequest {
   nip: string
   phone: string
   plan: 'basic' | 'pro' | 'enterprise'
+  captcha_id: string
+  captcha_answer: string
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Rate limiting for registration attempts
+    const rateLimitResult = await registrationRateLimit(request)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Zbyt wiele prób rejestracji. Spróbuj ponownie później.', success: false },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.reset.toString()
+          }
+        }
+      )
+    }
+
     const body: RegisterRequest = await request.json()
     
-    // Validate required fields
-    const { email, password, name, company_name, nip, plan } = body
-    
-    if (!email || !password || !name || !company_name || !nip || !plan) {
+    // SECURITY: Comprehensive input validation and sanitization
+    const validationResult = validateRegistrationData(body)
+    if (!validationResult.isValid) {
       return NextResponse.json(
-        { error: 'Wszystkie wymagane pola muszą być wypełnione', success: false },
+        { 
+          error: 'Dane zawierają błędy', 
+          details: validationResult.errors,
+          success: false 
+        },
+        { status: 400 }
+      )
+    }
+    
+    // Use sanitized data
+    const { email, password, name, company_name, nip, plan, captcha_id, captcha_answer } = {
+      ...validationResult.sanitized,
+      password: body.password, // Password not sanitized
+      captcha_id: body.captcha_id,
+      captcha_answer: body.captcha_answer
+    }
+
+    // SECURITY: Verify CAPTCHA before proceeding
+    if (!captcha_id || !captcha_answer) {
+      return NextResponse.json(
+        { error: 'Wymagana weryfikacja CAPTCHA', success: false },
+        { status: 400 }
+      )
+    }
+
+    if (!verifyCaptcha(captcha_id, captcha_answer)) {
+      return NextResponse.json(
+        { error: 'Nieprawidłowa odpowiedź na pytanie weryfikacyjne', success: false },
         { status: 400 }
       )
     }
@@ -36,10 +84,32 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate password length
+    // SECURITY: Enhanced password validation
     if (password.length < 8) {
       return NextResponse.json(
         { error: 'Hasło musi mieć co najmniej 8 znaków', success: false },
+        { status: 400 }
+      )
+    }
+    
+    // Check password strength
+    const hasUpperCase = /[A-Z]/.test(password)
+    const hasLowerCase = /[a-z]/.test(password)
+    const hasNumbers = /\d/.test(password)
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+      return NextResponse.json(
+        { error: 'Hasło musi zawierać wielkie litery, małe litery i cyfry', success: false },
+        { status: 400 }
+      )
+    }
+    
+    // Check for common weak passwords
+    const commonPasswords = ['12345678', 'password', 'qwerty123', 'admin123']
+    if (commonPasswords.includes(password.toLowerCase())) {
+      return NextResponse.json(
+        { error: 'Hasło jest zbyt proste. Wybierz silniejsze hasło.', success: false },
         { status: 400 }
       )
     }
@@ -81,8 +151,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
+    // SECURITY: Hash password with stronger salt rounds
+    const hashedPassword = await bcrypt.hash(password, 14)
 
     // Generate unique client ID for ministry URLs
     const clientId = `dev_${cleanNip}_${Date.now()}`
@@ -156,7 +226,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log successful registration (for analytics)
-    console.log(`New developer registered: ${email} (${company_name}) - Plan: ${plan}`)
+    console.log('New developer registered successfully')
 
     // Return success response (excluding sensitive data)
     return NextResponse.json({
@@ -181,9 +251,13 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Registration error:', error)
     
+    // SECURITY: Use secure error handler
+    const secureError = createSecureError(error, 'Wystąpił nieoczekiwany błąd podczas rejestracji. Spróbuj ponownie.', 'REGISTRATION')
+    
     return NextResponse.json(
       { 
-        error: 'Wystąpił nieoczekiwany błąd podczas rejestracji. Spróbuj ponownie.', 
+        error: secureError.error,
+        code: secureError.code,
         success: false 
       },
       { status: 500 }

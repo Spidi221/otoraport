@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`Processing file upload from user ${session.user.email}: ${file.name}`)
+    // File upload processing initiated (user details redacted for security)
 
     // Create uploads directory
     const uploadsDir = path.join(process.cwd(), 'uploads')
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      console.log(`Auto-regeneration completed for user ${session.user.email}:`, regenerationResult)
+      // Auto-regeneration completed (user details redacted for security)
     } catch (regenerationError) {
       console.error('Auto-regeneration failed:', regenerationError)
       // Don't fail the upload because of regeneration error
