@@ -12,23 +12,25 @@ export interface ValidationResult {
 // Security patterns to detect and block
 const SECURITY_PATTERNS = [
   // SQL Injection patterns
-  /('|(\\')|(;|;)|(\||(\|))|(\*|(\*))|(%)|(--)|(--)|(\/\*)|(\*\/)|(\+)/i,
+  /['";]|--|\/\*|\*\/|\+/i,
+  /\bunion\b|\bselect\b|\binsert\b|\bdelete\b|\bdrop\b/i,
   
   // XSS patterns
-  /<script[^>]*>.*?<\/script>/gi,
+  /<script/gi,
+  /<\/script>/gi,
   /javascript:/gi,
   /on\w+\s*=/gi,
-  /<iframe[^>]*>.*?<\/iframe>/gi,
-  /<object[^>]*>.*?<\/object>/gi,
-  /<embed[^>]*>/gi,
-  /<link[^>]*>/gi,
-  /<meta[^>]*>/gi,
+  /<iframe/gi,
+  /<object/gi,
+  /<embed/gi,
   
-  // Command injection patterns
-  /(\||&|;|\$\(|\`)/g,
+  // Command injection patterns  
+  /[|&;$()]/g,
+  /`/g,
   
   // Path traversal patterns
-  /(\.\.|\/\.\.|\\\.\.)|(\/|\\)+(etc|bin|usr|tmp|var)(\/|\\)/gi
+  /\.\./g,
+  /[\/\\](etc|bin|usr|tmp|var)[\/\\]/gi
 ]
 
 // Polish characters allowed in names and company names
