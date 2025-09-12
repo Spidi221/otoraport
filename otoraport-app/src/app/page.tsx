@@ -17,19 +17,16 @@ const PropertiesTable = lazy(() => import("@/components/dashboard/properties-tab
 export default function HomePage() {
   const { data: session } = useSession();
   
-  // Memoized greeting calculation
+  // Memoized greeting calculation - avoiding SSR/CSR mismatch
   const greeting = useMemo(() => {
     if (!session?.user?.name) {
       return "Dzień dobry! 👋";
     }
     
     const firstName = session.user.name.split(' ')[0];
-    const hour = new Date().getHours();
     
-    let greetingText = "Dzień dobry";
-    if (hour < 12) greetingText = "Dzień dobry";
-    else if (hour < 18) greetingText = "Dzień dobry";
-    else greetingText = "Dobry wieczór";
+    // Use static greeting to avoid hydration mismatch
+    const greetingText = "Dzień dobry";
     
     return `${greetingText}, ${firstName}! 👋`;
   }, [session?.user?.name]);

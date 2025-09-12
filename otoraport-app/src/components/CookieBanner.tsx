@@ -6,6 +6,7 @@ import Link from 'next/link'
 export function CookieBanner() {
   const [showBanner, setShowBanner] = useState(false)
   const [showPreferences, setShowPreferences] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const [preferences, setPreferences] = useState({
     necessary: true, // Always true, cannot be disabled
     functional: false,
@@ -14,6 +15,8 @@ export function CookieBanner() {
   })
 
   useEffect(() => {
+    setIsClient(true)
+    // Only access localStorage after client-side hydration
     const consent = localStorage.getItem('cookie-consent')
     if (!consent) {
       setShowBanner(true)
@@ -26,7 +29,7 @@ export function CookieBanner() {
       functional: true,
       analytics: true,
       marketing: true,
-      timestamp: Date.now()
+      timestamp: new Date().toISOString()
     }
     localStorage.setItem('cookie-consent', JSON.stringify(allConsent))
     setShowBanner(false)
@@ -39,7 +42,7 @@ export function CookieBanner() {
       functional: false,
       analytics: false,
       marketing: false,
-      timestamp: Date.now()
+      timestamp: new Date().toISOString()
     }
     localStorage.setItem('cookie-consent', JSON.stringify(necessaryConsent))
     setShowBanner(false)
@@ -49,7 +52,7 @@ export function CookieBanner() {
   const savePreferences = () => {
     const consent = {
       ...preferences,
-      timestamp: Date.now()
+      timestamp: new Date().toISOString()
     }
     localStorage.setItem('cookie-consent', JSON.stringify(consent))
     setShowBanner(false)
@@ -64,7 +67,8 @@ export function CookieBanner() {
     }))
   }
 
-  if (!showBanner) return null
+  // Don't render on server to avoid hydration mismatch
+  if (!isClient || !showBanner) return null
 
   return (
     <>

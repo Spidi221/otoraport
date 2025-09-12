@@ -11,6 +11,7 @@ import {
 } from "../ui/dropdown-menu";
 import { OtoraportLogo } from "../icons/otoraport-logo";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 interface HeaderProps {
   showUserMenu?: boolean;
@@ -40,8 +41,7 @@ export function PublicHeader() {
 
 // Header for authenticated pages (with session)
 function AuthenticatedHeader() {
-  const { useSession } = require("next-auth/react");
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   
   // Admin emails
   const ADMIN_EMAILS = [
