@@ -135,11 +135,13 @@ const PricingSection = memo(function PricingSection() {
                 ))}
               </ul>
               
-              <button className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
-                plan.popular
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-900 text-white hover:bg-gray-800'
-              }`}>
+              <button 
+                onClick={() => window.location.href = `/auth/signup?plan=${plan.name.toLowerCase()}&period=${isAnnual ? 'yearly' : 'monthly'}`}
+                className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
+                  plan.popular
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
+                }`}>
                 Rozpocznij 14-dniowy okres próbny
               </button>
             </div>
