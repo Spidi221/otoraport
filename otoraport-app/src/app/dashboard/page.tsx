@@ -14,6 +14,7 @@ import { ChatWidget } from "@/components/ChatWidget";
 const ActionButtons = lazy(() => import("@/components/dashboard/action-buttons").then(m => ({ default: m.ActionButtons })));
 const ChartsSection = lazy(() => import("@/components/dashboard/charts-section").then(m => ({ default: m.ChartsSection })));
 const PropertiesTable = lazy(() => import("@/components/dashboard/properties-table").then(m => ({ default: m.PropertiesTable })));
+const PresentationSection = lazy(() => import("@/components/dashboard/presentation-section").then(m => ({ default: m.PresentationSection })));
 
 export default function HomePage() {
   const { data: session, status } = useSession();
@@ -130,6 +131,11 @@ export default function HomePage() {
           {/* Action Buttons */}
           <Suspense fallback={<LoadingState message="Ładowanie akcji..." />}>
             <ActionButtons />
+          </Suspense>
+
+          {/* Presentation Section */}
+          <Suspense fallback={<LoadingState message="Ładowanie sekcji prezentacyjnej..." />}>
+            <PresentationSection />
           </Suspense>
 
           {/* Charts Section */}

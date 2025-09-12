@@ -13,6 +13,11 @@ export interface Database {
           subscription_end_date: string | null
           ministry_approved: boolean
           ministry_email_sent: boolean
+          presentation_url: string | null
+          presentation_generated_at: string | null
+          presentation_deployed_at: string | null
+          custom_domain: string | null
+          custom_domain_verified: boolean
           created_at: string
           updated_at: string
         }
@@ -27,6 +32,11 @@ export interface Database {
           subscription_end_date?: string | null
           ministry_approved?: boolean
           ministry_email_sent?: boolean
+          presentation_url?: string | null
+          presentation_generated_at?: string | null
+          presentation_deployed_at?: string | null
+          custom_domain?: string | null
+          custom_domain_verified?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -41,6 +51,11 @@ export interface Database {
           subscription_end_date?: string | null
           ministry_approved?: boolean
           ministry_email_sent?: boolean
+          presentation_url?: string | null
+          presentation_generated_at?: string | null
+          presentation_deployed_at?: string | null
+          custom_domain?: string | null
+          custom_domain_verified?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -52,6 +67,7 @@ export interface Database {
           name: string
           location: string | null
           address: string | null
+          description: string | null
           status: 'active' | 'inactive' | 'completed'
           created_at: string
         }
@@ -61,6 +77,7 @@ export interface Database {
           name: string
           location?: string | null
           address?: string | null
+          description?: string | null
           status?: 'active' | 'inactive' | 'completed'
           created_at?: string
         }
@@ -70,6 +87,7 @@ export interface Database {
           name?: string
           location?: string | null
           address?: string | null
+          description?: string | null
           status?: 'active' | 'inactive' | 'completed'
           created_at?: string
         }
@@ -84,6 +102,9 @@ export interface Database {
           total_price: number | null
           final_price: number | null
           area: number | null
+          floor: number | null
+          rooms: number | null
+          building_number: string | null
           parking_space: string | null
           parking_price: number | null
           status: 'available' | 'sold' | 'reserved'
@@ -100,6 +121,9 @@ export interface Database {
           total_price?: number | null
           final_price?: number | null
           area?: number | null
+          floor?: number | null
+          rooms?: number | null
+          building_number?: string | null
           parking_space?: string | null
           parking_price?: number | null
           status?: 'available' | 'sold' | 'reserved'
@@ -116,6 +140,9 @@ export interface Database {
           total_price?: number | null
           final_price?: number | null
           area?: number | null
+          floor?: number | null
+          rooms?: number | null
+          building_number?: string | null
           parking_space?: string | null
           parking_price?: number | null
           status?: 'available' | 'sold' | 'reserved'
@@ -208,6 +235,44 @@ export interface Database {
           currency?: string
           status?: string
           przelewy24_session_id?: string | null
+          created_at?: string
+        }
+      }
+      deployment_logs: {
+        Row: {
+          id: string
+          developer_id: string
+          deployment_type: 'subdomain' | 'custom_domain'
+          deployment_url: string | null
+          properties_count: number | null
+          projects_count: number | null
+          file_size_html: number | null
+          deployment_status: 'success' | 'failed' | 'pending'
+          error_message: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          developer_id: string
+          deployment_type: 'subdomain' | 'custom_domain'
+          deployment_url?: string | null
+          properties_count?: number | null
+          projects_count?: number | null
+          file_size_html?: number | null
+          deployment_status?: 'success' | 'failed' | 'pending'
+          error_message?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          developer_id?: string
+          deployment_type?: 'subdomain' | 'custom_domain'
+          deployment_url?: string | null
+          properties_count?: number | null
+          projects_count?: number | null
+          file_size_html?: number | null
+          deployment_status?: 'success' | 'failed' | 'pending'
+          error_message?: string | null
           created_at?: string
         }
       }

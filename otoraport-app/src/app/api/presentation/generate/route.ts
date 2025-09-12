@@ -65,7 +65,7 @@ async function generatePresentationSite(request: any) {
 
     const presentationUrl = subscription.plan === 'enterprise' && developer.custom_domain
       ? developer.custom_domain
-      : `${companySlug}.cenysync.pl`
+      : `${companySlug}.otoraport.pl`
 
     // Create presentation site configuration
     const siteConfig: PresentationSiteData = {

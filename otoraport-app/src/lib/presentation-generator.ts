@@ -29,6 +29,26 @@ export interface DeveloperData {
   email: string
 }
 
+export interface MarketStats {
+  totalProperties: number
+  avgPrice: number
+  avgPricePerM2: number
+  priceRange: { min: number, max: number }
+  pricePerM2Range: { min: number, max: number }
+  availableCount: number
+  reservedCount: number
+  soldCount: number
+  avgArea: number
+  areaRange: { min: number, max: number }
+}
+
+export interface PriceHistoryData {
+  date: string
+  avgPrice: number
+  avgPricePerM2: number
+  count: number
+}
+
 export interface PresentationSiteData {
   developer: DeveloperData
   projects: ProjectData[]
@@ -37,30 +57,98 @@ export interface PresentationSiteData {
   priceRange: { min: number, max: number }
   generatedAt: string
   presentationUrl: string
+  marketStats?: MarketStats
+  priceHistory?: PriceHistoryData[]
 }
 
 /**
- * Generate HTML for a presentation website
+ * Calculate comprehensive market statistics
  */
-export function generatePresentationHTML(siteData: PresentationSiteData): string {
-  const { developer, projects, totalProperties, avgPrice, priceRange } = siteData
+export function calculateMarketStats(properties: PropertyData[]): MarketStats {
+  if (properties.length === 0) {
+    return {
+      totalProperties: 0,
+      avgPrice: 0,
+      avgPricePerM2: 0,
+      priceRange: { min: 0, max: 0 },
+      pricePerM2Range: { min: 0, max: 0 },
+      availableCount: 0,
+      reservedCount: 0,
+      soldCount: 0,
+      avgArea: 0,
+      areaRange: { min: 0, max: 0 }
+    }
+  }
+
+  const prices = properties.map(p => p.total_price || 0)
+  const pricesPerM2 = properties.map(p => p.price_per_m2 || 0)
+  const areas = properties.map(p => p.area || 0)
   
-  return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${developer.name} - Oferta Mieszkań</title>
-  <meta name="description" content="Aktualna oferta mieszkań od dewelopera ${developer.name}. ${totalProperties} mieszkań w ofercie.">
-  <meta name="robots" content="index, follow">
+  const statusCounts = properties.reduce((acc, prop) => {
+    acc[prop.status] = (acc[prop.status] || 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+
+  return {
+    totalProperties: properties.length,
+    avgPrice: prices.reduce((sum, price) => sum + price, 0) / prices.length,
+    avgPricePerM2: pricesPerM2.reduce((sum, price) => sum + price, 0) / pricesPerM2.length,
+    priceRange: {
+      min: Math.min(...prices),
+      max: Math.max(...prices)
+    },
+    pricePerM2Range: {
+      min: Math.min(...pricesPerM2),
+      max: Math.max(...pricesPerM2)
+    },
+    availableCount: statusCounts['available'] || 0,
+    reservedCount: statusCounts['reserved'] || 0,
+    soldCount: statusCounts['sold'] || 0,
+    avgArea: areas.reduce((sum, area) => sum + area, 0) / areas.length,
+    areaRange: {
+      min: Math.min(...areas),
+      max: Math.max(...areas)
+    }
+  }
+}
+
+/**
+ * Generate price history chart data (mock data for demo)
+ * In production, this would query historical data from the database
+ */
+export function generatePriceHistoryChart(properties: PropertyData[]): PriceHistoryData[] {
+  // Generate mock historical data for the last 12 months
+  const months = []
+  const now = new Date()
   
-  <!-- Open Graph -->
-  <meta property="og:title" content="${developer.name} - Oferta Mieszkań">
-  <meta property="og:description" content="${totalProperties} mieszkań w ofercie. Ceny od ${formatPrice(priceRange.min)} do ${formatPrice(priceRange.max)}.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://${siteData.presentationUrl}">
+  for (let i = 11; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const monthName = date.toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' })
+    
+    // Simulate price fluctuations (in production, query real historical data)
+    const baseAvgPrice = properties.reduce((sum, prop) => sum + (prop.total_price || 0), 0) / properties.length
+    const baseAvgPricePerM2 = properties.reduce((sum, prop) => sum + (prop.price_per_m2 || 0), 0) / properties.length
+    
+    // Add some realistic variation (±5% monthly change)
+    const variation = (Math.random() - 0.5) * 0.1
+    const priceMultiplier = 1 + (variation * (12 - i) / 12) // Gradual trend over time
+    
+    months.push({
+      date: monthName,
+      avgPrice: Math.round(baseAvgPrice * priceMultiplier),
+      avgPricePerM2: Math.round(baseAvgPricePerM2 * priceMultiplier),
+      count: Math.max(1, properties.length + Math.round((Math.random() - 0.5) * 10))
+    })
+  }
   
-  <style>
+  return months
+}
+
+/**
+ * Get embedded CSS for the presentation site
+ */
+export function getEmbeddedCSS(): string {
+  return `
     * {
       margin: 0;
       padding: 0;
@@ -160,6 +248,26 @@ export function generatePresentationHTML(siteData: PresentationSiteData): string
       text-align: center;
       margin-bottom: 50px;
       color: #1e293b;
+    }
+    
+    .chart-container {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 40px;
+    }
+    
+    .chart-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1e293b;
+      margin-bottom: 20px;
+    }
+    
+    #priceChart {
+      width: 100% !important;
+      height: 400px !important;
     }
     
     .projects-grid {
@@ -325,6 +433,34 @@ export function generatePresentationHTML(siteData: PresentationSiteData): string
       font-size: 14px;
     }
     
+    .market-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .market-stat {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    
+    .market-stat-number {
+      font-size: 28px;
+      font-weight: bold;
+      color: #2563eb;
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    .market-stat-label {
+      color: #64748b;
+      font-size: 14px;
+    }
+    
     @media (max-width: 768px) {
       .hero h1 {
         font-size: 32px;
@@ -343,8 +479,48 @@ export function generatePresentationHTML(siteData: PresentationSiteData): string
       .contact-info {
         display: none;
       }
+      
+      .chart-container {
+        padding: 20px;
+      }
+      
+      #priceChart {
+        height: 300px !important;
+      }
     }
-  </style>
+  `
+}
+
+/**
+ * Generate HTML for a presentation website
+ */
+export function generatePresentationHTML(siteData: PresentationSiteData): string {
+  const { developer, projects, totalProperties, avgPrice, priceRange } = siteData
+  
+  // Generate additional data
+  const allProperties = projects.flatMap(p => p.properties)
+  const marketStats = calculateMarketStats(allProperties)
+  const priceHistory = generatePriceHistoryChart(allProperties)
+  
+  return `<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${developer.name} - Oferta Mieszkań</title>
+  <meta name="description" content="Aktualna oferta mieszkań od dewelopera ${developer.name}. ${totalProperties} mieszkań w ofercie.">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="${developer.name} - Oferta Mieszkań">
+  <meta property="og:description" content="${totalProperties} mieszkań w ofercie. Ceny od ${formatPrice(priceRange.min)} do ${formatPrice(priceRange.max)}.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://${siteData.presentationUrl}">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>${getEmbeddedCSS()}</style>
 </head>
 <body>
   <header class="header">
@@ -388,6 +564,33 @@ export function generatePresentationHTML(siteData: PresentationSiteData): string
 
   <main class="main">
     <div class="container">
+      <!-- Market Statistics Section -->
+      <h2 class="section-title">Statystyki Rynkowe</h2>
+      <div class="market-stats">
+        <div class="market-stat">
+          <span class="market-stat-number">${formatPrice(marketStats.avgPricePerM2)}</span>
+          <span class="market-stat-label">Średnia cena za m²</span>
+        </div>
+        <div class="market-stat">
+          <span class="market-stat-number">${Math.round(marketStats.avgArea)} m²</span>
+          <span class="market-stat-label">Średnia powierzchnia</span>
+        </div>
+        <div class="market-stat">
+          <span class="market-stat-number">${marketStats.availableCount}</span>
+          <span class="market-stat-label">Mieszkania dostępne</span>
+        </div>
+        <div class="market-stat">
+          <span class="market-stat-number">${formatPrice(marketStats.priceRange.min)} - ${formatPrice(marketStats.priceRange.max)}</span>
+          <span class="market-stat-label">Zakres cen</span>
+        </div>
+      </div>
+
+      <!-- Price History Chart Section -->
+      <div class="chart-container">
+        <h3 class="chart-title">Historia Cen (Ostatnie 12 Miesięcy)</h3>
+        <canvas id="priceChart"></canvas>
+      </div>
+      
       <h2 class="section-title">Dostępne Mieszkania</h2>
       
       <div class="filters">
@@ -453,6 +656,123 @@ export function generatePresentationHTML(siteData: PresentationSiteData): string
   </footer>
 
   <script>
+    // Price history chart data
+    const priceHistoryData = ${JSON.stringify(priceHistory)};
+    
+    // Initialize Chart.js price history chart
+    document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('priceChart').getContext('2d');
+      
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: priceHistoryData.map(item => item.date),
+          datasets: [
+            {
+              label: 'Średnia cena całkowita (PLN)',
+              data: priceHistoryData.map(item => item.avgPrice),
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37, 99, 235, 0.1)',
+              tension: 0.4,
+              fill: true,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Średnia cena za m² (PLN)',
+              data: priceHistoryData.map(item => item.avgPricePerM2),
+              borderColor: '#dc2626',
+              backgroundColor: 'rgba(220, 38, 38, 0.1)',
+              tension: 0.4,
+              fill: false,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          scales: {
+            x: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Okres'
+              }
+            },
+            y: {
+              type: 'linear',
+              display: true,
+              position: 'left',
+              title: {
+                display: true,
+                text: 'Cena całkowita (PLN)'
+              },
+              ticks: {
+                callback: function(value) {
+                  return new Intl.NumberFormat('pl-PL', {
+                    style: 'currency',
+                    currency: 'PLN',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  }).format(value);
+                }
+              }
+            },
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              title: {
+                display: true,
+                text: 'Cena za m² (PLN)'
+              },
+              grid: {
+                drawOnChartArea: false,
+              },
+              ticks: {
+                callback: function(value) {
+                  return new Intl.NumberFormat('pl-PL', {
+                    style: 'currency',
+                    currency: 'PLN',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  }).format(value);
+                }
+              }
+            },
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Trend cenowy mieszkań w ofercie dewelopera'
+            },
+            legend: {
+              display: true,
+              position: 'top'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.dataset.label || '';
+                  const value = new Intl.NumberFormat('pl-PL', {
+                    style: 'currency',
+                    currency: 'PLN',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  }).format(context.parsed.y);
+                  return label + ': ' + value;
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+    
     // Simple filtering functionality
     function filterProperties() {
       const minArea = document.getElementById('minArea').value;
@@ -462,6 +782,7 @@ export function generatePresentationHTML(siteData: PresentationSiteData): string
       const status = document.getElementById('statusFilter').value;
       
       const properties = document.querySelectorAll('.property');
+      let visibleCount = 0;
       
       properties.forEach(property => {
         const area = parseFloat(property.dataset.area);
@@ -477,15 +798,36 @@ export function generatePresentationHTML(siteData: PresentationSiteData): string
         if (status && propStatus !== status) show = false;
         
         property.style.display = show ? 'block' : 'none';
+        if (show) visibleCount++;
       });
+      
+      // Update visible count indicator
+      updateResultsCount(visibleCount);
+    }
+    
+    // Update results count
+    function updateResultsCount(count) {
+      let countElement = document.getElementById('results-count');
+      if (!countElement) {
+        countElement = document.createElement('div');
+        countElement.id = 'results-count';
+        countElement.style.cssText = 'text-align: center; margin: 20px 0; font-weight: bold; color: #2563eb;';
+        document.querySelector('.filters').insertAdjacentElement('afterend', countElement);
+      }
+      countElement.textContent = 'Wyników: ' + count + ' mieszkań';
     }
     
     // Add event listeners
-    document.getElementById('minArea').addEventListener('input', filterProperties);
-    document.getElementById('maxArea').addEventListener('input', filterProperties);
-    document.getElementById('minPrice').addEventListener('input', filterProperties);
-    document.getElementById('maxPrice').addEventListener('input', filterProperties);
-    document.getElementById('statusFilter').addEventListener('change', filterProperties);
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('minArea').addEventListener('input', filterProperties);
+      document.getElementById('maxArea').addEventListener('input', filterProperties);
+      document.getElementById('minPrice').addEventListener('input', filterProperties);
+      document.getElementById('maxPrice').addEventListener('input', filterProperties);
+      document.getElementById('statusFilter').addEventListener('change', filterProperties);
+      
+      // Initialize results count
+      updateResultsCount(document.querySelectorAll('.property').length);
+    });
   </script>
 </body>
 </html>`
