@@ -72,7 +72,7 @@ const PricingSection = memo(function PricingSection() {
               <label htmlFor="pricing-toggle" className="flex items-center cursor-pointer">
                 <div className="relative">
                   <div className={`w-12 h-6 rounded-full shadow-inner transition-colors ${isAnnual ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
-                  <div className={`absolute w-4 h-4 bg-white rounded-full shadow -top-1 transition-transform ${isAnnual ? 'translate-x-7' : 'translate-x-1'}`}></div>
+                  <div className={`absolute w-4 h-4 bg-white rounded-full shadow top-1 transition-transform ${isAnnual ? 'translate-x-7' : 'translate-x-1'}`}></div>
                 </div>
               </label>
             </div>
@@ -87,8 +87,10 @@ const PricingSection = memo(function PricingSection() {
               key={plan.name}
               className={`relative bg-white rounded-2xl border p-8 transition-all duration-300 ${
                 plan.popular 
-                  ? 'border-2 border-blue-500 shadow-xl transform scale-105' 
-                  : 'border-gray-200 shadow-sm hover:shadow-lg'
+                  ? 'border-2 border-blue-500 shadow-xl transform scale-105 hover:scale-110 hover:shadow-2xl' 
+                  : index === 0 
+                    ? 'border-gray-200 shadow-sm hover:shadow-md hover:scale-102'
+                    : 'border-gray-200 shadow-sm hover:shadow-xl hover:scale-105 hover:border-purple-300'
               }`}
             >
               {plan.popular && (

@@ -148,30 +148,90 @@
   animation-delay: 4s;
 }
 
+/* Custom scale classes */
+.scale-102 {
+  transform: scale(1.02);
+}
+
+.hover\:scale-102:hover {
+  transform: scale(1.02);
+}
+
 /* Enhanced hover effects */
 .hover-lift {
-  transition: all 0.3s ease;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+.hover-lift::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.02), rgba(99, 102, 241, 0.05));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 1;
+  border-radius: inherit;
 }
 
 .hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 25px 50px -12px rgba(59, 130, 246, 0.15),
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+    0 10px 10px -5px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.hover-lift:hover::before {
+  opacity: 1;
+}
+
+.hover-lift > * {
+  position: relative;
+  z-index: 2;
 }
 
 /* Subtle button animations */
 .btn-subtle-hover {
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-subtle-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .btn-subtle-hover:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 10px 25px rgba(59, 130, 246, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.btn-subtle-hover:hover::before {
+  opacity: 1;
 }
 
 /* Navigation link underline animation */
 .nav-link {
   position: relative;
-  transition: color 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .nav-link::after {
@@ -182,22 +242,196 @@
   width: 0;
   height: 2px;
   background: linear-gradient(90deg, #3B82F6, #6366F1);
-  transition: width 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: 1px;
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+  color: #3B82F6;
+  text-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
 }
 
 .nav-link:hover::after {
   width: 100%;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
-/* Card gentle hover */
+/* Enhanced card gentle hover */
 .card-gentle-hover {
-  transition: all 0.3s ease;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+.card-gentle-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.02), rgba(59, 130, 246, 0.03));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 1;
+  border-radius: inherit;
 }
 
 .card-gentle-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.08);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 
+    0 20px 40px -8px rgba(34, 197, 94, 0.1),
+    0 15px 25px -5px rgba(0, 0, 0, 0.08),
+    0 8px 16px -4px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.15);
 }
+
+.card-gentle-hover:hover::before {
+  opacity: 1;
+}
+
+.card-gentle-hover > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Enhanced hover effects for the additional features cards */
+.feature-card-hover {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+.feature-card-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.02));
+  opacity: 0;
+  transition: all 0.4s ease;
+  z-index: 1;
+  border-radius: inherit;
+  transform: scale(0.8);
+}
+
+.feature-card-hover:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 
+    0 25px 50px -12px rgba(59, 130, 246, 0.12),
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 15px -3px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.feature-card-hover:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.feature-card-hover > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Icon glow effect on hover */
+.icon-glow {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.feature-card-hover:hover .icon-glow {
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+  transform: scale(1.1);
+}
+
+/* Text color enhancement on hover */
+.text-enhance {
+  transition: all 0.3s ease;
+}
+
+.card-gentle-hover:hover .text-enhance,
+.feature-card-hover:hover .text-enhance {
+  color: rgb(34 197 94);
+}
+
+.hover-lift:hover .text-enhance {
+  color: rgb(59 130 246);
+}
+
+/* Focus states for accessibility */
+.hover-lift:focus-visible,
+.card-gentle-hover:focus-visible,
+.feature-card-hover:focus-visible {
+  outline: 2px solid rgb(59 130 246);
+  outline-offset: 2px;
+}
+
+/* Pulse animation for loading states */
+.pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+/* Enhanced gradient hover overlay */
+.gradient-hover-overlay {
+  position: relative;
+  overflow: hidden;
+}
+
+.gradient-hover-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.05),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.gradient-hover-overlay:hover::after {
+  left: 100%;
+}
+
+/* Staggered animation delays for card grids */
+.hover-lift:nth-child(1) { transition-delay: 0ms; }
+.hover-lift:nth-child(2) { transition-delay: 50ms; }
+.hover-lift:nth-child(3) { transition-delay: 100ms; }
+.hover-lift:nth-child(4) { transition-delay: 150ms; }
+.hover-lift:nth-child(5) { transition-delay: 200ms; }
+.hover-lift:nth-child(6) { transition-delay: 250ms; }
+
+.card-gentle-hover:nth-child(1) { transition-delay: 0ms; }
+.card-gentle-hover:nth-child(2) { transition-delay: 50ms; }
+.card-gentle-hover:nth-child(3) { transition-delay: 100ms; }
+.card-gentle-hover:nth-child(4) { transition-delay: 150ms; }
+.card-gentle-hover:nth-child(5) { transition-delay: 200ms; }
+.card-gentle-hover:nth-child(6) { transition-delay: 250ms; }
+
+.feature-card-hover:nth-child(1) { transition-delay: 0ms; }
+.feature-card-hover:nth-child(2) { transition-delay: 75ms; }
+.feature-card-hover:nth-child(3) { transition-delay: 150ms; }
+.feature-card-hover:nth-child(4) { transition-delay: 225ms; }
 
 /* Gradient text animation */
 .gradient-animate {

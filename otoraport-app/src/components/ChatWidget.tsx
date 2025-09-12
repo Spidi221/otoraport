@@ -63,16 +63,19 @@ export function ChatWidget({ isOpen: controlledIsOpen, onToggle }: ChatWidgetPro
       const greetingMessage: ChatMessage = {
         id: `greeting-${Date.now()}`,
         type: 'bot',
-        content: `Cześć! 👋 Jestem asystentem OTORAPORT - pomagam z automatyzacją raportowania cen mieszkań zgodnie z ustawą z 21 maja 2025.
+        content: `Cześć! 👋 Jestem asystentem OTORAPORT - pomagam **wyłącznie** z automatyzacją raportowania cen mieszkań zgodnie z ustawą z 21 maja 2025.
 
-**Mogę pomóc z:**
-• Wyjaśnieniem wymagań prawnych i kar
-• Informacjami o planach cenowych (Basic 149zł, Pro 249zł, Enterprise 399zł)  
-• Procesem onboardingu (<10 min setup)
-• Formatami plików (CSV, XML, Excel)
-• Integracją z dane.gov.pl
+**Pomagam tylko w tematach:**
+• Wymagania prawne i kary za brak compliance
+• Plany cenowe (Basic 149zł, Pro 249zł, Enterprise 399zł)  
+• Setup i onboarding (<10 min)
+• Formaty plików (CSV, XML 1.13, Excel)
+• Integracja z dane.gov.pl
+• Proces automatyzacji raportowania
 
-**Jak mogę Ci pomóc?** 🚀`,
+**Nie odpowiadam na pytania niezwiązane z OTORAPORT.**
+
+Jak mogę pomóc w compliance? 🏢`,
         timestamp: new Date(),
       };
       
@@ -327,8 +330,16 @@ export function ChatWidget({ isOpen: controlledIsOpen, onToggle }: ChatWidgetPro
                   <Send className="w-4 h-4" />
                 </button>
               </div>
-              <div className="mt-2 text-xs text-gray-500 text-center">
-                Zasilane przez AI • Dla złożonych pytań: support@otoraport.pl
+              <div className="mt-3 text-xs text-gray-500 text-center leading-4">
+                <span className="inline-flex items-center">
+                  🤖 Zasilane przez AI • Dla złożonych pytań: 
+                  <a 
+                    href="mailto:support@otoraport.pl" 
+                    className="text-blue-600 hover:text-blue-700 ml-1 font-medium"
+                  >
+                    support@otoraport.pl
+                  </a>
+                </span>
               </div>
             </div>
           </>

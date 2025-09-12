@@ -75,25 +75,6 @@ export default function HomePage() {
           </Suspense>
         </div>
 
-        {/* Footer */}
-        <footer className="mt-12 border-t pt-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              © 2024 OTORAPORT. Automatyzacja raportowania cen nieruchomości.
-            </div>
-            <div className="flex gap-4 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-foreground transition-colors">
-                Pomoc
-              </a>
-              <a href="#" className="hover:text-foreground transition-colors">
-                Dokumentacja API
-              </a>
-              <a href="#" className="hover:text-foreground transition-colors">
-                Kontakt
-              </a>
-            </div>
-          </div>
-        </footer>
         
         <ScrollToTop />
         <ChatWidget />

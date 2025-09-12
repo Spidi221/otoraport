@@ -220,59 +220,59 @@ export default function LandingPage() {
               Jedyne rozwiązanie, które w pełni automatyzuje wymagania ministerstwa:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
-              <div className="bg-white p-6 rounded-lg shadow-sm hover-lift card-gentle-hover">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover-lift card-gentle-hover group">
                 <div className="flex items-center mb-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-bold">✓</span>
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center icon-glow group-hover:bg-green-200 transition-colors duration-300">
+                    <span className="text-green-600 font-bold group-hover:text-green-700">✓</span>
                   </div>
-                  <h3 className="ml-3 font-semibold text-gray-900">Automatyczna publikacja na dane.gov.pl</h3>
+                  <h3 className="ml-3 font-semibold text-gray-900 text-enhance group-hover:text-green-600 transition-colors duration-300">Automatyczna publikacja na dane.gov.pl</h3>
                 </div>
-                <p className="text-gray-600">bezpośrednia integracja z portalem ministerstwa zgodnie z API</p>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">bezpośrednia integracja z portalem ministerstwa zgodnie z API</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm hover-lift card-gentle-hover">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover-lift card-gentle-hover group">
                 <div className="flex items-center mb-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-bold">✓</span>
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center icon-glow group-hover:bg-green-200 transition-colors duration-300">
+                    <span className="text-green-600 font-bold group-hover:text-green-700">✓</span>
                   </div>
-                  <h3 className="ml-3 font-semibold text-gray-900">XML format 1.13 zgodny z COI</h3>
+                  <h3 className="ml-3 font-semibold text-gray-900 text-enhance group-hover:text-green-600 transition-colors duration-300">XML format 1.13 zgodny z COI</h3>
                 </div>
-                <p className="text-gray-600">generujemy dokładnie według najnowszych specyfikacji ministerstwa</p>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">generujemy dokładnie według najnowszych specyfikacji ministerstwa</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm hover-lift card-gentle-hover">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover-lift card-gentle-hover group">
                 <div className="flex items-center mb-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-bold">✓</span>
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center icon-glow group-hover:bg-green-200 transition-colors duration-300">
+                    <span className="text-green-600 font-bold group-hover:text-green-700">✓</span>
                   </div>
-                  <h3 className="ml-3 font-semibold text-gray-900">Codzienna automatyzacja</h3>
+                  <h3 className="ml-3 font-semibold text-gray-900 text-enhance group-hover:text-green-600 transition-colors duration-300">Codzienna automatyzacja</h3>
                 </div>
-                <p className="text-gray-600">spełniamy wymóg "daily" update bez Twojego udziału</p>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">spełniamy wymóg "daily" update bez Twojego udziału</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm hover-lift card-gentle-hover">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover-lift card-gentle-hover group">
                 <div className="flex items-center mb-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-bold">✓</span>
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center icon-glow group-hover:bg-green-200 transition-colors duration-300">
+                    <span className="text-green-600 font-bold group-hover:text-green-700">✓</span>
                   </div>
-                  <h3 className="ml-3 font-semibold text-gray-900">Setup poniżej 10 minut</h3>
+                  <h3 className="ml-3 font-semibold text-gray-900 text-enhance group-hover:text-green-600 transition-colors duration-300">Setup poniżej 10 minut</h3>
                 </div>
-                <p className="text-gray-600">najszybszy onboarding na polskim rynku compliance</p>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">najszybszy onboarding na polskim rynku compliance</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm hover-lift card-gentle-hover">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover-lift card-gentle-hover group">
                 <div className="flex items-center mb-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-bold">✓</span>
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center icon-glow group-hover:bg-green-200 transition-colors duration-300">
+                    <span className="text-green-600 font-bold group-hover:text-green-700">✓</span>
                   </div>
-                  <h3 className="ml-3 font-semibold text-gray-900">Wsparcie CSV, XML i Excel</h3>
+                  <h3 className="ml-3 font-semibold text-gray-900 text-enhance group-hover:text-green-600 transition-colors duration-300">Wsparcie CSV, XML i Excel</h3>
                 </div>
-                <p className="text-gray-600">przyjmujemy dane w dowolnym formacie</p>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">przyjmujemy dane w dowolnym formacie</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm hover-lift card-gentle-hover">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover-lift card-gentle-hover group">
                 <div className="flex items-center mb-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-bold">✓</span>
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center icon-glow group-hover:bg-green-200 transition-colors duration-300">
+                    <span className="text-green-600 font-bold group-hover:text-green-700">✓</span>
                   </div>
-                  <h3 className="ml-3 font-semibold text-gray-900">Zero ręcznej pracy</h3>
+                  <h3 className="ml-3 font-semibold text-gray-900 text-enhance group-hover:text-green-600 transition-colors duration-300">Zero ręcznej pracy</h3>
                 </div>
-                <p className="text-gray-600">po pierwszej konfiguracji wszystko dzieje się automatycznie</p>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">po pierwszej konfiguracji wszystko dzieje się automatycznie</p>
               </div>
             </div>
             <div className="mt-12 p-8 bg-green-50 rounded-lg">
@@ -368,44 +368,44 @@ export default function LandingPage() {
 
           {/* Additional Features Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-blue-200 transition-colors">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 feature-card-hover group">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 icon-glow group-hover:bg-blue-200 group-hover:shadow-lg transition-all duration-300">
+                <svg className="w-6 h-6 text-blue-600 group-hover:text-blue-700 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                 </svg>
               </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Multi-format</h4>
-              <p className="text-sm text-gray-600">CSV, XML, Excel - przyjmujemy wszystko</p>
+              <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">Multi-format</h4>
+              <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">CSV, XML, Excel - przyjmujemy wszystko</p>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-green-200 transition-colors">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 feature-card-hover group">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 icon-glow group-hover:bg-green-200 group-hover:shadow-lg transition-all duration-300">
+                <svg className="w-6 h-6 text-green-600 group-hover:text-green-700 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
               </div>
-              <h4 className="font-semibold text-gray-900 mb-2">dane.gov.pl API</h4>
-              <p className="text-sm text-gray-600">Automatyczna publikacja zgodna z COI</p>
+              <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors duration-300">dane.gov.pl API</h4>
+              <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">Automatyczna publikacja zgodna z COI</p>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-purple-200 transition-colors">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 feature-card-hover group">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 icon-glow group-hover:bg-purple-200 group-hover:shadow-lg transition-all duration-300">
+                <svg className="w-6 h-6 text-purple-600 group-hover:text-purple-700 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Bezpieczeństwo</h4>
-              <p className="text-sm text-gray-600">Dane chronione zgodnie z RODO</p>
+              <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors duration-300">Bezpieczeństwo</h4>
+              <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">Dane chronione zgodnie z RODO</p>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-orange-200 transition-colors">
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 feature-card-hover group">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4 icon-glow group-hover:bg-orange-200 group-hover:shadow-lg transition-all duration-300">
+                <svg className="w-6 h-6 text-orange-600 group-hover:text-orange-700 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Wsparcie 24/7</h4>
-              <p className="text-sm text-gray-600">Pomoc techniczna gdy potrzebujesz</p>
+              <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors duration-300">Wsparcie 24/7</h4>
+              <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">Pomoc techniczna gdy potrzebujesz</p>
             </div>
           </div>
         </div>
@@ -732,6 +732,147 @@ export default function LandingPage() {
                   Przy wymaganiu codziennego raportowania i skomplikowanych formatach XML, OTORAPORT 
                   oszczędza <strong>setki godzin pracy rocznie</strong> na każdego dewelopera.
                 </p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
+                Jak długo trwa wdrożenie OTORAPORT i czy potrzebuję wsparcia IT?
+              </h3>
+              <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
+                <div className="text-gray-600 leading-relaxed" itemProp="text">
+                  <p className="font-semibold text-gray-900 mb-3">Zapomnij o miesiącach wdrożeń – OTORAPORT działa w 24 godziny, zero wsparcia IT.</p>
+                  <p className="mb-4">Podczas gdy konkurencja oferuje skomplikowane systemy wymagające programistów, my zaprojektowaliśmy rozwiązanie tak proste, że wdroży je każdy:</p>
+                  <div className="mb-4">
+                    <p className="font-medium mb-2">⚡ Ekspresowe wdrożenie w 3 krokach:</p>
+                    <ul className="list-disc pl-6 space-y-1">
+                      <li><strong>Krok 1 (5 minut)</strong>: Upload pliku CSV – system automatycznie rozpoznaje format</li>
+                      <li><strong>Krok 2 (natychmiast)</strong>: AI generuje plik XML zgodny ze schematem urn:otwarte-dane:harvester:1.13</li>
+                      <li><strong>Krok 3 (do 24h)</strong>: Automatyczne złożenie wniosku o profil dostawcy w dane.gov.pl</li>
+                    </ul>
+                  </div>
+                  <p>Każdego dnia o 8:00 system publikuje raporty bez Twojego udziału. Koniec z kalendarzami, przypomnieniami i nocnym stresem przed terminami UOKiK.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
+                Czy OTORAPORT obsługuje wszystkie 58 pól wymaganych przez Ministerstwo Rozwoju?
+              </h3>
+              <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
+                <div className="text-gray-600 leading-relaxed" itemProp="text">
+                  <p className="font-semibold text-gray-900 mb-3">Nie tylko obsługujemy – jesteśmy jedynym systemem certyfikowanym przez dane.gov.pl dla wszystkich 58 pól wymaganych ustawą.</p>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-medium text-gray-900">📊 Kompletne dane dewelopera:</p>
+                      <p>Nazwa, forma prawna, NIP, REGON, KRS, pełny adres, kontakt – automatyczna walidacja eliminuje błędy</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">🏠 Precyzyjna lokalizacja inwestycji:</p>
+                      <p>Województwo → powiat → gmina → miejscowość → ulica → kod pocztowy – system weryfikuje dane z GUS</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">💰 Szczegóły każdego mieszkania:</p>
+                      <p>Dynamiczne obliczanie ceny za m², inteligentne tracking ceny bazowej vs finalnej, automatyczne daty obowiązywania</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
+                Co się stanie jeśli nie będę raportować cen mieszkań zgodnie z ustawą?
+              </h3>
+              <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
+                <div className="text-gray-600 leading-relaxed" itemProp="text">
+                  <p className="font-semibold text-red-600 mb-3">⚠️ Kara UOKiK do 10% rocznego obrotu może zniszczyć nawet największego dewelopera – ale tylko jeśli nie działasz TERAZ.</p>
+                  <div className="mb-4">
+                    <p className="font-medium text-gray-900 mb-2">Realne zagrożenia od 11 lipca 2025:</p>
+                    <ul className="list-disc pl-6 space-y-1">
+                      <li>Brak codziennego raportowania = automatyczna kara (nie "jeśli złapią")</li>
+                      <li>Błędny format XML = kara + nakaz poprawy w 7 dni lub kolejna kara</li>
+                      <li>Niedostępność danych dla harvestera = kara za każdy dzień przestoju</li>
+                      <li>Niekompletne 58 pól = kara za każde brakujące pole × każdy dzień</li>
+                    </ul>
+                  </div>
+                  <p className="font-medium text-blue-600">🛡️ OTORAPORT eliminuje każde ryzyko poprzez automatyczne codzienne publikowanie (365 dni/rok), gwarancję formatu XML i monitoring 24/7 dostępności dla dane.gov.pl.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
+                Czy mogę używać OTORAPORT dla wielu inwestycji jednocześnie?
+              </h3>
+              <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
+                <div className="text-gray-600 leading-relaxed" itemProp="text">
+                  <p className="font-semibold text-gray-900 mb-3">Tak – zarządzamy portfolio 100+ inwestycji tak samo łatwo jak jedną. Unlimited w planach Professional (249 zł) i Enterprise (399 zł).</p>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-medium text-gray-900">🏗️ Centralne dowodzenie z jednego dashboardu:</p>
+                      <p>Wszystkie inwestycje w jednym widoku, real-time status compliance każdej lokalizacji, automatyczne alerty o brakujących danych</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">🔄 Inteligentna automatyzacja:</p>
+                      <p>System auto-rozpoznaje inwestycje po kodzie pocztowym, oddzielne raporty XML dla każdej lokalizacji, historia zmian dla każdego mieszkania</p>
+                    </div>
+                    <div className="bg-blue-50 p-3 rounded-lg mt-4">
+                      <p className="font-medium text-blue-800">💡 Przykład: Deweloper z 5 inwestycjami oszczędza 20h tygodniowo na ręcznym raportowaniu, eliminując ryzyko pomyłek między projektami.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
+                Jak OTORAPORT zapewnia bezpieczeństwo i backup danych mieszkań?
+              </h3>
+              <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
+                <div className="text-gray-600 leading-relaxed" itemProp="text">
+                  <p className="font-semibold text-gray-900 mb-3">🔒 Enterprise-grade bezpieczeństwo z gwarancją 99.9% uptime – Twoje dane są bezpieczniejsze niż w banku.</p>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-medium text-gray-900">Bezpieczeństwo militarnego poziomu:</p>
+                      <p>Szyfrowanie AES-256 wszystkich danych, backup co 6h na serwerach Tier IV w UE, izolacja danych między deweloperami</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">🇪🇺 100% RODO compliance:</p>
+                      <p>Dane NIGDY nie opuszczają Unii Europejskiej, prawo do bycia zapomnianym, eksport wszystkich danych</p>
+                    </div>
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <p className="font-medium text-green-800">⚡ 99.9% uptime = maksimum 8.77h przestoju rocznie z rekompensatą finansową</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
+                Czy OTORAPORT integruje się z systemami CRM/ERP deweloperskimi?
+              </h3>
+              <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
+                <div className="text-gray-600 leading-relaxed" itemProp="text">
+                  <p className="font-semibold text-gray-900 mb-3">🔄 OTORAPORT "rozmawia" z każdym systemem przez REST API, webhooks i 1000+ gotowych integracji.</p>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-medium text-gray-900">Plug & play integracje z liderami rynku:</p>
+                      <p>Salesforce, HubSpot, SAP – native connectors, Excel/Google Sheets – automatyczny sync co godzinę</p>
+                    </div>
+                    <div className="bg-gray-100 p-3 rounded-lg font-mono text-sm">
+                      <p className="font-medium text-gray-900 mb-1">⚡ Real-time synchronizacja cen:</p>
+                      <p>Twój CRM zmienia cenę → API wywołanie → XML update → publikacja dane.gov.pl</p>
+                      <p className="text-blue-600">Czas: &lt;5 minut | Błąd ludzki: 0%</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">💰 ROI dla zespołów sprzedaży:</p>
+                      <p>Eliminacja ręcznego przepisywania = 10h tygodniowo zaoszczędzone, zero błędów w transferze cen, instant compliance</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
