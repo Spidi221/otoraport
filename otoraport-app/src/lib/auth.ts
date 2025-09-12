@@ -24,7 +24,7 @@ export const authOptions = {
   adapter: SupabaseAdapter({
     url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
     secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    // Default schema is 'next_auth' - let adapter use it
+    schema: 'public', // Force public schema where our tables are
   }),
   providers: [
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && 
