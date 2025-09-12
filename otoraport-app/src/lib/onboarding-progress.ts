@@ -3,7 +3,17 @@
  * Manages user progress through the onboarding flow with local storage persistence
  */
 
-import { OnboardingStage } from './chatbot-knowledge';
+export type OnboardingStage = 
+  | 'pre-registration'
+  | 'account-setup' 
+  | 'company-data'
+  | 'file-upload'
+  | 'data-validation'
+  | 'xml-preview'
+  | 'ministry-registration'
+  | 'first-sync'
+  | 'dashboard-tour'
+  | 'completed';
 
 export interface OnboardingProgress {
   currentStage: OnboardingStage;

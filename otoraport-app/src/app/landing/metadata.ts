@@ -68,18 +68,27 @@ export const structuredData = {
       "offers": [
         {
           "@type": "Offer",
-          "name": "Plan Starter",
+          "name": "Plan Basic",
           "description": "Dla małych deweloperów z 1-2 inwestycjami",
-          "price": "299",
+          "price": "149",
           "priceCurrency": "PLN",
           "billingDuration": "P1M",
           "availability": "https://schema.org/InStock"
         },
         {
           "@type": "Offer",
-          "name": "Plan Professional", 
+          "name": "Plan Pro", 
           "description": "Dla średnich deweloperów z wieloma projektami",
-          "price": "599",
+          "price": "249",
+          "priceCurrency": "PLN",
+          "billingDuration": "P1M",
+          "availability": "https://schema.org/InStock"
+        },
+        {
+          "@type": "Offer",
+          "name": "Plan Enterprise", 
+          "description": "Dla dużych deweloperów z wieloma projektami",
+          "price": "499",
           "priceCurrency": "PLN",
           "billingDuration": "P1M",
           "availability": "https://schema.org/InStock"
@@ -181,18 +190,27 @@ export const structuredData = {
               "@type": "Offer",
               "itemOffered": {
                 "@type": "Service",
-                "name": "Plan Starter"
+                "name": "Plan Basic"
               },
-              "price": "299",
+              "price": "149",
               "priceCurrency": "PLN"
             },
             {
               "@type": "Offer", 
               "itemOffered": {
                 "@type": "Service",
-                "name": "Plan Professional"
+                "name": "Plan Pro"
               },
-              "price": "599",
+              "price": "249",
+              "priceCurrency": "PLN"
+            },
+            {
+              "@type": "Offer", 
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Plan Enterprise"
+              },
+              "price": "499",
               "priceCurrency": "PLN"
             }
           ]
@@ -232,7 +250,7 @@ export const structuredData = {
           "name": "Ile kosztuje OTORAPORT w porównaniu do wykazcen.pl?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Plan Starter kosztuje 299 zł/miesiąc, Professional 599 zł/miesiąc. W porównaniu do wykazcen.pl oferujemy 25% szybszy onboarding i pełną automatyzację procesów, co znacząco oszczędza czas deweloperów."
+            "text": "Plan Basic kosztuje 149 zł/miesiąc, Pro 249 zł/miesiąc, Enterprise 499 zł/miesiąc. W porównaniu do wykazcen.pl oferujemy 25% szybszy onboarding i pełną automatyzację procesów, co znacząco oszczędza czas deweloperów."
           }
         }
       ]

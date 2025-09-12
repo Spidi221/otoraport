@@ -9,6 +9,18 @@ export interface Database {
           company_name: string | null
           nip: string | null
           phone: string | null
+          
+          // Ministry compliance fields
+          krs: string | null
+          ceidg: string | null
+          regon: string | null
+          legal_form: string | null
+          headquarters_address: string | null
+          website_url: string | null
+          license_number: string | null
+          tax_office_code: string | null
+          subscription_plan: string | null
+          
           subscription_status: 'trial' | 'active' | 'cancelled' | 'expired'
           subscription_end_date: string | null
           ministry_approved: boolean
@@ -28,6 +40,18 @@ export interface Database {
           company_name?: string | null
           nip?: string | null
           phone?: string | null
+          
+          // Ministry compliance fields
+          krs?: string | null
+          ceidg?: string | null
+          regon?: string | null
+          legal_form?: string | null
+          headquarters_address?: string | null
+          website_url?: string | null
+          license_number?: string | null
+          tax_office_code?: string | null
+          subscription_plan?: string | null
+          
           subscription_status?: 'trial' | 'active' | 'cancelled' | 'expired'
           subscription_end_date?: string | null
           ministry_approved?: boolean
@@ -47,6 +71,18 @@ export interface Database {
           company_name?: string | null
           nip?: string | null
           phone?: string | null
+          
+          // Ministry compliance fields
+          krs?: string | null
+          ceidg?: string | null
+          regon?: string | null
+          legal_form?: string | null
+          headquarters_address?: string | null
+          website_url?: string | null
+          license_number?: string | null
+          tax_office_code?: string | null
+          subscription_plan?: string | null
+          
           subscription_status?: 'trial' | 'active' | 'cancelled' | 'expired'
           subscription_end_date?: string | null
           ministry_approved?: boolean
@@ -69,6 +105,9 @@ export interface Database {
           address: string | null
           description: string | null
           status: 'active' | 'inactive' | 'completed'
+          start_date: string | null
+          expected_completion_date: string | null
+          actual_completion_date: string | null
           created_at: string
         }
         Insert: {
@@ -79,6 +118,9 @@ export interface Database {
           address?: string | null
           description?: string | null
           status?: 'active' | 'inactive' | 'completed'
+          start_date?: string | null
+          expected_completion_date?: string | null
+          actual_completion_date?: string | null
           created_at?: string
         }
         Update: {
@@ -89,6 +131,9 @@ export interface Database {
           address?: string | null
           description?: string | null
           status?: 'active' | 'inactive' | 'completed'
+          start_date?: string | null
+          expected_completion_date?: string | null
+          actual_completion_date?: string | null
           created_at?: string
         }
       }
@@ -109,6 +154,49 @@ export interface Database {
           parking_price: number | null
           status: 'available' | 'sold' | 'reserved'
           raw_data: Record<string, unknown> | null
+          
+          // Ministry compliance fields (30 new fields)
+          wojewodztwo: string | null
+          powiat: string | null
+          gmina: string | null
+          miejscowosc: string | null
+          ulica: string | null
+          numer_nieruchomosci: string | null
+          kod_pocztowy: string | null
+          kondygnacja: number | null
+          liczba_pokoi: number | null
+          powierzchnia_balkon: number | null
+          powierzchnia_taras: number | null
+          powierzchnia_loggia: number | null
+          powierzchnia_ogrod: number | null
+          price_valid_from: string | null
+          price_valid_to: string | null
+          cena_za_m2_poczatkowa: number | null
+          cena_bazowa_poczatkowa: number | null
+          data_pierwszej_oferty: string | null
+          data_pierwszej_sprzedazy: string | null
+          miejsca_postojowe_nr: string[] | null
+          miejsca_postojowe_ceny: number[] | null
+          komorki_nr: string[] | null
+          komorki_ceny: number[] | null
+          pomieszczenia_przynalezne: Record<string, unknown> | null
+          inne_swiadczenia: string | null
+          status_dostepnosci: string | null
+          data_rezerwacji: string | null
+          data_sprzedazy: string | null
+          data_aktualizacji: string | null
+          powod_zmiany: string | null
+          numer_akt_notarialny: string | null
+          data_akt_notarialny: string | null
+          uwagi: string | null
+          construction_year: number | null
+          building_permit_number: string | null
+          energy_class: string | null
+          certyfikat_energetyczny: string | null
+          additional_costs: number | null
+          vat_rate: number | null
+          legal_status: string | null
+          
           created_at: string
           updated_at: string
         }
@@ -128,6 +216,49 @@ export interface Database {
           parking_price?: number | null
           status?: 'available' | 'sold' | 'reserved'
           raw_data?: Record<string, unknown> | null
+          
+          // Ministry compliance fields (all optional for insert)
+          wojewodztwo?: string | null
+          powiat?: string | null
+          gmina?: string | null
+          miejscowosc?: string | null
+          ulica?: string | null
+          numer_nieruchomosci?: string | null
+          kod_pocztowy?: string | null
+          kondygnacja?: number | null
+          liczba_pokoi?: number | null
+          powierzchnia_balkon?: number | null
+          powierzchnia_taras?: number | null
+          powierzchnia_loggia?: number | null
+          powierzchnia_ogrod?: number | null
+          price_valid_from?: string | null
+          price_valid_to?: string | null
+          cena_za_m2_poczatkowa?: number | null
+          cena_bazowa_poczatkowa?: number | null
+          data_pierwszej_oferty?: string | null
+          data_pierwszej_sprzedazy?: string | null
+          miejsca_postojowe_nr?: string[] | null
+          miejsca_postojowe_ceny?: number[] | null
+          komorki_nr?: string[] | null
+          komorki_ceny?: number[] | null
+          pomieszczenia_przynalezne?: Record<string, unknown> | null
+          inne_swiadczenia?: string | null
+          status_dostepnosci?: string | null
+          data_rezerwacji?: string | null
+          data_sprzedazy?: string | null
+          data_aktualizacji?: string | null
+          powod_zmiany?: string | null
+          numer_akt_notarialny?: string | null
+          data_akt_notarialny?: string | null
+          uwagi?: string | null
+          construction_year?: number | null
+          building_permit_number?: string | null
+          energy_class?: string | null
+          certyfikat_energetyczny?: string | null
+          additional_costs?: number | null
+          vat_rate?: number | null
+          legal_status?: string | null
+          
           created_at?: string
           updated_at?: string
         }
@@ -147,6 +278,49 @@ export interface Database {
           parking_price?: number | null
           status?: 'available' | 'sold' | 'reserved'
           raw_data?: Record<string, unknown> | null
+          
+          // Ministry compliance fields (all optional for update)
+          wojewodztwo?: string | null
+          powiat?: string | null
+          gmina?: string | null
+          miejscowosc?: string | null
+          ulica?: string | null
+          numer_nieruchomosci?: string | null
+          kod_pocztowy?: string | null
+          kondygnacja?: number | null
+          liczba_pokoi?: number | null
+          powierzchnia_balkon?: number | null
+          powierzchnia_taras?: number | null
+          powierzchnia_loggia?: number | null
+          powierzchnia_ogrod?: number | null
+          price_valid_from?: string | null
+          price_valid_to?: string | null
+          cena_za_m2_poczatkowa?: number | null
+          cena_bazowa_poczatkowa?: number | null
+          data_pierwszej_oferty?: string | null
+          data_pierwszej_sprzedazy?: string | null
+          miejsca_postojowe_nr?: string[] | null
+          miejsca_postojowe_ceny?: number[] | null
+          komorki_nr?: string[] | null
+          komorki_ceny?: number[] | null
+          pomieszczenia_przynalezne?: Record<string, unknown> | null
+          inne_swiadczenia?: string | null
+          status_dostepnosci?: string | null
+          data_rezerwacji?: string | null
+          data_sprzedazy?: string | null
+          data_aktualizacji?: string | null
+          powod_zmiany?: string | null
+          numer_akt_notarialny?: string | null
+          data_akt_notarialny?: string | null
+          uwagi?: string | null
+          construction_year?: number | null
+          building_permit_number?: string | null
+          energy_class?: string | null
+          certyfikat_energetyczny?: string | null
+          additional_costs?: number | null
+          vat_rate?: number | null
+          legal_status?: string | null
+          
           created_at?: string
           updated_at?: string
         }

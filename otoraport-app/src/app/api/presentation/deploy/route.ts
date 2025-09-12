@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { generatePresentationHTML, generateRobotsTxt, generateSitemap, calculateMarketStats, generatePriceHistoryChart, type PresentationSiteData } from '@/lib/presentation-generator'
 
 // Deployment functions
-export async function deployToSubdomain(
+async function deployToSubdomain(
   htmlContent: string,
   robotsTxt: string,
   sitemapXml: string,
@@ -61,7 +61,7 @@ export async function deployToSubdomain(
   }
 }
 
-export async function deployToCustomDomain(
+async function deployToCustomDomain(
   htmlContent: string,
   robotsTxt: string,
   sitemapXml: string,

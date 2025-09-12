@@ -12,7 +12,8 @@ interface Property {
   parking_price?: number | null
   status: string
   raw_data?: any
-  // Ministry required location fields
+  
+  // Ministry required location fields (7/7) - COMPLETE
   wojewodztwo?: string | null
   powiat?: string | null
   gmina?: string | null
@@ -20,16 +21,46 @@ interface Property {
   ulica?: string | null
   numer_nieruchomosci?: string | null
   kod_pocztowy?: string | null
-  // Ministry required price validity dates
+  
+  // Basic property details - MISSING FIELDS ADDED
+  kondygnacja?: number | null
+  liczba_pokoi?: number | null
+  powierzchnia_balkon?: number | null
+  powierzchnia_taras?: number | null
+  powierzchnia_loggia?: number | null
+  powierzchnia_ogrod?: number | null
+  
+  // Price history and validity dates
   price_valid_from?: string | null
   price_valid_to?: string | null
+  cena_za_m2_poczatkowa?: number | null
+  cena_bazowa_poczatkowa?: number | null
+  data_pierwszej_oferty?: string | null
+  data_pierwszej_sprzedazy?: string | null
+  
+  // Parking and storage - ENHANCED
+  miejsca_postojowe_nr?: string[] | null
+  miejsca_postojowe_ceny?: number[] | null
+  komorki_nr?: string[] | null
+  komorki_ceny?: number[] | null
+  pomieszczenia_przynalezne?: any | null
+  inne_swiadczenia?: string | null
+  
+  // Status and availability
   status_dostepnosci?: string | null
   data_rezerwacji?: string | null
   data_sprzedazy?: string | null
-  // Final compliance fields (58/58)
+  data_aktualizacji?: string | null
+  powod_zmiany?: string | null
+  numer_akt_notarialny?: string | null
+  data_akt_notarialny?: string | null
+  uwagi?: string | null
+  
+  // Building compliance
   construction_year?: number | null
   building_permit_number?: string | null
   energy_class?: string | null
+  certyfikat_energetyczny?: string | null
   additional_costs?: number | null
   vat_rate?: number | null
   legal_status?: string | null
@@ -151,18 +182,52 @@ export function generateXMLForMinistry(data: DataForGeneration): string {
         <propertyDetails>
           <propertyNumber>${property.property_number}</propertyNumber>
           <propertyType>${property.property_type}</propertyType>
+          <area>${property.area || 0}</area>
+          <kondygnacja>${property.kondygnacja || ''}</kondygnacja>
+          <liczbaPokoi>${property.liczba_pokoi || ''}</liczbaPokoi>
+          
+          <!-- Additional areas - NEW FIELDS -->
+          <powierzchniaBalkon>${property.powierzchnia_balkon || 0}</powierzchniaBalkon>
+          <powierzchniaTaras>${property.powierzchnia_taras || 0}</powierzchniaTaras>
+          <powierzchniaLoggia>${property.powierzchnia_loggia || 0}</powierzchniaLoggia>
+          <powierzchniaOgrod>${property.powierzchnia_ogrod || 0}</powierzchniaOgrod>
+          
+          <!-- Current prices -->
           <pricePerM2>${property.price_per_m2 || 0}</pricePerM2>
           <totalPrice>${property.total_price || 0}</totalPrice>
           <finalPrice>${property.final_price || property.total_price || 0}</finalPrice>
-          <area>${property.area || 0}</area>
-          <parkingSpace>${property.parking_space || 'Brak'}</parkingSpace>
-          <parkingPrice>${property.parking_price || 0}</parkingPrice>
-          <status>${property.status}</status>
-          <statusDostepnosci>${property.status_dostepnosci || property.status}</statusDostepnosci>
+          
+          <!-- Price history - NEW FIELDS -->
+          <cenaZaM2Poczatkowa>${property.cena_za_m2_poczatkowa || property.price_per_m2 || 0}</cenaZaM2Poczatkowa>
+          <cenaBazowaPoczatkowa>${property.cena_bazowa_poczatkowa || property.total_price || 0}</cenaBazowaPoczatkowa>
+          <dataPierwszejOferty>${property.data_pierwszej_oferty || ''}</dataPierwszejOferty>
+          <dataPierwszejSprzedazy>${property.data_pierwszej_sprzedazy || ''}</dataPierwszejSprzedazy>
+          
+          <!-- Price validity -->
           <priceValidFrom>${property.price_valid_from || dateOnly}</priceValidFrom>
           <priceValidTo>${property.price_valid_to || dateOnly}</priceValidTo>
+          
+          <!-- Parking and storage - ENHANCED -->
+          <parkingSpace>${property.parking_space || 'Brak'}</parkingSpace>
+          <parkingPrice>${property.parking_price || 0}</parkingPrice>
+          <miejscaPostojoweNr>${(property.miejsca_postojowe_nr || []).join(', ')}</miejscaPostojoweNr>
+          <miejscaPostojoweCeny>${(property.miejsca_postojowe_ceny || []).join(', ')}</miejscaPostojoweCeny>
+          <komorkiNr>${(property.komorki_nr || []).join(', ')}</komorkiNr>
+          <komorkiCeny>${(property.komorki_ceny || []).join(', ')}</komorkiCeny>
+          <pomieszczeniaPrzynalezne>${JSON.stringify(property.pomieszczenia_przynalezne || {})}</pomieszczeniaPrzynalezne>
+          <inneSwiadczenia>${property.inne_swiadczenia || ''}</inneSwiadczenia>
+          
+          <!-- Status and availability - ENHANCED -->
+          <status>${property.status}</status>
+          <statusDostepnosci>${property.status_dostepnosci || property.status}</statusDostepnosci>
           <dataRezerwacji>${property.data_rezerwacji || ''}</dataRezerwacji>
           <dataSprzedazy>${property.data_sprzedazy || ''}</dataSprzedazy>
+          <dataAktualizacji>${property.data_aktualizacji || currentDate}</dataAktualizacji>
+          <powodZmiany>${property.powod_zmiany || ''}</powodZmiany>
+          <numerAktNotarialny>${property.numer_akt_notarialny || ''}</numerAktNotarialny>
+          <dataAktNotarialny>${property.data_akt_notarialny || ''}</dataAktNotarialny>
+          <uwagi>${property.uwagi || ''}</uwagi>
+          
           <lastUpdated>${currentDate}</lastUpdated>
         </propertyDetails>
         <locationDetails>
@@ -178,6 +243,7 @@ export function generateXMLForMinistry(data: DataForGeneration): string {
           <constructionYear>${property.construction_year || new Date().getFullYear() + 1}</constructionYear>
           <buildingPermitNumber>${property.building_permit_number || ''}</buildingPermitNumber>
           <energyClass>${property.energy_class || 'B'}</energyClass>
+          <certyfikatEnergetyczny>${property.certyfikat_energetyczny || ''}</certyfikatEnergetyczny>
           <legalStatus>${property.legal_status || 'własność'}</legalStatus>
         </constructionDetails>
         <enhancedPricing>

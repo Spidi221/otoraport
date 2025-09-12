@@ -4,7 +4,7 @@ import { ChatWidget } from '@/components/ChatWidget'
 
 export const metadata: Metadata = {
   title: 'Cennik - OTORAPORT',
-  description: 'Wybierz plan, który najlepiej pasuje do Twoich potrzeb. Automatyczne raporty dla ministerstwa od 99 zł/mies.',
+  description: 'Wybierz plan, który najlepiej pasuje do Twoich potrzeb. Automatyczne raporty dla ministerstwa od 149 zł/mies.',
   alternates: {
     canonical: 'https://otoraport.pl/pricing',
   },
@@ -40,7 +40,7 @@ export default function PricingPage() {
       {
         "@type": "Offer",
         "name": "Plan Enterprise", 
-        "price": "399",
+        "price": "499",
         "priceCurrency": "PLN",
         "billingPeriod": "P1M",
         "description": "Zaawansowane funkcje, custom domeny, API, SLA"

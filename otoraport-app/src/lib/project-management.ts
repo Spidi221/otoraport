@@ -365,15 +365,13 @@ export class ProjectManagementService {
     const xmlContent = generateXMLForMinistry({
       developer,
       projects,
-      properties: allProperties,
-      generatedAt: new Date()
+      properties: allProperties
     })
 
     const markdownContent = generateMarkdownForMinistry({
       developer,
-      projects,
-      properties: allProperties,
-      generatedAt: new Date()
+      projects,  
+      properties: allProperties
     })
 
     return {

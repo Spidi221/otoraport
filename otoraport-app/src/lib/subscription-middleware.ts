@@ -14,7 +14,7 @@ export interface AuthenticatedRequest extends NextRequest {
 /**
  * Middleware to check authentication and subscription status
  */
-export async function withSubscriptionCheck(
+export function withSubscriptionCheck(
   handler: (request: AuthenticatedRequest) => Promise<NextResponse>,
   options: {
     requireFeature?: string

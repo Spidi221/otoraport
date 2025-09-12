@@ -9,7 +9,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
 interface PricingPlan {
-  id: 'starter' | 'professional'
+  id: 'basic' | 'pro' | 'enterprise'
   name: string
   description: string
   monthlyPrice: number
@@ -21,15 +21,15 @@ interface PricingPlan {
 
 const plans: PricingPlan[] = [
   {
-    id: 'starter',
-    name: 'Plan Starter',
+    id: 'basic',
+    name: 'Plan Basic',
     description: 'Idealny dla małych deweloperów z jednym projektem',
-    monthlyPrice: 99,
-    yearlyPrice: 990, // 20% zniżki
+    monthlyPrice: 14900, // 149 zł (stored in grosze)
+    yearlyPrice: 119000, // 1190 zł (20% discount)
     icon: <Zap className="h-6 w-6" />,
     features: [
       'Do 100 mieszkań',
-      'Automatyczne raporty XML/MD',
+      'Automatyczne raporty XML/MD5',
       'Integracja z dane.gov.pl',
       'Email support',
       'Dashboard analityczny',
@@ -37,22 +37,39 @@ const plans: PricingPlan[] = [
     ]
   },
   {
-    id: 'professional', 
-    name: 'Plan Professional',
-    description: 'Dla dużych deweloperów z wieloma projektami',
-    monthlyPrice: 199,
-    yearlyPrice: 1990, // 20% zniżki
+    id: 'pro', 
+    name: 'Plan Pro',
+    description: 'Dla średnich deweloperów z wieloma projektami',
+    monthlyPrice: 24900, // 249 zł (stored in grosze)
+    yearlyPrice: 199200, // 1992 zł (20% discount)
     popular: true,
     icon: <Shield className="h-6 w-6" />,
     features: [
       'Nieograniczona liczba mieszkań',
-      'Wszystko z planu Starter',
-      'Priority support 24/7',
+      'Wszystko z planu Basic',
+      'Strony prezentacyjne',
+      'Priority support',
       'Zaawansowana analityka',
       'API dostęp',
-      'Bulk operations',
+      'Bulk operations'
+    ]
+  },
+  {
+    id: 'enterprise',
+    name: 'Plan Enterprise', 
+    description: 'Dla dużych deweloperów z wieloma projektami',
+    monthlyPrice: 49900, // 499 zł (stored in grosze)
+    yearlyPrice: 399200, // 3992 zł (20% discount)
+    icon: <Shield className="h-6 w-6" />,
+    features: [
+      'Wszystko z planu Pro',
+      'Custom domeny',
+      'White-label rozwiązania',
+      'Dedykowany support 24/7',
       'Custom integracje',
-      'Dedykowany account manager'
+      'SLA 99.9%',
+      'Dedykowany account manager',
+      'On-premise deployment'
     ]
   }
 ]
@@ -63,7 +80,7 @@ export function PricingCard() {
   const { data: session } = useSession()
   const router = useRouter()
 
-  const handleSubscribe = async (planId: 'starter' | 'professional') => {
+  const handleSubscribe = async (planId: 'basic' | 'pro' | 'enterprise') => {
     if (!session?.user) {
       router.push('/auth/signin')
       return

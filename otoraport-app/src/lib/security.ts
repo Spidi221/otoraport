@@ -163,7 +163,7 @@ function getClientIdentifier(request: NextRequest): string {
   // Try to get client IP
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
-  const ip = forwarded?.split(',')[0] || realIP || request.ip || 'unknown';
+  const ip = forwarded?.split(',')[0] || realIP || 'unknown';
   
   // Include user agent to differentiate clients behind same NAT
   const userAgent = request.headers.get('user-agent') || '';

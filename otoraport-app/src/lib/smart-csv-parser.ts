@@ -2,27 +2,80 @@
 import * as XLSX from 'xlsx';
 
 interface ColumnMapping {
+  // Basic property info
   property_number: string[]
   property_type: string[]
+  area: string[]
+  kondygnacja: string[]
+  liczba_pokoi: string[]
+  
+  // Additional areas
+  powierzchnia_balkon: string[]
+  powierzchnia_taras: string[]
+  powierzchnia_loggia: string[]
+  powierzchnia_ogrod: string[]
+  
+  // Prices
   price_per_m2: string[]
   total_price: string[]
   final_price: string[]
-  area: string[]
+  cena_za_m2_poczatkowa: string[]
+  cena_bazowa_poczatkowa: string[]
+  
+  // Location
+  wojewodztwo: string[]
+  powiat: string[]
+  gmina: string[]
+  miejscowosc: string[]
+  ulica: string[]
+  numer_nieruchomosci: string[]
+  kod_pocztowy: string[]
+  
+  // Dates
+  data_pierwszej_oferty: string[]
+  data_pierwszej_sprzedazy: string[]
+  price_valid_from: string[]
+  price_valid_to: string[]
+  data_rezerwacji: string[]
+  data_sprzedazy: string[]
+  
+  // Parking and storage
   parking_space: string[]
   parking_price: string[]
+  miejsca_postojowe_nr: string[]
+  miejsca_postojowe_ceny: string[]
+  komorki_nr: string[]
+  komorki_ceny: string[]
+  
+  // Status
   status: string[]
+  status_dostepnosci: string[]
+  
+  // Building compliance
+  construction_year: string[]
+  building_permit_number: string[]
+  energy_class: string[]
+  certyfikat_energetyczny: string[]
+  additional_costs: string[]
+  vat_rate: string[]
+  legal_status: string[]
+  
+  // Developer info
   developer_name: string[]
   company_name: string[]
   nip: string[]
   phone: string[]
   email: string[]
+  
+  // Investment info
   investment_name: string[]
   investment_address: string[]
   investment_city: string[]
 }
 
-// Polish real estate field variations - key competitive advantage
+// Polish real estate field variations - COMPLETE 58 field mapping
 const COLUMN_PATTERNS: ColumnMapping = {
+  // Basic property info
   property_number: [
     'nr lokalu', 'numer lokalu', 'nr mieszkania', 'numer mieszkania', 
     'lokal', 'mieszkanie', 'nr', 'property_number', 'apartment_number',
@@ -32,6 +85,8 @@ const COLUMN_PATTERNS: ColumnMapping = {
     'typ', 'typ lokalu', 'typ mieszkania', 'rodzaj', 'property_type',
     'type', 'kategoria', 'typ_lokalu', 'rodzaj_lokalu'
   ],
+  
+  // Prices
   price_per_m2: [
     'cena za m²', 'cena za m2', 'cena m2', 'cena m²', 'cena/m2', 'cena/m²',
     'price_per_m2', 'price_per_sqm', 'cena_za_m2', 'cena_m2', 'cena za metr'
@@ -44,10 +99,93 @@ const COLUMN_PATTERNS: ColumnMapping = {
     'cena finalna', 'cena końcowa', 'cena ostateczna', 'final_price',
     'cena_finalna', 'cena_koncowa', 'cena_ostateczna'
   ],
+  
+  // Areas and spaces
   area: [
     'powierzchnia', 'powierzchnia użytkowa', 'powierzchnia m²', 'powierzchnia m2',
     'area', 'size', 'metraż', 'pow', 'powierzchnia_uzytkowa', 'm2', 'm²'
   ],
+  powierzchnia_balkon: [
+    'balkon', 'powierzchnia balkonu', 'balcony', 'powierzchnia_balkon',
+    'pow balkonu', 'balkon m2', 'balkon m²'
+  ],
+  powierzchnia_taras: [
+    'taras', 'powierzchnia tarasu', 'terrace', 'powierzchnia_taras',
+    'pow tarasu', 'taras m2', 'taras m²'
+  ],
+  powierzchnia_loggia: [
+    'loggia', 'powierzchnia loggii', 'powierzchnia_loggia',
+    'pow loggii', 'loggia m2', 'loggia m²'
+  ],
+  powierzchnia_ogrod: [
+    'ogród', 'ogrod', 'powierzchnia ogrodu', 'garden', 'powierzchnia_ogrod',
+    'pow ogrodu', 'ogród m2', 'ogród m²'
+  ],
+  
+  // Property details
+  kondygnacja: [
+    'kondygnacja', 'piętro', 'pietro', 'floor', 'level',
+    'poziom', 'kondygnacja_nr', 'nr_pietra'
+  ],
+  liczba_pokoi: [
+    'pokoje', 'liczba pokoi', 'rooms', 'liczba_pokoi', 'ilosc_pokoi',
+    'nr pokoi', 'rooms_count', 'pokoi'
+  ],
+  
+  // Location fields
+  wojewodztwo: [
+    'województwo', 'wojewodztwo', 'voivodeship', 'region',
+    'woj', 'woj.', 'province'
+  ],
+  powiat: [
+    'powiat', 'county', 'district', 'pow', 'pow.'
+  ],
+  gmina: [
+    'gmina', 'municipality', 'commune', 'gm', 'gm.'
+  ],
+  miejscowosc: [
+    'miejscowość', 'miejscowosc', 'miasto', 'city', 'town',
+    'locality', 'place'
+  ],
+  ulica: [
+    'ulica', 'ul', 'ul.', 'street', 'adres', 'address'
+  ],
+  numer_nieruchomosci: [
+    'numer nieruchomości', 'nr nieruchomości', 'numer_nieruchomosci',
+    'nr budynku', 'building_number', 'house_number'
+  ],
+  kod_pocztowy: [
+    'kod pocztowy', 'kod_pocztowy', 'postal_code', 'zip_code',
+    'zip', 'postal'
+  ],
+  
+  // Price history and dates
+  cena_za_m2_poczatkowa: [
+    'cena początkowa za m²', 'cena startowa m2', 'initial_price_m2',
+    'cena_za_m2_poczatkowa', 'first_price_m2'
+  ],
+  cena_bazowa_poczatkowa: [
+    'cena bazowa początkowa', 'cena startowa', 'initial_price',
+    'cena_bazowa_poczatkowa', 'starting_price'
+  ],
+  data_pierwszej_oferty: [
+    'data pierwszej oferty', 'first_offer_date', 'offer_date',
+    'data_pierwszej_oferty', 'data oferty'
+  ],
+  data_pierwszej_sprzedazy: [
+    'data pierwszej sprzedaży', 'first_sale_date', 'sale_date',
+    'data_pierwszej_sprzedazy', 'data sprzedaży'
+  ],
+  price_valid_from: [
+    'data od', 'obowiązuje od', 'price_valid_from', 'valid_from',
+    'cena od', 'od kiedy'
+  ],
+  price_valid_to: [
+    'data do', 'obowiązuje do', 'price_valid_to', 'valid_to',
+    'cena do', 'do kiedy'
+  ],
+  
+  // Parking and storage
   parking_space: [
     'parking', 'miejsce parkingowe', 'garaż', 'parking space', 'parking_space',
     'miejsce_parkingowe', 'mp', 'parking_spot', 'garage'
@@ -56,10 +194,74 @@ const COLUMN_PATTERNS: ColumnMapping = {
     'cena parkingu', 'cena garażu', 'parking price', 'parking_price',
     'cena_parkingu', 'cena_garazu', 'parking_cost'
   ],
+  miejsca_postojowe_nr: [
+    'nr miejsc parkingowych', 'parking_numbers', 'parking_spaces',
+    'miejsca_postojowe_nr', 'numery parkingów'
+  ],
+  miejsca_postojowe_ceny: [
+    'ceny miejsc parkingowych', 'parking_prices', 'parking_costs',
+    'miejsca_postojowe_ceny', 'ceny parkingów'
+  ],
+  komorki_nr: [
+    'nr komórek', 'storage_numbers', 'komorki_nr',
+    'numery komórek', 'storage_rooms'
+  ],
+  komorki_ceny: [
+    'ceny komórek', 'storage_prices', 'komorki_ceny',
+    'ceny pomieszczeń', 'storage_costs'
+  ],
+  
+  // Status and availability
   status: [
     'status', 'dostępność', 'stan', 'availability', 'dostepnosc',
     'stan_sprzedaży', 'stan_sprzedazy'
   ],
+  status_dostepnosci: [
+    'status dostępności', 'availability_status', 'dostępny',
+    'status_dostepnosci', 'current_status'
+  ],
+  data_rezerwacji: [
+    'data rezerwacji', 'reservation_date', 'data_rezerwacji',
+    'zarezerwowano', 'reserved_date'
+  ],
+  data_sprzedazy: [
+    'data sprzedaży', 'sale_date', 'data_sprzedazy',
+    'sprzedano', 'sold_date'
+  ],
+  
+  // Building compliance
+  construction_year: [
+    'rok budowy', 'construction_year', 'year_built',
+    'rok_budowy', 'built_year'
+  ],
+  building_permit_number: [
+    'nr pozwolenia na budowę', 'pozwolenie budowlane', 'building_permit',
+    'building_permit_number', 'permit_number'
+  ],
+  energy_class: [
+    'klasa energetyczna', 'energy_class', 'energy_rating',
+    'efektywność energetyczna', 'energia'
+  ],
+  certyfikat_energetyczny: [
+    'certyfikat energetyczny', 'energy_certificate',
+    'certyfikat_energetyczny', 'certificate'
+  ],
+  
+  // Additional costs and legal
+  additional_costs: [
+    'koszty dodatkowe', 'additional_costs', 'extra_costs',
+    'opłaty dodatkowe', 'fees'
+  ],
+  vat_rate: [
+    'stawka VAT', 'VAT', 'vat_rate', 'tax_rate',
+    'podatek', 'vat %'
+  ],
+  legal_status: [
+    'status prawny', 'legal_status', 'ownership',
+    'własność', 'prawo własności'
+  ],
+  
+  // Developer info
   developer_name: [
     'deweloper', 'nazwa dewelopera', 'developer', 'developer_name',
     'firma', 'nazwa_dewelopera'
@@ -79,12 +281,14 @@ const COLUMN_PATTERNS: ColumnMapping = {
     'email', 'e-mail', 'mail', 'adres email', 'contact_email',
     'email_kontaktowy', 'adres_email'
   ],
+  
+  // Investment info
   investment_name: [
     'inwestycja', 'nazwa inwestycji', 'project', 'investment',
     'investment_name', 'projekt', 'nazwa_inwestycji', 'osiedle'
   ],
   investment_address: [
-    'adres', 'ulica', 'adres inwestycji', 'address', 'street',
+    'adres', 'adres inwestycji', 'address',
     'investment_address', 'adres_inwestycji', 'lokalizacja'
   ],
   investment_city: [
