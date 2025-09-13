@@ -69,7 +69,8 @@ function SignUpContent() {
           data: {
             full_name: formData.name,
             company_name: formData.company_name,
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       })
 
@@ -79,15 +80,21 @@ function SignUpContent() {
           : 'Wystąpił błąd podczas rejestracji')
         console.error('Sign up error:', signUpError)
       } else if (data.user) {
-        // Create developer profile immediately
-        await createDeveloperProfile(data.user)
+        console.log('User registered:', data.user.email)
+        console.log('Session:', data.session)
         
-        setMessage('Konto zostało utworzone! Sprawdź email w celu potwierdzenia.')
-        
-        // Auto sign in after successful registration
-        setTimeout(() => {
-          router.push('/dashboard')
-        }, 2000)
+        // FORCE CREATE PROFILE - skip email confirmation for dev
+        if (process.env.NODE_ENV === 'development' || data.session) {
+          // Development or confirmed user
+          await createDeveloperProfile(data.user)
+          setMessage('Konto zostało utworzone! Przekierowywanie...')
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, 1000)
+        } else {
+          // Production - email confirmation needed
+          setMessage('Rejestracja udana! Sprawdź email i kliknij link potwierdzający.')
+        }
       }
     } catch (error) {
       console.error('Sign up error:', error)
