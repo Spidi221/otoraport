@@ -1,8 +1,8 @@
 'use client'
 
-import { useSession } from "next-auth/react";
 import { Suspense, lazy, useMemo, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import { Header } from "@/components/dashboard/header";
 import { UploadWidget } from "@/components/dashboard/upload-widget";
 import { StatusCards } from "@/components/dashboard/status-cards";
@@ -17,22 +17,35 @@ const PropertiesTable = lazy(() => import("@/components/dashboard/properties-tab
 const PresentationSection = lazy(() => import("@/components/dashboard/presentation-section").then(m => ({ default: m.PresentationSection })));
 
 export default function HomePage() {
-  const { data: session, status } = useSession();
   const router = useRouter();
+  const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Check user profile and subscription status
+  // Check Supabase user and profile status
   useEffect(() => {
     async function checkUserStatus() {
-      if (status === 'loading') return;
+      console.log('Dashboard: Checking auth status...')
       
-      if (status === 'unauthenticated') {
-        router.push('/auth/signin');
-        return;
+      // Get current Supabase session
+      const { data: { session }, error } = await supabase.auth.getSession()
+      
+      if (error) {
+        console.error('Dashboard: Auth error:', error)
+        router.push('/auth/signin')
+        return
       }
+      
+      if (!session?.user) {
+        console.log('Dashboard: No session, redirecting to signin')
+        router.push('/auth/signin')
+        return
+      }
+      
+      console.log('Dashboard: User authenticated:', session.user.email)
+      setUser(session.user)
 
-      if (session?.user?.email) {
+      if (session.user?.email) {
         try {
           // Check if user has completed profile
           const response = await fetch('/api/user/profile');
@@ -57,24 +70,24 @@ export default function HomePage() {
     }
 
     checkUserStatus();
-  }, [session, status, router]);
+  }, [router]);
 
   // Memoized greeting calculation - avoiding SSR/CSR mismatch
   const greeting = useMemo(() => {
-    if (!session?.user?.name) {
+    if (!user?.user_metadata?.full_name) {
       return "Dzień dobry! 👋";
     }
     
-    const firstName = session.user.name.split(' ')[0];
+    const firstName = user.user_metadata.full_name.split(' ')[0];
     
     // Use static greeting to avoid hydration mismatch
     const greetingText = "Dzień dobry";
     
     return `${greetingText}, ${firstName}! 👋`;
-  }, [session?.user?.name]);
+  }, [user?.user_metadata?.full_name]);
 
   // Show loading while checking user status
-  if (isLoading || status === 'loading') {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <LoadingState message="Sprawdzanie uprawnień..." />
