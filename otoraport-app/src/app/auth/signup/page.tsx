@@ -75,10 +75,9 @@ function SignUpContent() {
       })
 
       if (signUpError) {
-        setError(signUpError.message === 'User already registered' 
-          ? 'Użytkownik o tym adresie email już istnieje'
-          : 'Wystąpił błąd podczas rejestracji')
         console.error('Sign up error:', signUpError)
+        setError(signUpError.message)  // POKAZUJ PRAWDZIWY BŁĄD
+        console.error('Full error object:', signUpError)
       } else if (data.user) {
         console.log('User registered:', data.user.email)
         console.log('Session:', data.session)
