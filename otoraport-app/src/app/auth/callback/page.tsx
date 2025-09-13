@@ -43,7 +43,14 @@ export default function AuthCallbackPage() {
           setMessage(isEmailConfirmation ? 'Konto utworzone pomyślnie! Przekierowywanie...' : 'Logowanie pomyślne! Przekierowywanie...')
           
           setTimeout(() => {
+            console.log('Callback: attempting redirect to dashboard')
             router.push('/dashboard')
+            
+            // Fallback for Google OAuth
+            setTimeout(() => {
+              console.log('Callback: fallback redirect')
+              window.location.href = '/dashboard'
+            }, 1000)
           }, isEmailConfirmation ? 2000 : 500)
         } else {
           console.log('No session found, checking for hash params...')

@@ -94,7 +94,18 @@ export default function SignInPage() {
         
         // Success - redirect to dashboard
         console.log('Redirecting to dashboard...')
-        router.push('/dashboard')
+        
+        // Force redirect with window.location as fallback
+        setTimeout(() => {
+          console.log('Attempting router.push...')
+          router.push('/dashboard')
+          
+          // Fallback if router.push doesn't work
+          setTimeout(() => {
+            console.log('Fallback: using window.location...')
+            window.location.href = '/dashboard'
+          }, 1000)
+        }, 500)
       }
     } catch (error) {
       console.error('Sign in error:', error)
