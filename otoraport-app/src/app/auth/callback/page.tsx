@@ -12,8 +12,10 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get session after OAuth redirect
-        const { data: { session }, error } = await supabase.auth.getSession()
+        console.log('OAuth callback started, processing URL params...')
+        
+        // Handle the OAuth callback with URL hash
+        const { data, error } = await supabase.auth.getSession()
         
         if (error) {
           console.error('Auth callback error:', error)
@@ -21,18 +23,30 @@ export default function AuthCallbackPage() {
           return
         }
 
-        if (session?.user) {
-          console.log('User logged in via OAuth:', session.user.email)
+        console.log('Session data:', data)
+
+        if (data.session?.user) {
+          console.log('User logged in via OAuth:', data.session.user.email)
           
           // Create or update developer profile
-          await createOrUpdateDeveloperProfile(session.user)
+          await createOrUpdateDeveloperProfile(data.session.user)
           
-          // Small delay to ensure database is updated
-          setTimeout(() => {
-            router.push('/dashboard')
-          }, 1000)
+          // Redirect to dashboard with success
+          router.push('/dashboard')
         } else {
-          console.log('No session found, redirecting to signin')
+          console.log('No session found, checking for hash params...')
+          
+          // Check if we're in the middle of OAuth flow
+          if (window.location.hash) {
+            console.log('Hash params found:', window.location.hash)
+            // Give Supabase more time to process the OAuth
+            setTimeout(() => {
+              window.location.reload()
+            }, 1000)
+            return
+          }
+          
+          console.log('No session and no hash, redirecting to signin')
           router.push('/auth/signin?error=oauth_failed')
         }
       } catch (err) {
@@ -43,9 +57,8 @@ export default function AuthCallbackPage() {
       }
     }
 
-    // Small delay to ensure URL params are processed
-    const timer = setTimeout(handleAuthCallback, 500)
-    return () => clearTimeout(timer)
+    // Process callback immediately
+    handleAuthCallback()
   }, [router])
 
   const createOrUpdateDeveloperProfile = async (user: any) => {
