@@ -61,7 +61,7 @@ export default function SignInPage() {
       const { data, error: googleError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `${window.location.origin}/dashboard`
         }
       })
 
@@ -143,8 +143,8 @@ export default function SignInPage() {
               </Button>
             </form>
 
-            {/* Google OAuth temporarily disabled - enable in Supabase Dashboard first */}
-            {process.env.NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED === 'true' && (
+            {/* Google OAuth - configured for production */}
+            {true && (
               <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
