@@ -81,7 +81,7 @@ export default function HomePage() {
   }
 
   // Show access denied if not properly authenticated
-  if (!session || !userProfile) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -100,7 +100,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header showUserMenu={!!session} />
+      <Header showUserMenu={!!user} />
       
       <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-6 lg:px-6">
         {/* Welcome Section */}
@@ -109,7 +109,7 @@ export default function HomePage() {
             {greeting}
           </h1>
           <p className="text-muted-foreground">
-            {session ? 
+            {user ? 
               "Wszystko działa sprawnie. Twoje raporty są aktualne i zgodne z przepisami." :
               "Zaloguj się, aby zarządzać swoimi raportami nieruchomości."
             }
