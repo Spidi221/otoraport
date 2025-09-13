@@ -46,24 +46,9 @@ export default function HomePage() {
       setUser(session.user)
 
       if (session.user?.email) {
-        try {
-          // Check if user has completed profile
-          const response = await fetch('/api/user/profile');
-          const data = await response.json();
-          
-          if (!response.ok || !data.profile_completed) {
-            // User logged in via Google but hasn't completed registration
-            router.push('/onboarding?reason=incomplete_profile');
-            return;
-          }
-          
-          setUserProfile(data);
-        } catch (error) {
-          console.error('Error checking user status:', error);
-          // If there's an error, redirect to onboarding to be safe
-          router.push('/onboarding?reason=profile_check_failed');
-          return;
-        }
+        console.log('Dashboard: User authenticated, skipping profile API check')
+        // TODO: Replace with direct Supabase query to developers table
+        // For now, assume user is good to go
       }
       
       setIsLoading(false);
