@@ -76,11 +76,11 @@ export default function AuthCallbackPage() {
   const createOrUpdateDeveloperProfile = async (user: any) => {
     try {
       // Check if developer profile already exists
-      const { data: existingDeveloper } = await supabase
+      const { data: existingDeveloper, error: selectError } = await supabase
         .from('developers')
         .select('*')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle() // Use maybeSingle instead of single
 
       if (!existingDeveloper) {
         // Create new developer profile

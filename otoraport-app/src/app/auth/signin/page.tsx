@@ -21,11 +21,11 @@ export default function SignInPage() {
   const ensureDeveloperProfile = async (user: any) => {
     try {
       // Check if developer profile exists
-      const { data: existingDeveloper } = await supabase
+      const { data: existingDeveloper, error: selectError } = await supabase
         .from('developers')
         .select('*')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle() // Use maybeSingle instead of single to avoid errors
 
       if (!existingDeveloper) {
         console.log('Creating developer profile for existing user...')

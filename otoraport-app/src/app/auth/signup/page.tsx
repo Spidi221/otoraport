@@ -105,6 +105,7 @@ function SignUpContent() {
 
   const createDeveloperProfile = async (user: any) => {
     try {
+      console.log('Creating developer profile for user:', user.id, user.email)
       const clientId = user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9-]/g, '') || 'unnamed'
       
       const { error: insertError } = await supabase
