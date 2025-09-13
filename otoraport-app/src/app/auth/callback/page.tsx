@@ -8,6 +8,7 @@ export default function AuthCallbackPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -28,11 +29,22 @@ export default function AuthCallbackPage() {
         if (data.session?.user) {
           console.log('User logged in via OAuth:', data.session.user.email)
           
+          // Check if this is email confirmation or OAuth
+          const isEmailConfirmation = window.location.hash.includes('type=signup')
+          
+          if (isEmailConfirmation) {
+            setMessage('Email potwierdzony pomyślnie! Tworzenie konta...')
+          }
+          
           // Create or update developer profile
           await createOrUpdateDeveloperProfile(data.session.user)
           
-          // Redirect to dashboard with success
-          router.push('/dashboard')
+          // Success message and redirect
+          setMessage(isEmailConfirmation ? 'Konto utworzone pomyślnie! Przekierowywanie...' : 'Logowanie pomyślne! Przekierowywanie...')
+          
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, isEmailConfirmation ? 2000 : 500)
         } else {
           console.log('No session found, checking for hash params...')
           
@@ -105,6 +117,11 @@ export default function AuthCallbackPage() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <h2 className="text-xl font-semibold text-gray-900">Uwierzytelnianie...</h2>
           <p className="text-gray-600 mt-2">Proszę czekać</p>
+          {message && (
+            <div className="mt-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+              {message}
+            </div>
+          )}
         </div>
       </div>
     )

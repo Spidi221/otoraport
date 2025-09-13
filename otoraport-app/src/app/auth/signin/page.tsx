@@ -18,6 +18,48 @@ export default function SignInPage() {
   })
   const router = useRouter()
 
+  const ensureDeveloperProfile = async (user: any) => {
+    try {
+      // Check if developer profile exists
+      const { data: existingDeveloper } = await supabase
+        .from('developers')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+
+      if (!existingDeveloper) {
+        console.log('Creating developer profile for existing user...')
+        // Create developer profile for existing user
+        const clientId = user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9-]/g, '') || 'unnamed'
+        
+        const { error: insertError } = await supabase
+          .from('developers')
+          .insert({
+            user_id: user.id,
+            name: user.user_metadata?.full_name || user.email || 'Unnamed User',
+            email: user.email,
+            company_name: user.user_metadata?.company_name || 'Unnamed Company',
+            client_id: clientId,
+            xml_url: `${window.location.origin}/api/public/${clientId}/data.xml`,
+            md5_url: `${window.location.origin}/api/public/${clientId}/data.md5`,
+            status: 'trial',
+            subscription_plan: 'basic',
+            subscription_status: 'trial'
+          })
+
+        if (insertError) {
+          console.error('Error creating developer profile:', insertError)
+        } else {
+          console.log('Developer profile created successfully')
+        }
+      } else {
+        console.log('Developer profile already exists')
+      }
+    } catch (err) {
+      console.error('Error checking/creating developer profile:', err)
+    }
+  }
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     if (error) setError('')
@@ -41,10 +83,17 @@ export default function SignInPage() {
       })
 
       if (signInError) {
-        setError('Nieprawidłowy email lub hasło')
         console.error('Sign in error:', signInError)
+        setError(signInError.message || 'Nieprawidłowy email lub hasło')
       } else if (data.user) {
+        console.log('User signed in:', data.user.email)
+        console.log('Session:', data.session)
+        
+        // Check if user has developer profile
+        await ensureDeveloperProfile(data.user)
+        
         // Success - redirect to dashboard
+        console.log('Redirecting to dashboard...')
         router.push('/dashboard')
       }
     } catch (error) {
@@ -58,19 +107,27 @@ export default function SignInPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
     try {
+      console.log('Starting Google OAuth...')
+      
       const { data, error: googleError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       })
 
+      console.log('Google OAuth response:', { data, error: googleError })
+
       if (googleError) {
         console.error('Google sign in error:', googleError)
-        setError('Wystąpił błąd podczas logowania przez Google')
+        setError(`Google OAuth Error: ${googleError.message}`)
         setIsLoading(false)
       }
-      // If successful, user will be redirected automatically
+      // If successful, user will be redirected automatically to Google
     } catch (error) {
       console.error('Google sign in error:', error)
       setError('Wystąpił błąd podczas logowania przez Google')
