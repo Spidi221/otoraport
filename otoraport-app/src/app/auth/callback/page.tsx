@@ -12,8 +12,8 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Handle the OAuth callback
-        const { data, error } = await supabase.auth.getSession()
+        // Get session after OAuth redirect
+        const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
           console.error('Auth callback error:', error)
@@ -21,15 +21,19 @@ export default function AuthCallbackPage() {
           return
         }
 
-        if (data.session?.user) {
-          // User is logged in, create or update developer profile
-          await createOrUpdateDeveloperProfile(data.session.user)
+        if (session?.user) {
+          console.log('User logged in via OAuth:', session.user.email)
           
-          // Redirect to dashboard
-          router.push('/dashboard')
+          // Create or update developer profile
+          await createOrUpdateDeveloperProfile(session.user)
+          
+          // Small delay to ensure database is updated
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, 1000)
         } else {
-          // No session, redirect to login
-          router.push('/auth/signin')
+          console.log('No session found, redirecting to signin')
+          router.push('/auth/signin?error=oauth_failed')
         }
       } catch (err) {
         console.error('Callback handling error:', err)
@@ -39,7 +43,9 @@ export default function AuthCallbackPage() {
       }
     }
 
-    handleAuthCallback()
+    // Small delay to ensure URL params are processed
+    const timer = setTimeout(handleAuthCallback, 500)
+    return () => clearTimeout(timer)
   }, [router])
 
   const createOrUpdateDeveloperProfile = async (user: any) => {
