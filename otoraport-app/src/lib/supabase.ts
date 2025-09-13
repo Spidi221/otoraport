@@ -9,7 +9,17 @@ if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_SUPABASE_U
   console.warn('Missing NEXT_PUBLIC_SUPABASE_URL environment variable')
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
+// Public client for browser usage
+export const supabase = createClient<Database>(
+  supabaseUrl, 
+  supabaseAnonKey, // MUST use anon key for security
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true
+    }
+  }
+)
 
 // For server-side operations that require elevated privileges
 export const supabaseAdmin = createClient<Database>(
