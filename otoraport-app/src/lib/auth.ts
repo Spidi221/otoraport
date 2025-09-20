@@ -41,6 +41,46 @@ export const authOptions = {
         }
       })
     ] : []),
+    // DEVELOPMENT TEST PROVIDER - Pozwala logowanie jako istniejący developer z bazy
+    CredentialsProvider({
+      id: 'test-developer',
+      name: 'Test as Developer',
+      credentials: {
+        client_id: { label: 'Client ID (e.g. rolbestcompany123)', type: 'text', placeholder: 'rolbestcompany123' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.client_id) return null;
+
+        try {
+          // Znajdź developera po client_id
+          const { supabaseAdmin } = await import('./supabase');
+          const { data: developer, error } = await supabaseAdmin
+            .from('developers')
+            .select('*')
+            .eq('client_id', credentials.client_id)
+            .single();
+
+          if (error || !developer) {
+            console.error('Developer not found:', credentials.client_id);
+            return null;
+          }
+
+          return {
+            id: developer.id,
+            email: developer.email || `${developer.client_id}@test.local`,
+            name: developer.company_name || developer.name,
+            image: null,
+            // Dodaj developer data do sesji
+            developerId: developer.id,
+            clientId: developer.client_id,
+            subscriptionPlan: developer.subscription_plan || 'basic'
+          };
+        } catch (error) {
+          console.error('Test auth error:', error);
+          return null;
+        }
+      },
+    }),
     CredentialsProvider({
       name: 'credentials',
       credentials: {
@@ -108,10 +148,19 @@ export const authOptions = {
       if (user) {
         token.id = user.id
         token.email = user.email
-        
+
         // Track OAuth provider for profile completion logic
         if (account?.provider) {
           token.provider = account.provider
+        }
+
+        // For test-developer provider, copy developer data directly
+        if (account?.provider === 'test-developer') {
+          token.developerId = user.developerId
+          token.clientId = user.clientId
+          token.subscriptionPlan = user.subscriptionPlan
+          token.registrationCompleted = true
+          token.provider = 'test-developer'
         }
       }
       
@@ -142,6 +191,7 @@ export const authOptions = {
         session.user.id = token.id as string
         session.user.provider = token.provider
         session.user.developerId = token.developerId
+        session.user.clientId = token.clientId
         session.user.registrationCompleted = token.registrationCompleted
         session.user.subscriptionPlan = token.subscriptionPlan
         session.user.subscriptionStatus = token.subscriptionStatus
@@ -165,11 +215,21 @@ export const authOptions = {
         return true
       }
       
+      // For test-developer provider - allow sign-in
+      if (account?.provider === 'test-developer') {
+        console.log('Test developer sign-in:', {
+          clientId: user.clientId,
+          developerId: user.developerId,
+          email: user.email
+        });
+        return true;
+      }
+
       // For credentials sign-in
       if (account?.provider === 'credentials') {
         return true
       }
-      
+
       return true
     },
     
