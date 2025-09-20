@@ -65,12 +65,13 @@ export async function GET(request: NextRequest) {
       }
 
       // Calculate additional metrics
+      const commissionRate = await getCommissionRate(developer.partner_id);
       const enrichedClients = (clients || []).map(client => ({
         ...client,
         days_since_created: Math.floor((Date.now() - new Date(client.created_at).getTime()) / (1000 * 60 * 60 * 24)),
         trial_days_remaining: client.trial_ends_at ?
           Math.max(0, Math.floor((new Date(client.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : 0,
-        commission_rate: await getCommissionRate(developer.partner_id)
+        commission_rate: commissionRate
       }));
 
       return NextResponse.json({
