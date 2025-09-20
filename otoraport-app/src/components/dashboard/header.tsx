@@ -11,7 +11,8 @@ import {
 } from "../ui/dropdown-menu";
 import { OtoraportLogo } from "../icons/otoraport-logo";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface HeaderProps {
   showUserMenu?: boolean;
@@ -41,15 +42,35 @@ export function PublicHeader() {
 
 // Header for authenticated pages (with session)
 function AuthenticatedHeader() {
-  const { data: session } = useSession();
-  
+  const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('developers')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        setUserProfile(profile);
+      }
+    }
+
+    getUser();
+  }, []);
+
   // Admin emails
   const ADMIN_EMAILS = [
     'admin@otoraport.pl',
-    'bartlomiej@agencjaai.pl'
+    'bartlomiej@agencjaai.pl',
+    'chudziszewski221@gmail.com'
   ];
-  
-  const isAdmin = session?.user?.email && ADMIN_EMAILS.includes(session.user.email);
+
+  const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
 
   return (
     <header className="border-b bg-white px-4 py-4 lg:px-6">
@@ -88,7 +109,7 @@ function AuthenticatedHeader() {
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10">
                   <AvatarFallback>
-                    {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : 'U'}
+                    {userProfile?.company_name ? userProfile.company_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -96,10 +117,10 @@ function AuthenticatedHeader() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <div className="flex flex-col space-y-1 p-2">
                 <p className="text-sm leading-none">
-                  {session?.user?.name || 'Użytkownik'}
+                  {userProfile?.company_name || userProfile?.name || user?.email || 'Użytkownik'}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {session?.user?.email || 'email@example.com'}
+                  {user?.email || 'email@example.com'}
                 </p>
               </div>
               <DropdownMenuSeparator />
@@ -123,7 +144,10 @@ function AuthenticatedHeader() {
                 </>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = '/auth/signin';
+              }}>
                 Wyloguj się
               </DropdownMenuItem>
             </DropdownMenuContent>
