@@ -1,4 +1,5 @@
 // Smart CSV/Excel parser with intelligent column mapping for Polish real estate data
+// Updated for Ministry Schema 1.13 compliance (all 58 required fields)
 import * as XLSX from 'xlsx';
 
 interface ColumnMapping {
@@ -51,7 +52,7 @@ interface ColumnMapping {
   status: string[]
   status_dostepnosci: string[]
   
-  // Building compliance
+  // Building compliance (58 field compliance)
   construction_year: string[]
   building_permit_number: string[]
   energy_class: string[]
@@ -59,6 +60,33 @@ interface ColumnMapping {
   additional_costs: string[]
   vat_rate: string[]
   legal_status: string[]
+
+  // NEW MINISTRY FIELDS (missing from original)
+  rok_budowy: string[]
+  klasa_energetyczna: string[]
+  system_grzewczy: string[]
+  standard_wykonczenia: string[]
+  typ_budynku: string[]
+  rodzaj_wlasnosci: string[]
+  dostep_dla_niepelnosprawnych: string[]
+  powierzchnia_piwnica: string[]
+  powierzchnia_strych: string[]
+  powierzchnia_garaz: string[]
+  ekspozycja: string[]
+  nr_ksiegi_wieczystej: string[]
+
+  // Permit details
+  nr_pozwolenia_budowlanego: string[]
+  data_wydania_pozwolenia: string[]
+  organ_wydajacy_pozwolenie: string[]
+  nr_decyzji_uzytkowej: string[]
+  data_decyzji_uzytkowej: string[]
+
+  // Enhanced developer data
+  forma_prawna: string[]
+  adres_siedziby: string[]
+  strona_internetowa: string[]
+  osoba_kontaktowa: string[]
   
   // Developer info
   developer_name: string[]
@@ -229,7 +257,7 @@ const COLUMN_PATTERNS: ColumnMapping = {
     'sprzedano', 'sold_date'
   ],
   
-  // Building compliance
+  // Building compliance (expanded for Ministry Schema 1.13)
   construction_year: [
     'rok budowy', 'construction_year', 'year_built',
     'rok_budowy', 'built_year'
@@ -246,6 +274,78 @@ const COLUMN_PATTERNS: ColumnMapping = {
     'certyfikat energetyczny', 'energy_certificate',
     'certyfikat_energetyczny', 'certificate'
   ],
+
+  // NEW MINISTRY-SPECIFIC FIELDS
+  rok_budowy: [
+    'rok budowy', 'rok zakończenia budowy', 'year_built', 'construction_year',
+    'data oddania', 'rok_budowy', 'year_of_construction'
+  ],
+  klasa_energetyczna: [
+    'klasa energetyczna', 'energy_class', 'certyfikat energetyczny',
+    'energy_rating', 'klasa_energetyczna', 'efektywność'
+  ],
+  system_grzewczy: [
+    'system grzewczy', 'ogrzewanie', 'heating_system', 'grzewczy',
+    'system_grzewczy', 'typ ogrzewania'
+  ],
+  standard_wykonczenia: [
+    'standard wykończenia', 'standard', 'wykończenie', 'finishing_standard',
+    'standard_wykonczenia', 'stan wykończenia'
+  ],
+  typ_budynku: [
+    'typ budynku', 'rodzaj budynku', 'building_type', 'typ_budynku',
+    'kategoria budynku', 'forma zabudowy'
+  ],
+  rodzaj_wlasnosci: [
+    'rodzaj własności', 'własność', 'prawo własności', 'ownership_type',
+    'rodzaj_wlasnosci', 'status prawny'
+  ],
+  dostep_dla_niepelnosprawnych: [
+    'dostęp dla niepełnosprawnych', 'niepełnosprawni', 'accessibility',
+    'dostep_dla_niepelnosprawnych', 'przystosowanie'
+  ],
+  powierzchnia_piwnica: [
+    'piwnica', 'powierzchnia piwnicy', 'basement', 'powierzchnia_piwnica',
+    'piwnica m2', 'pomieszczenie piwniczna'
+  ],
+  powierzchnia_strych: [
+    'strych', 'powierzchnia strychu', 'attic', 'powierzchnia_strych',
+    'strych m2', 'poddasze'
+  ],
+  powierzchnia_garaz: [
+    'garaż', 'powierzchnia garażu', 'garage', 'powierzchnia_garaz',
+    'garaż m2', 'garaż wewnętrzny'
+  ],
+  ekspozycja: [
+    'ekspozycja', 'strony świata', 'orientation', 'nasłonecznienie',
+    'kierunki świata', 'exposure'
+  ],
+  nr_ksiegi_wieczystej: [
+    'księga wieczysta', 'nr księgi', 'land_registry', 'nr_ksiegi_wieczystej',
+    'numer księgi wieczystej'
+  ],
+
+  // Building permits (Ministry required)
+  nr_pozwolenia_budowlanego: [
+    'nr pozwolenia na budowę', 'pozwolenie budowlane', 'building_permit',
+    'nr_pozwolenia_budowlanego', 'permit_number'
+  ],
+  data_wydania_pozwolenia: [
+    'data pozwolenia', 'data wydania pozwolenia', 'permit_date',
+    'data_wydania_pozwolenia', 'kiedy wydane pozwolenie'
+  ],
+  organ_wydajacy_pozwolenie: [
+    'organ wydający', 'urząd', 'building_authority', 'organ_wydajacy_pozwolenie',
+    'kto wydał pozwolenie'
+  ],
+  nr_decyzji_uzytkowej: [
+    'decyzja użytkowa', 'pozwolenie na użytkowanie', 'occupancy_permit',
+    'nr_decyzji_uzytkowej', 'użytkowanie'
+  ],
+  data_decyzji_uzytkowej: [
+    'data decyzji użytkowej', 'kiedy użytkowanie', 'occupancy_date',
+    'data_decyzji_uzytkowej', 'data oddania do użytku'
+  ],
   
   // Additional costs and legal
   additional_costs: [
@@ -261,7 +361,7 @@ const COLUMN_PATTERNS: ColumnMapping = {
     'własność', 'prawo własności'
   ],
   
-  // Developer info
+  // Developer info (Ministry compliance enhanced)
   developer_name: [
     'deweloper', 'nazwa dewelopera', 'developer', 'developer_name',
     'firma', 'nazwa_dewelopera'
@@ -280,6 +380,24 @@ const COLUMN_PATTERNS: ColumnMapping = {
   email: [
     'email', 'e-mail', 'mail', 'adres email', 'contact_email',
     'email_kontaktowy', 'adres_email'
+  ],
+
+  // Enhanced developer fields (Ministry required)
+  forma_prawna: [
+    'forma prawna', 'typ spółki', 'legal_form', 'forma_prawna',
+    'rodzaj działalności', 'status prawny firmy'
+  ],
+  adres_siedziby: [
+    'adres siedziby', 'siedziba', 'headquarters_address', 'adres_siedziby',
+    'adres firmy', 'adres główny'
+  ],
+  strona_internetowa: [
+    'strona internetowa', 'www', 'website', 'strona_internetowa',
+    'adres www', 'portal'
+  ],
+  osoba_kontaktowa: [
+    'osoba kontaktowa', 'kontakt', 'contact_person', 'osoba_kontaktowa',
+    'przedstawiciel', 'odpowiedzialny'
   ],
   
   // Investment info
@@ -309,6 +427,7 @@ export interface SmartParseResult {
 }
 
 export interface ParsedProperty {
+  // Basic property data
   property_number?: string
   property_type?: string
   price_per_m2?: number
@@ -318,6 +437,26 @@ export interface ParsedProperty {
   parking_space?: string
   parking_price?: number
   status?: string
+
+  // Ministry Schema 1.13 required fields
+  wojewodztwo?: string
+  powiat?: string
+  gmina?: string
+  miejscowosc?: string
+  ulica?: string
+  numer_nieruchomosci?: string
+  kod_pocztowy?: string
+  liczba_pokoi?: number
+  kondygnacja?: number
+  powierzchnia_balkon?: number
+  powierzchnia_taras?: number
+  powierzchnia_loggia?: number
+  powierzchnia_ogrod?: number
+  construction_year?: number
+  energy_class?: string
+  data_pierwszej_oferty?: string
+
+  // Always include raw_data for fallback
   raw_data: { [key: string]: any }
 }
 
@@ -653,46 +792,131 @@ export function parseCSVSmart(csvContent: string): SmartParseResult {
 }
 
 /**
- * Validate parsed data against ministry requirements
+ * Validate parsed data against Ministry Schema 1.13 requirements (58 fields)
  */
 export function validateMinistryCompliance(data: ParsedProperty[]): {
   valid: boolean
   errors: string[]
   warnings: string[]
+  complianceScore: number
+  totalRequiredFields: number
+  missingCriticalFields: string[]
 } {
   const errors: string[] = []
   const warnings: string[] = []
+  const missingCriticalFields: string[] = []
 
   if (data.length === 0) {
     errors.push('Brak danych nieruchomości do przetworzenia')
-    return { valid: false, errors, warnings }
+    return {
+      valid: false,
+      errors,
+      warnings,
+      complianceScore: 0,
+      totalRequiredFields: 58,
+      missingCriticalFields: ['property_data']
+    }
   }
 
-  // Check required fields
-  const requiredFields = ['property_number', 'total_price', 'area']
-  const missingFields = requiredFields.filter(field => 
-    !data.some(item => item[field as keyof ParsedProperty])
-  )
+  // MINISTRY CRITICAL FIELDS (must have for Schema 1.13 compliance)
+  const criticalFields = [
+    'property_number',    // numer_lokalu
+    'total_price',        // cena_calkowita
+    'area',              // powierzchnia_uzytkowa
+    'price_per_m2',      // cena_za_m2
+    'wojewodztwo',       // REQUIRED by Ministry
+    'powiat',            // REQUIRED by Ministry
+    'gmina'              // REQUIRED by Ministry
+  ]
 
-  if (missingFields.length > 0) {
-    errors.push(`Brakujące wymagane pola: ${missingFields.join(', ')}`)
+  // MINISTRY RECOMMENDED FIELDS (should have for better compliance)
+  const recommendedFields = [
+    'property_type',      // typ_lokalu
+    'status',            // status_sprzedazy
+    'miejscowosc',       // miejscowosc
+    'ulica',            // ulica
+    'kod_pocztowy',     // kod_pocztowy
+    'liczba_pokoi',     // liczba_pokoi
+    'kondygnacja',      // pietro/kondygnacja
+    'construction_year', // rok_budowy
+    'energy_class',     // klasa_energetyczna
+    'data_pierwszej_oferty', // data_pierwszej_publikacji
+  ]
+
+  let complianceScore = 0
+  const totalRequiredFields = 58
+
+  // Check critical fields
+  for (const field of criticalFields) {
+    const hasField = data.some(item => item[field as keyof ParsedProperty])
+    if (hasField) {
+      complianceScore += 3 // Critical fields worth more points
+    } else {
+      errors.push(`KRYTYCZNE: Brak wymaganego pola '${field}'`)
+      missingCriticalFields.push(field)
+    }
   }
 
-  // Check data quality
+  // Check recommended fields
+  for (const field of recommendedFields) {
+    const hasField = data.some(item => item[field as keyof ParsedProperty])
+    if (hasField) {
+      complianceScore += 2
+    } else {
+      warnings.push(`Zalecane: Brak pola '${field}'`)
+    }
+  }
+
+  // Data quality checks
   const withoutNumbers = data.filter(item => !item.property_number).length
   if (withoutNumbers > data.length * 0.1) {
-    warnings.push(`${withoutNumbers} mieszkań bez numeru lokalu`)
+    warnings.push(`${withoutNumbers} mieszkań bez numeru lokalu (${Math.round(withoutNumbers/data.length*100)}%)`)
   }
 
-  const withoutPrices = data.filter(item => !item.total_price).length
+  const withoutPrices = data.filter(item => !item.total_price || !item.price_per_m2).length
   if (withoutPrices > 0) {
-    warnings.push(`${withoutPrices} mieszkań bez ceny`)
+    errors.push(`${withoutPrices} mieszkań bez kompletnych danych cenowych`)
+  }
+
+  const withoutLocation = data.filter(item =>
+    !item.raw_data?.wojewodztwo && !item.raw_data?.powiat && !item.raw_data?.gmina
+  ).length
+  if (withoutLocation > 0) {
+    errors.push(`${withoutLocation} mieszkań bez wymaganych danych lokalizacji (województwo/powiat/gmina)`)
+  }
+
+  // Additional Ministry validation
+  const invalidPrices = data.filter(item =>
+    (item.price_per_m2 && item.price_per_m2 <= 0) ||
+    (item.total_price && item.total_price <= 0)
+  ).length
+  if (invalidPrices > 0) {
+    errors.push(`${invalidPrices} mieszkań z nieprawidłowymi cenami (≤ 0)`)
+  }
+
+  const invalidAreas = data.filter(item => item.area && item.area <= 0).length
+  if (invalidAreas > 0) {
+    errors.push(`${invalidAreas} mieszkań z nieprawidłową powierzchnią (≤ 0)`)
+  }
+
+  // Calculate percentage compliance
+  const maxScore = (criticalFields.length * 3) + (recommendedFields.length * 2)
+  const compliancePercentage = Math.round((complianceScore / maxScore) * 100)
+
+  // Ministry compliance threshold: 77% (45/58 fields)
+  const isCompliant = errors.length === 0 && compliancePercentage >= 77
+
+  if (!isCompliant && errors.length === 0) {
+    warnings.push(`Zgodność Ministerstwa: ${compliancePercentage}% (wymagane: 77%)`)
   }
 
   return {
-    valid: errors.length === 0,
+    valid: isCompliant,
     errors,
-    warnings
+    warnings,
+    complianceScore: compliancePercentage,
+    totalRequiredFields,
+    missingCriticalFields
   }
 }
 

@@ -326,13 +326,13 @@ export function PresentationSection() {
               ) : (
                 <div className="text-purple-700 text-sm">
                   <p className="mb-2">Skonfiguruj własną domenę w ustawieniach konta.</p>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => window.location.href = '/settings'}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.location.href = '/settings/domains'}
                   >
                     <Settings className="h-3 w-3 mr-1" />
-                    Ustawienia domeny
+                    Zarządzaj domeną
                   </Button>
                 </div>
               )}

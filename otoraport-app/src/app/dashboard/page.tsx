@@ -9,12 +9,15 @@ import { StatusCards } from "@/components/dashboard/status-cards";
 import { LoadingState } from "@/components/ui/loading";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ChatWidget } from "@/components/ChatWidget";
+import { FloatingHelpButton } from "@/components/help/HelpButton";
 
 // Lazy load heavy components that are below the fold
 const ActionButtons = lazy(() => import("@/components/dashboard/action-buttons").then(m => ({ default: m.ActionButtons })));
 const ChartsSection = lazy(() => import("@/components/dashboard/charts-section").then(m => ({ default: m.ChartsSection })));
 const PropertiesTable = lazy(() => import("@/components/dashboard/properties-table").then(m => ({ default: m.PropertiesTable })));
 const PresentationSection = lazy(() => import("@/components/dashboard/presentation-section").then(m => ({ default: m.PresentationSection })));
+const AdvancedAnalyticsDashboard = lazy(() => import("@/components/dashboard/AdvancedAnalyticsDashboard"));
+const PredictiveInsightsDashboard = lazy(() => import("@/components/dashboard/PredictiveInsightsDashboard"));
 
 export default function HomePage() {
   const router = useRouter();
@@ -131,6 +134,16 @@ export default function HomePage() {
             <ActionButtons />
           </Suspense>
 
+          {/* Advanced Analytics Dashboard */}
+          <Suspense fallback={<LoadingState message="Ładowanie zaawansowanych analiz..." />}>
+            <AdvancedAnalyticsDashboard />
+          </Suspense>
+
+          {/* Predictive Insights Dashboard */}
+          <Suspense fallback={<LoadingState message="Ładowanie AI insights..." />}>
+            <PredictiveInsightsDashboard />
+          </Suspense>
+
           {/* Presentation Section */}
           <Suspense fallback={<LoadingState message="Ładowanie sekcji prezentacyjnej..." />}>
             <PresentationSection />
@@ -147,9 +160,18 @@ export default function HomePage() {
           </Suspense>
         </div>
 
-        
+
         <ScrollToTop />
         <ChatWidget />
+
+        {/* Floating Help Button */}
+        {user && (
+          <FloatingHelpButton
+            userId={user.id}
+            subscriptionPlan={userProfile?.subscription_plan || 'basic'}
+            onboardingStep={userProfile?.onboarding_step || 1}
+          />
+        )}
       </main>
     </div>
   );

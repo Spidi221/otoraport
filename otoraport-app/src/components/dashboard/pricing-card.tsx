@@ -25,7 +25,7 @@ const plans: PricingPlan[] = [
     name: 'Plan Basic',
     description: 'Idealny dla małych deweloperów z jednym projektem',
     monthlyPrice: 14900, // 149 zł (stored in grosze)
-    yearlyPrice: 119000, // 1190 zł (20% discount)
+    yearlyPrice: 142800, // 1428 zł/year (119 zł/month with 20% discount)
     icon: <Zap className="h-6 w-6" />,
     features: [
       'Do 100 mieszkań',
@@ -41,7 +41,7 @@ const plans: PricingPlan[] = [
     name: 'Plan Pro',
     description: 'Dla średnich deweloperów z wieloma projektami',
     monthlyPrice: 24900, // 249 zł (stored in grosze)
-    yearlyPrice: 199200, // 1992 zł (20% discount)
+    yearlyPrice: 238800, // 2388 zł/year (199 zł/month with 20% discount)
     popular: true,
     icon: <Shield className="h-6 w-6" />,
     features: [
@@ -59,7 +59,7 @@ const plans: PricingPlan[] = [
     name: 'Plan Enterprise', 
     description: 'Dla dużych deweloperów z wieloma projektami',
     monthlyPrice: 49900, // 499 zł (stored in grosze)
-    yearlyPrice: 399200, // 3992 zł (20% discount)
+    yearlyPrice: 478800, // 4788 zł/year (399 zł/month with 20% discount)
     icon: <Shield className="h-6 w-6" />,
     features: [
       'Wszystko z planu Pro',

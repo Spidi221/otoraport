@@ -1,10 +1,12 @@
 /**
- * Multi-Project XML Aggregation for Phase 2
- * Based on CLAUDE.md specification - combines all projects into single XML
+ * Multi-Project XML Aggregation for Ministry Schema 1.13
+ * Based on CLAUDE.md specification - combines all projects into single Ministry-compliant XML
+ * CRITICAL: Uses official dane_o_cenach_mieszkan format
  */
 
 import { supabaseAdmin } from '@/lib/supabase'
 import { generateXMLForMinistry, DataForGeneration } from '@/lib/generators'
+import { generateMinistryXML, convertToMinistryFormat, validateMinistryXML } from './xml-generator'
 
 interface ProjectWithProperties {
   id: string
@@ -17,16 +19,13 @@ interface ProjectWithProperties {
   properties: Array<{
     id: string
     project_id: string
-    property_number: string
+    apartment_number: string
     property_type: string
     price_per_m2: number | null
-    total_price: number | null
+    base_price: number | null
     final_price: number | null
-    area: number | null
-    parking_space: string | null
-    parking_price: number | null
+    surface_area: number | null
     status: string
-    raw_data: Record<string, any>
     // All ministry fields
     wojewodztwo?: string | null
     powiat?: string | null
@@ -68,54 +67,19 @@ export async function generateAggregatedXML(developerId: string): Promise<string
       throw new Error(`Developer not found: ${developerId}`)
     }
 
-    // Pobierz wszystkie projekty developera z właściwościami
+    // Pobierz projekty developera (osobno, bez zagnieżdżeń)
     const { data: projects, error: projectsError } = await supabaseAdmin
       .from('projects')
       .select(`
         id,
         name,
         location,
-        address,
         status,
         developer_id,
-        created_at,
-        properties (
-          id,
-          project_id,
-          property_number,
-          property_type,
-          price_per_m2,
-          total_price,
-          final_price,
-          area,
-          parking_space,
-          parking_price,
-          status,
-          raw_data,
-          wojewodztwo,
-          powiat,
-          gmina,
-          miejscowosc,
-          ulica,
-          numer_nieruchomosci,
-          kod_pocztowy,
-          price_valid_from,
-          price_valid_to,
-          status_dostepnosci,
-          data_rezerwacji,
-          data_sprzedazy,
-          construction_year,
-          building_permit_number,
-          energy_class,
-          additional_costs,
-          vat_rate,
-          legal_status,
-          created_at,
-          updated_at
-        )
+        created_at
       `)
       .eq('developer_id', developerId)
-      .eq('status', 'active') as { data: ProjectWithProperties[] | null, error: any }
+      .eq('status', 'active')
 
     if (projectsError) {
       console.error('Error fetching projects:', projectsError)
@@ -123,34 +87,76 @@ export async function generateAggregatedXML(developerId: string): Promise<string
     }
 
     const validProjects = projects || []
-    console.log(`Found ${validProjects.length} active projects for developer`)
+    console.log(`Found ${validProjects.length} projects for developer ${developerId}`)
 
-    // Połącz wszystkie properties z wszystkich projektów
-    const allProperties = validProjects.flatMap(project => {
-      if (!project.properties || !Array.isArray(project.properties)) {
-        console.warn(`Project ${project.id} has no properties`)
-        return []
-      }
+    // Jeśli brak projektów, generuj pusty XML
+    if (validProjects.length === 0) {
+      console.warn(`No projects found for developer ${developerId}`)
+      const emptyData = createEmptyDataForGeneration(developer)
+      const ministryOptions = convertToMinistryFormat([], emptyData.developer, emptyData.projects)
+      return generateMinistryXML(ministryOptions)
+    }
 
+    // Pobierz wszystkie właściwości dla tych projektów (osobno)
+    const projectIds = validProjects.map(p => p.id)
+    const { data: properties, error: propertiesError } = await supabaseAdmin
+      .from('properties')
+      .select(`
+        id,
+        project_id,
+        apartment_number,
+        property_type,
+        price_per_m2,
+        base_price,
+        final_price,
+        surface_area,
+        status,
+        wojewodztwo,
+        powiat,
+        gmina,
+        miejscowosc,
+        ulica,
+        numer_nieruchomosci,
+        kod_pocztowy,
+        price_valid_from,
+        price_valid_to,
+        status_dostepnosci,
+        data_rezerwacji,
+        data_sprzedazy,
+        created_at,
+        updated_at
+      `)
+      .in('project_id', projectIds)
+
+    if (propertiesError) {
+      console.error('Error fetching properties:', propertiesError)
+      throw new Error(`Failed to fetch properties: ${propertiesError.message}`)
+    }
+
+    const allProperties = properties || []
+    console.log(`Found ${allProperties.length} properties across ${validProjects.length} projects`)
+
+    // Połącz properties z projektami (ręcznie zamiast zagnieżdżonych query)
+    const projectsWithProperties = validProjects.map(project => ({
+      ...project,
+      properties: allProperties.filter(prop => prop.project_id === project.id)
+    }))
+
+    console.log(`Projects with properties:`, projectsWithProperties.map(p => ({ name: p.name, propertiesCount: p.properties.length })))
+
+    // Flatten wszystkie properties z kontekstem projektu
+    const allPropertiesWithContext = projectsWithProperties.flatMap(project => {
       return project.properties.map(property => ({
         ...property,
         // Add project context to each property
         project_name: project.name,
-        project_location: project.location,
-        investment_address: project.address,
-        // Ensure raw_data includes project info
-        raw_data: {
-          ...property.raw_data,
-          project_id: project.id,
-          project_name: project.name,
-          project_location: project.location
-        }
+        project_location: project.location
       }))
     })
 
-    console.log(`Total properties across all projects: ${allProperties.length}`)
+    console.log(`Total properties across all projects: ${allPropertiesWithContext.length}`)
 
-    if (allProperties.length === 0) {
+    if (allPropertiesWithContext.length === 0) {
       console.warn(`No properties found for developer ${developerId}`)
       // Generate empty XML with developer info
       const emptyData: DataForGeneration = {
@@ -179,7 +185,9 @@ export async function generateAggregatedXML(developerId: string): Promise<string
         })),
         properties: []
       }
-      return generateXMLForMinistry(emptyData)
+      // Generate empty Ministry XML
+      const ministryOptions = convertToMinistryFormat([], emptyData.developer, emptyData.projects)
+      return generateMinistryXML(ministryOptions)
     }
 
     // Prepare data for XML generation
@@ -204,16 +212,32 @@ export async function generateAggregatedXML(developerId: string): Promise<string
         id: project.id,
         name: project.name,
         location: project.location,
-        address: project.address,
         status: project.status
       })),
-      properties: allProperties
+      properties: allPropertiesWithContext
     }
 
-    // Generate ministry-compliant XML
-    const xmlContent = generateXMLForMinistry(aggregatedData)
-    
-    console.log(`Generated XML with ${allProperties.length} properties from ${validProjects.length} projects`)
+    // CRITICAL: Generate XML using official Ministry Schema 1.13
+    console.log('Converting to Ministry format and validating...')
+    const ministryOptions = convertToMinistryFormat(
+      allProperties,
+      aggregatedData.developer,
+      aggregatedData.projects
+    )
+
+    // Validate before generation
+    const validation = validateMinistryXML(ministryOptions)
+    if (!validation.valid) {
+      console.warn('Ministry XML validation warnings:', validation.errors)
+      console.warn('Continuing with generation despite warnings...')
+    }
+
+    // Generate Ministry-compliant XML
+    const xmlContent = generateMinistryXML(ministryOptions)
+
+    console.log(`Generated Ministry Schema 1.13 XML with ${allProperties.length} properties from ${validProjects.length} projects`)
+    console.log(`Validation: ${validation.valid ? 'PASSED' : 'WARNINGS'} (${validation.errors.length} issues)`)
+
     return xmlContent
 
   } catch (error) {
