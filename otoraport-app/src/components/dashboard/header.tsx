@@ -1,3 +1,5 @@
+'use client';
+
 import { Bell, Settings, User, Shield } from "lucide-react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -47,16 +49,31 @@ function AuthenticatedHeader() {
 
   useEffect(() => {
     async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-      if (user) {
-        const { data: profile } = await supabase
-          .from('developers')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-        setUserProfile(profile);
+        if (userError) {
+          console.error('Failed to fetch user:', userError);
+          return;
+        }
+
+        setUser(user);
+
+        if (user) {
+          const { data: profile, error: profileError } = await supabase
+            .from('developers')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle(); // Use maybeSingle to avoid error when profile doesn't exist
+
+          if (profileError) {
+            console.error('Failed to fetch developer profile:', profileError);
+          } else if (profile) {
+            setUserProfile(profile);
+          }
+        }
+      } catch (error) {
+        console.error('Auth error:', error);
       }
     }
 
@@ -79,15 +96,17 @@ function AuthenticatedHeader() {
         
         <div className="flex items-center gap-4">
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <Badge 
-              variant="destructive" 
-              className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
-            >
-              2
-            </Badge>
-          </Button>
+          <Link href="/dashboard/notifications">
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              <Badge
+                variant="destructive"
+                className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
+              >
+                2
+              </Badge>
+            </Button>
+          </Link>
 
           {/* Admin Panel */}
           {isAdmin && (
@@ -99,9 +118,11 @@ function AuthenticatedHeader() {
           )}
 
           {/* Settings */}
-          <Button variant="ghost" size="icon">
-            <Settings className="h-5 w-5" />
-          </Button>
+          <Link href="/dashboard/settings">
+            <Button variant="ghost" size="icon">
+              <Settings className="h-5 w-5" />
+            </Button>
+          </Link>
 
           {/* User Menu */}
           <DropdownMenu>
@@ -117,20 +138,24 @@ function AuthenticatedHeader() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <div className="flex flex-col space-y-1 p-2">
                 <p className="text-sm leading-none">
-                  {userProfile?.company_name || userProfile?.name || user?.email || 'Użytkownik'}
+                  {userProfile?.company_name || userProfile?.name || 'Ładowanie...'}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email || 'email@example.com'}
+                  {user?.email || userProfile?.email || 'Ładowanie...'}
                 </p>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>Profil</span>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profil</span>
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Ustawienia</span>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Ustawienia</span>
+                </Link>
               </DropdownMenuItem>
               {isAdmin && (
                 <>

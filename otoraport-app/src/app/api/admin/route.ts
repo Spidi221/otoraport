@@ -1,18 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { supabaseAdmin } from '@/lib/supabase'
 import { adminService } from '@/lib/admin-service'
+import { cookies } from 'next/headers'
 
 // Admin users - in production this would be from database
 const ADMIN_EMAILS = [
   'admin@otoraport.pl',
-  'bartlomiej@agencjaai.pl'
+  'bartlomiej@agencjaai.pl',
+  'chudziszewski221@gmail.com'
 ]
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email || !ADMIN_EMAILS.includes(session.user.email)) {
+    // Get auth token from cookie
+    const cookieStore = await cookies()
+    const accessToken = cookieStore.get('sb-maichqozswcomegcsaqg-auth-token')
+
+    if (!accessToken) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // Get user from Supabase
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken.value)
+
+    if (error || !user?.email || !ADMIN_EMAILS.includes(user.email)) {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }
@@ -79,12 +93,12 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Admin API error:', error)
-    
+
     await adminService.logSystemEvent(
       'error',
       'Admin API error',
       { error: error instanceof Error ? error.message : 'Unknown error' },
-      (await getServerSession(authOptions))?.user?.email
+      undefined // User email not available in error context
     )
 
     return NextResponse.json(
@@ -96,8 +110,21 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email || !ADMIN_EMAILS.includes(session.user.email)) {
+    // Get auth token from cookie
+    const cookieStore = await cookies()
+    const accessToken = cookieStore.get('sb-maichqozswcomegcsaqg-auth-token')
+
+    if (!accessToken) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // Get user from Supabase
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken.value)
+
+    if (error || !user?.email || !ADMIN_EMAILS.includes(user.email)) {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }

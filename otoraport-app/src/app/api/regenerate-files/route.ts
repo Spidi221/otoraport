@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { generateXMLFile } from '@/lib/xml-generator'
+import { generateMinistryXML, convertToMinistryFormat } from '@/lib/xml-generator'
 import { generateMarkdownFile } from '@/lib/md-generator'
 import { sendEmail } from '@/lib/email-service'
 
@@ -79,12 +79,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Generuj pliki XML i Markdown
-    const xmlContent = generateXMLFile({
+    // Convert database format to Ministry format
+    const ministryData = convertToMinistryFormat(
       developer,
-      projects: projects || [],
-      properties,
-      generatedAt: new Date()
-    })
+      projects || [],
+      properties
+    )
+
+    // Generate XML using Ministry format
+    const xmlContent = generateMinistryXML(ministryData)
 
     const markdownContent = generateMarkdownFile({
       developer,
