@@ -1,21 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { generateCSRFToken } from '@/lib/csrf'
 
 export async function GET(request: NextRequest) {
   try {
-    const session: any = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
+    const auth = await getAuthenticatedDeveloper(request)
+
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Generate CSRF token using session ID
-    const csrfToken = generateCSRFToken(session.user.id)
+    // Generate CSRF token using user ID
+    const csrfToken = generateCSRFToken(auth.user.id)
     
     return NextResponse.json({
       csrfToken,
