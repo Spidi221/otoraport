@@ -20,11 +20,8 @@ export async function POST(request: NextRequest) {
     const { domain } = await request.json();
 
     const developer = auth.developer;
-      .select('id, custom_domain, subscription_plan, company_name')
-      .eq('email', session.user.email)
-      .single();
 
-    if (devError || !developer) {
+    if (!developer) {
       return NextResponse.json(
         { success: false, error: 'Developer profile not found' },
         { status: 404 }
