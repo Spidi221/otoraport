@@ -117,12 +117,35 @@ function AuthenticatedHeader() {
             </Link>
           )}
 
-          {/* Settings */}
-          <Link href="/dashboard/settings">
-            <Button variant="ghost" size="icon">
-              <Settings className="h-5 w-5" />
-            </Button>
-          </Link>
+          {/* Settings Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Settings className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings">
+                  <User className="mr-2 h-4 w-4" />
+                  Profil użytkownika
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings/domains">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Domeny niestandardowe
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/notifications">
+                  <Bell className="mr-2 h-4 w-4" />
+                  Powiadomienia
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* User Menu */}
           <DropdownMenu>
