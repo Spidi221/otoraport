@@ -1,8 +1,7 @@
 // Middleware for subscription checking in API routes
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getSubscriptionInfo, hasFeatureAccess, requireActiveSubscription } from '@/lib/subscription-manager'
 
@@ -23,30 +22,17 @@ export function withSubscriptionCheck(
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
-      // Check authentication
-      const session: any = await getServerSession(authOptions as any)
-      if (!session?.user?.email) {
+      // Check authentication using Supabase Auth
+      const auth = await getAuthenticatedDeveloper(request)
+
+      if (!auth.success || !auth.user || !auth.developer) {
         return NextResponse.json(
-          { error: 'Unauthorized. Please log in.' },
+          { error: auth.error || 'Unauthorized. Please log in.' },
           { status: 401 }
         )
       }
 
-      // Get developer ID
-      const { data: developer, error } = await supabaseAdmin
-        .from('developers')
-        .select('id')
-        .eq('email', session.user.email)
-        .single()
-
-      if (error || !developer) {
-        return NextResponse.json(
-          { error: 'Developer not found' },
-          { status: 404 }
-        )
-      }
-
-      const developerId = developer.id
+      const developerId = auth.developer.id
 
       // Check if subscription is required and active
       if (options.requireActive !== false) { // Default true
