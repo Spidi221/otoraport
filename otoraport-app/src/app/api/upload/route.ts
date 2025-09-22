@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { parseCSVSmart, validateMinistryCompliance, parseExcelFileFromBlob, parsePropertyFile } from '@/lib/smart-csv-parser'
 import { sendComplianceNotification } from '@/lib/email-service'
-import { 
-  checkRateLimit, 
-  validateUploadFile, 
-  generateSafeFilePath, 
+import {
+  checkRateLimit,
+  validateUploadFile,
+  generateSafeFilePath,
   applySecurityHeaders,
-  sanitizeInput 
+  sanitizeInput
 } from '@/lib/security'
 import path from 'path'
 
@@ -31,32 +32,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check Supabase authentication via cookies (same as dashboard)
-    const cookieStore = request.headers.get('cookie') || ''
-    
-    // Extract Supabase session from cookies
-    let user = null
-    try {
-      // Look for the supabase auth token in cookies
-      const authTokenMatch = cookieStore.match(/sb-[^=]+-auth-token=([^;]+)/)
-      if (authTokenMatch) {
-        const authToken = decodeURIComponent(authTokenMatch[1])
-        const sessionData = JSON.parse(authToken)
-        if (sessionData.access_token) {
-          const { data: userData, error: authError } = await supabaseAdmin.auth.getUser(sessionData.access_token)
-          if (!authError && userData.user) {
-            user = userData.user
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error parsing auth cookie:', error)
-    }
-    
-    if (!user?.email) {
+    // Authentication check
+    const auth = await getAuthenticatedDeveloper(request)
+
+    if (!auth.success || !auth.user || !auth.developer) {
       const headers = applySecurityHeaders(new Headers());
       return new NextResponse(
-        JSON.stringify({ error: 'Unauthorized. Please log in.' }),
+        JSON.stringify({ error: auth.error || 'Unauthorized. Please log in.' }),
         { status: 401, headers }
       );
     }
@@ -85,7 +67,7 @@ export async function POST(request: NextRequest) {
     }
 
     // SECURITY: Generate safe filename to prevent path traversal
-    const userId = user.id || 'anonymous'
+    const userId = auth.developer.id
     const safeFileName = generateSafeFilePath(file.name, sanitizeInput(userId))
     const filePath = path.join(uploadsDir, safeFileName)
 
