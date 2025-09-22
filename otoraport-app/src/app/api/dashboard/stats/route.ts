@@ -1,32 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
-    const session: any = await getServerSession(authOptions as any)
+    const auth = await getAuthenticatedDeveloper(request)
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Get developer information
-    const { data: developer, error: devError } = await supabaseAdmin
-      .from('developers')
-      .select('*')
-      .eq('email', session.user.email)
-      .single()
-
-    if (devError || !developer) {
-      return NextResponse.json(
-        { error: 'Developer not found' },
-        { status: 404 }
-      )
-    }
+    const developer = auth.developer
 
     // Get projects count
     const { count: projectsCount } = await supabaseAdmin

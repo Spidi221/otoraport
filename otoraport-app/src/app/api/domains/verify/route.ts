@@ -2,27 +2,24 @@
 // POST /api/domains/verify
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { supabaseAdmin } from '@/lib/supabase';
 import { verifyCustomDomain } from '@/lib/custom-domains';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const auth = await getAuthenticatedDeveloper(request);
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
 
     const { domain } = await request.json();
 
-    // Get developer profile
-    const { data: developer, error: devError } = await supabaseAdmin
-      .from('developers')
+    const developer = auth.developer;
       .select('id, custom_domain, subscription_plan, company_name')
       .eq('email', session.user.email)
       .single();
@@ -115,21 +112,16 @@ export async function POST(request: NextRequest) {
 // GET /api/domains/verify - check verification status
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const auth = await getAuthenticatedDeveloper(request);
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    // Get developer profile
-    const { data: developer } = await supabaseAdmin
-      .from('developers')
-      .select('custom_domain, subscription_plan')
-      .eq('email', session.user.email)
-      .single();
+    const developer = auth.developer;
 
     if (!developer) {
       return NextResponse.json(

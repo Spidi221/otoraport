@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { analyticsService } from '@/lib/analytics'
 
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized. Please log in.' },
+        { error: auth.error || 'Unauthorized. Please log in.' },
         { status: 401 }
       )
     }
 
-    const userId = (session.user as any).id
+    const userId = auth.developer.id
     const { searchParams } = new URL(request.url)
     const reportType = searchParams.get('type') || 'overview'
     const timeframe = searchParams.get('timeframe') as '30d' | '90d' | '12m' || '30d'
@@ -89,16 +88,16 @@ export async function GET(request: NextRequest) {
 // Export detailed market report as PDF/Excel
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       )
     }
 
     const { format, reportType } = await request.json()
-    const userId = (session.user as any).id
+    const userId = auth.developer.id
 
     // Export request logged (user info redacted for security)
 

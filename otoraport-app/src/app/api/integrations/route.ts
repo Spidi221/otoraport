@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { apiIntegrationService } from '@/lib/api-integration'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    const userId = (session.user as any).id
+    const userId = auth.developer.id
     const { searchParams } = new URL(request.url)
     const action = searchParams.get('action') || 'list'
 
@@ -84,15 +83,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    const userId = (session.user as any).id
+    const userId = auth.developer.id
     const body = await request.json()
     const { action, ...data } = body
 
@@ -205,15 +204,15 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    const userId = (session.user as any).id
+    const userId = auth.developer.id
     const body = await request.json()
     const { action, id, ...updates } = body
 
@@ -284,15 +283,15 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    const userId = (session.user as any).id
+    const userId = auth.developer.id
     const { searchParams } = new URL(request.url)
     const action = searchParams.get('action')
     const id = searchParams.get('id')

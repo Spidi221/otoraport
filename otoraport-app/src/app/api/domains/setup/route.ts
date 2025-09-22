@@ -2,19 +2,18 @@
 // POST /api/domains/setup
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { supabaseAdmin } from '@/lib/supabase';
 import { setupCustomDomain } from '@/lib/custom-domains';
 import { checkSubscriptionLimits } from '@/lib/subscription-plans';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const auth = await getAuthenticatedDeveloper(request);
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -32,7 +31,7 @@ export async function POST(request: NextRequest) {
     const { data: developer, error: devError } = await supabaseAdmin
       .from('developers')
       .select('*')
-      .eq('email', session.user.email)
+      .eq('id', auth.developer.id)
       .single();
 
     if (devError || !developer) {
@@ -104,11 +103,11 @@ export async function POST(request: NextRequest) {
 // GET /api/domains/setup - get current domain configuration
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const auth = await getAuthenticatedDeveloper(request);
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -117,7 +116,7 @@ export async function GET(request: NextRequest) {
     const { data: developer } = await supabaseAdmin
       .from('developers')
       .select('id, custom_domain, presentation_url, presentation_generated_at, subscription_plan')
-      .eq('email', session.user.email)
+      .eq('id', auth.developer.id)
       .single();
 
     if (!developer) {

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { supabaseAdmin } from '@/lib/supabase'
 import { przelewy24 } from '@/lib/przelewy24'
 import { v4 as uuidv4 } from 'uuid'
@@ -8,10 +7,10 @@ import { v4 as uuidv4 } from 'uuid'
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized. Please log in.' },
+        { error: auth.error || 'Unauthorized. Please log in.' },
         { status: 401 }
       )
     }
@@ -35,10 +34,10 @@ export async function POST(request: NextRequest) {
 
     const amount = plans[plan as keyof typeof plans][period as 'monthly' | 'yearly']
     const sessionId = uuidv4()
-    
+
     // Get user data
-    const userId = (session.user as any).id
-    const userEmail = session.user.email!
+    const userId = auth.developer.id
+    const userEmail = auth.user.email
 
     // Payment creation initiated (user details redacted for security)
 
@@ -71,7 +70,7 @@ export async function POST(request: NextRequest) {
       currency: 'PLN',
       description: `OTORAPORT - ${plan} ${period} subscription`,
       email: userEmail,
-      client: session.user.name || userEmail,
+      client: auth.user.user_metadata?.name || userEmail,
       urlReturn: `${process.env.NEXTAUTH_URL}/dashboard?payment=success`,
       urlStatus: `${process.env.NEXTAUTH_URL}/api/payments/webhook`,
       sessionId

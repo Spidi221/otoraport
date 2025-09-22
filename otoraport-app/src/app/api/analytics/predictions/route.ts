@@ -2,18 +2,17 @@
 // GET /api/analytics/predictions
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { supabaseAdmin } from '@/lib/supabase';
 import { PredictiveEngine } from '@/lib/predictive-engine';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const auth = await getAuthenticatedDeveloper(request);
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -23,19 +22,7 @@ export async function GET(request: NextRequest) {
     const insight_type = searchParams.get('type'); // 'prices', 'sales', 'trends', 'behavior', 'business'
     const timeframe = searchParams.get('timeframe'); // 'week', 'month', 'quarter', 'year'
 
-    // Get developer profile
-    const { data: developer, error: devError } = await supabaseAdmin
-      .from('developers')
-      .select('id, subscription_plan, company_name')
-      .eq('email', session.user.email)
-      .single();
-
-    if (devError || !developer) {
-      return NextResponse.json(
-        { success: false, error: 'Developer profile not found' },
-        { status: 404 }
-      );
-    }
+    const developer = auth.developer;
 
     // Check if predictive analytics is available
     const hasAdvancedAnalytics = ['pro', 'enterprise'].includes(developer.subscription_plan);
@@ -106,11 +93,11 @@ export async function GET(request: NextRequest) {
 // POST endpoint for custom prediction queries
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const auth = await getAuthenticatedDeveloper(request);
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -124,19 +111,7 @@ export async function POST(request: NextRequest) {
       confidence_threshold = 0.7
     } = body;
 
-    // Get developer profile
-    const { data: developer } = await supabaseAdmin
-      .from('developers')
-      .select('id, subscription_plan')
-      .eq('email', session.user.email)
-      .single();
-
-    if (!developer) {
-      return NextResponse.json(
-        { success: false, error: 'Developer profile not found' },
-        { status: 404 }
-      );
-    }
+    const developer = auth.developer;
 
     // Check subscription access
     if (!['pro', 'enterprise'].includes(developer.subscription_plan)) {

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { supabaseAdmin } from '@/lib/supabase'
 import { setupCustomDomain, generateDNSInstructions } from '@/lib/custom-domains'
 import { checkRateLimit, applySecurityHeaders, sanitizeInput } from '@/lib/security'
@@ -32,11 +31,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Check authentication
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       const headers = applySecurityHeaders(new Headers());
       return new NextResponse(
-        JSON.stringify({ error: 'Unauthorized. Please log in.' }),
+        JSON.stringify({ error: auth.error || 'Unauthorized. Please log in.' }),
         { status: 401, headers }
       );
     }
@@ -58,7 +57,7 @@ export async function POST(request: NextRequest) {
     const { data: developer, error: devError } = await supabaseAdmin
       .from('developers')
       .select('id, company_name, subscription_plan, custom_domain')
-      .eq('email', session.user.email)
+      .eq('id', auth.developer.id)
       .single()
 
     if (devError || !developer) {

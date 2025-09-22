@@ -1,24 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { projectManagementService } from '@/lib/project-management'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    const userId = (session.user as any).id
+    const userId = auth.developer.id
     const { searchParams } = new URL(request.url)
     const action = searchParams.get('action') || 'list'
     const projectId = searchParams.get('projectId')
 
-    console.log(`Projects API request for user ${session.user.email}: ${action}`)
+    console.log(`Projects API request for user ${auth.user.email}: ${action}`)
 
     switch (action) {
       case 'list': {
@@ -85,19 +84,19 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    const userId = (session.user as any).id
+    const userId = auth.developer.id
     const body = await request.json()
     const { action, ...data } = body
 
-    console.log(`Projects POST request for user ${session.user.email}: ${action}`)
+    console.log(`Projects POST request for user ${auth.user.email}: ${action}`)
 
     switch (action) {
       case 'create': {

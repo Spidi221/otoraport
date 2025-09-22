@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { regenerateFilesForDeveloper, regenerateAllActiveFiles } from '@/lib/file-regeneration'
 
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized. Please log in.' },
+        { error: auth.error || 'Unauthorized. Please log in.' },
         { status: 401 }
       )
     }
@@ -17,12 +16,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { developerId, regenerateAll = false } = body
 
-    const userId = (session.user as any).id
+    const userId = auth.developer.id
 
     if (regenerateAll) {
       // Admin function to regenerate all files
       // In production, this should have additional admin role check
-      console.log(`Manual bulk regeneration requested by ${session.user.email}`)
+      console.log(`Manual bulk regeneration requested by ${auth.user.email}`)
       
       const result = await regenerateAllActiveFiles()
       
@@ -79,17 +78,17 @@ export async function POST(request: NextRequest) {
 // GET endpoint to check regeneration status
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       )
     }
 
     const { searchParams } = new URL(request.url)
     const developerId = searchParams.get('developerId')
-    const userId = (session.user as any).id
+    const userId = auth.developer.id
     const targetId = developerId || userId
 
     // Get latest generation info from database

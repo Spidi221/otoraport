@@ -1,34 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { supabaseAdmin } from '@/lib/supabase';
 import { ApiKeyManager, ApiResponseBuilder, API_PERMISSION_TEMPLATES } from '@/lib/api-v1';
 
 // GET /api/v1/keys - List API keys (authenticated via session)
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const auth = await getAuthenticatedDeveloper(request);
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        ApiResponseBuilder.error('Authentication required'),
+        ApiResponseBuilder.error(auth.error || 'Authentication required'),
         { status: 401 }
       );
     }
 
-    // Get developer profile
-    const { data: developer, error: devError } = await supabaseAdmin
-      .from('developers')
-      .select('id, subscription_plan')
-      .eq('email', session.user.email)
-      .single();
-
-    if (devError || !developer) {
-      return NextResponse.json(
-        ApiResponseBuilder.error('Developer profile not found'),
-        { status: 404 }
-      );
-    }
+    const developer = auth.developer;
 
     // Get API keys
     const { data: apiKeys, error } = await supabaseAdmin
@@ -70,28 +57,16 @@ export async function GET(request: NextRequest) {
 // POST /api/v1/keys - Create new API key
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const auth = await getAuthenticatedDeveloper(request);
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        ApiResponseBuilder.error('Authentication required'),
+        ApiResponseBuilder.error(auth.error || 'Authentication required'),
         { status: 401 }
       );
     }
 
-    // Get developer profile
-    const { data: developer, error: devError } = await supabaseAdmin
-      .from('developers')
-      .select('id, subscription_plan')
-      .eq('email', session.user.email)
-      .single();
-
-    if (devError || !developer) {
-      return NextResponse.json(
-        ApiResponseBuilder.error('Developer profile not found'),
-        { status: 404 }
-      );
-    }
+    const developer = auth.developer;
 
     // Parse request body
     const body = await request.json();
@@ -227,28 +202,16 @@ export async function POST(request: NextRequest) {
 // DELETE /api/v1/keys - Deactivate API key
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const auth = await getAuthenticatedDeveloper(request);
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        ApiResponseBuilder.error('Authentication required'),
+        ApiResponseBuilder.error(auth.error || 'Authentication required'),
         { status: 401 }
       );
     }
 
-    // Get developer profile
-    const { data: developer, error: devError } = await supabaseAdmin
-      .from('developers')
-      .select('id')
-      .eq('email', session.user.email)
-      .single();
-
-    if (devError || !developer) {
-      return NextResponse.json(
-        ApiResponseBuilder.error('Developer profile not found'),
-        { status: 404 }
-      );
-    }
+    const developer = auth.developer;
 
     // Parse request body
     const body = await request.json();

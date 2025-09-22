@@ -2,35 +2,22 @@
 // GET /api/analytics/dashboard
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { supabaseAdmin } from '@/lib/supabase';
 import { AnalyticsEngine } from '@/lib/analytics-engine';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const auth = await getAuthenticatedDeveloper(request);
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    // Get developer profile
-    const { data: developer, error: devError } = await supabaseAdmin
-      .from('developers')
-      .select('id, subscription_plan, company_name')
-      .eq('email', session.user.email)
-      .single();
-
-    if (devError || !developer) {
-      return NextResponse.json(
-        { success: false, error: 'Developer profile not found' },
-        { status: 404 }
-      );
-    }
+    const developer = auth.developer;
 
     // Check if analytics feature is available
     const hasAnalytics = ['pro', 'enterprise'].includes(developer.subscription_plan);
@@ -185,30 +172,17 @@ function calculateOverallHealthScore(analytics: any): number {
 // POST endpoint for custom analytics queries
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const auth = await getAuthenticatedDeveloper(request);
 
-    if (!session?.user?.email) {
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
 
     const { query_type, parameters } = await request.json();
-
-    // Get developer profile
-    const { data: developer } = await supabaseAdmin
-      .from('developers')
-      .select('id, subscription_plan')
-      .eq('email', session.user.email)
-      .single();
-
-    if (!developer) {
-      return NextResponse.json(
-        { success: false, error: 'Developer profile not found' },
-        { status: 404 }
-      );
-    }
+    const developer = auth.developer;
 
     // Handle different query types
     let result;
