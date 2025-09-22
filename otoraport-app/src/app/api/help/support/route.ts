@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { supabaseAdmin } from '@/lib/supabase';
 import { InAppHelpSystem, HelpContext } from '@/lib/help-system';
 import { sendEmail } from '@/lib/email-service';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -26,18 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user info
-    const { data: developer } = await supabaseAdmin
-      .from('developers')
-      .select('id, company_name, subscription_plan, phone')
-      .eq('email', session.user.email)
-      .single();
-
-    if (!developer) {
-      return NextResponse.json(
-        { success: false, error: 'Developer profile not found' },
-        { status: 404 }
-      );
-    }
+    const developer = auth.developer;
 
     // Validate and sanitize context
     const helpContext: HelpContext = {
@@ -64,7 +51,7 @@ export async function POST(request: NextRequest) {
       .insert({
         id: ticket.id,
         user_id: developer.id,
-        user_email: session.user.email,
+        user_email: auth.user.email,
         subject: ticket.subject,
         description: ticket.description,
         priority: ticket.priority,
@@ -88,7 +75,7 @@ Nowy ticket wsparcia od ${developer.company_name}
 
 SZCZEGÓŁY ZGŁOSZENIA:
 - ID Ticket: ${ticket.id}
-- Użytkownik: ${session.user.email}
+- Użytkownik: ${auth.user.email}
 - Firma: ${developer.company_name}
 - Plan: ${developer.subscription_plan}
 - Priorytet: ${priority}
@@ -106,7 +93,7 @@ KONTEKST APLIKACJI:
 - Krok onboardingu: ${helpContext.onboarding_step}
 
 DANE KONTAKTOWE:
-- Email: ${session.user.email}
+- Email: ${auth.user.email}
 - Telefon: ${developer.phone || 'Nie podano'}
 
 Link do ticketu: ${process.env.NEXTAUTH_URL}/admin/tickets/${ticket.id}
@@ -117,7 +104,7 @@ Link do ticketu: ${process.env.NEXTAUTH_URL}/admin/tickets/${ticket.id}
         to: process.env.SUPPORT_EMAIL || 'support@otoraport.pl',
         subject: `[${priority.toUpperCase()}] ${ticket.category} - ${subject}`,
         text: supportEmail,
-        replyTo: session.user.email
+        replyTo: auth.user.email
       });
     } catch (emailError) {
       console.error('Error sending support email:', emailError);
@@ -149,7 +136,7 @@ Zespół DevReporter
 
     try {
       await sendEmail({
-        to: session.user.email,
+        to: auth.user.email,
         subject: `Potwierdzenie zgłoszenia #${ticket.id} - ${subject}`,
         text: confirmationEmail,
         from: process.env.SUPPORT_EMAIL || 'support@otoraport.pl'
@@ -191,11 +178,10 @@ Zespół DevReporter
 // GET endpoint to fetch user's support tickets
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -206,18 +192,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Get developer ID
-    const { data: developer } = await supabaseAdmin
-      .from('developers')
-      .select('id')
-      .eq('email', session.user.email)
-      .single();
-
-    if (!developer) {
-      return NextResponse.json(
-        { success: false, error: 'Developer profile not found' },
-        { status: 404 }
-      );
-    }
+    const developer = auth.developer;
 
     // Build query
     let query = supabaseAdmin

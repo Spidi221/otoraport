@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { supabaseAdmin } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
-    const session: any = await getServerSession(authOptions as any)
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       )
     }
@@ -22,7 +20,7 @@ export async function POST(request: NextRequest) {
         onboarding_completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .eq('email', session.user.email)
+      .eq('id', auth.developer.id)
       .select()
       .single()
 
@@ -33,7 +31,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`Onboarding completed for user: ${session.user.email}`)
+    console.log(`Onboarding completed for user: ${auth.user.email}`)
 
     return NextResponse.json({
       success: true,

@@ -1,27 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { supabaseAdmin } from '@/lib/supabase';
 import { MarketingAutomationEngine, MarketingContact } from '@/lib/marketing-automation';
 
 // GET /api/marketing/contacts - List marketing contacts
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
 
     // Check if user has admin/marketing permissions
-    const { data: developer } = await supabaseAdmin
-      .from('developers')
-      .select('id, subscription_plan')
-      .eq('email', session.user.email)
-      .single();
+    const developer = auth.developer;
 
     if (!developer) {
       return NextResponse.json(
@@ -147,11 +141,10 @@ export async function GET(request: NextRequest) {
 // POST /api/marketing/contacts - Create marketing contact
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -252,11 +245,10 @@ export async function POST(request: NextRequest) {
 // PUT /api/marketing/contacts - Bulk update contacts
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }

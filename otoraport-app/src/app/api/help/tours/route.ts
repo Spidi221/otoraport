@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { supabaseAdmin } from '@/lib/supabase';
 import { InAppHelpSystem, HelpContext } from '@/lib/help-system';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -66,11 +64,10 @@ export async function GET(request: NextRequest) {
 // POST endpoint to track tour progress
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -93,18 +90,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get developer ID
-    const { data: developer } = await supabaseAdmin
-      .from('developers')
-      .select('id')
-      .eq('email', session.user.email)
-      .single();
-
-    if (!developer) {
-      return NextResponse.json(
-        { success: false, error: 'Developer profile not found' },
-        { status: 404 }
-      );
-    }
+    const developer = auth.developer;
 
     // Save tour progress to database
     const { error: saveError } = await supabaseAdmin
@@ -137,7 +123,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Send completion analytics
-      console.log(`Tour completed: ${tour_id} by user ${session.user.email}`);
+      console.log(`Tour completed: ${tour_id} by user ${auth.user.email}`);
     }
 
     return NextResponse.json({
@@ -162,17 +148,16 @@ export async function POST(request: NextRequest) {
 // PATCH endpoint to update tour completion rates (admin only)
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
 
     // Check if user is admin (in production, implement proper admin check)
-    if (!session.user.email.includes('admin') && !session.user.email.includes('bartlomiej')) {
+    if (!auth.user.email.includes('admin') && !auth.user.email.includes('bartlomiej')) {
       return NextResponse.json(
         { success: false, error: 'Admin access required' },
         { status: 403 }

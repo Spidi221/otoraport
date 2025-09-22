@@ -213,7 +213,7 @@ export async function POST(request: NextRequest) {
       'error',
       'Admin POST error',
       { error: error instanceof Error ? error.message : 'Unknown error' },
-      (await getServerSession(authOptions))?.user?.email
+      user?.email
     )
 
     return NextResponse.json(

@@ -1,27 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { supabaseAdmin } from '@/lib/supabase';
 import { MarketingAutomationEngine, EmailCampaign, EmailTemplate, AudienceSegment } from '@/lib/marketing-automation';
 
 // GET /api/marketing/campaigns - List email campaigns
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
 
     // Check subscription plan
-    const { data: developer } = await supabaseAdmin
-      .from('developers')
-      .select('id, subscription_plan')
-      .eq('email', session.user.email)
-      .single();
+    const developer = auth.developer;
 
     if (!developer || !['pro', 'enterprise'].includes(developer.subscription_plan)) {
       return NextResponse.json({
@@ -122,20 +116,15 @@ export async function GET(request: NextRequest) {
 // POST /api/marketing/campaigns - Create email campaign
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const { data: developer } = await supabaseAdmin
-      .from('developers')
-      .select('id, subscription_plan')
-      .eq('email', session.user.email)
-      .single();
+    const developer = auth.developer;
 
     if (!developer || !['pro', 'enterprise'].includes(developer.subscription_plan)) {
       return NextResponse.json({
@@ -218,20 +207,15 @@ export async function POST(request: NextRequest) {
 // PATCH /api/marketing/campaigns - Update campaign status
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const { data: developer } = await supabaseAdmin
-      .from('developers')
-      .select('id')
-      .eq('email', session.user.email)
-      .single();
+    const developer = auth.developer;
 
     if (!developer) {
       return NextResponse.json(

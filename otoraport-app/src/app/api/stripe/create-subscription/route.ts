@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { createStripeCustomer, createStripeSubscription, createBillingRecord } from '@/lib/stripe';
 import { getDeveloperById } from '@/lib/database';
 import { SubscriptionPlanType, SUBSCRIPTION_PLANS } from '@/lib/subscription-plans';
@@ -14,18 +13,18 @@ import { applySecurityHeaders, validateEmail } from '@/lib/security';
 export async function POST(request: NextRequest) {
   try {
     // Sprawdź autoryzację
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.developerId) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       const headers = applySecurityHeaders(new Headers({
         'Content-Type': 'application/json'
       }));
       return new NextResponse(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: auth.error || 'Unauthorized' }),
         { status: 401, headers }
       );
     }
 
-    const developerId = session.user.developerId;
+    const developerId = auth.developer.id;
 
     // Pobierz dane z request
     const body = await request.json();
@@ -165,13 +164,13 @@ export async function POST(request: NextRequest) {
 // GET endpoint dla informacji o planach
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.developerId) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       const headers = applySecurityHeaders(new Headers({
         'Content-Type': 'application/json'
       }));
       return new NextResponse(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: auth.error || 'Unauthorized' }),
         { status: 401, headers }
       );
     }

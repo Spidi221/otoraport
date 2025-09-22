@@ -1,26 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { supabaseAdmin } from '@/lib/supabase';
 import { WhiteLabelEngine } from '@/lib/white-label';
 
 // GET /api/white-label/metrics - Get partner dashboard metrics
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const { data: developer } = await supabaseAdmin
-      .from('developers')
-      .select('id, partner_id, is_partner')
-      .eq('email', session.user.email)
-      .single();
+    const developer = auth.developer;
 
     if (!developer || !developer.is_partner || !developer.partner_id) {
       return NextResponse.json(

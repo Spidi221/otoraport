@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
 import { InAppHelpSystem, HelpContext } from '@/lib/help-system';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request);
+    if (!auth.success || !auth.user || !auth.developer) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { error: auth.error || 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -37,7 +35,7 @@ export async function POST(request: NextRequest) {
     const response = await InAppHelpSystem.processChatbotQuery(query, helpContext);
 
     // Log interaction for analytics
-    console.log(`Chatbot interaction - User: ${session.user.email}, Query: ${query}, Confidence: ${response.confidence}`);
+    console.log(`Chatbot interaction - User: ${auth.user.email}, Query: ${query}, Confidence: ${response.confidence}`);
 
     return NextResponse.json({
       success: true,
@@ -46,7 +44,7 @@ export async function POST(request: NextRequest) {
         query,
         context: helpContext,
         timestamp: new Date().toISOString(),
-        user_id: session.user.email
+        user_id: auth.user.email
       }
     });
 

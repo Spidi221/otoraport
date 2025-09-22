@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { supabaseAdmin } from '@/lib/supabase'
 import { 
   generateMinistryRegistrationEmail, 
@@ -36,11 +35,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Check authentication
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
+    const auth = await getAuthenticatedDeveloper(request)
+    if (!auth.success || !auth.user || !auth.developer) {
       const headers = applySecurityHeaders(new Headers());
       return new NextResponse(
-        JSON.stringify({ error: 'Unauthorized. Please log in.' }),
+        JSON.stringify({ error: auth.error || 'Unauthorized' }),
         { status: 401, headers }
       );
     }
@@ -48,24 +47,8 @@ export async function POST(request: NextRequest) {
     const body: GenerateEmailRequest = await request.json()
     const { type, developerId, errors, daysSinceRegistration } = body
 
-    // Get current developer from session
-    let targetDeveloperId = developerId
-    if (!targetDeveloperId) {
-      const { data: developer } = await supabaseAdmin
-        .from('developers')
-        .select('id')
-        .eq('email', session.user.email)
-        .single()
-      
-      if (!developer) {
-        const headers = applySecurityHeaders(new Headers());
-        return new NextResponse(
-          JSON.stringify({ error: 'Developer not found' }),
-          { status: 404, headers }
-        );
-      }
-      targetDeveloperId = developer.id
-    }
+    // Get current developer from auth
+    let targetDeveloperId = developerId || auth.developer.id
 
     // Get full developer data
     const { data: developer } = await supabaseAdmin
