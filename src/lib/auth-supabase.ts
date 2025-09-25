@@ -1,53 +1,21 @@
 import { NextRequest } from 'next/server'
+import { createSupabaseReqResClient } from '@/lib/supabase-ssr'
 import { supabaseAdmin } from '@/lib/supabase'
 
 /**
- * Get authenticated user from Supabase using Bearer token
+ * Get authenticated user from Supabase using SSR client
  */
 export async function getSupabaseUser(request: NextRequest) {
   try {
-    // Get token from Authorization header
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      // Fallback to cookie if no bearer token
-      const cookieHeader = request.headers.get('cookie')
-      if (!cookieHeader) {
-        return { success: false, error: 'No authorization token provided' }
-      }
+    // Create SSR client that properly handles cookies
+    const supabase = createSupabaseReqResClient(request)
 
-      // Extract token from cookie - dynamic pattern
-      const cookiePattern = /sb-[a-z0-9]+-auth-token=([^;]+)/
-      const tokenMatch = cookieHeader.match(cookiePattern)
-
-      let token = null
-      if (tokenMatch) {
-        token = tokenMatch[1]
-      } else {
-        // Try alternative cookie patterns
-        const altPattern = /supabase-auth-token=([^;]+)/
-        const altMatch = cookieHeader.match(altPattern)
-        if (altMatch) {
-          token = altMatch[1]
-        }
-      }
-
-      if (!token) {
-        return { success: false, error: 'No valid session cookie found' }
-      }
-      const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
-
-      if (error || !user) {
-        return { success: false, error: 'Invalid session' }
-      }
-
-      return { success: true, user }
-    }
-
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+    // Get user from session (this handles cookies automatically)
+    const { data: { user }, error } = await supabase.auth.getUser()
 
     if (error || !user) {
-      return { success: false, error: 'Invalid or expired token' }
+      console.log('Auth error:', error?.message || 'No user found')
+      return { success: false, error: error?.message || 'No valid session found' }
     }
 
     return { success: true, user }

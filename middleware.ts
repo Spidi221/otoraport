@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createSupabaseReqResClient } from '@/lib/supabase-ssr'
 import { handleCustomDomain } from '@/lib/custom-domain-middleware'
 
 export async function middleware(req: NextRequest) {
@@ -16,6 +17,7 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/auth') ||
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/public') ||
+    pathname.startsWith('/api/debug-cookies') || // Allow debug endpoint
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
     pathname === '/' ||
@@ -28,19 +30,25 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // For protected routes, check auth cookie - dynamic detection
-  let accessToken = req.cookies.get('sb-maichqozswcomegcsaqg-auth-token')
+  // Create response to handle cookies properly
+  const res = NextResponse.next()
 
-  if (!accessToken) {
-    // Try generic Supabase pattern
-    const allCookies = req.cookies.getAll()
-    accessToken = allCookies.find(cookie =>
-      cookie.name.match(/sb-[a-z0-9]+-auth-token/)
-    )
-  }
+  // For protected routes, check using Supabase SSR
+  try {
+    const supabase = createSupabaseReqResClient(req, res)
+    const { data: { user }, error } = await supabase.auth.getUser()
 
-  // User must be logged in for protected routes
-  if (!accessToken) {
+    // User must be logged in for protected routes
+    if (!user || error) {
+      console.log('MIDDLEWARE: No valid user session found:', error?.message || 'No user')
+      const url = new URL('/auth/signin', req.url)
+      url.searchParams.set('callbackUrl', pathname)
+      return NextResponse.redirect(url)
+    }
+
+    console.log('MIDDLEWARE: Valid user session for:', user.email)
+  } catch (error) {
+    console.error('MIDDLEWARE: Auth check failed:', error)
     const url = new URL('/auth/signin', req.url)
     url.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(url)
@@ -54,9 +62,6 @@ export async function middleware(req: NextRequest) {
   ) {
     console.log(`AUTH: User accessing protected route ${pathname}`)
   }
-
-  // Create response with security headers
-  const res = NextResponse.next()
 
   // SECURITY: Add comprehensive security headers to all responses
   res.headers.set('X-Frame-Options', 'DENY')
