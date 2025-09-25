@@ -1,19 +1,27 @@
 'use client'
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import { Download, Send, Eye, BarChart3, Globe } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { ErrorDisplay, useErrorHandling, CommonErrors } from "../ui/error-display";
+import { supabase } from "@/lib/supabase";
 
 export function ActionButtons() {
-  const { data: session } = useSession()
+  const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const { errors, addError, removeError, clearErrors } = useErrorHandling()
 
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+  }, [])
+
   const handleDownloadXML = async () => {
-    if (!session?.user) {
+    if (!user) {
       addError(CommonErrors.unauthorizedError())
       return
     }
@@ -61,7 +69,7 @@ export function ActionButtons() {
   }
 
   const handleSendToMinistry = async () => {
-    if (!session?.user) return
+    if (!user) return
     
     setIsLoading('ministry')
     try {
@@ -81,7 +89,7 @@ export function ActionButtons() {
   }
 
   const handlePreviewReport = async () => {
-    if (!session?.user) return
+    if (!user) return
     
     setIsLoading('preview')
     try {
@@ -103,7 +111,7 @@ export function ActionButtons() {
   }
 
   const handlePresentationSite = async () => {
-    if (!session?.user) {
+    if (!user) {
       addError(CommonErrors.unauthorizedError())
       return
     }

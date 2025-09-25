@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { supabase } from "@/lib/supabase";
 import { Globe, Eye, Settings, ExternalLink, RefreshCw, Zap, Crown, Lock } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -29,7 +29,7 @@ interface DeploymentResult {
 }
 
 export function PresentationSection() {
-  const { data: session } = useSession()
+  const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const [deploymentStatus, setDeploymentStatus] = useState<DeploymentStatus | null>(null)
   const [userProfile, setUserProfile] = useState<any>(null)
@@ -37,11 +37,16 @@ export function PresentationSection() {
 
   // Check user profile and deployment status on mount
   useEffect(() => {
-    if (session?.user) {
-      checkUserProfile()
-      checkDeploymentStatus()
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      if (user) {
+        checkUserProfile()
+        checkDeploymentStatus()
+      }
     }
-  }, [session])
+    getUser()
+  }, [])
 
   const checkUserProfile = async () => {
     try {
@@ -68,7 +73,7 @@ export function PresentationSection() {
   }
 
   const handlePreview = async () => {
-    if (!session?.user) {
+    if (!user) {
       addError(CommonErrors.unauthorizedError())
       return
     }
@@ -120,7 +125,7 @@ export function PresentationSection() {
   }
 
   const handleDeploy = async () => {
-    if (!session?.user) {
+    if (!user) {
       addError(CommonErrors.unauthorizedError())
       return
     }

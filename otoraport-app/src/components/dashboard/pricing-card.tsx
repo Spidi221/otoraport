@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Check, Loader2, CreditCard, Zap, Shield, Clock } from 'lucide-react'
-import { useSession } from 'next-auth/react'
+import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
 interface PricingPlan {
@@ -77,11 +77,19 @@ const plans: PricingPlan[] = [
 export function PricingCard() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly')
   const [processing, setProcessing] = useState<string | null>(null)
-  const { data: session } = useSession()
+  const [user, setUser] = useState(null)
   const router = useRouter()
 
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+  }, [])
+
   const handleSubscribe = async (planId: 'basic' | 'pro' | 'enterprise') => {
-    if (!session?.user) {
+    if (!user) {
       router.push('/auth/signin')
       return
     }

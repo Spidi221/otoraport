@@ -28,8 +28,16 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // For protected routes, check auth cookie
-  const accessToken = req.cookies.get('sb-maichqozswcomegcsaqg-auth-token')
+  // For protected routes, check auth cookie - dynamic detection
+  let accessToken = req.cookies.get('sb-maichqozswcomegcsaqg-auth-token')
+
+  if (!accessToken) {
+    // Try generic Supabase pattern
+    const allCookies = req.cookies.getAll()
+    accessToken = allCookies.find(cookie =>
+      cookie.name.match(/sb-[a-z0-9]+-auth-token/)
+    )
+  }
 
   // User must be logged in for protected routes
   if (!accessToken) {

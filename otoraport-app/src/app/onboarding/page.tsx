@@ -1,18 +1,19 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { useSession } from 'next-auth/react'
+import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 function OnboardingContent() {
-  const { data: session, status } = useSession()
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
   const reason = searchParams.get('reason')
-  
+
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [showProfileForm, setShowProfileForm] = useState(false)
@@ -29,16 +30,23 @@ function OnboardingContent() {
   const [nipData, setNipData] = useState(null)
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin')
-      return
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      setLoading(false)
+
+      if (!user) {
+        router.push('/auth/signin')
+        return
+      }
+
+      // Check if user needs to complete profile
+      if (reason === 'incomplete_profile') {
+        setShowProfileForm(true)
+      }
     }
-    
-    // Check if user needs to complete profile (Google OAuth scenario)
-    if (reason === 'incomplete_profile' && session?.user?.provider === 'google') {
-      setShowProfileForm(true)
-    }
-  }, [status, router, reason, session])
+    getUser()
+  }, [router, reason])
 
   // Handle different onboarding scenarios based on URL params
   useEffect(() => {
@@ -179,9 +187,9 @@ function OnboardingContent() {
             <p className="text-gray-600 mt-2">
               Please complete your company profile to access the dashboard
             </p>
-            {session?.user?.email && (
+            {user?.email && (
               <p className="text-sm text-gray-500 mt-2">
-                Logged in as: {session.user.email}
+                Logged in as: {user.email}
               </p>
             )}
           </div>

@@ -80,12 +80,8 @@ function AuthenticatedHeader() {
     getUser();
   }, []);
 
-  // Admin emails
-  const ADMIN_EMAILS = [
-    'admin@otoraport.pl',
-    'bartlomiej@agencjaai.pl',
-    'chudziszewski221@gmail.com'
-  ];
+  // Admin emails from environment variable
+  const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',').map(email => email.trim()) || [];
 
   const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
 

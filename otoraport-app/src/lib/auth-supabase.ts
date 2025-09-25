@@ -15,13 +15,25 @@ export async function getSupabaseUser(request: NextRequest) {
         return { success: false, error: 'No authorization token provided' }
       }
 
-      // Extract token from cookie
-      const tokenMatch = cookieHeader.match(/sb-maichqozswcomegcsaqg-auth-token=([^;]+)/)
-      if (!tokenMatch) {
-        return { success: false, error: 'No valid session cookie' }
+      // Extract token from cookie - dynamic pattern
+      const cookiePattern = /sb-[a-z0-9]+-auth-token=([^;]+)/
+      const tokenMatch = cookieHeader.match(cookiePattern)
+
+      let token = null
+      if (tokenMatch) {
+        token = tokenMatch[1]
+      } else {
+        // Try alternative cookie patterns
+        const altPattern = /supabase-auth-token=([^;]+)/
+        const altMatch = cookieHeader.match(altPattern)
+        if (altMatch) {
+          token = altMatch[1]
+        }
       }
 
-      const token = tokenMatch[1]
+      if (!token) {
+        return { success: false, error: 'No valid session cookie found' }
+      }
       const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
 
       if (error || !user) {
