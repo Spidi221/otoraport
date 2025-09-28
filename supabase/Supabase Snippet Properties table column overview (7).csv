@@ -1,0 +1,10 @@
+field_name,status
+apartment_number,EXISTS
+property_type,EXISTS
+surface_area,EXISTS
+price_per_m2,EXISTS
+base_price,EXISTS
+final_price,EXISTS
+wojewodztwo,EXISTS
+powiat,EXISTS
+gmina,EXISTS

@@ -12,12 +12,10 @@ export async function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl
 
-  // Public routes that don't need authentication
+  // Public routes that don't need authentication middleware
   if (
     pathname.startsWith('/auth') ||
-    pathname.startsWith('/api/auth') ||
-    pathname.startsWith('/api/public') ||
-    pathname.startsWith('/api/debug-cookies') || // Allow debug endpoint
+    pathname.startsWith('/api/') || // ALL API routes bypass middleware auth
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
     pathname === '/' ||
@@ -27,7 +25,17 @@ export async function middleware(req: NextRequest) {
     pathname === '/rodo' ||
     pathname.includes('.') // Static files
   ) {
-    return NextResponse.next()
+    // Still add security headers but skip auth check
+    const res = NextResponse.next()
+
+    // PHASE 2: Enhanced security headers for all responses
+    res.headers.set('X-Frame-Options', 'DENY')
+    res.headers.set('X-Content-Type-Options', 'nosniff')
+    res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+    res.headers.set('X-XSS-Protection', '1; mode=block')
+    res.headers.set('Server', 'OTORAPORT/2.0')
+
+    return res
   }
 
   // Create response to handle cookies properly

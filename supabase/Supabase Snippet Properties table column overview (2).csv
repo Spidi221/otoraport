@@ -1,0 +1,5 @@
+id,email,company_name,client_id,subscription_plan,subscription_status,created_at
+1cd45b85-e3a6-45af-ae82-423367f0e298,demo@otoraport.pl,Unnamed Company,demo-9a17b9b6,basic,trial,2025-09-25 16:19:17.866428+00
+bb035876-89db-4eb7-b8d0-53ddebd9db07,rolbest77@gmail.com,Rol Best,rolbestcompany123,basic,trial,2025-09-13 11:05:06.479993+00
+d6a3ca68-41e6-433b-8821-6acac9ff36d2,chudzik_bartek@o2.pl,Bartek,chudzikbartek456,basic,trial,2025-09-13 09:46:57.337256+00
+105846a4-ad5d-4270-bceb-1be365ee1773,chudziszewski221@gmail.com,Bartek Chudzik,chudziszewski789,basic,trial,2025-09-13 09:45:55.146697+00

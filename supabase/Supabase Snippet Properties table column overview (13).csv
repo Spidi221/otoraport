@@ -1,0 +1,4 @@
+table_schema,constraint_name,table_name,column_name,foreign_table_schema,foreign_table_name,foreign_column_name
+public,notification_logs_developer_id_fkey,notification_logs,developer_id,public,developers,id
+public,fk_projects_developer_id,projects,developer_id,public,developers,id
+public,fk_properties_project_id,properties,project_id,public,projects,id

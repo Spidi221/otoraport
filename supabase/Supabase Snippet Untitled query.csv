@@ -1,0 +1,92 @@
+column_name,data_type,is_nullable,column_default,character_maximum_length
+id,uuid,NO,uuid_generate_v4(),null
+project_id,uuid,NO,null,null
+apartment_number,text,NO,null,null
+property_type,text,YES,'mieszkanie'::text,null
+surface_area,numeric,NO,null,null
+price_per_m2,numeric,NO,null,null
+base_price,numeric,NO,null,null
+final_price,numeric,YES,null,null
+status,text,YES,'available'::text,null
+wojewodztwo,text,YES,null,null
+powiat,text,YES,null,null
+gmina,text,YES,null,null
+miejscowosc,text,YES,null,null
+ulica,text,YES,null,null
+numer_nieruchomosci,text,YES,null,null
+kod_pocztowy,text,YES,null,null
+kondygnacja,integer,YES,null,null
+liczba_pokoi,numeric,YES,null,null
+powierzchnia_balkon,numeric,YES,null,null
+powierzchnia_taras,numeric,YES,null,null
+powierzchnia_loggia,numeric,YES,null,null
+powierzchnia_ogrod,numeric,YES,null,null
+powierzchnia_piwnica,numeric,YES,null,null
+powierzchnia_strych,numeric,YES,null,null
+powierzchnia_garaz,numeric,YES,null,null
+data_pierwszej_oferty,date,YES,null,null
+data_pierwszej_sprzedazy,date,YES,null,null
+price_valid_from,date,YES,CURRENT_DATE,null
+price_valid_to,date,YES,null,null
+cena_za_m2_poczatkowa,numeric,YES,null,null
+cena_bazowa_poczatkowa,numeric,YES,null,null
+miejsca_postojowe_nr,ARRAY,YES,null,null
+miejsca_postojowe_ceny,ARRAY,YES,null,null
+komorki_nr,ARRAY,YES,null,null
+komorki_ceny,ARRAY,YES,null,null
+pomieszczenia_przynalezne,jsonb,YES,null,null
+inne_swiadczenia,jsonb,YES,null,null
+status_dostepnosci,text,YES,'dostepne'::text,null
+data_rezerwacji,date,YES,null,null
+data_sprzedazy,date,YES,null,null
+powod_zmiany_ceny,text,YES,null,null
+uwagi,text,YES,null,null
+standard_wykonczenia,text,YES,null,null
+typ_budynku,text,YES,null,null
+rok_budowy,integer,YES,null,null
+klasa_energetyczna,text,YES,null,null
+system_grzewczy,text,YES,null,null
+dostep_dla_niepelnosprawnych,boolean,YES,false,null
+created_at,timestamp with time zone,YES,now(),null
+updated_at,timestamp with time zone,YES,now(),null
+last_price_change,timestamp with time zone,YES,null,null
+xml_generated,boolean,YES,false,null
+ministry_compliant,boolean,YES,true,null
+budynek,character varying,YES,null,50
+klatka,character varying,YES,null,20
+liczba_kondygnacji,integer,YES,null,null
+uklad_mieszkania,character varying,YES,null,50
+stan_wykonczenia,character varying,YES,null,50
+technologia_budowy,character varying,YES,null,100
+powierzchnia_uzytkowa,numeric,YES,null,null
+powierzchnia_calkowita,numeric,YES,null,null
+powierzchnia_piwnicy,numeric,YES,null,null
+powierzchnia_strychu,numeric,YES,null,null
+cena_finalna_poczatkowa,numeric,YES,null,null
+cena_za_m2_aktualna,numeric,YES,null,null
+cena_bazowa_aktualna,numeric,YES,null,null
+cena_finalna_aktualna,numeric,YES,null,null
+data_obowiazywania_ceny_od,date,YES,null,null
+data_obowiazywania_ceny_do,date,YES,null,null
+waluta,character varying,YES,'PLN'::character varying,3
+miejsca_postojowe_liczba,integer,YES,null,null
+miejsca_postojowe_rodzaj,character varying,YES,null,50
+komorki_lokatorskie_liczba,integer,YES,null,null
+komorki_lokatorskie_nr,ARRAY,YES,null,null
+komorki_lokatorskie_ceny,ARRAY,YES,null,null
+komorki_lokatorskie_powierzchnie,ARRAY,YES,null,null
+winda,boolean,YES,null,null
+klimatyzacja,boolean,YES,null,null
+ogrzewanie,character varying,YES,null,50
+ekspozycja,character varying,YES,null,100
+widok_z_okien,character varying,YES,null,200
+status_sprzedazy,character varying,YES,'dostepne'::character varying,50
+data_przekazania,date,YES,null,null
+forma_wlasnosci,character varying,YES,null,50
+ksiega_wieczysta,character varying,YES,null,100
+udzial_w_gruncie,numeric,YES,null,null
+data_pierwszego_raportu,timestamp with time zone,YES,null,null
+data_ostatniej_aktualizacji,timestamp with time zone,YES,null,null
+liczba_zmian_ceny,integer,YES,0,null
+uwagi_ministerstwo,text,YES,null,null
+uuid_ministerstwo,uuid,YES,null,null

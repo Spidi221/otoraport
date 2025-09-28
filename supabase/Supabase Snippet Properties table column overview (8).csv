@@ -1,0 +1,12 @@
+schemaname,tablename,policyname,permissive,roles,cmd,qual,with_check
+public,developers,Service role full access to developers,PERMISSIVE,{service_role},ALL,true,null
+public,developers,Users can access their own developer profile,PERMISSIVE,{authenticated},ALL,(auth.uid() = user_id),null
+public,projects,Developers can access own projects,PERMISSIVE,{public},ALL,"((developer_id IN ( SELECT developers.id
+   FROM developers
+  WHERE ((developers.user_id)::text = (auth.uid())::text))) OR (auth.role() = 'service_role'::text))",null
+public,projects,Service role can access projects,PERMISSIVE,{public},ALL,(auth.role() = 'service_role'::text),null
+public,properties,Developers can access own properties,PERMISSIVE,{public},ALL,"((project_id IN ( SELECT p.id
+   FROM (projects p
+     JOIN developers d ON ((p.developer_id = d.id)))
+  WHERE ((d.user_id)::text = (auth.uid())::text))) OR (auth.role() = 'service_role'::text))",null
+public,properties,Service role can access properties,PERMISSIVE,{public},ALL,(auth.role() = 'service_role'::text),null

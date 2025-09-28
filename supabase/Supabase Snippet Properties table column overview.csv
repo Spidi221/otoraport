@@ -1,0 +1,12 @@
+column_name,data_type,is_nullable,column_default,character_maximum_length
+id,uuid,NO,uuid_generate_v4(),null
+developer_id,uuid,NO,null,null
+name,text,NO,null,null
+description,text,YES,null,null
+location,text,YES,null,null
+status,text,YES,'active'::text,null
+start_date,date,YES,null,null
+expected_completion_date,date,YES,null,null
+actual_completion_date,date,YES,null,null
+created_at,timestamp with time zone,YES,now(),null
+updated_at,timestamp with time zone,YES,now(),null

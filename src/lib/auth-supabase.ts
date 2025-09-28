@@ -7,6 +7,26 @@ import { supabaseAdmin } from '@/lib/supabase'
  */
 export async function getSupabaseUser(request: NextRequest) {
   try {
+    // Check if we have any cookies at all
+    const cookieHeader = request.headers.get('cookie')
+    if (!cookieHeader) {
+      console.log('❌ AUTH: No cookie header found in request')
+      return { success: false, error: 'Auth session missing!' }
+    }
+
+    console.log('🍪 AUTH: Cookie header found:', cookieHeader.substring(0, 100) + '...')
+
+    // Enhanced cookie detection - look for Supabase auth tokens
+    const supabaseTokenPattern = /sb-[a-z0-9]+-auth-token/
+    const hasSupabaseToken = supabaseTokenPattern.test(cookieHeader)
+
+    if (!hasSupabaseToken) {
+      console.log('❌ AUTH: No Supabase auth token found in cookies')
+      return { success: false, error: 'Auth session missing!' }
+    }
+
+    console.log('✅ AUTH: Supabase auth token detected')
+
     // Create SSR client that properly handles cookies
     const supabase = createSupabaseReqResClient(request)
 
@@ -14,13 +34,14 @@ export async function getSupabaseUser(request: NextRequest) {
     const { data: { user }, error } = await supabase.auth.getUser()
 
     if (error || !user) {
-      console.log('Auth error:', error?.message || 'No user found')
+      console.log('❌ AUTH: Supabase auth failed:', error?.message || 'No user found')
       return { success: false, error: error?.message || 'No valid session found' }
     }
 
+    console.log('✅ AUTH: User authenticated successfully:', user.email)
     return { success: true, user }
   } catch (error) {
-    console.error('Auth error:', error)
+    console.error('❌ AUTH: Exception in getSupabaseUser:', error)
     return { success: false, error: 'Authentication failed' }
   }
 }
