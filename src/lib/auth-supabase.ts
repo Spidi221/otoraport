@@ -51,19 +51,28 @@ export async function getSupabaseUser(request: NextRequest) {
  */
 export async function getDeveloperByEmail(email: string) {
   try {
+    console.log('🔍 AUTH: Querying developers table for email:', email)
+
     const { data: developer, error } = await supabaseAdmin
       .from('developers')
       .select('*')
       .eq('email', email)
-      .single()
+      .maybeSingle()
 
-    if (error || !developer) {
+    if (error) {
+      console.error('❌ AUTH: Database query error:', error)
+      return { success: false, error: `Database error: ${error.message}` }
+    }
+
+    if (!developer) {
+      console.log('⚠️ AUTH: No developer profile found for email:', email)
       return { success: false, error: 'Developer profile not found' }
     }
 
+    console.log('✅ AUTH: Developer profile found:', developer.client_id)
     return { success: true, developer }
   } catch (error) {
-    console.error('Developer lookup error:', error)
+    console.error('💥 AUTH: Exception in getDeveloperByEmail:', error)
     return { success: false, error: 'Failed to get developer profile' }
   }
 }
