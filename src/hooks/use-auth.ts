@@ -45,12 +45,21 @@ export function useAuth(): AuthState & AuthActions {
     try {
       console.log('🔍 Loading developer profile for user:', user.id, user.email)
 
-      // Use maybeSingle() instead of single() to avoid errors when profile doesn't exist
-      const { data: developerData, error } = await supabase
+      // Add timeout to detect hanging queries
+      const queryPromise = supabase
         .from('developers')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle()
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Query timeout after 5 seconds')), 5000)
+      )
+
+      const { data: developerData, error } = await Promise.race([
+        queryPromise,
+        timeoutPromise
+      ]) as any
 
       if (error) {
         console.error('❌ Error loading developer profile:', error)
@@ -66,6 +75,8 @@ export function useAuth(): AuthState & AuthActions {
       }
     } catch (error) {
       console.error('💥 Critical error loading developer profile:', error)
+      // If loading fails, still allow user to continue without developer profile
+      setDeveloper(null)
     }
   }
 
