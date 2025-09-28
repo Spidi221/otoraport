@@ -3,20 +3,23 @@ import { cookies } from 'next/headers'
 import { supabaseAdmin } from '@/lib/supabase'
 import AdminDashboard from '@/components/admin/admin-dashboard'
 
-// SECURITY FIX: Admin emails - match header configuration
-const ADMIN_EMAILS = [
-  'admin@otoraport.pl',
-  'bartlomiej@agencjaai.pl',
-  'chudziszewski221@gmail.com'
-]
+// SECURITY FIX: Admin emails from environment variables
+const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',').map(email => email.trim()) || []
 
 export default async function AdminPage() {
   const cookieStore = await cookies()
-  const accessToken = cookieStore.get('sb-maichqozswcomegcsaqg-auth-token')
 
-  if (!accessToken) {
+  // FIXED: Dynamic cookie detection for any Supabase instance
+  const allCookies = cookieStore.getAll()
+  const authCookie = allCookies.find(cookie =>
+    cookie.name.match(/^sb-[a-z0-9]+-auth-token$/)
+  )
+
+  if (!authCookie) {
     redirect('/auth/signin')
   }
+
+  const accessToken = authCookie
 
   // Get user from Supabase Auth
   const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken.value)

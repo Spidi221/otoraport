@@ -109,10 +109,19 @@ function getOffTopicResponse(): string {
   return "Przepraszam, jestem chatbotem OTORAPORT i pomagam wyłącznie w kwestiach związanych z automatyzacją raportowania cen mieszkań. Czy mogę pomóc Ci w czymś związanym z naszym systemem compliance?";
 }
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy OpenAI client initialization to prevent build errors
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY environment variable is not set');
+    }
+    openai = new OpenAI({ apiKey });
+  }
+  return openai;
+}
 
 export interface AIResponse {
   response: string;
@@ -169,6 +178,15 @@ export async function getAIChatResponse(
   sessionId: string
 ): Promise<AIResponse> {
   try {
+    // Check if OpenAI is configured
+    if (!process.env.OPENAI_API_KEY) {
+      console.warn('OpenAI API key not configured, using fallback response');
+      return {
+        response: 'Chatbot jest obecnie w trybie ograniczonym. Skontaktuj się z supportem w celu uzyskania pełnego dostępu.',
+        confidence: 0.8,
+        sources: ['system-fallback']
+      };
+    }
     // CRITICAL: First validate if the question is OTORAPORT-related
     const topicValidation = validateTopicRelevance(message);
     
@@ -221,7 +239,7 @@ export async function getAIChatResponse(
       `\n\nREMINDER: The user asked: "${message}" - make sure this is OTORAPORT related. If not, use the standard redirect response.`;
     
     // Call OpenAI API
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAIClient().chat.completions.create({
       model: 'gpt-4o',
       messages: [
         { role: 'system', content: enhancedSystemPrompt },
@@ -302,7 +320,7 @@ export async function getAIChatResponse(
  */
 async function generateFollowUpQuestions(userMessage: string, botResponse: string): Promise<string[]> {
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAIClient().chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {
@@ -347,12 +365,17 @@ async function generateFollowUpQuestions(userMessage: string, botResponse: strin
  */
 export async function checkOpenAIHealth(): Promise<boolean> {
   try {
-    const completion = await openai.chat.completions.create({
+    // Return false if API key is not configured
+    if (!process.env.OPENAI_API_KEY) {
+      return false;
+    }
+
+    const completion = await getOpenAIClient().chat.completions.create({
       model: 'gpt-4o',
       messages: [{ role: 'user', content: 'Czy działa OTORAPORT?' }],
       max_tokens: 10
     });
-    
+
     return !!completion.choices[0]?.message?.content;
   } catch (error) {
     console.error('OpenAI Health Check Failed:', error);

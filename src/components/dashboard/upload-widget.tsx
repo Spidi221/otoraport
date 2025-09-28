@@ -3,6 +3,7 @@ import { Upload, FileText, CheckCircle, Loader2, AlertCircle } from "lucide-reac
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+import { api } from "@/lib/api-client";
 
 interface UploadResult {
   fileName: string;
@@ -35,22 +36,15 @@ export function UploadWidget() {
   const uploadFile = async (file: File) => {
     setUploading(true);
     setError(null);
-    
+
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      const result = await response.json();
-      
-      if (!response.ok) {
+      // Use API client with automatic cookie handling
+      const result = await api.uploadFile(file);
+
+      if (!result.success) {
         throw new Error(result.error || 'Wystąpił błąd podczas przesyłania');
       }
-      
+
       setUploadResult(result.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Wystąpił nieznany błąd');

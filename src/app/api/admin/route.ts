@@ -3,25 +3,26 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { adminService } from '@/lib/admin-service'
 import { cookies } from 'next/headers'
 
-// Admin users - in production this would be from database
-const ADMIN_EMAILS = [
-  'admin@otoraport.pl',
-  'bartlomiej@agencjaai.pl',
-  'chudziszewski221@gmail.com'
-]
+// SECURITY FIX: Admin emails from environment variables
+const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',').map(email => email.trim()) || []
 
 export async function GET(request: NextRequest) {
   try {
-    // Get auth token from cookie
+    // FIXED: Dynamic cookie detection for any Supabase instance
     const cookieStore = await cookies()
-    const accessToken = cookieStore.get('sb-maichqozswcomegcsaqg-auth-token')
+    const allCookies = cookieStore.getAll()
+    const authCookie = allCookies.find(cookie =>
+      cookie.name.match(/^sb-[a-z0-9]+-auth-token$/)
+    )
 
-    if (!accessToken) {
+    if (!authCookie) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       )
     }
+
+    const accessToken = authCookie
 
     // Get user from Supabase
     const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken.value)
@@ -110,16 +111,21 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get auth token from cookie
+    // FIXED: Dynamic cookie detection for any Supabase instance
     const cookieStore = await cookies()
-    const accessToken = cookieStore.get('sb-maichqozswcomegcsaqg-auth-token')
+    const allCookies = cookieStore.getAll()
+    const authCookie = allCookies.find(cookie =>
+      cookie.name.match(/^sb-[a-z0-9]+-auth-token$/)
+    )
 
-    if (!accessToken) {
+    if (!authCookie) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       )
     }
+
+    const accessToken = authCookie
 
     // Get user from Supabase
     const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken.value)

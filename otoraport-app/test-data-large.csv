@@ -1,0 +1,101 @@
+Nazwa dewelopera;NIP;REGON;Email;Telefon;Nr lokalu;Rodzaj nieruchomości;Powierzchnia użytkowa;Cena za m2;Cena bazowa;Cena finalna;Miejscowość inwestycji;Ulica inwestycji;Status sprzedaży;Miejsca postojowe;Cena parkingu;Komórka;Cena komórki;Uwagi
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD001;mieszkanie;32.4;11500;372600;397600;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Centrum miasta
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD002;mieszkanie;45.7;11200;511840;546840;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Widok na Wawel
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD003;mieszkanie;38.9;11800;459020;494020;Kraków;Starowiślna;Rezerwacja;1;28000;0;0;Balkon francuski
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD004;mieszkanie;52.3;11000;575300;620300;Kraków;Starowiślna;Dostępne;1;28000;1;12000;3 pokoje
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD005;mieszkanie;41.2;11600;477920;512920;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Nowoczesny design
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD006;mieszkanie;67.8;10800;732240;782240;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Mieszkanie rodzinne
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD007;mieszkanie;29.5;12000;354000;379000;Kraków;Starowiślna;Dostępne;1;28000;0;0;Studio loft
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD008;mieszkanie;56.1;10900;611490;661490;Kraków;Starowiślna;Sprzedane;1;28000;1;12000;Sold out
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD009;mieszkanie;43.6;11400;497040;532040;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Premium wykończenie
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD010;mieszkanie;39.8;11700;465660;500660;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Ciche podwórko
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD011;mieszkanie;48.4;11100;537240;572240;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Południowa strona
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD012;mieszkanie;61.7;10700;660190;710190;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Przestronny salon
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD013;mieszkanie;35.2;11900;418880;448880;Kraków;Starowiślna;Dostępne;1;28000;0;0;Kompaktowe mieszkanie
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD014;mieszkanie;54.9;10600;582140;632140;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Duża kuchnia
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD015;mieszkanie;42.7;11500;491050;526050;Kraków;Starowiślna;Rezerwacja;1;28000;1;12000;W trakcie rezerwacji
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD016;mieszkanie;37.1;11800;437780;467780;Kraków;Starowiślna;Dostępne;1;28000;0;0;Idealne dla pary
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD017;mieszkanie;59.3;10500;622650;672650;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Corner unit
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD018;mieszkanie;46.8;11300;528840;563840;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Wysokie sufity
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD019;mieszkanie;33.6;12100;406560;431560;Kraków;Starowiślna;Dostępne;1;28000;0;0;Młoda para starter
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD020;mieszkanie;71.4;10400;742560;802560;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Family apartment
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD021;mieszkanie;40.5;11600;469800;504800;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Modern kitchen
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD022;mieszkanie;53.7;10900;585330;635330;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Large bedroom
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD023;mieszkanie;36.9;11900;439110;469110;Kraków;Starowiślna;Sprzedane;1;28000;0;0;Recently sold
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD024;mieszkanie;48.2;11200;539840;574840;Kraków;Starowiślna;Dostępne;1;28000;1;12000;City view
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD025;mieszkanie;64.1;10300;660230;720230;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Penthouse style
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD026;mieszkanie;31.8;12200;388360;413360;Kraków;Starowiślna;Dostępne;1;28000;0;0;Investment unit
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD027;mieszkanie;55.6;10800;600480;650480;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Garden access
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD028;mieszkanie;44.3;11400;505020;540020;Kraków;Starowiślna;Rezerwacja;1;28000;1;12000;Under negotiation
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD029;mieszkanie;38.7;11700;452790;487790;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Bright apartment
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD030;mieszkanie;62.5;10600;662500;722500;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Executive unit
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD031;dom;95.4;9800;935320;1035320;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Townhouse
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD032;dom;108.7;9600;1043520;1153520;Kraków;Starowiślna;Dostępne;3;84000;1;12000;Large house
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD033;dom;87.3;10100;881730;971730;Kraków;Starowiślna;Rezerwacja;2;56000;1;12000;Family home
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD034;mieszkanie;41.9;11500;481850;516850;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Mid-floor unit
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD035;mieszkanie;57.2;10700;612040;662040;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Terrace access
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD036;mieszkanie;34.5;12000;414000;439000;Kraków;Starowiślna;Dostępne;1;28000;0;0;Starter home
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD037;mieszkanie;49.8;11100;552780;587780;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Premium finishes
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD038;mieszkanie;66.4;10400;690560;750560;Kraków;Starowiślna;Sprzedane;2;56000;1;12000;Luxury unit sold
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD039;mieszkanie;37.8;11800;445840;475840;Kraków;Starowiślna;Dostępne;1;28000;0;0;Cozy apartment
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD040;mieszkanie;52.1;11000;573100;623100;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Open plan living
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD041;mieszkanie;45.6;11300;515280;550280;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Designer unit
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD042;mieszkanie;39.2;11700;458640;488640;Kraków;Starowiślna;Rezerwacja;1;28000;1;12000;Popular choice
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD043;mieszkanie;58.9;10600;624340;674340;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Master suite
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD044;mieszkanie;42.4;11500;487600;522600;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Quality build
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD045;mieszkanie;35.7;11900;425030;455030;Kraków;Starowiślna;Dostępne;1;28000;0;0;Single person
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD046;mieszkanie;61.3;10500;643650;703650;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Spacious living
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD047;mieszkanie;47.1;11200;527520;562520;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Great location
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD048;mieszkanie;33.9;12100;410190;435190;Kraków;Starowiślna;Dostępne;1;28000;0;0;Urban living
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD049;mieszkanie;54.5;10900;594050;644050;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Modern amenities
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD050;mieszkanie;40.8;11600;473280;508280;Kraków;Starowiślna;Sprzedane;1;28000;1;12000;Recently purchased
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD051;mieszkanie;69.2;10300;712760;772760;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Premium location
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD052;mieszkanie;36.4;11800;429520;459520;Kraków;Starowiślna;Dostępne;1;28000;0;0;Compact design
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD053;mieszkanie;51.7;11000;568700;618700;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Central heating
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD054;mieszkanie;44.9;11400;512060;547060;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Air conditioning
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD055;mieszkanie;38.1;11700;445770;480770;Kraków;Starowiślna;Rezerwacja;1;28000;1;12000;Quick sale needed
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD056;mieszkanie;63.8;10400;663520;723520;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Executive style
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD057;mieszkanie;29.7;12200;362340;387340;Kraków;Starowiślna;Dostępne;1;28000;0;0;Micro apartment
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD058;mieszkanie;56.3;10800;608040;658040;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Garden view
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD059;mieszkanie;43.2;11500;496800;531800;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Move-in ready
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD060;mieszkanie;37.5;11800;442500;472500;Kraków;Starowiślna;Dostępne;1;28000;0;0;Perfect starter
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD061;mieszkanie;59.7;10600;632820;682820;Kraków;Starowiślna;Dostępne;1;28000;1;12000;River view
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD062;mieszkanie;46.5;11300;525450;560450;Kraków;Starowiślna;Sprzedane;1;28000;1;12000;Sold to investor
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD063;mieszkanie;32.1;12000;385200;410200;Kraków;Starowiślna;Dostępne;1;28000;0;0;Student friendly
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD064;mieszkanie;68.4;10200;697680;757680;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Large family unit
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD065;mieszkanie;41.6;11600;482560;517560;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Quality finishes
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD066;mieszkanie;53.8;10900;586420;636420;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Contemporary style
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD067;mieszkanie;35.9;11900;427410;457410;Kraków;Starowiślna;Rezerwacja;1;28000;0;0;Under offer
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD068;mieszkanie;48.7;11100;540570;575570;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Natural light
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD069;mieszkanie;62.9;10500;660450;720450;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Luxury amenities
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD070;mieszkanie;39.6;11700;463320;498320;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Perfect layout
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD071;mieszkanie;55.2;10800;596160;646160;Kraków;Starowiślna;Dostępne;1;28000;1;12000;High ceiling
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD072;mieszkanie;42.8;11400;488320;523320;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Modern bathroom
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD073;mieszkanie;34.3;12100;415030;440030;Kraków;Starowiślna;Dostępne;1;28000;0;0;Efficient space
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD074;mieszkanie;67.1;10300;691130;751130;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Premium suite
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD075;mieszkanie;45.4;11300;513020;548020;Kraków;Starowiślna;Sprzedane;1;28000;1;12000;Recently completed
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD076;mieszkanie;38.8;11700;453960;483960;Kraków;Starowiślna;Dostępne;1;28000;0;0;Great investment
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD077;mieszkanie;57.6;10700;616320;666320;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Balcony included
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD078;mieszkanie;31.5;12200;384300;409300;Kraków;Starowiślna;Dostępne;1;28000;0;0;Young professional
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD079;mieszkanie;64.7;10400;672880;732880;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Penthouse feel
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD080;mieszkanie;47.9;11200;536480;571480;Kraków;Starowiślna;Rezerwacja;1;28000;1;12000;Final negotiations
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD081;mieszkanie;40.2;11600;466320;501320;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Smart home ready
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD082;mieszkanie;52.5;11000;577500;627500;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Energy efficient
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD083;mieszkanie;36.1;11900;429590;459590;Kraków;Starowiślna;Dostępne;1;28000;0;0;Low maintenance
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD084;mieszkanie;59.4;10600;629640;679640;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Executive home
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD085;mieszkanie;44.1;11400;502740;537740;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Modern appliances
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD086;mieszkanie;33.7;12000;404400;429400;Kraków;Starowiślna;Sprzedane;1;28000;0;0;Quick purchase
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD087;mieszkanie;66.8;10300;688040;748040;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Luxury living
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD088;mieszkanie;49.3;11100;547230;582230;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Great value
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD089;mieszkanie;41.8;11500;480700;515700;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Prime location
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD090;mieszkanie;58.1;10700;621670;671670;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Panoramic view
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD091;dom;92.3;9900;914070;1014070;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Detached house
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD092;dom;105.6;9700;1024320;1134320;Kraków;Starowiślna;Rezerwacja;3;84000;1;12000;Large family home
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD093;dom;78.9;10200;804780;884780;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Cozy house
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD094;mieszkanie;37.4;11800;441320;471320;Kraków;Starowiślna;Dostępne;1;28000;0;0;Easy maintenance
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD095;mieszkanie;54.6;10900;595140;645140;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Secure building
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD096;mieszkanie;43.5;11400;496900;531900;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Elevator access
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD097;mieszkanie;32.8;12100;396880;421880;Kraków;Starowiślna;Dostępne;1;28000;0;0;Rental potential
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD098;mieszkanie;61.9;10500;650450;710450;Kraków;Starowiślna;Dostępne;2;56000;1;12000;Corner position
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD099;mieszkanie;46.7;11300;527710;562710;Kraków;Starowiślna;Sprzedane;1;28000;1;12000;Final unit sold
+BIG DEVELOPMENT S.A.;7070009012;901234567;biuro@bigdev.pl;+48 12 678 90 12;BD100;mieszkanie;39.4;11700;461180;496180;Kraków;Starowiślna;Dostępne;1;28000;1;12000;Last chance opportunity

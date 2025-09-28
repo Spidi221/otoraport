@@ -51,9 +51,19 @@ export async function getDeveloperByEmail(email: string) {
  * Combined auth check - gets both user and developer profile
  */
 export async function getAuthenticatedDeveloper(request: NextRequest) {
+  console.log('🔍 AUTH: getAuthenticatedDeveloper called')
+
   const authResult = await getSupabaseUser(request)
 
+  console.log('🔍 AUTH: getSupabaseUser result:', {
+    success: authResult.success,
+    hasUser: !!authResult.user,
+    userEmail: authResult.user?.email,
+    error: authResult.error
+  })
+
   if (!authResult.success || !authResult.user?.email) {
+    console.log('❌ AUTH: User authentication failed')
     return {
       success: false,
       error: authResult.error || 'Unauthorized',
@@ -62,9 +72,17 @@ export async function getAuthenticatedDeveloper(request: NextRequest) {
     }
   }
 
+  console.log('🔍 AUTH: Looking up developer for email:', authResult.user.email)
   const devResult = await getDeveloperByEmail(authResult.user.email)
 
+  console.log('🔍 AUTH: Developer lookup result:', {
+    success: devResult.success,
+    hasDeveloper: !!devResult.developer,
+    error: devResult.error
+  })
+
   if (!devResult.success || !devResult.developer) {
+    console.log('❌ AUTH: Developer profile not found')
     return {
       success: false,
       error: devResult.error || 'Developer profile not found',
@@ -73,6 +91,7 @@ export async function getAuthenticatedDeveloper(request: NextRequest) {
     }
   }
 
+  console.log('✅ AUTH: Full authentication successful for:', devResult.developer.client_id)
   return {
     success: true,
     user: authResult.user,

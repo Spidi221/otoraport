@@ -5,11 +5,18 @@ import AnalyticsDashboard from '@/components/analytics/analytics-dashboard'
 
 export default async function AnalyticsPage() {
   const cookieStore = await cookies()
-  const accessToken = cookieStore.get('sb-maichqozswcomegcsaqg-auth-token')
 
-  if (!accessToken) {
+  // FIXED: Dynamic cookie detection for any Supabase instance
+  const allCookies = cookieStore.getAll()
+  const authCookie = allCookies.find(cookie =>
+    cookie.name.match(/^sb-[a-z0-9]+-auth-token$/)
+  )
+
+  if (!authCookie) {
     redirect('/auth/signin')
   }
+
+  const accessToken = authCookie
 
   // Get user from Supabase Auth
   const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken.value)

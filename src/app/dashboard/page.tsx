@@ -1,8 +1,7 @@
 'use client'
 
-import { Suspense, lazy, useMemo, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { Suspense, lazy, useMemo } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import { Header } from "@/components/dashboard/header";
 import { UploadWidget } from "@/components/dashboard/upload-widget";
 import { StatusCards } from "@/components/dashboard/status-cards";
@@ -20,45 +19,8 @@ const AdvancedAnalyticsDashboard = lazy(() => import("@/components/dashboard/Adv
 const PredictiveInsightsDashboard = lazy(() => import("@/components/dashboard/PredictiveInsightsDashboard"));
 
 export default function HomePage() {
-  const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Check Supabase user and profile status
-  useEffect(() => {
-    async function checkUserStatus() {
-      console.log('Dashboard: Checking auth status...')
-      
-      // Get current Supabase session
-      const { data: { session }, error } = await supabase.auth.getSession()
-      
-      if (error) {
-        console.error('Dashboard: Auth error:', error)
-        router.push('/auth/signin')
-        return
-      }
-      
-      if (!session?.user) {
-        console.log('Dashboard: No session, redirecting to signin')
-        router.push('/auth/signin')
-        return
-      }
-      
-      console.log('Dashboard: User authenticated:', session.user.email)
-      setUser(session.user)
-
-      if (session.user?.email) {
-        console.log('Dashboard: User authenticated, skipping profile API check')
-        // TODO: Replace with direct Supabase query to developers table
-        // For now, assume user is good to go
-      }
-      
-      setIsLoading(false);
-    }
-
-    checkUserStatus();
-  }, [router]);
+  // FIXED: Use unified auth hook with automatic developer profile loading
+  const { user, developer, loading, isAdmin } = useAuth();
 
   // Memoized greeting calculation - avoiding SSR/CSR mismatch
   const greeting = useMemo(() => {
@@ -75,7 +37,7 @@ export default function HomePage() {
   }, [user?.user_metadata?.full_name]);
 
   // Show loading while checking user status
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <LoadingState message="Sprawdzanie uprawnień..." />
@@ -89,13 +51,7 @@ export default function HomePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Dostęp zabroniony</h2>
-          <p className="text-gray-600 mb-6">Musisz ukończyć proces rejestracji, aby uzyskać dostęp do dashboardu.</p>
-          <button
-            onClick={() => router.push('/onboarding')}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Ukończ rejestrację
-          </button>
+          <p className="text-gray-600 mb-6">Musisz się zalogować, aby uzyskać dostęp do dashboardu.</p>
         </div>
       </div>
     );
@@ -168,8 +124,8 @@ export default function HomePage() {
         {user && (
           <FloatingHelpButton
             userId={user.id}
-            subscriptionPlan={userProfile?.subscription_plan || 'basic'}
-            onboardingStep={userProfile?.onboarding_step || 1}
+            subscriptionPlan={developer?.subscription_plan || 'basic'}
+            onboardingStep={1}
           />
         )}
       </main>

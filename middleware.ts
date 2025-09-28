@@ -63,31 +63,47 @@ export async function middleware(req: NextRequest) {
     console.log(`AUTH: User accessing protected route ${pathname}`)
   }
 
-  // SECURITY: Add comprehensive security headers to all responses
+  // PHASE 2: Enhanced security headers
   res.headers.set('X-Frame-Options', 'DENY')
   res.headers.set('X-Content-Type-Options', 'nosniff')
   res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   res.headers.set('X-XSS-Protection', '1; mode=block')
-  res.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
-  res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  res.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
+  res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), clipboard-read=(), clipboard-write=()')
 
-  // Content Security Policy - prevents XSS attacks
+  // Enhanced Content Security Policy
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com https://maichqozswcomegcsaqg.supabase.co;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com https://maichqozswcomegcsaqg.supabase.co https://js.stripe.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    font-src 'self' https://fonts.gstatic.com;
+    font-src 'self' https://fonts.gstatic.com data:;
     img-src 'self' data: https: blob:;
-    connect-src 'self' https://api.openai.com https://accounts.google.com https://www.googleapis.com https://maichqozswcomegcsaqg.supabase.co;
-    frame-src https://accounts.google.com;
+    connect-src 'self' https://api.openai.com https://accounts.google.com https://www.googleapis.com https://maichqozswcomegcsaqg.supabase.co https://api.stripe.com https://api.resend.com;
+    frame-src https://accounts.google.com https://js.stripe.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
     upgrade-insecure-requests;
+    block-all-mixed-content;
   `.replace(/\s{2,}/g, ' ').trim()
 
   res.headers.set('Content-Security-Policy', cspHeader)
+
+  // Additional security headers for Phase 2
+  res.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
+  res.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
+  res.headers.set('Cross-Origin-Resource-Policy', 'same-origin')
+
+  // Server identification removal
+  res.headers.set('Server', 'OTORAPORT/2.0')
+
+  // Cache control for sensitive pages
+  if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard')) {
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    res.headers.set('Pragma', 'no-cache')
+    res.headers.set('Expires', '0')
+  }
 
   return res
 }
@@ -96,7 +112,7 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api/auth (NextAuth routes)
+     * - api/auth (Supabase auth routes)
      * - api/public (public API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)

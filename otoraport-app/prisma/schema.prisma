@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+// NextAuth.js Required Tables
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  role          String    @default("USER") // USER, ADMIN
+
+  accounts Account[]
+  sessions Session[]
+  developer Developer?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Application-Specific Tables
+
+model Developer {
+  id                 String   @id @default(cuid())
+  userId             String   @unique @map("user_id")
+  email              String   @unique
+  companyName        String   @map("company_name")
+  clientId           String   @unique @map("client_id")
+
+  // Company details (Ministry requirements)
+  nip                String?
+  regon              String?
+  krs                String?
+  ceidg              String?
+  legalForm          String?  @map("legal_form")
+  headquartersAddress String? @map("headquarters_address")
+  phone              String?
+  website            String?
+
+  // Subscription
+  subscriptionPlan   String   @default("basic") @map("subscription_plan") // basic, pro, enterprise
+  subscriptionStatus String   @default("trial") @map("subscription_status") // trial, active, canceled
+  trialEndsAt        DateTime? @map("trial_ends_at")
+
+  // Generated URLs
+  xmlUrl             String?  @map("xml_url")
+  md5Url             String?  @map("md5_url")
+
+  // Custom domains (Enterprise feature)
+  customDomain       String?  @map("custom_domain")
+  presentationUrl    String?  @map("presentation_url")
+  presentationGeneratedAt DateTime? @map("presentation_generated_at")
+
+  // Relations
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  properties Property[]
+  payments   Payment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("developers")
+}
+
+model Property {
+  id              String   @id @default(cuid())
+  developerId     String   @map("developer_id")
+
+  // Basic property info
+  apartmentNumber String   @map("apartment_number")
+  propertyType    String   @default("mieszkanie") @map("property_type") // mieszkanie, dom
+  area            Decimal  @db.Decimal(8, 2)
+
+  // Pricing
+  pricePerM2      Decimal  @map("price_per_m2") @db.Decimal(10, 2)
+  basePrice       Decimal  @map("base_price") @db.Decimal(12, 2)
+  finalPrice      Decimal  @map("final_price") @db.Decimal(12, 2)
+
+  // Location (Ministry requirements)
+  wojewodztwo     String
+  powiat          String
+  gmina           String
+  miejscowosc     String?
+  ulica           String?
+  numerNieruchomosci String? @map("numer_nieruchomosci")
+  kodPocztowy     String?  @map("kod_pocztowy")
+
+  // Additional details
+  kondygnacja     Int?
+  liczbaPokoi     Decimal? @map("liczba_pokoi") @db.Decimal(3, 1)
+  powierzchniaBalkon  Decimal? @map("powierzchnia_balkon") @db.Decimal(8, 2)
+  powierzchniaTaras   Decimal? @map("powierzchnia_taras") @db.Decimal(8, 2)
+  powierzchniaLoggia  Decimal? @map("powierzchnia_loggia") @db.Decimal(8, 2)
+  powierzchniaOgrod   Decimal? @map("powierzchnia_ogrod") @db.Decimal(8, 2)
+
+  // Dates
+  priceValidFrom  DateTime @map("price_valid_from") @db.Date
+  priceValidTo    DateTime? @map("price_valid_to") @db.Date
+  dataPierwszejOferty DateTime? @map("data_pierwszej_oferty") @db.Date
+  dataPierwszejSprzedazy DateTime? @map("data_pierwszej_sprzedazy") @db.Date
+
+  // Additional elements (JSON for flexibility)
+  miejscaPostojowe  Json? @map("miejsca_postojowe") // [{nr: "1", cena: 50000}]
+  komorki           Json? @map("komorki") // [{nr: "A1", cena: 15000}]
+  pomieszczeniaPrzynalezne Json? @map("pomieszczenia_przynalezne")
+
+  // Status
+  statusDostepnosci String @default("dostepne") @map("status_dostepnosci") // dostepne, zarezerwowane, sprzedane
+  dataRezerwacji    DateTime? @map("data_rezerwacji") @db.Date
+  dataSprzedazy     DateTime? @map("data_sprzedazy") @db.Date
+  uwagi             String?
+
+  // Relations
+  developer Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("properties")
+}
+
+model Payment {
+  id                      String   @id @default(cuid())
+  developerId             String   @map("developer_id")
+
+  amount                  Decimal  @db.Decimal(10, 2)
+  currency                String   @default("PLN")
+  status                  String   @default("pending") // pending, completed, failed, canceled
+
+  planType                String?  @map("plan_type") // basic, pro, enterprise
+  billingPeriod           String?  @map("billing_period") // monthly, yearly
+
+  // Stripe
+  stripePaymentIntentId   String?  @unique @map("stripe_payment_intent_id")
+  stripeCustomerId        String?  @map("stripe_customer_id")
+
+  // Polish payment providers
+  przelewy24Token         String?  @map("przelewy24_token")
+  przelewy24OrderId       String?  @map("przelewy24_order_id")
+
+  completedAt             DateTime? @map("completed_at")
+
+  // Relations
+  developer Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("payments")
+}
+
+// System analytics and monitoring
+model Analytics {
+  id                String   @id @default(cuid())
+  date              DateTime @db.Date
+
+  // Usage metrics
+  activeUsers       Int      @default(0) @map("active_users")
+  xmlGenerations    Int      @default(0) @map("xml_generations")
+  fileUploads       Int      @default(0) @map("file_uploads")
+  propertiesProcessed Int    @default(0) @map("properties_processed")
+
+  // Business metrics
+  newSignups        Int      @default(0) @map("new_signups")
+  trialConversions  Int      @default(0) @map("trial_conversions")
+  churnedUsers      Int      @default(0) @map("churned_users")
+  revenue           Decimal  @default(0) @db.Decimal(10, 2)
+
+  // Technical metrics
+  errorRate         Decimal  @default(0) @map("error_rate") @db.Decimal(5, 4)
+  avgResponseTime   Int      @default(0) @map("avg_response_time") // ms
+  uptime            Decimal  @default(100) @db.Decimal(5, 2) // percentage
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([date])
+  @@map("analytics")
+}

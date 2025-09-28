@@ -9,52 +9,170 @@ import {
   validateUploadFile,
   generateSafeFilePath,
   applySecurityHeaders,
-  sanitizeInput
+  sanitizeInput,
+  sanitizeInputAdvanced,
+  validateInput,
+  fileUploadSchema,
+  logSecurityEvent,
+  isIPBlocked,
+  blockIP,
+  RATE_LIMIT_TIERS
 } from '@/lib/security'
 import path from 'path'
 
 export async function POST(request: NextRequest) {
+  const clientIP = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+  const userAgent = request.headers.get('user-agent') || '';
+
   try {
-    // SECURITY: Rate limiting
-    const rateLimitResult = await checkRateLimit(request, {
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      maxRequests: 10, // Max 10 file uploads per 15 minutes
-    });
+    // PHASE 2: Enhanced security checks
+    console.log('🔒 UPLOAD: Enhanced security validation started');
+
+    // Check if IP is blocked
+    if (isIPBlocked(clientIP)) {
+      logSecurityEvent({
+        type: 'blocked_request',
+        ip: clientIP,
+        userAgent,
+        endpoint: '/api/upload',
+        details: 'IP temporarily blocked due to previous violations'
+      });
+
+      const headers = applySecurityHeaders(new Headers());
+      return new NextResponse(
+        JSON.stringify({ error: 'Dostęp tymczasowo zablokowany. Spróbuj ponownie później.' }),
+        { status: 403, headers }
+      );
+    }
+
+    // SECURITY: Enhanced rate limiting for file uploads
+    const rateLimitResult = await checkRateLimit(request, RATE_LIMIT_TIERS.strict);
 
     if (!rateLimitResult.allowed) {
+      // Log rate limit violation
+      logSecurityEvent({
+        type: 'rate_limit',
+        ip: clientIP,
+        userAgent,
+        endpoint: '/api/upload',
+        details: { count: rateLimitResult.count, resetTime: rateLimitResult.resetTime }
+      });
+
+      // Block IP temporarily after repeated violations
+      if (rateLimitResult.count > RATE_LIMIT_TIERS.strict.maxRequests * 2) {
+        blockIP(clientIP, RATE_LIMIT_TIERS.strict.blockDuration || 60 * 60 * 1000);
+        console.warn(`🚨 IP ${clientIP} blocked for repeated rate limit violations`);
+      }
+
       const headers = applySecurityHeaders(new Headers({
         'Retry-After': Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString()
       }));
-      
+
       return new NextResponse(
         JSON.stringify({ error: 'Za dużo żądań. Spróbuj ponownie później.' }),
         { status: 429, headers }
       );
     }
 
-    // Authentication check
+    // Authentication check with detailed debugging
+    console.log('🔍 UPLOAD: Starting authentication check...')
+
     const auth = await getAuthenticatedDeveloper(request)
 
+    console.log('🔍 UPLOAD: Auth result:', {
+      success: auth.success,
+      hasUser: !!auth.user,
+      hasDeveloper: !!auth.developer,
+      error: auth.error,
+      userEmail: auth.user?.email
+    })
+
     if (!auth.success || !auth.user || !auth.developer) {
+      console.log('❌ UPLOAD: Auth failed - returning 401')
       const headers = applySecurityHeaders(new Headers());
       return new NextResponse(
-        JSON.stringify({ error: auth.error || 'Unauthorized. Please log in.' }),
+        JSON.stringify({
+          error: auth.error || 'Auth session missing!',
+          debug: {
+            success: auth.success,
+            hasUser: !!auth.user,
+            hasDeveloper: !!auth.developer
+          }
+        }),
         { status: 401, headers }
       );
     }
 
+    console.log('✅ UPLOAD: Auth successful for developer:', auth.developer.client_id)
+
     const formData = await request.formData()
     const file = formData.get('file') as File
 
-    // SECURITY: Validate file using security library
-    const fileValidation = validateUploadFile(file);
-    if (!fileValidation.valid) {
+    // PHASE 2: Enhanced file validation with Zod schema
+    console.log('🔍 UPLOAD: Enhanced file validation started');
+
+    if (!file) {
+      logSecurityEvent({
+        type: 'validation_error',
+        ip: clientIP,
+        userAgent,
+        endpoint: '/api/upload',
+        details: 'No file provided'
+      });
+
       const headers = applySecurityHeaders(new Headers());
       return new NextResponse(
-        JSON.stringify({ error: fileValidation.error }),
+        JSON.stringify({ error: 'Nie wybrano pliku do przesłania' }),
         { status: 400, headers }
       );
     }
+
+    // Validate file with enhanced Zod schema
+    const fileValidationResult = validateInput({
+      name: file.name,
+      size: file.size,
+      type: file.type
+    }, fileUploadSchema);
+
+    if (!fileValidationResult.success) {
+      logSecurityEvent({
+        type: 'validation_error',
+        ip: clientIP,
+        userAgent,
+        endpoint: '/api/upload',
+        details: {
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          errors: fileValidationResult.errors
+        }
+      });
+
+      const headers = applySecurityHeaders(new Headers());
+      return new NextResponse(
+        JSON.stringify({
+          error: 'Nieprawidłowy plik',
+          details: fileValidationResult.errors
+        }),
+        { status: 400, headers }
+      );
+    }
+
+    // Additional legacy validation for backwards compatibility
+    const legacyValidation = validateUploadFile(file);
+    if (!legacyValidation.valid) {
+      const headers = applySecurityHeaders(new Headers());
+      return new NextResponse(
+        JSON.stringify({ error: legacyValidation.error }),
+        { status: 400, headers }
+      );
+    }
+
+    console.log('✅ UPLOAD: File validation passed - ', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    });
 
     // File upload processing initiated (user details redacted for security)
 
@@ -66,10 +184,16 @@ export async function POST(request: NextRequest) {
       // Directory already exists
     }
 
-    // SECURITY: Generate safe filename to prevent path traversal
-    const userId = auth.developer.id
-    const safeFileName = generateSafeFilePath(file.name, sanitizeInput(userId))
+    // PHASE 2: Enhanced secure file handling
+    const userId = sanitizeInputAdvanced(auth.developer.id)
+    const safeFileName = generateSafeFilePath(file.name, userId)
     const filePath = path.join(uploadsDir, safeFileName)
+
+    console.log('🔒 UPLOAD: Safe file path generated:', {
+      original: file.name,
+      safe: safeFileName,
+      userId: userId.substring(0, 8) + '...' // Log only first 8 chars for privacy
+    });
 
     // Save file
     const bytes = await file.arrayBuffer()
@@ -220,12 +344,14 @@ function parseCSVPreview(content: string) {
 
 async function getDeveloperIdFromUser(user: any): Promise<string | null> {
   try {
-    // Use the bridge table to get developer ID from Supabase auth user ID
-    const { data: bridgeData } = await supabaseAdmin
-      .rpc('get_developer_by_nextauth_user', { user_id: user.id })
+    // FIXED: Direct query to developers table using Supabase auth user ID
+    const { data: developer } = await supabaseAdmin
+      .from('developers')
+      .select('id')
+      .eq('user_id', user.id)
       .single()
-    
-    return bridgeData?.developer_id || null
+
+    return developer?.id || null
   } catch (error) {
     console.error('Error getting developer ID:', error)
     return null

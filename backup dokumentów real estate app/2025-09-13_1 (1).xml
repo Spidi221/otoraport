@@ -1,0 +1,1158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasets xmlns="urn:otwarte-dane:harvester:1.13">
+  <dataset status="published">
+    <extIdent>2025-09-13-2</extIdent>
+    <title>
+      <polish>Nieruchomość B2/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B2/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B2/2 w lokalizacji Bolszewo, ul. Strażacka 73B/1. Cena za m2: x zł, cena całkowita: x zł, cena końcowa: x zł. Miejsce postojowe MP77 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B2/2 located at Bolszewo, ul. Strażacka 73B/1. Price per m2: x PLN, total price: x PLN, final price: x PLN. Parking space MP77 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-2-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B2/2</polish>
+          <english>Property B2/2 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B2/2: lokalizacja Bolszewo, ul. Strażacka 73B/1, powierzchnia wyliczona z ceny (NaN m2), cena x zł/m2, cena całkowita x zł, cena końcowa x zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP77 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B2/2: location Bolszewo, ul. Strażacka 73B/1, calculated area (NaN m2), price x PLN/m2, total price x PLN, final price x PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP77 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B2/2</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">NaNzlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B2/2</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-3</extIdent>
+    <title>
+      <polish>Nieruchomość B5/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B5/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B5/2 w lokalizacji Bolszewo, ul. Strażacka 73E/1. Cena za m2: 11831.886706258565 zł, cena całkowita: 1295000 zł, cena końcowa: 1299000 zł. Miejsce postojowe MP71 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B5/2 located at Bolszewo, ul. Strażacka 73E/1. Price per m2: 11831.886706258565 PLN, total price: 1295000 PLN, final price: 1299000 PLN. Parking space MP71 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-3-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B5/2</polish>
+          <english>Property B5/2 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B5/2: lokalizacja Bolszewo, ul. Strażacka 73E/1, powierzchnia wyliczona z ceny (109 m2), cena 11831.886706258565 zł/m2, cena całkowita 1295000 zł, cena końcowa 1299000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP71 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B5/2: location Bolszewo, ul. Strażacka 73E/1, calculated area (109 m2), price 11831.886706258565 PLN/m2, total price 1295000 PLN, final price 1299000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP71 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B5/2</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">11832zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B5/2</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-4</extIdent>
+    <title>
+      <polish>Nieruchomość B7/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B7/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B7/1 w lokalizacji Bolszewo, ul. Strażacka 73G/2. Cena za m2: 5984.467793513019 zł, cena całkowita: 655000 zł, cena końcowa: 659000 zł. Miejsce postojowe MP66 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B7/1 located at Bolszewo, ul. Strażacka 73G/2. Price per m2: 5984.467793513019 PLN, total price: 655000 PLN, final price: 659000 PLN. Parking space MP66 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-4-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B7/1</polish>
+          <english>Property B7/1 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B7/1: lokalizacja Bolszewo, ul. Strażacka 73G/2, powierzchnia wyliczona z ceny (109 m2), cena 5984.467793513019 zł/m2, cena całkowita 655000 zł, cena końcowa 659000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP66 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B7/1: location Bolszewo, ul. Strażacka 73G/2, calculated area (109 m2), price 5984.467793513019 PLN/m2, total price 655000 PLN, final price 659000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP66 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B7/1</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">5984zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B7/1</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-5</extIdent>
+    <title>
+      <polish>Nieruchomość B8/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B8/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B8/1 w lokalizacji Bolszewo, ul. Strażacka 73H/2. Cena za m2: 5984.467793513019 zł, cena całkowita: 655000 zł, cena końcowa: 659000 zł. Miejsce postojowe MP64 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B8/1 located at Bolszewo, ul. Strażacka 73H/2. Price per m2: 5984.467793513019 PLN, total price: 655000 PLN, final price: 659000 PLN. Parking space MP64 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-5-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B8/1</polish>
+          <english>Property B8/1 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B8/1: lokalizacja Bolszewo, ul. Strażacka 73H/2, powierzchnia wyliczona z ceny (109 m2), cena 5984.467793513019 zł/m2, cena całkowita 655000 zł, cena końcowa 659000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP64 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B8/1: location Bolszewo, ul. Strażacka 73H/2, calculated area (109 m2), price 5984.467793513019 PLN/m2, total price 655000 PLN, final price 659000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP64 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B8/1</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">5984zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B8/1</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-6</extIdent>
+    <title>
+      <polish>Nieruchomość B18/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B18/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B18/1 w lokalizacji Bolszewo, ul. Strażacka 69A/1. Cena za m2: x zł, cena całkowita: x zł, cena końcowa: x zł. Miejsce postojowe MP41/MP42 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B18/1 located at Bolszewo, ul. Strażacka 69A/1. Price per m2: x PLN, total price: x PLN, final price: x PLN. Parking space MP41/MP42 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-6-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B18/1</polish>
+          <english>Property B18/1 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B18/1: lokalizacja Bolszewo, ul. Strażacka 69A/1, powierzchnia wyliczona z ceny (NaN m2), cena x zł/m2, cena całkowita x zł, cena końcowa x zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP41/MP42 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B18/1: location Bolszewo, ul. Strażacka 69A/1, calculated area (NaN m2), price x PLN/m2, total price x PLN, final price x PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP41/MP42 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B18/1</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">NaNzlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B18/1</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-7</extIdent>
+    <title>
+      <polish>Nieruchomość B19/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B19/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B19/1 w lokalizacji Bolszewo, ul. Strażacka 69B/1. Cena za m2: 6192.498230714791 zł, cena całkowita: 525000 zł, cena końcowa: 529000 zł. Miejsce postojowe MP44/MP5 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B19/1 located at Bolszewo, ul. Strażacka 69B/1. Price per m2: 6192.498230714791 PLN, total price: 525000 PLN, final price: 529000 PLN. Parking space MP44/MP5 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-7-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B19/1</polish>
+          <english>Property B19/1 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B19/1: lokalizacja Bolszewo, ul. Strażacka 69B/1, powierzchnia wyliczona z ceny (85 m2), cena 6192.498230714791 zł/m2, cena całkowita 525000 zł, cena końcowa 529000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP44/MP5 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B19/1: location Bolszewo, ul. Strażacka 69B/1, calculated area (85 m2), price 6192.498230714791 PLN/m2, total price 525000 PLN, final price 529000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP44/MP5 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B19/1</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">6192zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B19/1</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-8</extIdent>
+    <title>
+      <polish>Nieruchomość B20/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B20/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B20/1 w lokalizacji Bolszewo, ul. Strażacka 69C/1. Cena za m2: x zł, cena całkowita: x zł, cena końcowa: x zł. Miejsce postojowe MP46/MP24 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B20/1 located at Bolszewo, ul. Strażacka 69C/1. Price per m2: x PLN, total price: x PLN, final price: x PLN. Parking space MP46/MP24 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-8-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B20/1</polish>
+          <english>Property B20/1 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B20/1: lokalizacja Bolszewo, ul. Strażacka 69C/1, powierzchnia wyliczona z ceny (NaN m2), cena x zł/m2, cena całkowita x zł, cena końcowa x zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP46/MP24 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B20/1: location Bolszewo, ul. Strażacka 69C/1, calculated area (NaN m2), price x PLN/m2, total price x PLN, final price x PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP46/MP24 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B20/1</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">NaNzlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B20/1</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-9</extIdent>
+    <title>
+      <polish>Nieruchomość B20/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B20/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B20/2 w lokalizacji Bolszewo, ul. Strażacka 69C/2. Cena za m2: 6251.474404340646 zł, cena całkowita: 530000 zł, cena końcowa: 534000 zł. Miejsce postojowe MP47/MP23 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B20/2 located at Bolszewo, ul. Strażacka 69C/2. Price per m2: 6251.474404340646 PLN, total price: 530000 PLN, final price: 534000 PLN. Parking space MP47/MP23 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-9-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B20/2</polish>
+          <english>Property B20/2 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B20/2: lokalizacja Bolszewo, ul. Strażacka 69C/2, powierzchnia wyliczona z ceny (85 m2), cena 6251.474404340646 zł/m2, cena całkowita 530000 zł, cena końcowa 534000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP47/MP23 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B20/2: location Bolszewo, ul. Strażacka 69C/2, calculated area (85 m2), price 6251.474404340646 PLN/m2, total price 530000 PLN, final price 534000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP47/MP23 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B20/2</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">6251zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B20/2</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-10</extIdent>
+    <title>
+      <polish>Nieruchomość B21/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B21/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B21/1 w lokalizacji Bolszewo, ul. Strażacka 69D/1. Cena za m2: 7796.6501533380515 zł, cena całkowita: 661000 zł, cena końcowa: 665000 zł. Miejsce postojowe MP48/MP49 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B21/1 located at Bolszewo, ul. Strażacka 69D/1. Price per m2: 7796.6501533380515 PLN, total price: 661000 PLN, final price: 665000 PLN. Parking space MP48/MP49 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-10-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B21/1</polish>
+          <english>Property B21/1 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B21/1: lokalizacja Bolszewo, ul. Strażacka 69D/1, powierzchnia wyliczona z ceny (85 m2), cena 7796.6501533380515 zł/m2, cena całkowita 661000 zł, cena końcowa 665000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP48/MP49 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B21/1: location Bolszewo, ul. Strażacka 69D/1, calculated area (85 m2), price 7796.6501533380515 PLN/m2, total price 661000 PLN, final price 665000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP48/MP49 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B21/1</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">7797zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B21/1</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-11</extIdent>
+    <title>
+      <polish>Nieruchomość B14/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B14/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B14/1 w lokalizacji Bolszewo, ul. Strażacka 67A/1. Cena za m2: 7018.164661476763 zł, cena całkowita: 595000 zł, cena końcowa: 599000 zł. Miejsce postojowe MP25/MP26 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B14/1 located at Bolszewo, ul. Strażacka 67A/1. Price per m2: 7018.164661476763 PLN, total price: 595000 PLN, final price: 599000 PLN. Parking space MP25/MP26 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-11-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B14/1</polish>
+          <english>Property B14/1 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B14/1: lokalizacja Bolszewo, ul. Strażacka 67A/1, powierzchnia wyliczona z ceny (85 m2), cena 7018.164661476763 zł/m2, cena całkowita 595000 zł, cena końcowa 599000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP25/MP26 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B14/1: location Bolszewo, ul. Strażacka 67A/1, calculated area (85 m2), price 7018.164661476763 PLN/m2, total price 595000 PLN, final price 599000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP25/MP26 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B14/1</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">7018zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B14/1</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-12</extIdent>
+    <title>
+      <polish>Nieruchomość B14/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B14/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B14/2 w lokalizacji Bolszewo, ul. Strażacka 67A/2. Cena za m2: 6192.498230714791 zł, cena całkowita: 525000 zł, cena końcowa: 529000 zł. Miejsce postojowe MP27/MP28 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B14/2 located at Bolszewo, ul. Strażacka 67A/2. Price per m2: 6192.498230714791 PLN, total price: 525000 PLN, final price: 529000 PLN. Parking space MP27/MP28 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-12-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B14/2</polish>
+          <english>Property B14/2 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B14/2: lokalizacja Bolszewo, ul. Strażacka 67A/2, powierzchnia wyliczona z ceny (85 m2), cena 6192.498230714791 zł/m2, cena całkowita 525000 zł, cena końcowa 529000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP27/MP28 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B14/2: location Bolszewo, ul. Strażacka 67A/2, calculated area (85 m2), price 6192.498230714791 PLN/m2, total price 525000 PLN, final price 529000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP27/MP28 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B14/2</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">6192zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B14/2</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-13</extIdent>
+    <title>
+      <polish>Nieruchomość B15/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B15/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B15/1 w lokalizacji Bolszewo, ul. Strażacka 67B/1. Cena za m2: 6192.498230714791 zł, cena całkowita: 525000 zł, cena końcowa: 529000 zł. Miejsce postojowe MP29/MP30 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B15/1 located at Bolszewo, ul. Strażacka 67B/1. Price per m2: 6192.498230714791 PLN, total price: 525000 PLN, final price: 529000 PLN. Parking space MP29/MP30 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-13-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B15/1</polish>
+          <english>Property B15/1 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B15/1: lokalizacja Bolszewo, ul. Strażacka 67B/1, powierzchnia wyliczona z ceny (85 m2), cena 6192.498230714791 zł/m2, cena całkowita 525000 zł, cena końcowa 529000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP29/MP30 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B15/1: location Bolszewo, ul. Strażacka 67B/1, calculated area (85 m2), price 6192.498230714791 PLN/m2, total price 525000 PLN, final price 529000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP29/MP30 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B15/1</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">6192zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B15/1</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-14</extIdent>
+    <title>
+      <polish>Nieruchomość B15/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B15/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B15/2 w lokalizacji Bolszewo, ul. Strażacka 67B/2. Cena za m2: 6192.498230714791 zł, cena całkowita: 525000 zł, cena końcowa: 529000 zł. Miejsce postojowe MP31/MP32 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B15/2 located at Bolszewo, ul. Strażacka 67B/2. Price per m2: 6192.498230714791 PLN, total price: 525000 PLN, final price: 529000 PLN. Parking space MP31/MP32 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-14-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B15/2</polish>
+          <english>Property B15/2 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B15/2: lokalizacja Bolszewo, ul. Strażacka 67B/2, powierzchnia wyliczona z ceny (85 m2), cena 6192.498230714791 zł/m2, cena całkowita 525000 zł, cena końcowa 529000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP31/MP32 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B15/2: location Bolszewo, ul. Strażacka 67B/2, calculated area (85 m2), price 6192.498230714791 PLN/m2, total price 525000 PLN, final price 529000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP31/MP32 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B15/2</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">6192zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B15/2</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-15</extIdent>
+    <title>
+      <polish>Nieruchomość B16/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B16/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B16/1 w lokalizacji Bolszewo, ul. Strażacka 67C/1. Cena za m2: 6192.498230714791 zł, cena całkowita: 525000 zł, cena końcowa: 529000 zł. Miejsce postojowe MP33/MP34 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B16/1 located at Bolszewo, ul. Strażacka 67C/1. Price per m2: 6192.498230714791 PLN, total price: 525000 PLN, final price: 529000 PLN. Parking space MP33/MP34 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-15-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B16/1</polish>
+          <english>Property B16/1 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B16/1: lokalizacja Bolszewo, ul. Strażacka 67C/1, powierzchnia wyliczona z ceny (85 m2), cena 6192.498230714791 zł/m2, cena całkowita 525000 zł, cena końcowa 529000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP33/MP34 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B16/1: location Bolszewo, ul. Strażacka 67C/1, calculated area (85 m2), price 6192.498230714791 PLN/m2, total price 525000 PLN, final price 529000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP33/MP34 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B16/1</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">6192zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B16/1</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-16</extIdent>
+    <title>
+      <polish>Nieruchomość B16/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B16/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B16/2 w lokalizacji Bolszewo, ul. Strażacka 67C/2. Cena za m2: 6192.498230714791 zł, cena całkowita: 525000 zł, cena końcowa: 529000 zł. Miejsce postojowe MP35/MP36 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B16/2 located at Bolszewo, ul. Strażacka 67C/2. Price per m2: 6192.498230714791 PLN, total price: 525000 PLN, final price: 529000 PLN. Parking space MP35/MP36 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-16-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B16/2</polish>
+          <english>Property B16/2 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B16/2: lokalizacja Bolszewo, ul. Strażacka 67C/2, powierzchnia wyliczona z ceny (85 m2), cena 6192.498230714791 zł/m2, cena całkowita 525000 zł, cena końcowa 529000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP35/MP36 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B16/2: location Bolszewo, ul. Strażacka 67C/2, calculated area (85 m2), price 6192.498230714791 PLN/m2, total price 525000 PLN, final price 529000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP35/MP36 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B16/2</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">6192zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B16/2</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-17</extIdent>
+    <title>
+      <polish>Nieruchomość B17/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B17/1 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B17/1 w lokalizacji Bolszewo, ul. Strażacka 67D/1. Cena za m2: 6192.498230714791 zł, cena całkowita: 525000 zł, cena końcowa: 529000 zł. Miejsce postojowe MP37/MP38 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B17/1 located at Bolszewo, ul. Strażacka 67D/1. Price per m2: 6192.498230714791 PLN, total price: 525000 PLN, final price: 529000 PLN. Parking space MP37/MP38 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-17-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B17/1</polish>
+          <english>Property B17/1 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B17/1: lokalizacja Bolszewo, ul. Strażacka 67D/1, powierzchnia wyliczona z ceny (85 m2), cena 6192.498230714791 zł/m2, cena całkowita 525000 zł, cena końcowa 529000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP37/MP38 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B17/1: location Bolszewo, ul. Strażacka 67D/1, calculated area (85 m2), price 6192.498230714791 PLN/m2, total price 525000 PLN, final price 529000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP37/MP38 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B17/1</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">6192zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B17/1</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-18</extIdent>
+    <title>
+      <polish>Nieruchomość B17/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property B17/2 - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr B17/2 w lokalizacji Bolszewo, ul. Strażacka 67D/2. Cena za m2: 7372.021703231894 zł, cena całkowita: 625000 zł, cena końcowa: 629000 zł. Miejsce postojowe MP39/MP40 za 4000 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no. B17/2 located at Bolszewo, ul. Strażacka 67D/2. Price per m2: 7372.021703231894 PLN, total price: 625000 PLN, final price: 629000 PLN. Parking space MP39/MP40 for 4000 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-18-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości B17/2</polish>
+          <english>Property B17/2 details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny B17/2: lokalizacja Bolszewo, ul. Strażacka 67D/2, powierzchnia wyliczona z ceny (85 m2), cena 7372.021703231894 zł/m2, cena całkowita 625000 zł, cena końcowa 629000 zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MP39/MP40 za 4000 zł.</polish>
+          <english>Complete data for lokal mieszkalny B17/2: location Bolszewo, ul. Strażacka 67D/2, calculated area (85 m2), price 7372.021703231894 PLN/m2, total price 625000 PLN, final price 629000 PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MP39/MP40 for 4000 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl">B17/2</tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">7372zlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en">B17/2</tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-19</extIdent>
+    <title>
+      <polish>Nieruchomość  - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property  - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr  w lokalizacji Bolszewo, ul. Strażacka . Cena za m2: X zł, cena całkowita: X zł, cena końcowa: X zł. Miejsce postojowe MR1 za 14600 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no.  located at Bolszewo, ul. Strażacka . Price per m2: X PLN, total price: X PLN, final price: X PLN. Parking space MR1 for 14600 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-19-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości </polish>
+          <english>Property  details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny : lokalizacja Bolszewo, ul. Strażacka , powierzchnia wyliczona z ceny (NaN m2), cena X zł/m2, cena całkowita X zł, cena końcowa X zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MR1 za 14600 zł.</polish>
+          <english>Complete data for lokal mieszkalny : location Bolszewo, ul. Strażacka , calculated area (NaN m2), price X PLN/m2, total price X PLN, final price X PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MR1 for 14600 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl"></tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">NaNzlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en"></tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-20</extIdent>
+    <title>
+      <polish>Nieruchomość  - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property  - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr  w lokalizacji Bolszewo, ul. Strażacka . Cena za m2: X zł, cena całkowita: X zł, cena końcowa: X zł. Miejsce postojowe MR2 za 14600 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no.  located at Bolszewo, ul. Strażacka . Price per m2: X PLN, total price: X PLN, final price: X PLN. Parking space MR2 for 14600 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-20-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości </polish>
+          <english>Property  details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny : lokalizacja Bolszewo, ul. Strażacka , powierzchnia wyliczona z ceny (NaN m2), cena X zł/m2, cena całkowita X zł, cena końcowa X zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MR2 za 14600 zł.</polish>
+          <english>Complete data for lokal mieszkalny : location Bolszewo, ul. Strażacka , calculated area (NaN m2), price X PLN/m2, total price X PLN, final price X PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MR2 for 14600 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl"></tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">NaNzlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en"></tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-21</extIdent>
+    <title>
+      <polish>Nieruchomość  - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property  - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr  w lokalizacji Bolszewo, ul. Strażacka . Cena za m2: X zł, cena całkowita: X zł, cena końcowa: X zł. Miejsce postojowe MR3 za 14600 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no.  located at Bolszewo, ul. Strażacka . Price per m2: X PLN, total price: X PLN, final price: X PLN. Parking space MR3 for 14600 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-21-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości </polish>
+          <english>Property  details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny : lokalizacja Bolszewo, ul. Strażacka , powierzchnia wyliczona z ceny (NaN m2), cena X zł/m2, cena całkowita X zł, cena końcowa X zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MR3 za 14600 zł.</polish>
+          <english>Complete data for lokal mieszkalny : location Bolszewo, ul. Strażacka , calculated area (NaN m2), price X PLN/m2, total price X PLN, final price X PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MR3 for 14600 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl"></tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">NaNzlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en"></tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+  <dataset status="published">
+    <extIdent>2025-09-13-22</extIdent>
+    <title>
+      <polish>Nieruchomość  - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</polish>
+      <english>Property  - TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa</english>
+    </title>
+    <description>
+      <polish>Lokal mieszkalny nr  w lokalizacji Bolszewo, ul. Strażacka . Cena za m2: X zł, cena całkowita: X zł, cena końcowa: X zł. Miejsce postojowe MR4 za 14600 zł. Deweloper: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</polish>
+      <english>Lokal mieszkalny no.  located at Bolszewo, ul. Strażacka . Price per m2: X PLN, total price: X PLN, final price: X PLN. Parking space MR4 for 14600 PLN. Developer: TAMBUD Tadeusz Muchewicz Mateusz Muchewicz Spółka komandytowa.</english>
+    </description>
+    <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+    <updateFrequency>daily</updateFrequency>
+    <categories>
+      <category>ECON</category>
+    </categories>
+    <resources>
+      <resource status="published">
+        <extIdent>2025-09-13-22-resource</extIdent>
+        <url>https://adrian128-20128.wykr.es/webhook-test/0bdd2f38-c0f2-490f-9190-9c788acf7d30</url>
+        <title>
+          <polish>Szczegóły nieruchomości </polish>
+          <english>Property  details</english>
+        </title>
+        <description>
+          <polish>Kompletne dane dotyczące lokal mieszkalny : lokalizacja Bolszewo, ul. Strażacka , powierzchnia wyliczona z ceny (NaN m2), cena X zł/m2, cena całkowita X zł, cena końcowa X zł. Kontakt z deweloperem: sekretariat@tambud.pl, tel. 501263547. Dodatkowe miejsce postojowe MR4 za 14600 zł.</polish>
+          <english>Complete data for lokal mieszkalny : location Bolszewo, ul. Strażacka , calculated area (NaN m2), price X PLN/m2, total price X PLN, final price X PLN. Developer contact: sekretariat@tambud.pl, phone 501263547. Additional parking space MR4 for 14600 PLN.</english>
+        </description>
+        <availability>remote</availability>
+        <dataDate>2025-09-13</dataDate>
+        <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+        <hasDynamicData>true</hasDynamicData>
+        <hasHighValueData>false</hasHighValueData>
+        <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+        <hasResearchData>false</hasResearchData>
+        <containsProtectedData>false</containsProtectedData>
+      </resource>
+    </resources>
+    <tags>
+      <tag lang="pl">nieruchomość</tag>
+      <tag lang="pl"></tag>
+      <tag lang="pl">bolszewo</tag>
+      <tag lang="pl">wejherowo</tag>
+      <tag lang="pl">pomorskie</tag>
+      <tag lang="pl">NaNzlm2</tag>
+      <tag lang="pl">tambud</tag>
+      <tag lang="en">property</tag>
+      <tag lang="en"></tag>
+      <tag lang="en">real-estate</tag>
+    </tags>
+    <lastUpdateDate>2025-09-13T08:14:35.023Z</lastUpdateDate>
+    <hasDynamicData>true</hasDynamicData>
+    <hasHighValueData>false</hasHighValueData>
+    <hasHighValueDataFromEuropeanCommissionList>false</hasHighValueDataFromEuropeanCommissionList>
+    <hasResearchData>false</hasResearchData>
+  </dataset>
+</datasets>

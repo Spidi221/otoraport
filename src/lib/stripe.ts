@@ -7,15 +7,25 @@ import Stripe from 'stripe';
 import { SUBSCRIPTION_PLANS, SubscriptionPlanType, calculateMonthlyCost } from './subscription-plans';
 import { supabaseAdmin } from './database';
 
-// Validate environment variables
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing STRIPE_SECRET_KEY environment variable');
+// Lazy Stripe client initialization to prevent build errors
+let stripe: Stripe | null = null;
+
+function getStripeClient(): Stripe {
+  if (!stripe) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+    }
+    stripe = new Stripe(secretKey, {
+      apiVersion: '2024-12-18.acacia', // Latest API version
+      typescript: true,
+    });
+  }
+  return stripe;
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-12-18.acacia', // Latest API version
-  typescript: true,
-});
+// Export function instead of client directly
+export { getStripeClient as stripe };
 
 /**
  * Tworzy Stripe Customer dla dewelopera
@@ -26,7 +36,7 @@ export async function createStripeCustomer(
   companyName?: string
 ): Promise<{ success: boolean; customerId?: string; error?: string }> {
   try {
-    const customer = await stripe.customers.create({
+    const customer = await getStripeClient().customers.create({
       email,
       name,
       metadata: {
@@ -65,7 +75,7 @@ export async function createStripeSubscription(
     // Utwórz product jeśli nie istnieje
     const productName = `${plan.displayName}${additionalProjects > 0 ? ` + ${additionalProjects} dodatkowe projekty` : ''}`;
 
-    const product = await stripe.products.create({
+    const product = await getStripeClient().products.create({
       name: productName,
       description: `DevReporter ${plan.displayName} subscription`,
       metadata: {
@@ -76,7 +86,7 @@ export async function createStripeSubscription(
     });
 
     // Utwórz price
-    const price = await stripe.prices.create({
+    const price = await getStripeClient().prices.create({
       product: product.id,
       unit_amount: totalAmount,
       currency: 'pln',
@@ -90,7 +100,7 @@ export async function createStripeSubscription(
     });
 
     // Utwórz subskrypcję
-    const subscription = await stripe.subscriptions.create({
+    const subscription = await getStripeClient().subscriptions.create({
       customer: customerId,
       items: [{
         price: price.id,
@@ -279,7 +289,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   if (!invoice.subscription) return;
 
-  const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+  const subscription = await getStripeClient().subscriptions.retrieve(invoice.subscription as string);
   const developerId = subscription.metadata.developer_id;
 
   if (developerId) {
@@ -350,7 +360,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   if (!invoice.subscription) return;
 
-  const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+  const subscription = await getStripeClient().subscriptions.retrieve(invoice.subscription as string);
   const developerId = subscription.metadata.developer_id;
 
   if (developerId) {
@@ -382,7 +392,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
  */
 export async function getStripeSubscriptionInfo(subscriptionId: string) {
   try {
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+    const subscription = await getStripeClient().subscriptions.retrieve(subscriptionId, {
       expand: ['default_payment_method', 'latest_invoice']
     });
 
@@ -408,9 +418,9 @@ export async function cancelStripeSubscription(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     if (immediately) {
-      await stripe.subscriptions.cancel(subscriptionId);
+      await getStripeClient().subscriptions.cancel(subscriptionId);
     } else {
-      await stripe.subscriptions.update(subscriptionId, {
+      await getStripeClient().subscriptions.update(subscriptionId, {
         cancel_at_period_end: true
       });
     }

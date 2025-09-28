@@ -1,0 +1,11 @@
+nr lokalu,powierzchnia,liczba pokoi,pietro,cena za m2,cena całkowita,status,parking,balkon,powierzchnia balkonu,piwnica,opis
+1,45.5,2,1,9890,450000,dostępny,nie,tak,6.5,nie,Przytulne 2-pokojowe mieszkanie na pierwszym piętrze
+2,65.2,3,2,9500,620000,dostępny,tak,tak,8.2,tak,Przestronne 3-pokojowe z miejscem parkingowym
+3,78.0,4,3,10200,795600,zarezerwowany,tak,tak,12.5,tak,Luksusowe 4-pokojowe z dużym balkonem
+4,52.3,2,4,9750,510000,dostępny,nie,tak,7.8,nie,2-pokojowe na wysokim piętrze z widokiem
+5,89.1,4,5,9300,828630,sprzedany,tak,tak,15.2,tak,Penthouse z ogrodem na dachu
+6,38.2,1,0,8900,340000,dostępny,nie,nie,0,nie,Kawalerka na parterze - idealna na wynajem
+7,55.7,2,1,9650,537500,dostępny,tak,tak,5.8,nie,Mieszkanie dla młodej pary
+8,72.3,3,2,9800,708540,dostępny,tak,tak,9.1,tak,Rodzinne mieszkanie z dodatkami
+9,81.5,4,3,10100,823150,rezerwacja,tak,tak,11.2,tak,Przestrzenny apartament rodzinny
+10,41.8,1,4,9200,384560,dostępny,nie,tak,4.5,nie,Studio z balkonem i widokiem
