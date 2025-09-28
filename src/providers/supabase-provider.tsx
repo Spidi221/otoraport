@@ -14,12 +14,8 @@ const Context = createContext<SupabaseContext | undefined>(undefined)
 
 // Get Supabase config - support both naming conventions
 function getSupabaseConfig() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ||
-             (typeof window !== 'undefined' ? window.location.origin.includes('vercel') ? 'https://maichqozswcomegcsaqg.supabase.co' : 'https://maichqozswcomegcsaqg.supabase.co') :
-             'https://maichqozswcomegcsaqg.supabase.co'
-
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-                  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1haWNocW96c3djb21lZ2NzYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1OTUwMjMsImV4cCI6MjA3MzE3MTAyM30.pFj72PPCCGZue4-M1hzhAjptuedJdY-qiS4gRWHAxVU'
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://maichqozswcomegcsaqg.supabase.co'
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1haWNocW96c3djb21lZ2NzYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1OTUwMjMsImV4cCI6MjA3MzE3MTAyM30.pFj72PPCCGZue4-M1hzhAjptuedJdY-qiS4gRWHAxVU'
 
   console.log('🔍 SUPABASE CONFIG: URL:', url, 'Key present:', !!anonKey)
 
