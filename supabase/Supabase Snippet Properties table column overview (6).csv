@@ -1,4 +1,0 @@
-apartment_number,property_type,surface_area,price_per_m2,base_price,final_price,wojewodztwo,powiat,gmina,status,created_at
-A-01,mieszkanie,50.00,15000.00,750000.00,780000.00,mazowieckie,warszawski,Warszawa,dostępne,2025-09-20 06:33:34.274797+00
-A-02,mieszkanie,60.00,14000.00,840000.00,860000.00,mazowieckie,warszawski,Warszawa,dostępne,2025-09-20 06:33:34.274797+00
-B-01,mieszkanie,70.00,16000.00,1120000.00,1150000.00,mazowieckie,warszawski,Warszawa,zarezerwowane,2025-09-20 06:33:34.274797+00

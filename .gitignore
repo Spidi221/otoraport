@@ -43,3 +43,44 @@ next-env.d.ts
 
 # OS
 Thumbs.db
+
+# Development and Debug Files
+debug-*.js
+test-*.js
+test-*.html
+*debug*.md
+*DEBUG*.md
+*test*.csv
+sample_*.csv
+*backup*.json
+*-backup.*
+emergency-*.sql
+fix-*.sql
+database-setup.sql
+debugging_report.md
+db-inspector.js
+
+# Documentation and Temporary Files
+CLAUDE*.md
+LOGIN-CREDENTIALS.md
+DATABASE_SETUP.md
+SUPABASE-*.md
+*VERIFICATION_QUERIES.sql
+project_summary.md
+setup-instructions.md
+
+# Development Directories
+backup*/
+dokumenty/
+OTORAPORT/
+otoraport-app/
+uploads/
+
+# Supabase Development Exports
+supabase/*.csv
+Supabase*.csv
+
+# Lint Reports
+*Performance*Security*Lints*.csv
+
+# Only keep essential files for production

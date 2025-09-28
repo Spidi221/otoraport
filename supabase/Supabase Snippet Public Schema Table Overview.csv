@@ -1,7 +1,0 @@
-schemaname,tablename,tableowner,hasindexes,hasrules,hastriggers
-public,developers,postgres,true,false,true
-public,file_uploads,postgres,true,false,true
-public,notification_logs,postgres,true,false,true
-public,payments,postgres,true,false,true
-public,projects,postgres,true,false,true
-public,properties,postgres,true,false,true
