@@ -30,7 +30,7 @@ export async function getDeveloperById(id: string) {
     .from('developers')
     .select('*')
     .eq('id', id)
-    .single()
+    .maybeSingle()
 
   if (error) {
     console.error('Error fetching developer:', error)
@@ -45,7 +45,7 @@ export async function getDeveloperByEmail(email: string) {
     .from('developers')
     .select('*')
     .eq('email', email)
-    .single()
+    .maybeSingle()
 
   if (error) {
     console.error('Error fetching developer by email:', error)

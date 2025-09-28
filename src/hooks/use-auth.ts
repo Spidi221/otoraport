@@ -43,17 +43,67 @@ export function useAuth(): AuthState & AuthActions {
   // Load developer profile
   const loadDeveloperProfile = async (user: User) => {
     try {
-      const { data: developerData } = await supabase
+      console.log('🔍 Loading developer profile for user:', user.id, user.email)
+
+      // Use maybeSingle() instead of single() to avoid errors when profile doesn't exist
+      const { data: developerData, error } = await supabase
         .from('developers')
         .select('*')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
+
+      if (error) {
+        console.error('❌ Error loading developer profile:', error)
+        return
+      }
 
       if (developerData) {
+        console.log('✅ Developer profile found:', developerData)
         setDeveloper(developerData)
+      } else {
+        console.log('⚠️ No developer profile found, creating one...')
+        await createDeveloperProfile(user)
       }
     } catch (error) {
-      console.error('Error loading developer profile:', error)
+      console.error('💥 Critical error loading developer profile:', error)
+    }
+  }
+
+  // Create developer profile if it doesn't exist
+  const createDeveloperProfile = async (user: User) => {
+    try {
+      console.log('🔧 Creating developer profile for:', user.email)
+
+      // Generate unique client ID
+      const clientId = `dev_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+      const newProfile = {
+        user_id: user.id,
+        email: user.email!,
+        name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Developer',
+        company_name: user.user_metadata?.company_name || 'My Company',
+        client_id: clientId,
+        subscription_plan: 'basic',
+        subscription_status: 'trial'
+      }
+
+      const { data: createdProfile, error: createError } = await supabase
+        .from('developers')
+        .insert(newProfile)
+        .select()
+        .single()
+
+      if (createError) {
+        console.error('❌ Error creating developer profile:', createError)
+        throw createError
+      }
+
+      if (createdProfile) {
+        console.log('✅ Developer profile created successfully:', createdProfile)
+        setDeveloper(createdProfile)
+      }
+    } catch (error) {
+      console.error('💥 Critical error creating developer profile:', error)
     }
   }
 
