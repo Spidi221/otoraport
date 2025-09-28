@@ -37,20 +37,32 @@ export async function GET() {
 
 async function checkDatabase() {
   try {
+    console.log('🔍 HEALTH: Starting database check...')
+    console.log('🔍 HEALTH: Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'MISSING')
+    console.log('🔍 HEALTH: Anon Key present:', !!(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY))
+    console.log('🔍 HEALTH: Service Key present:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
+
     const { data, error } = await supabaseAdmin
       .from('developers')
       .select('id')
       .limit(1)
-      
+
+    if (error) {
+      console.log('❌ HEALTH: Database query error:', error)
+    } else {
+      console.log('✅ HEALTH: Database query successful, rows:', data?.length)
+    }
+
     return {
       healthy: !error,
-      message: error ? error.message : 'Database connection OK',
+      message: error ? `Database error: ${error.message}` : 'Database connection OK',
       responseTime: Date.now()
     }
   } catch (error) {
+    console.error('❌ HEALTH: Database check exception:', error)
     return {
       healthy: false,
-      message: error instanceof Error ? error.message : 'Database connection failed',
+      message: error instanceof Error ? `Exception: ${error.message}` : 'Database connection failed',
       responseTime: Date.now()
     }
   }
