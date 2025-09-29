@@ -831,8 +831,9 @@ export class SmartCSVParser {
         }
       }
 
-      // Only include rows with at least property number
-      if (property.property_number || property.raw_data.length > 0) {
+      // Only include rows with at least property number or any other data
+      // FIX: raw_data is an object, not array - check Object.keys().length
+      if (property.property_number || Object.keys(property.raw_data).length > 0) {
         results.push(property)
       }
     }
