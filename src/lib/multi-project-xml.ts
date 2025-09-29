@@ -196,107 +196,12 @@ export async function generateAggregatedXML(developerId: string): Promise<string
       return generateMinistryXML(ministryOptions)
     }
 
-    // Pobierz wszystkie właściwości dla tych projektów (osobno) - ALL 58 MINISTRY FIELDS
+    // CRITICAL FIX: Query ONLY raw_data column (all other columns don't exist due to schema cache issue)
+    // All 58 ministry fields are stored inside raw_data JSONB
     const projectIds = validProjects.map(p => p.id)
-    const { data: properties, error: propertiesError } = await createAdminClient()
+    const { data: rawProperties, error: propertiesError } = await createAdminClient()
       .from('properties')
-      .select(`
-        id,
-        project_id,
-        apartment_number,
-        property_type,
-        price_per_m2,
-        base_price,
-        final_price,
-        surface_area,
-        status,
-
-        /* Location details (Ministry required) */
-        wojewodztwo,
-        powiat,
-        gmina,
-        miejscowosc,
-        ulica,
-        numer_nieruchomosci,
-        kod_pocztowy,
-
-        /* Building and apartment details */
-        budynek,
-        klatka,
-        kondygnacja,
-        liczba_kondygnacji,
-        liczba_pokoi,
-        uklad_mieszkania,
-        stan_wykonczenia,
-        rok_budowy,
-        technologia_budowy,
-
-        /* Surface areas (detailed breakdown) */
-        powierzchnia_uzytkowa,
-        powierzchnia_calkowita,
-        powierzchnia_balkon,
-        powierzchnia_taras,
-        powierzchnia_loggia,
-        powierzchnia_ogrod,
-        powierzchnia_piwnicy,
-        powierzchnia_strychu,
-
-        /* Price details (historical and current) */
-        cena_za_m2_poczatkowa,
-        cena_bazowa_poczatkowa,
-        cena_finalna_poczatkowa,
-        data_pierwszej_oferty,
-        cena_za_m2_aktualna,
-        cena_bazowa_aktualna,
-        cena_finalna_aktualna,
-        data_obowiazywania_ceny_od,
-        data_obowiazywania_ceny_do,
-        waluta,
-
-        /* Additional elements (parking, storage) - Arrays */
-        miejsca_postojowe_liczba,
-        miejsca_postojowe_nr,
-        miejsca_postojowe_ceny,
-        miejsca_postojowe_rodzaj,
-        komorki_lokatorskie_liczba,
-        komorki_lokatorskie_nr,
-        komorki_lokatorskie_ceny,
-        komorki_lokatorskie_powierzchnie,
-
-        /* Amenities and features */
-        pomieszczenia_przynalezne,
-        winda,
-        klimatyzacja,
-        ogrzewanie,
-        dostep_dla_niepelnosprawnych,
-        ekspozycja,
-        widok_z_okien,
-
-        /* Legal and status information */
-        status_sprzedazy,
-        data_rezerwacji,
-        data_sprzedazy,
-        data_przekazania,
-        forma_wlasnosci,
-        ksiega_wieczysta,
-        udzial_w_gruncie,
-
-        /* Ministry reporting metadata */
-        data_pierwszego_raportu,
-        data_ostatniej_aktualizacji,
-        liczba_zmian_ceny,
-        uwagi_ministerstwo,
-        uuid_ministerstwo,
-
-        /* Legacy compatibility */
-        price_valid_from,
-        price_valid_to,
-        status_dostepnosci,
-
-        /* System fields */
-        created_at,
-        updated_at
-      `)
+      .select('id, project_id, raw_data, created_at, updated_at')
       .in('project_id', projectIds)
 
     if (propertiesError) {
@@ -304,8 +209,111 @@ export async function generateAggregatedXML(developerId: string): Promise<string
       throw new Error(`Failed to fetch properties: ${propertiesError.message}`)
     }
 
-    const allProperties = properties || []
+    // CRITICAL FIX: Extract all fields from raw_data JSONB column
+    // Transform raw_data back to structured format expected by XML generator
+    const allProperties = (rawProperties || []).map(prop => {
+      const data = (prop.raw_data as any) || {}
+      return {
+        id: prop.id,
+        project_id: prop.project_id,
+        created_at: prop.created_at,
+        updated_at: prop.updated_at,
+
+        // Extract ALL 58 ministry fields from raw_data
+        apartment_number: data.apartment_number || data.property_number,
+        property_type: data.property_type,
+        price_per_m2: data.price_per_m2,
+        base_price: data.base_price || data.total_price,
+        final_price: data.final_price || data.total_price,
+        surface_area: data.surface_area || data.area,
+        status: data.status,
+
+        // Location details
+        wojewodztwo: data.wojewodztwo,
+        powiat: data.powiat,
+        gmina: data.gmina,
+        miejscowosc: data.miejscowosc,
+        ulica: data.ulica,
+        numer_nieruchomosci: data.numer_nieruchomosci,
+        kod_pocztowy: data.kod_pocztowy,
+
+        // Building details
+        budynek: data.budynek,
+        klatka: data.klatka,
+        kondygnacja: data.kondygnacja,
+        liczba_kondygnacji: data.liczba_kondygnacji,
+        liczba_pokoi: data.liczba_pokoi || data.rooms,
+        uklad_mieszkania: data.uklad_mieszkania,
+        stan_wykonczenia: data.stan_wykonczenia,
+        rok_budowy: data.rok_budowy,
+        technologia_budowy: data.technologia_budowy,
+
+        // Surface areas
+        powierzchnia_uzytkowa: data.powierzchnia_uzytkowa || data.surface_area || data.area,
+        powierzchnia_calkowita: data.powierzchnia_calkowita,
+        powierzchnia_balkon: data.powierzchnia_balkon,
+        powierzchnia_taras: data.powierzchnia_taras,
+        powierzchnia_loggia: data.powierzchnia_loggia,
+        powierzchnia_ogrod: data.powierzchnia_ogrod,
+        powierzchnia_piwnicy: data.powierzchnia_piwnicy,
+        powierzchnia_strychu: data.powierzchnia_strychu,
+
+        // Price details
+        cena_za_m2_poczatkowa: data.cena_za_m2_poczatkowa,
+        cena_bazowa_poczatkowa: data.cena_bazowa_poczatkowa,
+        cena_finalna_poczatkowa: data.cena_finalna_poczatkowa,
+        data_pierwszej_oferty: data.data_pierwszej_oferty,
+        cena_za_m2_aktualna: data.cena_za_m2_aktualna || data.price_per_m2,
+        cena_bazowa_aktualna: data.cena_bazowa_aktualna || data.base_price || data.total_price,
+        cena_finalna_aktualna: data.cena_finalna_aktualna || data.final_price,
+        data_obowiazywania_ceny_od: data.data_obowiazywania_ceny_od,
+        data_obowiazywania_ceny_do: data.data_obowiazywania_ceny_do,
+        waluta: data.waluta,
+
+        // Additional elements (parking, storage)
+        miejsca_postojowe_liczba: data.miejsca_postojowe_liczba,
+        miejsca_postojowe_nr: data.miejsca_postojowe_nr,
+        miejsca_postojowe_ceny: data.miejsca_postojowe_ceny,
+        miejsca_postojowe_rodzaj: data.miejsca_postojowe_rodzaj,
+        komorki_lokatorskie_liczba: data.komorki_lokatorskie_liczba,
+        komorki_lokatorskie_nr: data.komorki_lokatorskie_nr,
+        komorki_lokatorskie_ceny: data.komorki_lokatorskie_ceny,
+        komorki_lokatorskie_powierzchnie: data.komorki_lokatorskie_powierzchnie,
+
+        // Amenities
+        pomieszczenia_przynalezne: data.pomieszczenia_przynalezne,
+        winda: data.winda,
+        klimatyzacja: data.klimatyzacja,
+        ogrzewanie: data.ogrzewanie,
+        dostep_dla_niepelnosprawnych: data.dostep_dla_niepelnosprawnych,
+        ekspozycja: data.ekspozycja,
+        widok_z_okien: data.widok_z_okien,
+
+        // Legal info
+        status_sprzedazy: data.status_sprzedazy,
+        data_rezerwacji: data.data_rezerwacji,
+        data_sprzedazy: data.data_sprzedazy,
+        data_przekazania: data.data_przekazania,
+        forma_wlasnosci: data.forma_wlasnosci,
+        ksiega_wieczysta: data.ksiega_wieczysta,
+        udzial_w_gruncie: data.udzial_w_gruncie,
+
+        // Ministry metadata
+        data_pierwszego_raportu: data.data_pierwszego_raportu,
+        data_ostatniej_aktualizacji: data.data_ostatniej_aktualizacji,
+        liczba_zmian_ceny: data.liczba_zmian_ceny,
+        uwagi_ministerstwo: data.uwagi_ministerstwo,
+        uuid_ministerstwo: data.uuid_ministerstwo,
+
+        // Legacy fields
+        price_valid_from: data.price_valid_from,
+        price_valid_to: data.price_valid_to,
+        status_dostepnosci: data.status_dostepnosci
+      }
+    })
+
     console.log(`Found ${allProperties.length} properties across ${validProjects.length} projects`)
+    console.log('Sample property data:', allProperties[0]) // Debug: check if extraction worked
 
     // Połącz properties z projektami (ręcznie zamiast zagnieżdżonych query)
     const projectsWithProperties = validProjects.map(project => ({

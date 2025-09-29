@@ -225,10 +225,14 @@ function AuthenticatedHeader() {
                 </>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={async () => {
-                await supabase.auth.signOut();
-                window.location.href = '/auth/signin';
-              }}>
+              <DropdownMenuItem
+                className="text-red-600 hover:bg-red-50 cursor-pointer"
+                onClick={async () => {
+                  const supabase = createClient();
+                  await supabase.auth.signOut();
+                  window.location.href = '/auth/signin';
+                }}
+              >
                 Wyloguj się
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -1,36 +1,24 @@
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import AnalyticsDashboard from '@/components/analytics/analytics-dashboard'
 
 export default async function AnalyticsPage() {
-  const cookieStore = await cookies()
+  // Create Supabase client for server-side auth
+  const supabase = await createClient()
 
-  // FIXED: Dynamic cookie detection for any Supabase instance
-  const allCookies = cookieStore.getAll()
-  const authCookie = allCookies.find(cookie =>
-    cookie.name.match(/^sb-[a-z0-9]+-auth-token$/)
-  )
-
-  if (!authCookie) {
-    redirect('/auth/signin')
-  }
-
-  const accessToken = authCookie
-
-  // Get user from Supabase Auth
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken.value)
+  // Get authenticated user
+  const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error || !user?.email) {
     redirect('/auth/signin')
   }
 
   // Get developer profile
-  const { data: developer } = await supabaseAdmin
+  const { data: developer } = await supabase
     .from('developers')
     .select('id')
-    .eq('email', user.email)
-    .single()
+    .eq('user_id', user.id)
+    .maybeSingle()
 
   if (!developer) {
     redirect('/auth/signin')
