@@ -1,27 +1,29 @@
 import { NextRequest } from 'next/server'
-import { getServerAuth, supabaseAdmin, getDeveloperProfile } from '@/lib/supabase-single'
+import { supabaseAdmin } from '@/lib/supabase-single'
+import { createSupabaseReqResClient } from '@/lib/supabase-ssr'
 
 /**
  * Get authenticated user from Supabase using SSR client
  */
 export async function getSupabaseUser(request: NextRequest) {
   try {
-    console.log('🔍 AUTH: getSupabaseUser called')
+    console.log('🔍 AUTH: getSupabaseUser called - using SSR client')
 
-    // Use unified server auth from supabase-single
-    const user = await getServerAuth(request)
+    // Use Supabase SSR for proper server auth
+    const supabase = createSupabaseReqResClient(request)
+    const { data: { user }, error } = await supabase.auth.getUser()
 
-    if (!user) {
-      console.log('❌ AUTH: User authentication failed')
+    if (error || !user) {
+      console.log('❌ AUTH: SSR User authentication failed:', error?.message)
       return {
         success: false,
         hasUser: false,
         userEmail: undefined,
-        error: 'Auth session missing!'
+        error: error?.message || 'Auth session missing!'
       }
     }
 
-    console.log('✅ AUTH: User authenticated successfully:', user.email)
+    console.log('✅ AUTH: SSR User authenticated successfully:', user.email)
     return {
       success: true,
       hasUser: true,
