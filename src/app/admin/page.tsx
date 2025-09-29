@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 import AdminDashboard from '@/components/admin/admin-dashboard'
 
 // SECURITY FIX: Admin emails from environment variables

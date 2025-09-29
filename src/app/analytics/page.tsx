@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 import AnalyticsDashboard from '@/components/analytics/analytics-dashboard'
 
 export default async function AnalyticsPage() {
