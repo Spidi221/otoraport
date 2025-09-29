@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
+import { supabase } from '@/lib/supabase-single'
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 
 type SupabaseContext = {
@@ -12,18 +12,6 @@ type SupabaseContext = {
 
 const Context = createContext<SupabaseContext | undefined>(undefined)
 
-// Get Supabase config - force real credentials
-function getSupabaseConfig() {
-  // FORCE real credentials - ignore any environment variables to prevent placeholder URLs
-  const url = 'https://maichqozswcomegcsaqg.supabase.co'
-  const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1haWNocW96c3djb21lZ2NzYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1OTUwMjMsImV4cCI6MjA3MzE3MTAyM30.pFj72PPCCGZue4-M1hzhAjptuedJdY-qiS4gRWHAxVU'
-
-  console.log('🔍 SUPABASE CONFIG: URL:', url, 'Key present:', !!anonKey)
-  console.log('🔍 ENV CHECK: NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
-
-  return { url, anonKey }
-}
-
 export default function SupabaseProvider({
   children,
 }: {
@@ -31,9 +19,6 @@ export default function SupabaseProvider({
 }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-
-  const { url, anonKey } = getSupabaseConfig()
-  const supabase = createBrowserClient(url, anonKey)
 
   useEffect(() => {
     const getUser = async () => {

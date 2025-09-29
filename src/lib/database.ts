@@ -1,28 +1,6 @@
 // Database service layer - zastępuje mock data
-import { createClient } from '@supabase/supabase-js'
-import { Database } from './supabase-single'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://maichqozswcomegcsaqg.supabase.co'
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1haWNocW96c3djb21lZ2NzYXFnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzU5NTAyMywiZXhwIjoyMDczMTcxMDIzfQ.QTCimxihQ3QAJGnwm5BwEF-UaGwUfgwhVm-9Kklr6U8'
-
-// Validate environment variables in production
-if (process.env.NODE_ENV === 'production' && supabaseUrl.includes('placeholder')) {
-  console.warn('⚠️ DATABASE: Using placeholder URL in production!')
-} else {
-  console.log('✅ DATABASE: Using URL:', supabaseUrl)
-}
-
-// Service role client dla server-side operations
-export const supabaseAdmin = createClient<Database>(
-  supabaseUrl,
-  supabaseServiceKey,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
+import { supabaseAdmin } from '@/lib/supabase-single'
+import type { Database } from '@/lib/supabase-single'
 
 // Developer operations
 export async function getDeveloperById(id: string) {

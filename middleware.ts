@@ -12,19 +12,8 @@ export async function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl
 
-  // Public routes that don't need authentication middleware
-  if (
-    pathname.startsWith('/auth') ||
-    pathname.startsWith('/api/') || // ALL API routes bypass middleware auth
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon') ||
-    pathname === '/' ||
-    pathname === '/privacy' ||
-    pathname === '/terms' ||
-    pathname === '/cookies' ||
-    pathname === '/rodo' ||
-    pathname.includes('.') // Static files
-  ) {
+  // TEMPORARILY BYPASS ALL AUTH CHECKS - Let component-level auth handle it
+  if (true) {
     // Still add security headers but skip auth check
     const res = NextResponse.next()
 

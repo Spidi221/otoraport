@@ -87,13 +87,10 @@ export function useAuthSimple(): AuthState & AuthActions {
       console.log('🚀 SIMPLE AUTH: Initializing...')
 
       try {
-        // Add timeout for safety - prevent infinite loading
-        const sessionPromise = getCurrentSession()
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Session timeout after 10s')), 10000)
-        )
-
-        const session = await Promise.race([sessionPromise, timeoutPromise])
+        // Get current session - remove timeout that was killing valid sessions
+        console.log('🔍 SIMPLE AUTH: Getting current session...')
+        const session = await getCurrentSession()
+        console.log('🔍 SIMPLE AUTH: Session result:', session ? 'Found session' : 'No session')
 
         if (session?.user) {
           console.log('✅ SIMPLE AUTH: Session found for:', session.user.email)
