@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, lazy, useMemo } from "react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthSimple as useAuth } from "@/hooks/use-auth-simple";
 import { Header } from "@/components/dashboard/header";
 import { UploadWidget } from "@/components/dashboard/upload-widget";
 import { StatusCards } from "@/components/dashboard/status-cards";
