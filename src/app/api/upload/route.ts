@@ -189,12 +189,14 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
       updated_at: new Date().toISOString()
     }))
 
-    // Insert properties in batch (bypass type checking for schema mismatch)
+    // Insert properties in batch
+    // @ts-ignore - TypeScript types are out of sync with actual DB schema
     const { error } = await createAdminClient()
       .from('properties')
-      .insert(propertiesToInsert as any)
+      .insert(propertiesToInsert)
 
     if (error) {
+      console.error('❌ DATABASE INSERT ERROR:', JSON.stringify(error, null, 2))
       throw new Error(`Database insert failed: ${error.message}`)
     }
 
