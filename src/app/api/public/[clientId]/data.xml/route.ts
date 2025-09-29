@@ -4,6 +4,10 @@ import { generateAggregatedXML } from '@/lib/multi-project-xml'
 import { createAdminClient } from '@/lib/supabase/server'
 import { validateClientId, applySecurityHeaders, checkRateLimit } from '@/lib/security'
 
+// Next.js Route Segment Config - Enable caching for better performance
+export const revalidate = 3600 // Revalidate every 1 hour (3600 seconds)
+export const dynamic = 'force-static' // Try to generate statically when possible
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ clientId: string }> }
