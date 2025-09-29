@@ -8,6 +8,38 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { generateXMLForMinistry, DataForGeneration } from '@/lib/generators'
 import { generateMinistryXML, convertToMinistryFormat, validateMinistryXML } from './xml-generator'
 
+/**
+ * Creates empty data structure when developer has no projects yet
+ */
+function createEmptyDataForGeneration(developer: any): DataForGeneration {
+  return {
+    developer: {
+      id: developer.id,
+      email: developer.email || '',
+      name: developer.name || developer.company_name || 'Unknown',
+      company_name: developer.company_name || 'My Company',
+      nip: developer.nip || '',
+      phone: developer.phone || '',
+      regon: developer.regon || null,
+      krs: developer.krs || null,
+      forma_prawna: developer.forma_prawna || 'spółka z o.o.',
+      adres_siedziby: developer.adres_siedziby || '',
+      wojewodztwo: developer.wojewodztwo || '',
+      powiat: developer.powiat || '',
+      gmina: developer.gmina || '',
+      miejscowosc: developer.miejscowosc || '',
+      kod_pocztowy: developer.kod_pocztowy || '',
+      ulica: developer.ulica || '',
+      nr_budynku: developer.nr_budynku || '',
+      email_kontakt: developer.email_kontakt || developer.email || '',
+      telefon_kontakt: developer.telefon_kontakt || developer.phone || '',
+      strona_internetowa: developer.strona_internetowa || null
+    },
+    projects: [],
+    properties: []
+  }
+}
+
 interface ProjectWithProperties {
   id: string
   name: string
