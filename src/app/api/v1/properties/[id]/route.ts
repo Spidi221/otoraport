@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { ApiKeyManager, ApiResponseBuilder, PropertyApiModel, WebhookManager } from '@/lib/api-v1';
 
 // GET /api/v1/properties/[id] - Get single property
@@ -49,7 +49,7 @@ export async function GET(
     }
 
     // Get property from database
-    const { data: property, error } = await supabaseAdmin
+    const { data: property, error } = await createAdminClient()
       .from('properties')
       .select(`
         id,
@@ -196,7 +196,7 @@ export async function PUT(
     requestSize = JSON.stringify(body).length;
 
     // Get existing property
-    const { data: existingProperty, error: fetchError } = await supabaseAdmin
+    const { data: existingProperty, error: fetchError } = await createAdminClient()
       .from('properties')
       .select('*')
       .eq('id', params.id)
@@ -261,7 +261,7 @@ export async function PUT(
     }
 
     // Update property in database
-    const { data: property, error } = await supabaseAdmin
+    const { data: property, error } = await createAdminClient()
       .from('properties')
       .update(updateData)
       .eq('id', params.id)
@@ -387,7 +387,7 @@ export async function DELETE(
     }
 
     // Get property before deletion for webhook
-    const { data: existingProperty, error: fetchError } = await supabaseAdmin
+    const { data: existingProperty, error: fetchError } = await createAdminClient()
       .from('properties')
       .select('*')
       .eq('id', params.id)
@@ -406,7 +406,7 @@ export async function DELETE(
     }
 
     // Delete property from database
-    const { error } = await supabaseAdmin
+    const { error } = await createAdminClient()
       .from('properties')
       .delete()
       .eq('id', params.id)
@@ -458,7 +458,7 @@ export async function DELETE(
 
 async function sendWebhookEvent(eventType: string, data: any, developerId: string) {
   try {
-    const { data: webhooks } = await supabaseAdmin
+    const { data: webhooks } = await createAdminClient()
       .from('webhook_endpoints')
       .select('*')
       .eq('developer_id', developerId)

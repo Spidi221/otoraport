@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { ApiKeyManager, ApiResponseBuilder, ReportApiModel, WebhookManager } from '@/lib/api-v1';
 import { generateXMLFile } from '@/lib/generators';
 import crypto from 'crypto';
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
 
     // Build query for reports
-    let query = supabaseAdmin
+    let query = createAdminClient
       .from('reports')
       .select(`
         id,
@@ -213,7 +213,7 @@ export async function POST(request: NextRequest) {
     // Create report record
     const reportId = `rpt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    const { data: report, error: createError } = await supabaseAdmin
+    const { data: report, error: createError } = await createAdminClient()
       .from('reports')
       .insert({
         id: reportId,
@@ -297,7 +297,7 @@ async function generateReportAsync(
 ) {
   try {
     // Get properties for report
-    let query = supabaseAdmin
+    let query = createAdminClient
       .from('properties')
       .select('*')
       .eq('developer_id', developerId);
@@ -354,7 +354,7 @@ async function generateReportAsync(
     const fileUrl = `${process.env.NEXTAUTH_URL}/api/v1/reports/${reportId}/download`;
 
     // Update report with results
-    await supabaseAdmin
+    await createAdminClient()
       .from('reports')
       .update({
         status: 'completed',
@@ -388,7 +388,7 @@ async function generateReportAsync(
     console.error('Report generation error:', error);
 
     // Update report with error status
-    await supabaseAdmin
+    await createAdminClient()
       .from('reports')
       .update({
         status: 'failed',
@@ -454,7 +454,7 @@ function generateCustomReport(properties: any[], format: string): string {
 
 async function sendWebhookEvent(eventType: string, data: any, developerId: string) {
   try {
-    const { data: webhooks } = await supabaseAdmin
+    const { data: webhooks } = await createAdminClient()
       .from('webhook_endpoints')
       .select('*')
       .eq('developer_id', developerId)

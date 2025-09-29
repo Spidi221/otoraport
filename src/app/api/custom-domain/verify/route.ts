@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { verifyCustomDomain } from '@/lib/custom-domains'
 import { checkRateLimit, applySecurityHeaders } from '@/lib/security'
 
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Domain verified successfully - update database
-    const { error: updateError } = await supabaseAdmin
+    const { error: updateError } = await createAdminClient()
       .from('developers')
       .update({ 
         // Could add a verification status field here

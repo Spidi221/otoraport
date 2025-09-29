@@ -1,6 +1,6 @@
 // Subscription management and feature gating system
 
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export interface PlanLimits {
   investments: number // Max number of projects
@@ -76,7 +76,7 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
  */
 export async function getSubscriptionInfo(developerId: string): Promise<SubscriptionInfo | null> {
   try {
-    const { data: developer, error } = await supabaseAdmin
+    const { data: developer, error } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', developerId)
@@ -130,7 +130,7 @@ export async function canCreateProject(developerId: string): Promise<{ allowed: 
       return { allowed: true } // Unlimited
     }
 
-    const { count: projectsCount } = await supabaseAdmin
+    const { count: projectsCount } = await createAdminClient()
       .from('projects')
       .select('*', { count: 'exact' })
       .eq('developer_id', developerId)
@@ -169,7 +169,7 @@ export async function canAddProperties(developerId: string, projectId: string, a
       return { allowed: true } // Unlimited
     }
 
-    const { count: propertiesCount } = await supabaseAdmin
+    const { count: propertiesCount } = await createAdminClient()
       .from('properties')
       .select('*', { count: 'exact' })
       .eq('project_id', projectId)
@@ -219,19 +219,19 @@ export async function getUsageStats(developerId: string): Promise<{
     const subscription = await getSubscriptionInfo(developerId)
     
     // Get current usage
-    const { count: projectsCount } = await supabaseAdmin
+    const { count: projectsCount } = await createAdminClient()
       .from('projects')
       .select('*', { count: 'exact' })
       .eq('developer_id', developerId)
 
     // Get projects to count total properties
-    const { data: projects } = await supabaseAdmin
+    const { data: projects } = await createAdminClient()
       .from('projects')
       .select('id')
       .eq('developer_id', developerId)
 
     const projectIds = projects?.map(p => p.id) || []
-    const { count: propertiesCount } = await supabaseAdmin
+    const { count: propertiesCount } = await createAdminClient()
       .from('properties')
       .select('*', { count: 'exact' })
       .in('project_id', projectIds)

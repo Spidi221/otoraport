@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { parseCSVSmart, validateMinistryCompliance, parseExcelFileFromBlob, parsePropertyFile } from '@/lib/smart-csv-parser'
 import { sendComplianceNotification } from '@/lib/email-service'
@@ -268,7 +268,7 @@ export async function POST(request: NextRequest) {
       // Send compliance notification email if regeneration was successful
       if (regenerationResult.success && processingResult.recordsCount > 0) {
         try {
-          const { data: developer } = await supabaseAdmin
+          const { data: developer } = await createAdminClient()
             .from('developers')
             .select('*')
             .eq('id', sanitizeInput(userId))
@@ -345,7 +345,7 @@ function parseCSVPreview(content: string) {
 async function getDeveloperIdFromUser(user: any): Promise<string | null> {
   try {
     // FIXED: Direct query to developers table using Supabase auth user ID
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('id')
       .eq('user_id', user.id)
@@ -361,7 +361,7 @@ async function getDeveloperIdFromUser(user: any): Promise<string | null> {
 async function savePropertiesToDatabase(developerId: string, properties: any[], fileName: string) {
   try {
     // First, get or create a project for this upload
-    let { data: project } = await supabaseAdmin
+    let { data: project } = await createAdminClient()
       .from('projects')
       .select('id')
       .eq('developer_id', developerId)
@@ -369,7 +369,7 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
       .single()
 
     if (!project) {
-      const { data: newProject } = await supabaseAdmin
+      const { data: newProject } = await createAdminClient()
         .from('projects')
         .insert({
           developer_id: developerId,
@@ -406,7 +406,7 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
     }))
 
     // Insert properties in batch
-    const { error } = await supabaseAdmin
+    const { error } = await createAdminClient()
       .from('properties')
       .insert(propertiesToInsert)
 

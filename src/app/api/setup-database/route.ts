@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
     `
 
     // Uruchom migrację
-    const { error } = await supabaseAdmin.rpc('exec_sql', { sql: migration })
+    const { error } = await createAdminClient.rpc('exec_sql', { sql: migration })
     
     if (error) {
       console.error('Migration error:', error)
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
       for (const query of queries) {
         if (query.trim()) {
           try {
-            await supabaseAdmin.rpc('exec_sql', { sql: query })
+            await createAdminClient.rpc('exec_sql', { sql: query })
             successCount++
           } catch (err) {
             console.log('Query failed (might be OK):', query.substring(0, 50), err)
@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Sprawdź czy tabele zostały utworzone
-    const { data: tables } = await supabaseAdmin.rpc('exec_sql', { 
+    const { data: tables } = await createAdminClient.rpc('exec_sql', { 
       sql: "SELECT tablename FROM pg_tables WHERE schemaname = 'public'" 
     })
 

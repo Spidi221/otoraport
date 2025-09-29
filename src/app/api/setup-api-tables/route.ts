@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Execute the SQL script
-    const { data, error } = await supabaseAdmin.rpc('exec_sql', {
+    const { data, error } = await createAdminClient.rpc('exec_sql', {
       sql_script: sqlScript
     });
 
@@ -29,13 +29,13 @@ export async function POST(request: NextRequest) {
       const results = [];
       for (const statement of statements) {
         try {
-          const { error: stmtError } = await supabaseAdmin.rpc('exec', {
+          const { error: stmtError } = await createAdminClient.rpc('exec', {
             sql: statement
           });
 
           if (stmtError) {
             // Try direct query execution
-            const { error: queryError } = await supabaseAdmin.from('pg_stat_statements').select('*').limit(1);
+            const { error: queryError } = await createAdminClient.from('pg_stat_statements').select('*').limit(1);
             if (queryError) {
               // Use raw SQL execution
               const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/exec`, {

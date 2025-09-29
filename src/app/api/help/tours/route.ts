@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { InAppHelpSystem, HelpContext } from '@/lib/help-system';
 
 export async function GET(request: NextRequest) {
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     const developer = auth.developer;
 
     // Save tour progress to database
-    const { error: saveError } = await supabaseAdmin
+    const { error: saveError } = await createAdminClient()
       .from('tour_progress')
       .insert({
         user_id: developer.id,
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     if (event_type === 'tour_completed') {
       // Update user's onboarding progress if this was an onboarding tour
       if (tour_id === 'onboarding_tour') {
-        await supabaseAdmin
+        await createAdminClient()
           .from('developers')
           .update({
             onboarding_completed: true,
@@ -165,7 +165,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Calculate tour completion rates from database
-    const { data: tourStats, error } = await supabaseAdmin
+    const { data: tourStats, error } = await createAdminClient()
       .from('tour_progress')
       .select('tour_id, event_type')
       .in('event_type', ['tour_started', 'tour_completed']);

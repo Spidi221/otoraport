@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 
 export interface WhiteLabelPartner {
   id: string;
@@ -77,7 +77,7 @@ export class WhiteLabelEngine {
     };
 
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('whitelabel_partners')
         .insert(partner);
 
@@ -94,7 +94,7 @@ export class WhiteLabelEngine {
 
   static async getPartner(partnerId: string): Promise<WhiteLabelPartner | null> {
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await createAdminClient()
         .from('whitelabel_partners')
         .select('*')
         .eq('id', partnerId)
@@ -108,7 +108,7 @@ export class WhiteLabelEngine {
 
   static async getPartnerByDomain(domain: string): Promise<WhiteLabelPartner | null> {
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await createAdminClient()
         .from('whitelabel_partners')
         .select('*')
         .or(`domain.eq.${domain},subdomain.eq.${domain}`)
@@ -145,7 +145,7 @@ export class WhiteLabelEngine {
     };
 
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('whitelabel_clients')
         .insert(client);
 
@@ -165,7 +165,7 @@ export class WhiteLabelEngine {
 
   static async getPartnerClients(partnerId: string): Promise<WhiteLabelClient[]> {
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await createAdminClient()
         .from('whitelabel_clients')
         .select('*')
         .eq('partner_id', partnerId)
@@ -211,7 +211,7 @@ export class WhiteLabelEngine {
     support_phone: string;
   }>): Promise<void> {
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('whitelabel_partners')
         .update({
           ...branding,
@@ -290,7 +290,7 @@ export class WhiteLabelEngine {
   // Commission Calculations
   static async calculateCommission(clientId: string, revenue: number): Promise<number> {
     try {
-      const { data: client } = await supabaseAdmin
+      const { data: client } = await createAdminClient()
         .from('whitelabel_clients')
         .select('partner_id')
         .eq('id', clientId)
@@ -312,7 +312,7 @@ export class WhiteLabelEngine {
   static async processCommissionPayment(partnerId: string, amount: number): Promise<void> {
     try {
       // Record commission payment
-      await supabaseAdmin
+      await createAdminClient()
         .from('commission_payments')
         .insert({
           partner_id: partnerId,
@@ -324,10 +324,10 @@ export class WhiteLabelEngine {
         });
 
       // Update partner total commission
-      await supabaseAdmin
+      await createAdminClient()
         .from('whitelabel_partners')
         .update({
-          total_commission: supabaseAdmin.rpc('increment_commission', { amount }),
+          total_commission: createAdminClient.rpc('increment_commission', { amount }),
           last_commission_payment: new Date().toISOString()
         })
         .eq('id', partnerId);
@@ -357,7 +357,7 @@ export class WhiteLabelEngine {
       const totalRevenue = clients.reduce((sum, client) => sum + client.lifetime_value, 0);
       const totalCommission = clients.reduce((sum, client) => sum + client.commission_earned, 0);
 
-      await supabaseAdmin
+      await createAdminClient()
         .from('whitelabel_partners')
         .update({
           client_count: clientCount,

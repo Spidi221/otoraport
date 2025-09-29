@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { przelewy24 } from '@/lib/przelewy24'
 
 export async function POST(request: NextRequest) {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find payment in database
-    const { data: payment, error: findError } = await supabaseAdmin
+    const { data: payment, error: findError } = await createAdminClient()
       .from('payments')
       .select('*')
       .eq('przelewy24_session_id', sessionId)
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update payment status
-    const { error: updatePaymentError } = await supabaseAdmin
+    const { error: updatePaymentError } = await createAdminClient()
       .from('payments')
       .update({ 
         status: newStatus,
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     // Update user subscription if payment successful
     if (verification.verified) {
-      const { error: updateUserError } = await supabaseAdmin
+      const { error: updateUserError } = await createAdminClient()
         .from('developers')
         .update(subscriptionData)
         .eq('id', payment.developer_id)
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
 
       // Send welcome email to developer after successful payment
       try {
-        const { data: developer } = await supabaseAdmin
+        const { data: developer } = await createAdminClient()
           .from('developers')
           .select('*')
           .eq('id', payment.developer_id)

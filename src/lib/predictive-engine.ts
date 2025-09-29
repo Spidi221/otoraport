@@ -1,7 +1,7 @@
 // Predictive Analytics AI Engine - Machine Learning dla real estate insights
 // Wykorzystuje historyczne dane do przewidywania trendów i optymalizacji
 
-import { supabaseAdmin } from './supabase-single';
+import { createAdminClient } from './supabase/server';
 
 export interface PredictiveInsights {
   // Price predictions
@@ -183,7 +183,7 @@ export class PredictiveEngine {
    */
   private static async gatherHistoricalData(developerId: string) {
     // Get properties with history
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
         *,
@@ -192,14 +192,14 @@ export class PredictiveEngine {
       .eq('projects.developer_id', developerId);
 
     // Get developer info
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', developerId)
       .single();
 
     // Get file uploads (activity indicator)
-    const { data: uploads } = await supabaseAdmin
+    const { data: uploads } = await createAdminClient()
       .from('file_uploads')
       .select('*')
       .eq('developer_id', developerId)

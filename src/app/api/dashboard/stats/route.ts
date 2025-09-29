@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerAuth, getDeveloperProfile, supabaseAdmin } from '@/lib/supabase-single'
+import { getServerAuth, getDeveloperProfile, createAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,20 +22,20 @@ export async function GET(request: NextRequest) {
     console.log('✅ DASHBOARD STATS: Getting stats for developer:', developer.client_id)
 
     // Get projects count
-    const { count: projectsCount } = await supabaseAdmin
+    const { count: projectsCount } = await createAdminClient()
       .from('projects')
       .select('*', { count: 'exact' })
       .eq('developer_id', developer.id)
 
     // Get properties count and data
-    const { data: projects } = await supabaseAdmin
+    const { data: projects } = await createAdminClient()
       .from('projects')
       .select('id')
       .eq('developer_id', developer.id)
 
     const projectIds = projects?.map(p => p.id) || []
 
-    const { data: properties, count: propertiesCount } = await supabaseAdmin
+    const { data: properties, count: propertiesCount } = await createAdminClient()
       .from('properties')
       .select('*', { count: 'exact' })
       .in('project_id', projectIds)

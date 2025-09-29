@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email-service'
 
 export async function POST(request: NextRequest) {
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find developer
-    const { data: developer, error: findError } = await supabaseAdmin
+    const { data: developer, error: findError } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', developerId)
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update ministry approval status
-    const { error: updateError } = await supabaseAdmin
+    const { error: updateError } = await createAdminClient()
       .from('developers')
       .update({
         ministry_approved: approved,

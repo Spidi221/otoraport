@@ -1,7 +1,7 @@
 // Advanced Analytics Engine - Real-time business intelligence
 // Provides revenue insights, property performance, and predictive analytics
 
-import { supabaseAdmin } from './supabase-single';
+import { createAdminClient } from './supabase/server';
 
 export interface BusinessAnalytics {
   // Revenue insights
@@ -212,14 +212,14 @@ export class AnalyticsEngine {
    */
   private static async calculateRevenueMetrics(developerId: string) {
     // Get subscription history
-    const { data: subscriptions } = await supabaseAdmin
+    const { data: subscriptions } = await createAdminClient()
       .from('subscription_billing')
       .select('*')
       .eq('developer_id', developerId)
       .order('created_at', { ascending: false });
 
     // Get current subscription
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('subscription_plan, subscription_status, subscription_ends_at')
       .eq('id', developerId)
@@ -248,7 +248,7 @@ export class AnalyticsEngine {
    */
   private static async analyzePropertyPerformance(developerId: string) {
     // Get all properties with analytics
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
         *,
@@ -286,12 +286,12 @@ export class AnalyticsEngine {
    */
   private static async getEngagementMetrics(developerId: string) {
     // Simulate engagement metrics (in production, track with real events)
-    const { data: fileUploads } = await supabaseAdmin
+    const { data: fileUploads } = await createAdminClient()
       .from('file_uploads')
       .select('*')
       .eq('developer_id', developerId);
 
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('created_at, presentation_generated_at')
       .eq('id', developerId)
@@ -477,7 +477,7 @@ export class AnalyticsEngine {
   }
 
   private static async getSubscriptionHealth(developerId: string): Promise<SubscriptionMetrics> {
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('subscription_plan, subscription_status')
       .eq('id', developerId)
@@ -540,7 +540,7 @@ export class AnalyticsEngine {
   }
 
   private static async predictChurn(developerId: string): Promise<ChurnPrediction[]> {
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('company_name, subscription_plan, created_at')
       .eq('id', developerId)
@@ -577,7 +577,7 @@ export class AnalyticsEngine {
   }
 
   private static async identifyExpansionOpportunities(developerId: string): Promise<ExpansionOpportunity[]> {
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('company_name, subscription_plan')
       .eq('id', developerId)

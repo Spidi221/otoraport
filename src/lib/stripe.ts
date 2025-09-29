@@ -5,7 +5,7 @@
 
 import Stripe from 'stripe';
 import { SUBSCRIPTION_PLANS, SubscriptionPlanType, calculateMonthlyCost } from './subscription-plans';
-import { supabaseAdmin } from './database';
+import { createAdminClient } from './database';
 
 // Lazy Stripe client initialization to prevent build errors
 let stripe: Stripe | null = null;
@@ -148,7 +148,7 @@ async function updateDeveloperStripeInfo(
   customerId: string,
   subscriptionId: string
 ) {
-  const { error } = await supabaseAdmin
+  const { error } = await createAdminClient()
     .from('developers')
     .update({
       stripe_customer_id: customerId,
@@ -180,7 +180,7 @@ export async function createBillingRecord(
       : 0;
     const totalMonthlyCost = basePlanPrice + additionalProjectsFee;
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await createAdminClient()
       .from('subscription_billing')
       .insert({
         developer_id: developerId,
@@ -261,7 +261,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
 
   if (developerId) {
     // Aktywuj subskrypcję
-    await supabaseAdmin
+    await createAdminClient()
       .from('developers')
       .update({
         subscription_status: 'active',
@@ -270,7 +270,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
       .eq('id', developerId);
 
     // Log payment
-    await supabaseAdmin
+    await createAdminClient()
       .from('payments')
       .insert({
         developer_id: developerId,
@@ -294,7 +294,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 
   if (developerId) {
     // Aktualizuj status subskrypcji
-    await supabaseAdmin
+    await createAdminClient()
       .from('developers')
       .update({
         subscription_status: 'active',
@@ -304,7 +304,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
       .eq('id', developerId);
 
     // Aktualizuj billing record
-    await supabaseAdmin
+    await createAdminClient()
       .from('subscription_billing')
       .update({
         stripe_invoice_id: invoice.id,
@@ -323,7 +323,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   if (developerId) {
     const status = subscription.status === 'active' ? 'active' : 'inactive';
 
-    await supabaseAdmin
+    await createAdminClient()
       .from('developers')
       .update({
         subscription_status: status,
@@ -338,7 +338,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const developerId = subscription.metadata.developer_id;
 
   if (developerId) {
-    await supabaseAdmin
+    await createAdminClient()
       .from('developers')
       .update({
         subscription_status: 'cancelled',
@@ -347,7 +347,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       .eq('id', developerId);
 
     // Aktualizuj billing record
-    await supabaseAdmin
+    await createAdminClient()
       .from('subscription_billing')
       .update({
         status: 'cancelled',
@@ -364,7 +364,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   const developerId = subscription.metadata.developer_id;
 
   if (developerId) {
-    await supabaseAdmin
+    await createAdminClient()
       .from('developers')
       .update({
         subscription_status: 'past_due',
@@ -373,7 +373,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
       .eq('id', developerId);
 
     // Log failed payment
-    await supabaseAdmin
+    await createAdminClient()
       .from('payments')
       .insert({
         developer_id: developerId,

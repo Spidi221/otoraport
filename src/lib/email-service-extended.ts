@@ -4,7 +4,7 @@
  */
 
 import { Resend } from 'resend';
-import { Database } from './supabase-single';
+import { Database } from './supabase/server';
 import {
   generateMinistryRegistrationTemplate,
   generateWelcomeEmailWithInstructions,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { WhiteLabelEngine, WhiteLabelPartner } from '@/lib/white-label';
 
 // GET /api/white-label/partners - List or get current partner
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       }
 
       try {
-        const { data: partners } = await supabaseAdmin
+        const { data: partners } = await createAdminClient()
           .from('whitelabel_partners')
           .select('*')
           .order('created_at', { ascending: false });
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
     const partner = await WhiteLabelEngine.createPartner(partnerData);
 
     // Update developer record
-    await supabaseAdmin
+    await createAdminClient()
       .from('developers')
       .update({
         is_partner: true,
@@ -292,7 +292,7 @@ export async function PATCH(request: NextRequest) {
         Object.assign(updateData, updates);
     }
 
-    const { data: updatedPartner, error } = await supabaseAdmin
+    const { data: updatedPartner, error } = await createAdminClient()
       .from('whitelabel_partners')
       .update(updateData)
       .eq('id', developer.partner_id)

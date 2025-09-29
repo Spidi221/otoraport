@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 
 // GET /api/marketing/metrics - Get marketing performance metrics
 export async function GET(request: NextRequest) {
@@ -69,27 +69,27 @@ export async function GET(request: NextRequest) {
 
 async function getMarketingMetrics(developerId: string, startDate: Date) {
   // Get total contacts
-  const { count: totalContacts } = await supabaseAdmin
+  const { count: totalContacts } = await createAdminClient()
     .from('marketing_contacts')
     .select('*', { count: 'exact', head: true })
     .eq('created_by', developerId);
 
   // Get active campaigns
-  const { count: activeCampaigns } = await supabaseAdmin
+  const { count: activeCampaigns } = await createAdminClient()
     .from('email_campaigns')
     .select('*', { count: 'exact', head: true })
     .eq('created_by', developerId)
     .eq('status', 'active');
 
   // Get active workflows
-  const { count: activeWorkflows } = await supabaseAdmin
+  const { count: activeWorkflows } = await createAdminClient()
     .from('automation_workflows')
     .select('*', { count: 'exact', head: true })
     .eq('created_by', developerId)
     .eq('status', 'active');
 
   // Get email performance metrics
-  const { data: emailMetrics } = await supabaseAdmin
+  const { data: emailMetrics } = await createAdminClient()
     .from('email_logs')
     .select('*')
     .gte('sent_at', startDate.toISOString())
@@ -99,7 +99,7 @@ async function getMarketingMetrics(developerId: string, startDate: Date) {
   const totalSent = emailMetrics?.length || 0;
 
   // Get email events for open/click rates
-  const { data: emailEvents } = await supabaseAdmin
+  const { data: emailEvents } = await createAdminClient()
     .from('email_events')
     .select('event_type')
     .gte('occurred_at', startDate.toISOString());

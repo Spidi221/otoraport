@@ -1,5 +1,5 @@
 // Bulk operations system for large-scale property management
-import { supabaseAdmin } from './supabase-single'
+import { createAdminClient } from './supabase/server'
 import { analyticsService } from './analytics'
 
 export interface BulkOperationJob {
@@ -76,7 +76,7 @@ export class BulkOperationsService {
     console.log(`Starting bulk price update for ${update.propertyIds.length} properties`)
 
     // Validate properties belong to developer
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
         id,
@@ -135,7 +135,7 @@ export class BulkOperationsService {
 
     console.log(`Starting bulk status change for ${change.propertyIds.length} properties`)
 
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
         id,
@@ -198,7 +198,7 @@ export class BulkOperationsService {
     console.log(`Starting bulk data export for developer ${developerId}`)
 
     // Get all developer's properties
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
         *,
@@ -244,7 +244,7 @@ export class BulkOperationsService {
 
     console.log(`Starting bulk compliance check for developer ${developerId}`)
 
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
         *,
@@ -341,7 +341,7 @@ export class BulkOperationsService {
         const newTotalPrice = property.area ? newPricePerM2 * property.area : property.total_price
 
         // Update in database
-        const { error } = await supabaseAdmin
+        const { error } = await createAdminClient()
           .from('properties')
           .update({
             price_per_m2: newPricePerM2,
@@ -389,7 +389,7 @@ export class BulkOperationsService {
 
     for (const property of properties) {
       try {
-        const { error } = await supabaseAdmin
+        const { error } = await createAdminClient()
           .from('properties')
           .update({
             status: change.newStatus,
@@ -436,7 +436,7 @@ export class BulkOperationsService {
 
     try {
       // Get all developer data
-      const { data: properties } = await supabaseAdmin
+      const { data: properties } = await createAdminClient()
         .from('properties')
         .select(`
           *,
@@ -451,7 +451,7 @@ export class BulkOperationsService {
       }
 
       if (options.includeProjects) {
-        const { data: projects } = await supabaseAdmin
+        const { data: projects } = await createAdminClient()
           .from('projects')
           .select('*')
           .eq('developer_id', developerId)

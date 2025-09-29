@@ -3,7 +3,7 @@
  * Integruje się z bazą danych i enforces limity według planów
  */
 
-import { supabaseAdmin } from './database';
+import { createAdminClient } from './database';
 import { canAddProperty, canAddProject, SUBSCRIPTION_PLANS, SubscriptionPlanType } from './subscription-plans';
 
 export interface LimitCheckResult {
@@ -21,7 +21,7 @@ export interface LimitCheckResult {
 export async function checkPropertyLimit(developerId: string): Promise<LimitCheckResult> {
   try {
     // Pobierz dane dewelopera
-    const developer = await supabaseAdmin
+    const developer = await createAdminClient()
       .from('developers')
       .select('subscription_plan, properties_limit')
       .eq('id', developerId)
@@ -32,7 +32,7 @@ export async function checkPropertyLimit(developerId: string): Promise<LimitChec
     }
 
     // Policz obecne properties
-    const { count: currentPropertiesCount, error: countError } = await supabaseAdmin
+    const { count: currentPropertiesCount, error: countError } = await createAdminClient()
       .from('properties')
       .select('*', { count: 'exact', head: true })
       .eq('project.developer_id', developerId);
@@ -71,7 +71,7 @@ export async function checkPropertyLimit(developerId: string): Promise<LimitChec
 export async function checkProjectLimit(developerId: string): Promise<LimitCheckResult> {
   try {
     // Pobierz dane dewelopera
-    const developer = await supabaseAdmin
+    const developer = await createAdminClient()
       .from('developers')
       .select('subscription_plan, projects_limit, additional_projects_count')
       .eq('id', developerId)
@@ -82,7 +82,7 @@ export async function checkProjectLimit(developerId: string): Promise<LimitCheck
     }
 
     // Policz obecne projekty
-    const { count: currentProjectsCount, error: countError } = await supabaseAdmin
+    const { count: currentProjectsCount, error: countError } = await createAdminClient()
       .from('projects')
       .select('*', { count: 'exact', head: true })
       .eq('developer_id', developerId)
@@ -126,7 +126,7 @@ export async function checkProjectLimit(developerId: string): Promise<LimitCheck
 export async function addPaidProject(developerId: string): Promise<{ success: boolean; newMonthlyCost?: number; error?: string }> {
   try {
     // Sprawdź czy to plan Pro
-    const developer = await supabaseAdmin
+    const developer = await createAdminClient()
       .from('developers')
       .select('subscription_plan, additional_projects_count')
       .eq('id', developerId)
@@ -144,7 +144,7 @@ export async function addPaidProject(developerId: string): Promise<{ success: bo
     const newAdditionalCount = currentAdditional + 1;
 
     // Zaktualizuj liczbę dodatkowych projektów
-    const { error: updateError } = await supabaseAdmin
+    const { error: updateError } = await createAdminClient()
       .from('developers')
       .update({
         additional_projects_count: newAdditionalCount,
@@ -178,7 +178,7 @@ export async function addPaidProject(developerId: string): Promise<{ success: bo
 export async function getDeveloperUsageStats(developerId: string) {
   try {
     // Pobierz dane dewelopera
-    const developer = await supabaseAdmin
+    const developer = await createAdminClient()
       .from('developers')
       .select(`
         subscription_plan,
@@ -196,12 +196,12 @@ export async function getDeveloperUsageStats(developerId: string) {
 
     // Policz properties i projekty
     const [propertiesResult, projectsResult] = await Promise.all([
-      supabaseAdmin
+      createAdminClient
         .from('properties')
         .select('status, project:projects!inner(developer_id)')
         .eq('project.developer_id', developerId),
 
-      supabaseAdmin
+      createAdminClient
         .from('projects')
         .select('status')
         .eq('developer_id', developerId)
@@ -315,7 +315,7 @@ export async function updatePlanLimits(
   try {
     const plan = SUBSCRIPTION_PLANS[newPlan];
 
-    const { error } = await supabaseAdmin
+    const { error } = await createAdminClient()
       .from('developers')
       .update({
         subscription_plan: newPlan,

@@ -156,7 +156,7 @@ export class ApiKeyManager {
     expiresInDays?: number
   ): Promise<{ apiKey: ApiKey; plainKey: string }> {
     try {
-      const { supabaseAdmin } = await import('./supabase');
+      const { createAdminClient } = await import('./supabase');
 
       const plainKey = this.generateSecureKey();
       const keyHash = await this.hashKey(plainKey);
@@ -176,7 +176,7 @@ export class ApiKeyManager {
           null
       };
 
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await createAdminClient()
         .from('api_keys')
         .insert(apiKeyData)
         .select()
@@ -295,7 +295,7 @@ export class ApiKeyManager {
     responseTimeMs: number
   ): Promise<void> {
     try {
-      const { supabaseAdmin } = await import('./supabase');
+      const { createAdminClient } = await import('./supabase');
 
       const logEntry = {
         id: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -311,7 +311,7 @@ export class ApiKeyManager {
         response_time_ms: responseTimeMs
       };
 
-      const { error } = await supabaseAdmin
+      const { error } = await createAdminClient()
         .from('api_requests')
         .insert(logEntry);
 
@@ -354,9 +354,9 @@ export class ApiKeyManager {
 
   private static async findApiKeyByHash(hash: string): Promise<ApiKey | null> {
     try {
-      const { supabaseAdmin } = await import('./supabase');
+      const { createAdminClient } = await import('./supabase');
 
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await createAdminClient()
         .from('api_keys')
         .select('*')
         .eq('key_hash', hash)
@@ -400,9 +400,9 @@ export class ApiKeyManager {
 
   private static async findApiKeyById(id: string): Promise<ApiKey | null> {
     try {
-      const { supabaseAdmin } = await import('./supabase');
+      const { createAdminClient } = await import('./supabase');
 
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await createAdminClient()
         .from('api_keys')
         .select('*')
         .eq('id', id)
@@ -440,11 +440,11 @@ export class ApiKeyManager {
 
   private static async getRecentRequests(apiKeyId: string, since: number): Promise<ApiRequest[]> {
     try {
-      const { supabaseAdmin } = await import('./supabase');
+      const { createAdminClient } = await import('./supabase');
 
       const sinceDate = new Date(since).toISOString();
 
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await createAdminClient()
         .from('api_requests')
         .select('*')
         .eq('api_key_id', apiKeyId)
@@ -488,7 +488,7 @@ export class WebhookManager {
     retryPolicy?: Partial<RetryPolicy>
   ): Promise<WebhookEndpoint> {
     try {
-      const { supabaseAdmin } = await import('./supabase');
+      const { createAdminClient } = await import('./supabase');
 
       const secret = this.generateWebhookSecret();
 
@@ -508,7 +508,7 @@ export class WebhookManager {
         failure_count: 0
       };
 
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await createAdminClient()
         .from('webhook_endpoints')
         .insert(webhookData)
         .select()
@@ -547,7 +547,7 @@ export class WebhookManager {
     payload: any
   ): Promise<WebhookDelivery> {
     try {
-      const { supabaseAdmin } = await import('./supabase');
+      const { createAdminClient } = await import('./supabase');
 
       const deliveryData = {
         id: `whd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -559,7 +559,7 @@ export class WebhookManager {
         last_attempt_at: new Date().toISOString()
       };
 
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await createAdminClient()
         .from('webhook_deliveries')
         .insert(deliveryData)
         .select()
@@ -717,9 +717,9 @@ export class WebhookManager {
 
   private static async updateWebhookSuccess(webhook: WebhookEndpoint): Promise<void> {
     try {
-      const { supabaseAdmin } = await import('./supabase');
+      const { createAdminClient } = await import('./supabase');
 
-      await supabaseAdmin
+      await createAdminClient()
         .from('webhook_endpoints')
         .update({
           last_success_at: webhook.last_success_at,
@@ -733,9 +733,9 @@ export class WebhookManager {
 
   private static async updateWebhookFailure(webhook: WebhookEndpoint): Promise<void> {
     try {
-      const { supabaseAdmin } = await import('./supabase');
+      const { createAdminClient } = await import('./supabase');
 
-      await supabaseAdmin
+      await createAdminClient()
         .from('webhook_endpoints')
         .update({
           last_failure_at: webhook.last_failure_at,
@@ -749,9 +749,9 @@ export class WebhookManager {
 
   private static async updateDeliveryStatus(delivery: WebhookDelivery): Promise<void> {
     try {
-      const { supabaseAdmin } = await import('./supabase');
+      const { createAdminClient } = await import('./supabase');
 
-      await supabaseAdmin
+      await createAdminClient()
         .from('webhook_deliveries')
         .update({
           status: delivery.status,

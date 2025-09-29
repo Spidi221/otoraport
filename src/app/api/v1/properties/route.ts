@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withReadOnlyAuth, withWriteAuth } from '@/lib/api-middleware';
 import { ApiResponseBuilder, type PropertyApiModel } from '@/lib/api-v1';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 
 /**
  * GET /api/v1/properties
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       const project_id = url.searchParams.get('project_id');
 
       // Build query
-      let query = supabaseAdmin
+      let query = createAdminClient
         .from('properties')
         .select(`
           id,
@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
 
       // Verify project ownership
       const projectIds = [...new Set(properties.map(p => p.project_id))];
-      const { data: projects, error: projectError } = await supabaseAdmin
+      const { data: projects, error: projectError } = await createAdminClient()
         .from('projects')
         .select('id')
         .eq('developer_id', context.developerId)
@@ -210,7 +210,7 @@ export async function POST(request: NextRequest) {
       }));
 
       // Insert properties
-      const { data: insertedProperties, error: insertError } = await supabaseAdmin
+      const { data: insertedProperties, error: insertError } = await createAdminClient()
         .from('properties')
         .insert(dbProperties)
         .select();

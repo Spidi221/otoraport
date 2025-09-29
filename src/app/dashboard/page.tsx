@@ -15,8 +15,6 @@ const ActionButtons = lazy(() => import("@/components/dashboard/action-buttons")
 const ChartsSection = lazy(() => import("@/components/dashboard/charts-section").then(m => ({ default: m.ChartsSection })));
 const PropertiesTable = lazy(() => import("@/components/dashboard/properties-table").then(m => ({ default: m.PropertiesTable })));
 const PresentationSection = lazy(() => import("@/components/dashboard/presentation-section").then(m => ({ default: m.PresentationSection })));
-const AdvancedAnalyticsDashboard = lazy(() => import("@/components/dashboard/AdvancedAnalyticsDashboard"));
-const PredictiveInsightsDashboard = lazy(() => import("@/components/dashboard/PredictiveInsightsDashboard"));
 
 export default function HomePage() {
   // FIXED: Use unified auth hook with automatic developer profile loading
@@ -36,27 +34,7 @@ export default function HomePage() {
     return `${greetingText}, ${firstName}! 👋`;
   }, [user?.user_metadata?.full_name]);
 
-  // Show loading while checking user status
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingState message="Sprawdzanie uprawnień..." />
-      </div>
-    );
-  }
-
-  // Show access denied if not properly authenticated
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Dostęp zabroniony</h2>
-          <p className="text-gray-600 mb-6">Musisz się zalogować, aby uzyskać dostęp do dashboardu.</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Middleware already verified auth - no need to block rendering
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header showUserMenu={!!user} />
@@ -88,16 +66,6 @@ export default function HomePage() {
           {/* Action Buttons */}
           <Suspense fallback={<LoadingState message="Ładowanie akcji..." />}>
             <ActionButtons />
-          </Suspense>
-
-          {/* Advanced Analytics Dashboard */}
-          <Suspense fallback={<LoadingState message="Ładowanie zaawansowanych analiz..." />}>
-            <AdvancedAnalyticsDashboard />
-          </Suspense>
-
-          {/* Predictive Insights Dashboard */}
-          <Suspense fallback={<LoadingState message="Ładowanie AI insights..." />}>
-            <PredictiveInsightsDashboard />
           </Suspense>
 
           {/* Presentation Section */}

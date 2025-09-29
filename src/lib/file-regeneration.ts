@@ -1,8 +1,8 @@
 // Auto-regeneration system for XML/MD files when data changes
-import { supabaseAdmin } from './supabase-single'
+import { createAdminClient } from './supabase/server'
 import { generateXMLForMinistry, generateMarkdownForMinistry, createSampleData } from './generators'
 import { sendEmail } from './email-service'
-import { Database } from './supabase-single'
+import { Database } from './supabase/server'
 
 type Developer = Database['public']['Tables']['developers']['Row']
 
@@ -19,7 +19,7 @@ export async function regenerateFilesForDeveloper(developerId: string): Promise<
     console.log(`Starting file regeneration for developer: ${developerId}`)
 
     // Get developer data
-    const { data: developer, error: devError } = await supabaseAdmin
+    const { data: developer, error: devError } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', developerId)
@@ -36,7 +36,7 @@ export async function regenerateFilesForDeveloper(developerId: string): Promise<
     }
 
     // Get projects for this developer
-    const { data: projects } = await supabaseAdmin
+    const { data: projects } = await createAdminClient()
       .from('projects')
       .select('*')
       .eq('developer_id', developerId)
@@ -46,7 +46,7 @@ export async function regenerateFilesForDeveloper(developerId: string): Promise<
     let properties: any[] = []
 
     if (projectIds.length > 0) {
-      const { data: propertiesData } = await supabaseAdmin
+      const { data: propertiesData } = await createAdminClient()
         .from('properties')
         .select('*')
         .in('project_id', projectIds)
@@ -67,7 +67,7 @@ export async function regenerateFilesForDeveloper(developerId: string): Promise<
     const currentTime = new Date().toISOString()
 
     // Update XML file record
-    const { error: xmlError } = await supabaseAdmin
+    const { error: xmlError } = await createAdminClient()
       .from('generated_files')
       .upsert({
         developer_id: developerId,
@@ -80,7 +80,7 @@ export async function regenerateFilesForDeveloper(developerId: string): Promise<
       })
 
     // Update MD file record  
-    const { error: mdError } = await supabaseAdmin
+    const { error: mdError } = await createAdminClient()
       .from('generated_files')
       .upsert({
         developer_id: developerId,
@@ -148,7 +148,7 @@ export async function regenerateAllActiveFiles(): Promise<{
 }> {
   console.log('Starting bulk file regeneration for all active developers')
 
-  const { data: activeDevelopers, error } = await supabaseAdmin
+  const { data: activeDevelopers, error } = await createAdminClient()
     .from('developers')
     .select('id, name, email, company_name, subscription_status')
     .eq('subscription_status', 'active')

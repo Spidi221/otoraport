@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase-single'
+import { createClient } from '@/lib/supabase/client'
 
 export default function DebugAuthPage() {
   const [debugInfo, setDebugInfo] = useState<any>({})
 
   useEffect(() => {
     async function runDiagnostics() {
+      const supabase = createClient();
       const debug: any = {
         timestamp: new Date().toISOString(),
         url: window.location.href,

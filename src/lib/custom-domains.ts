@@ -194,9 +194,9 @@ export async function getDeveloperByDomain(domain: string): Promise<{
   subscription_plan: string
 } | null> {
   try {
-    const { supabaseAdmin } = await import('@/lib/supabase-single')
+    const { createAdminClient } = await import('@/lib/supabase/server')
     
-    const { data: developer, error } = await supabaseAdmin
+    const { data: developer, error } = await createAdminClient()
       .from('developers')
       .select('id, client_id, company_name, subscription_plan')
       .eq('custom_domain', domain)
@@ -264,9 +264,9 @@ function generateVerificationToken(): string {
 }
 
 async function checkDomainExists(domain: string): Promise<boolean> {
-  const { supabaseAdmin } = await import('@/lib/supabase-single')
+  const { createAdminClient } = await import('@/lib/supabase/server')
   
-  const { data } = await supabaseAdmin
+  const { data } = await createAdminClient()
     .from('developers')
     .select('id')
     .eq('custom_domain', domain)
@@ -276,9 +276,9 @@ async function checkDomainExists(domain: string): Promise<boolean> {
 }
 
 async function saveDomainConfig(config: CustomDomainConfig): Promise<void> {
-  const { supabaseAdmin } = await import('@/lib/supabase-single')
+  const { createAdminClient } = await import('@/lib/supabase/server')
   
-  await supabaseAdmin
+  await createAdminClient()
     .from('developers')
     .update({
       custom_domain: config.domain,
@@ -322,11 +322,11 @@ export async function deployPresentationToDomain(
   domain?: string
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
-    const { supabaseAdmin } = await import('@/lib/supabase-single');
+    const { createAdminClient } = await import('@/lib/supabase/server');
 
     // Get developer's custom domain if not provided
     if (!domain) {
-      const { data: developer } = await supabaseAdmin
+      const { data: developer } = await createAdminClient()
         .from('developers')
         .select('custom_domain')
         .eq('id', developerId)
@@ -356,7 +356,7 @@ export async function deployPresentationToDomain(
 
     if (deploymentResult.success) {
       // Update presentation generation timestamp
-      await supabaseAdmin
+      await createAdminClient()
         .from('developers')
         .update({
           presentation_generated_at: new Date().toISOString(),
@@ -482,9 +482,9 @@ export async function getDomainConfig(developerId: string): Promise<{
   dnsInstructions?: string;
 }> {
   try {
-    const { supabaseAdmin } = await import('@/lib/supabase-single');
+    const { createAdminClient } = await import('@/lib/supabase/server');
 
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('custom_domain, presentation_url, presentation_generated_at')
       .eq('id', developerId)

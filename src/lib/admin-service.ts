@@ -1,18 +1,18 @@
 // Admin panel service for system management and monitoring - Build-safe version
-let supabaseAdmin: any = null
+let createAdminClient: any = null
 
 // Lazy load supabase to avoid build errors
 function getSupabaseAdmin() {
-  if (!supabaseAdmin) {
+  if (!createAdminClient) {
     try {
-      const { supabaseAdmin: admin } = require('./supabase')
-      supabaseAdmin = admin
+      const { createAdminClient: admin } = require('./supabase')
+      createAdminClient = admin
     } catch (error) {
       console.warn('Supabase admin not available during build')
       return null
     }
   }
-  return supabaseAdmin
+  return createAdminClient
 }
 
 export interface SystemStats {

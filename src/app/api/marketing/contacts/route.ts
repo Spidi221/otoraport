@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { MarketingAutomationEngine, MarketingContact } from '@/lib/marketing-automation';
 
 // GET /api/marketing/contacts - List marketing contacts
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
 
     // Get marketing contacts from database
-    let query = supabaseAdmin
+    let query = createAdminClient
       .from('marketing_contacts')
       .select(`
         id,
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if contact already exists
-    const { data: existingContact } = await supabaseAdmin
+    const { data: existingContact } = await createAdminClient()
       .from('marketing_contacts')
       .select('id')
       .eq('email', body.email)
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Save to database
-    const { data: savedContact, error } = await supabaseAdmin
+    const { data: savedContact, error } = await createAdminClient()
       .from('marketing_contacts')
       .insert({
         id: contact.id,
@@ -264,7 +264,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Bulk update contacts
-    const { data: updatedContacts, error } = await supabaseAdmin
+    const { data: updatedContacts, error } = await createAdminClient()
       .from('marketing_contacts')
       .update({
         ...updates,
@@ -326,7 +326,7 @@ function getSegmentCriteria(segment: string) {
 }
 
 async function getContactsByStatus() {
-  const { data } = await supabaseAdmin
+  const { data } = await createAdminClient()
     .from('marketing_contacts')
     .select('lead_status')
     .not('lead_status', 'is', null);
@@ -340,7 +340,7 @@ async function getContactsByStatus() {
 }
 
 async function getContactsBySource() {
-  const { data } = await supabaseAdmin
+  const { data } = await createAdminClient()
     .from('marketing_contacts')
     .select('lead_source')
     .not('lead_source', 'is', null);

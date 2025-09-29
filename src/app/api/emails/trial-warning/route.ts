@@ -1,7 +1,7 @@
 // API endpoint for sending trial expiry warnings (cron job or manual trigger)
 
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { sendTrialExpiryWarning } from '@/lib/email-service'
 
 export async function POST(request: NextRequest) {
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 
     // Get developers on trial status
-    const { data: developersToNotify, error } = await supabaseAdmin
+    const { data: developersToNotify, error } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('subscription_status', 'trial')
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         if (emailResult.success) {
           // Update the developer record to track that we sent this warning
           const existingNotifications = developer.email_notifications_sent || []
-          await supabaseAdmin
+          await createAdminClient()
             .from('developers')
             .update({
               email_notifications_sent: [...existingNotifications, warningKey],

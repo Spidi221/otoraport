@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { WhiteLabelEngine } from '@/lib/white-label';
 
 // GET /api/white-label/clients - List partner clients
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     try {
       // Get clients from database
-      let query = supabaseAdmin
+      let query = createAdminClient
         .from('whitelabel_clients')
         .select(`
           *,
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if developer exists or create new one
-    let { data: targetDeveloper } = await supabaseAdmin
+    let { data: targetDeveloper } = await createAdminClient()
       .from('developers')
       .select('id, email')
       .eq('email', body.developer_email)
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
 
     if (!targetDeveloper) {
       // Create new developer account
-      const { data: newDeveloper, error: createError } = await supabaseAdmin
+      const { data: newDeveloper, error: createError } = await createAdminClient()
         .from('developers')
         .insert({
           email: body.developer_email,
@@ -261,7 +261,7 @@ export async function PATCH(request: NextRequest) {
         Object.assign(updateData, updates);
     }
 
-    const { data: updatedClient, error } = await supabaseAdmin
+    const { data: updatedClient, error } = await createAdminClient()
       .from('whitelabel_clients')
       .update(updateData)
       .eq('id', client_id)

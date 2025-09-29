@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update developer record to mark onboarding as completed
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await createAdminClient()
       .from('developers')
       .update({
         onboarding_completed: true,

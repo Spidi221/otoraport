@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { MarketingAutomationEngine, AutomationWorkflow, WorkflowTrigger } from '@/lib/marketing-automation';
 
 // GET /api/marketing/workflows - List automation workflows
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     const trigger = searchParams.get('trigger');
 
     // Get workflows from database
-    let query = supabaseAdmin
+    let query = createAdminClient
       .from('automation_workflows')
       .select(`
         id,
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Save to database
-    const { data: savedWorkflow, error } = await supabaseAdmin
+    const { data: savedWorkflow, error } = await createAdminClient()
       .from('automation_workflows')
       .insert({
         id: workflow.id,
@@ -258,7 +258,7 @@ export async function PATCH(request: NextRequest) {
         );
     }
 
-    const { data: updatedWorkflow, error } = await supabaseAdmin
+    const { data: updatedWorkflow, error } = await createAdminClient()
       .from('automation_workflows')
       .update(updateData)
       .eq('id', workflow_id)

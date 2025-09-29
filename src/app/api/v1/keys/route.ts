@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { ApiKeyManager, ApiResponseBuilder, API_PERMISSION_TEMPLATES } from '@/lib/api-v1';
 
 // GET /api/v1/keys - List API keys (authenticated via session)
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const developer = auth.developer;
 
     // Get API keys
-    const { data: apiKeys, error } = await supabaseAdmin
+    const { data: apiKeys, error } = await createAdminClient()
       .from('api_keys')
       .select(`
         id,
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     const currentLimit = limits[developer.subscription_plan] || limits.basic;
 
-    const { count } = await supabaseAdmin
+    const { count } = await createAdminClient()
       .from('api_keys')
       .select('id', { count: 'exact' })
       .eq('developer_id', developer.id)
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Save to database
-    const { data: savedKey, error } = await supabaseAdmin
+    const { data: savedKey, error } = await createAdminClient()
       .from('api_keys')
       .insert({
         id: apiKey.id,
@@ -224,7 +224,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Deactivate API key
-    const { data: updatedKey, error } = await supabaseAdmin
+    const { data: updatedKey, error } = await createAdminClient()
       .from('api_keys')
       .update({ is_active: false })
       .eq('id', body.key_id)

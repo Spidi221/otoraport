@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,13 +16,13 @@ export async function POST(request: NextRequest) {
     const developer = auth.developer
 
     // Check if developer has data to report
-    const { data: projects } = await supabaseAdmin
+    const { data: projects } = await createAdminClient()
       .from('projects')
       .select('id')
       .eq('developer_id', developer.id)
 
     const projectIds = projects?.map(p => p.id) || []
-    const { data: properties, count } = await supabaseAdmin
+    const { data: properties, count } = await createAdminClient()
       .from('properties')
       .select('*', { count: 'exact' })
       .in('project_id', projectIds)
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Log the notification in the database (optional)
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('ministry_notifications')
         .insert({
           developer_id: developer.id,

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function GET() {
   const startTime = Date.now()
@@ -42,7 +42,7 @@ async function checkDatabase() {
     console.log('🔍 HEALTH: Anon Key present:', !!(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY))
     console.log('🔍 HEALTH: Service Key present:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await createAdminClient()
       .from('developers')
       .select('id')
       .limit(1)

@@ -2,7 +2,7 @@
 // GET /api/analytics/dashboard
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerAuth, getDeveloperProfile, supabaseAdmin } from '@/lib/supabase-single';
+import { getServerAuth, getDeveloperProfile, createAdminClient } from '@/lib/supabase/server';
 import { AnalyticsEngine } from '@/lib/analytics-engine';
 
 export async function GET(request: NextRequest) {
@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
 
 async function getPropertyPerformanceAnalytics(developerId: string, parameters: any) {
   // Get detailed property performance metrics
-  const { data: properties } = await supabaseAdmin
+  const { data: properties } = await createAdminClient()
     .from('properties')
     .select(`
       *,
@@ -321,7 +321,7 @@ async function getMarketComparisonAnalytics(developerId: string, parameters: any
   const propertyType = parameters?.property_type || 'all';
 
   // Get developer's properties for comparison
-  const { data: properties } = await supabaseAdmin
+  const { data: properties } = await createAdminClient()
     .from('properties')
     .select(`
       *,

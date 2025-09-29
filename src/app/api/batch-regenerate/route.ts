@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin, Database } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 
 type DeveloperSelect = {
   id: string
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     console.log('🚀 Starting batch regeneration...')
 
     // Pobierz wszystkich aktywnych deweloperów
-    const { data: developers, error: devError } = await supabaseAdmin
+    const { data: developers, error: devError } = await createAdminClient()
       .from('developers')
       .select('id, name, company_name, email, subscription_status')
       .eq('subscription_status', 'active') as { data: DeveloperSelect[] | null, error: any }
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Loguj wyniki batch operacji
-    await (supabaseAdmin
+    await (createAdminClient
       .from('activity_logs')
       .insert({
         action: 'batch_regeneration',
@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Sprawdź ostatnie batch operacje
-    const { data: logs } = await supabaseAdmin
+    const { data: logs } = await createAdminClient()
       .from('activity_logs')
       .select('*')
       .eq('action', 'batch_regeneration')
@@ -168,12 +168,12 @@ export async function GET(request: NextRequest) {
       .limit(5)
 
     // Sprawdź ogólny status systemu
-    const { data: developers } = await supabaseAdmin
+    const { data: developers } = await createAdminClient()
       .from('developers')
       .select('id, subscription_status')
       .eq('subscription_status', 'active')
 
-    const { data: files } = await supabaseAdmin
+    const { data: files } = await createAdminClient()
       .from('generated_files')
       .select('developer_id, last_generated, properties_count')
 

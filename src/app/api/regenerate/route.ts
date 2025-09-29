@@ -92,9 +92,9 @@ export async function GET(request: NextRequest) {
     const targetId = developerId || userId
 
     // Get latest generation info from database
-    const { supabaseAdmin } = await import('@/lib/supabase')
+    const { createAdminClient } = await import('@/lib/supabase')
     
-    const { data: generatedFiles, error } = await supabaseAdmin
+    const { data: generatedFiles, error } = await createAdminClient()
       .from('generated_files')
       .select('*')
       .eq('developer_id', targetId)

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { supabase } from '@/lib/supabase-single'
+import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Building2, User, Bell, Shield } from 'lucide-react'
 
@@ -20,7 +20,7 @@ export default function SettingsPage() {
   useEffect(() => {
     async function loadUserAndProfile() {
       try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        const supabase = createClient(); const { data: { user }, error: userError } = await supabase.auth.getUser()
 
         if (userError || !user) {
           router.push('/auth/signin')
@@ -203,7 +203,7 @@ export default function SettingsPage() {
               <CardDescription>Zarządzaj ustawieniami bezpieczeństwa</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" onClick={() => supabase.auth.signOut()}>
+              <Button variant="outline" onClick={() => createClient().auth.signOut()}>
                 Wyloguj się ze wszystkich urządzeń
               </Button>
             </CardContent>

@@ -4,7 +4,7 @@
  * CRITICAL: Uses official dane_o_cenach_mieszkan format
  */
 
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { generateXMLForMinistry, DataForGeneration } from '@/lib/generators'
 import { generateMinistryXML, convertToMinistryFormat, validateMinistryXML } from './xml-generator'
 
@@ -124,7 +124,7 @@ export async function generateAggregatedXML(developerId: string): Promise<string
 
   try {
     // Get developer data
-    const { data: developer, error: devError } = await supabaseAdmin
+    const { data: developer, error: devError } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', developerId)
@@ -135,7 +135,7 @@ export async function generateAggregatedXML(developerId: string): Promise<string
     }
 
     // Pobierz projekty developera (osobno, bez zagnieżdżeń)
-    const { data: projects, error: projectsError } = await supabaseAdmin
+    const { data: projects, error: projectsError } = await createAdminClient()
       .from('projects')
       .select(`
         id,
@@ -166,7 +166,7 @@ export async function generateAggregatedXML(developerId: string): Promise<string
 
     // Pobierz wszystkie właściwości dla tych projektów (osobno) - ALL 58 MINISTRY FIELDS
     const projectIds = validProjects.map(p => p.id)
-    const { data: properties, error: propertiesError } = await supabaseAdmin
+    const { data: properties, error: propertiesError } = await createAdminClient()
       .from('properties')
       .select(`
         id,
@@ -402,7 +402,7 @@ export async function getProjectsSummary(developerId: string): Promise<{
   }>
 }> {
   try {
-    const { data: projects, error } = await supabaseAdmin
+    const { data: projects, error } = await createAdminClient()
       .from('projects')
       .select(`
         id,

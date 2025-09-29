@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateMarkdownForMinistry, createSampleData } from '@/lib/generators'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { validateClientId, applySecurityHeaders, checkRateLimit } from '@/lib/security'
 
 export async function GET(
@@ -42,7 +42,7 @@ export async function GET(
     
     try {
       // Try to get real data from database
-      const { data: developer, error: devError } = await supabaseAdmin
+      const { data: developer, error: devError } = await createAdminClient()
         .from('developers')
         .select('*')
         .eq('client_id', clientId)
@@ -53,14 +53,14 @@ export async function GET(
         data = createSampleData(clientId)
       } else {
         // Get projects for this developer
-        const { data: projects } = await supabaseAdmin
+        const { data: projects } = await createAdminClient()
           .from('projects')
           .select('*')
           .eq('developer_id', developer.id)
 
         // Get properties for these projects
         const projectIds = projects?.map(p => p.id) || []
-        const { data: properties } = await supabaseAdmin
+        const { data: properties } = await createAdminClient()
           .from('properties')
           .select('*')
           .in('project_id', projectIds)

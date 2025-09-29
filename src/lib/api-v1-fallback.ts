@@ -196,8 +196,8 @@ export class ApiKeyManagerWithFallback extends ApiKeyManager {
   static async getApiKeysByDeveloper(developerId: string): Promise<ApiKey[]> {
     try {
       // Try database approach
-      const { supabaseAdmin } = await import('./supabase');
-      const { data, error } = await supabaseAdmin
+      const { createAdminClient } = await import('./supabase');
+      const { data, error } = await createAdminClient()
         .from('api_keys')
         .select('*')
         .eq('developer_id', developerId)
@@ -217,8 +217,8 @@ export class ApiKeyManagerWithFallback extends ApiKeyManager {
   static async deactivateApiKey(keyId: string, developerId: string): Promise<boolean> {
     try {
       // Try database approach
-      const { supabaseAdmin } = await import('./supabase');
-      const { data, error } = await supabaseAdmin
+      const { createAdminClient } = await import('./supabase');
+      const { data, error } = await createAdminClient()
         .from('api_keys')
         .update({ is_active: false })
         .eq('id', keyId)
@@ -284,8 +284,8 @@ export class WebhookManagerWithFallback extends WebhookManager {
   static async getWebhooksByDeveloper(developerId: string): Promise<WebhookEndpoint[]> {
     try {
       // Try database approach
-      const { supabaseAdmin } = await import('./supabase');
-      const { data, error } = await supabaseAdmin
+      const { createAdminClient } = await import('./supabase');
+      const { data, error } = await createAdminClient()
         .from('webhook_endpoints')
         .select('*')
         .eq('developer_id', developerId);
@@ -317,8 +317,8 @@ export async function initializeSampleData(developerId: string): Promise<void> {
 export async function getApiAnalytics(developerId: string): Promise<any> {
   try {
     // Try getting real analytics from database
-    const { supabaseAdmin } = await import('./supabase');
-    const { data, error } = await supabaseAdmin.rpc('get_api_usage_stats', {
+    const { createAdminClient } = await import('./supabase');
+    const { data, error } = await createAdminClient.rpc('get_api_usage_stats', {
       developer_uuid: developerId
     });
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { 
   generateMinistryRegistrationEmail, 
   generateMinistryFollowUpEmail,
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     let targetDeveloperId = developerId || auth.developer.id
 
     // Get full developer data
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', sanitizeInput(targetDeveloperId))

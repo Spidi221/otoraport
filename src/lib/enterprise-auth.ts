@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 
 export interface EnterpriseUser {
   id: string;
@@ -93,7 +93,7 @@ export class EnterpriseAuthManager {
     };
 
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('organizations')
         .insert(org);
 
@@ -110,7 +110,7 @@ export class EnterpriseAuthManager {
 
   static async getOrganization(orgId: string): Promise<Organization | null> {
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await createAdminClient()
         .from('organizations')
         .select('*')
         .eq('id', orgId)
@@ -124,7 +124,7 @@ export class EnterpriseAuthManager {
 
   static async getOrganizationByDomain(domain: string): Promise<Organization | null> {
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await createAdminClient()
         .from('organizations')
         .select('*')
         .eq('domain', domain)
@@ -146,7 +146,7 @@ export class EnterpriseAuthManager {
     };
 
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('enterprise_users')
         .insert(user);
 
@@ -163,7 +163,7 @@ export class EnterpriseAuthManager {
 
   static async getEnterpriseUser(userId: string): Promise<EnterpriseUser | null> {
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await createAdminClient()
         .from('enterprise_users')
         .select('*')
         .eq('id', userId)
@@ -177,7 +177,7 @@ export class EnterpriseAuthManager {
 
   static async getUserByEmail(email: string, organizationId: string): Promise<EnterpriseUser | null> {
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await createAdminClient()
         .from('enterprise_users')
         .select('*')
         .eq('email', email)
@@ -200,7 +200,7 @@ export class EnterpriseAuthManager {
     };
 
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('roles')
         .insert(role);
 
@@ -214,7 +214,7 @@ export class EnterpriseAuthManager {
 
   static async assignRole(userId: string, roleId: string): Promise<void> {
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('user_roles')
         .insert({
           user_id: userId,
@@ -233,7 +233,7 @@ export class EnterpriseAuthManager {
 
   static async getUserPermissions(userId: string): Promise<string[]> {
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await createAdminClient()
         .from('user_permissions_view')
         .select('permission')
         .eq('user_id', userId);
@@ -254,7 +254,7 @@ export class EnterpriseAuthManager {
   // SSO Configuration
   static async configureSSOProvider(organizationId: string, config: SSOConfig): Promise<void> {
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('organizations')
         .update({
           sso_enabled: true,
@@ -330,7 +330,7 @@ export class EnterpriseAuthManager {
       }
 
       // Update last login
-      await supabaseAdmin
+      await createAdminClient()
         .from('enterprise_users')
         .update({
           last_login_at: new Date().toISOString(),
@@ -441,7 +441,7 @@ export class EnterpriseAuthManager {
 
   private static async getRoleByName(roleName: string, organizationId: string): Promise<Role | null> {
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await createAdminClient()
         .from('roles')
         .select('*')
         .eq('name', roleName)
@@ -461,13 +461,13 @@ export class EnterpriseAuthManager {
 
   private static async updateOrganizationUserCount(organizationId: string): Promise<void> {
     try {
-      const { count } = await supabaseAdmin
+      const { count } = await createAdminClient()
         .from('enterprise_users')
         .select('*', { count: 'exact', head: true })
         .eq('organization_id', organizationId)
         .eq('status', 'active');
 
-      await supabaseAdmin
+      await createAdminClient()
         .from('organizations')
         .update({
           current_users: count || 0,

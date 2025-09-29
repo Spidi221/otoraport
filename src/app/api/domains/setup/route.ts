@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { setupCustomDomain } from '@/lib/custom-domains';
 import { checkSubscriptionLimits } from '@/lib/subscription-plans';
 
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get developer profile
-    const { data: developer, error: devError } = await supabaseAdmin
+    const { data: developer, error: devError } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', auth.developer.id)
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get developer profile with custom domain info
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('id, custom_domain, presentation_url, presentation_generated_at, subscription_plan')
       .eq('id', auth.developer.id)

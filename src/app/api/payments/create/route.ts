@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { przelewy24 } from '@/lib/przelewy24'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Payment creation initiated (user details redacted for security)
 
     // Store payment intent in database
-    const { data: payment, error: dbError } = await supabaseAdmin
+    const { data: payment, error: dbError } = await createAdminClient()
       .from('payments')
       .insert({
         developer_id: userId,
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       console.error('Przelewy24 error:', p24Result.error)
       
       // Update payment status to failed
-      await supabaseAdmin
+      await createAdminClient()
         .from('payments')
         .update({ status: 'failed' })
         .eq('id', payment.id)
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update payment with token
-    await supabaseAdmin
+    await createAdminClient()
       .from('payments')
       .update({ 
         przelewy24_token: p24Result.token,

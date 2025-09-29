@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 
 /**
  * Custom domain middleware for Enterprise plans
@@ -25,7 +25,7 @@ export async function handleCustomDomain(request: NextRequest): Promise<NextResp
 
   try {
     // Look up developer by custom domain
-    const { data: developer, error } = await supabaseAdmin
+    const { data: developer, error } = await createAdminClient()
       .from('developers')
       .select(`
         id,

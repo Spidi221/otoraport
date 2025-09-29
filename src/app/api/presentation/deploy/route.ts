@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withSubscriptionCheck } from '@/lib/subscription-middleware'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { generatePresentationHTML, generateRobotsTxt, generateSitemap, calculateMarketStats, generatePriceHistoryChart, type PresentationSiteData } from '@/lib/presentation-generator'
 
 // Deployment functions
@@ -121,7 +121,7 @@ async function deployPresentationSite(request: any) {
     }
 
     // Get developer data
-    const { data: developer, error: devError } = await supabaseAdmin
+    const { data: developer, error: devError } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', developerId)
@@ -135,13 +135,13 @@ async function deployPresentationSite(request: any) {
     }
 
     // Get projects and properties
-    const { data: projects } = await supabaseAdmin
+    const { data: projects } = await createAdminClient()
       .from('projects')
       .select('*')
       .eq('developer_id', developerId)
 
     const projectIds = projects?.map(p => p.id) || []
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select('*')
       .in('project_id', projectIds)
@@ -237,7 +237,7 @@ async function deployPresentationSite(request: any) {
     }
     
     // Update developer record with deployment info
-    await supabaseAdmin
+    await createAdminClient()
       .from('developers')
       .update({
         presentation_url: deploymentResult.url,
@@ -248,7 +248,7 @@ async function deployPresentationSite(request: any) {
       .eq('id', developerId)
 
     // Log deployment for analytics
-    await supabaseAdmin
+    await createAdminClient()
       .from('deployment_logs')
       .insert([{
         developer_id: developerId,
@@ -285,7 +285,7 @@ async function deployPresentationSite(request: any) {
     
     // Log deployment failure
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('deployment_logs')
         .insert([{
           developer_id: request.developerId,
@@ -318,7 +318,7 @@ async function checkDeploymentStatus(request: any) {
   try {
     const { developerId } = request
 
-    const { data: developer, error } = await supabaseAdmin
+    const { data: developer, error } = await createAdminClient()
       .from('developers')
       .select('presentation_url, presentation_deployed_at, presentation_generated_at')
       .eq('id', developerId)

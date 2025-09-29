@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { MarketingAutomationEngine, EmailCampaign, EmailTemplate, AudienceSegment } from '@/lib/marketing-automation';
 
 // GET /api/marketing/campaigns - List email campaigns
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
 
     // Get campaigns from database
-    let query = supabaseAdmin
+    let query = createAdminClient
       .from('email_campaigns')
       .select(`
         id,
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Save to database
-    const { data: savedCampaign, error } = await supabaseAdmin
+    const { data: savedCampaign, error } = await createAdminClient()
       .from('email_campaigns')
       .insert({
         id: campaign.id,
@@ -260,7 +260,7 @@ export async function PATCH(request: NextRequest) {
         );
     }
 
-    const { data: updatedCampaign, error } = await supabaseAdmin
+    const { data: updatedCampaign, error } = await createAdminClient()
       .from('email_campaigns')
       .update(updateData)
       .eq('id', campaign_id)

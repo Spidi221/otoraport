@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     `;
 
     try {
-      const { error: apiKeysError } = await supabaseAdmin.rpc('exec', { sql: createApiKeysTable });
+      const { error: apiKeysError } = await createAdminClient.rpc('exec', { sql: createApiKeysTable });
       if (apiKeysError) throw apiKeysError;
       results.push({ table: 'api_keys', status: 'created' });
     } catch (err) {
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     `;
 
     try {
-      const { error: apiRequestsError } = await supabaseAdmin.rpc('exec', { sql: createApiRequestsTable });
+      const { error: apiRequestsError } = await createAdminClient.rpc('exec', { sql: createApiRequestsTable });
       if (apiRequestsError) throw apiRequestsError;
       results.push({ table: 'api_requests', status: 'created' });
     } catch (err) {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     `;
 
     try {
-      const { error: webhooksError } = await supabaseAdmin.rpc('exec', { sql: createWebhookEndpointsTable });
+      const { error: webhooksError } = await createAdminClient.rpc('exec', { sql: createWebhookEndpointsTable });
       if (webhooksError) throw webhooksError;
       results.push({ table: 'webhook_endpoints', status: 'created' });
     } catch (err) {
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     `;
 
     try {
-      const { error: deliveriesError } = await supabaseAdmin.rpc('exec', { sql: createWebhookDeliveriesTable });
+      const { error: deliveriesError } = await createAdminClient.rpc('exec', { sql: createWebhookDeliveriesTable });
       if (deliveriesError) throw deliveriesError;
       results.push({ table: 'webhook_deliveries', status: 'created' });
     } catch (err) {
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     `;
 
     try {
-      const { error: reportsError } = await supabaseAdmin.rpc('exec', { sql: createReportsTable });
+      const { error: reportsError } = await createAdminClient.rpc('exec', { sql: createReportsTable });
       if (reportsError) throw reportsError;
       results.push({ table: 'reports', status: 'created' });
     } catch (err) {

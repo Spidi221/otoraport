@@ -2,16 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  supabase,
-  signInWithEmail,
-  signUpWithEmail,
-  signOut,
-  getCurrentUser,
-  getCurrentSession,
-  getDeveloperProfile,
-  createDeveloperProfile
-} from '@/lib/supabase-single'
+import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
 interface Developer {
@@ -43,88 +34,100 @@ const ADMIN_EMAILS = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',').map(email 
 export function useAuthSimple(): AuthState & AuthActions {
   const [user, setUser] = useState<User | null>(null)
   const [developer, setDeveloper] = useState<Developer | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false) // Don't block - middleware handles auth
   const router = useRouter()
+  const supabase = createClient()
 
   // Determine if current user is admin
   const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email) : false
 
-  // Load or create developer profile
+  // Load or create developer profile via API (safer than direct DB access)
   const loadDeveloperProfile = async (user: User) => {
-    console.log('🔍 SIMPLE AUTH: Loading profile for:', user.email)
+    console.log('🔍 AUTH HOOK: Loading profile for:', user.email)
 
     try {
-      // Try to get existing profile
-      let profile = await getDeveloperProfile(user.id)
+      // Call API to get/create profile (handles RLS properly)
+      const response = await fetch('/api/user/profile', {
+        method: 'GET',
+        credentials: 'include', // Important: include cookies
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
 
-      // If no profile exists, create one
-      if (!profile) {
-        console.log('🔧 SIMPLE AUTH: Creating new developer profile')
-        profile = await createDeveloperProfile(
-          user.id,
-          user.email!,
-          user.user_metadata?.full_name,
-          user.user_metadata?.company_name
-        )
+      if (!response.ok) {
+        console.error('❌ AUTH HOOK: Profile API error:', response.status)
+        setDeveloper(null)
+        return
       }
 
-      if (profile) {
-        console.log('✅ SIMPLE AUTH: Profile loaded:', profile.client_id)
-        setDeveloper(profile)
+      const data = await response.json()
+
+      if (data.success && data.developer) {
+        console.log('✅ AUTH HOOK: Profile loaded:', data.developer.client_id)
+        setDeveloper(data.developer)
       } else {
-        console.log('❌ SIMPLE AUTH: Failed to load/create profile')
+        console.error('❌ AUTH HOOK: No profile in response')
         setDeveloper(null)
       }
     } catch (error) {
-      console.error('💥 SIMPLE AUTH: Profile loading failed:', error)
+      console.error('💥 AUTH HOOK: Profile loading failed:', error)
       setDeveloper(null)
     }
   }
 
   // Initialize auth state
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+
     const initializeAuth = async () => {
-      console.log('🚀 SIMPLE AUTH: Initializing...')
+      console.log('🚀 AUTH HOOK: Initializing...')
 
       try {
-        // Get current session - remove timeout that was killing valid sessions
-        console.log('🔍 SIMPLE AUTH: Getting current session...')
-        const session = await getCurrentSession()
-        console.log('🔍 SIMPLE AUTH: Session result:', session ? 'Found session' : 'No session')
+        // Safety timeout - force loading=false after 5 seconds
+        timeoutId = setTimeout(() => {
+          console.warn('⏱️ AUTH HOOK: Timeout reached, forcing loading=false')
+          setLoading(false)
+        }, 5000)
 
-        if (session?.user) {
-          console.log('✅ SIMPLE AUTH: Session found for:', session.user.email)
-          setUser(session.user)
-          await loadDeveloperProfile(session.user)
+        // Use getUser() instead of getSession() (recommended for SSR)
+        const { data: { user }, error } = await supabase.auth.getUser()
+
+        if (error) {
+          console.log('⚠️ AUTH HOOK: No authenticated user:', error.message)
+          setUser(null)
+          setDeveloper(null)
+        } else if (user) {
+          console.log('✅ AUTH HOOK: User authenticated:', user.email)
+          setUser(user)
+          await loadDeveloperProfile(user)
         } else {
-          console.log('⚠️ SIMPLE AUTH: No active session - user not logged in')
+          console.log('⚠️ AUTH HOOK: No active session')
           setUser(null)
           setDeveloper(null)
         }
       } catch (error) {
-        console.error('💥 SIMPLE AUTH: Initialization failed:', error)
+        console.error('💥 AUTH HOOK: Initialization failed:', error)
         setUser(null)
         setDeveloper(null)
       } finally {
-        console.log('✅ SIMPLE AUTH: Loading finished, setting loading = false')
+        clearTimeout(timeoutId)
+        console.log('✅ AUTH HOOK: Initialization complete')
         setLoading(false)
       }
     }
 
     initializeAuth()
 
-    // Removed safety timeout - was causing premature loading state changes
-
-    // Listen for auth state changes - but don't reset loading here
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 SIMPLE AUTH: State change:', event, session?.user?.email)
+        console.log('🔄 AUTH HOOK: State change:', event, session?.user?.email)
 
-        // Only update user/developer, don't touch loading state from auth changes
         if (session?.user) {
           setUser(session.user)
           await loadDeveloperProfile(session.user)
-        } else {
+        } else if (event === 'SIGNED_OUT') {
           setUser(null)
           setDeveloper(null)
         }
@@ -134,26 +137,31 @@ export function useAuthSimple(): AuthState & AuthActions {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [supabase])
 
   // Sign in
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true)
-      console.log('🔑 SIMPLE AUTH: Signing in:', email)
+      console.log('🔑 AUTH HOOK: Signing in:', email)
 
-      const result = await signInWithEmail(email, password)
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password
+      })
 
-      if (!result.success) {
-        return { success: false, error: result.error }
+      if (error) {
+        console.error('❌ AUTH HOOK: Sign in failed:', error.message)
+        return { success: false, error: error.message }
       }
 
-      if (result.user) {
-        setUser(result.user)
-        await loadDeveloperProfile(result.user)
+      if (data.user) {
+        console.log('✅ AUTH HOOK: Sign in successful:', data.user.email)
+        setUser(data.user)
+        await loadDeveloperProfile(data.user)
 
         // Redirect based on user type
-        if (ADMIN_EMAILS.includes(result.user.email || '')) {
+        if (ADMIN_EMAILS.includes(data.user.email || '')) {
           router.push('/admin')
         } else {
           router.push('/dashboard')
@@ -162,7 +170,7 @@ export function useAuthSimple(): AuthState & AuthActions {
 
       return { success: true }
     } catch (error) {
-      console.error('💥 SIMPLE AUTH: Sign in error:', error)
+      console.error('💥 AUTH HOOK: Sign in error:', error)
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Sign in failed'
@@ -176,17 +184,25 @@ export function useAuthSimple(): AuthState & AuthActions {
   const signUp = async (email: string, password: string, companyName: string) => {
     try {
       setLoading(true)
-      console.log('📝 SIMPLE AUTH: Signing up:', email)
+      console.log('📝 AUTH HOOK: Signing up:', email)
 
-      const result = await signUpWithEmail(email, password, companyName)
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: { company_name: companyName }
+        }
+      })
 
-      if (!result.success) {
-        return { success: false, error: result.error }
+      if (error) {
+        console.error('❌ AUTH HOOK: Sign up failed:', error.message)
+        return { success: false, error: error.message }
       }
 
+      console.log('✅ AUTH HOOK: Sign up successful:', data.user?.email)
       return { success: true }
     } catch (error) {
-      console.error('💥 SIMPLE AUTH: Sign up error:', error)
+      console.error('💥 AUTH HOOK: Sign up error:', error)
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Sign up failed'
@@ -200,14 +216,19 @@ export function useAuthSimple(): AuthState & AuthActions {
   const signOutUser = async () => {
     try {
       setLoading(true)
-      console.log('🚪 SIMPLE AUTH: Signing out')
+      console.log('🚪 AUTH HOOK: Signing out')
 
-      await signOut()
+      const { error } = await supabase.auth.signOut()
+
+      if (error) {
+        console.error('❌ AUTH HOOK: Sign out error:', error.message)
+      }
+
       setUser(null)
       setDeveloper(null)
       router.push('/auth/signin')
     } catch (error) {
-      console.error('💥 SIMPLE AUTH: Sign out error:', error)
+      console.error('💥 AUTH HOOK: Sign out error:', error)
     } finally {
       setLoading(false)
     }

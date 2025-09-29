@@ -1,113 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
-import { supabase } from '@/lib/supabase-single'
-import { sensitiveAPIRateLimit } from '@/lib/rate-limit'
+import { getServerAuth, getDeveloperProfile, createAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    // SECURITY: Rate limiting for sensitive profile data access
-    const rateLimitResult = await sensitiveAPIRateLimit(request)
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        { error: 'Zbyt wiele zapytań. Spróbuj ponownie później.' },
-        { 
-          status: 429,
-          headers: {
-            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
-            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-            'X-RateLimit-Reset': rateLimitResult.reset.toString()
-          }
-        }
-      )
-    }
+    // Get authenticated user
+    const user = await getServerAuth(request)
 
-    const auth = await getAuthenticatedDeveloper(request)
-
-    if (!auth.success || !auth.user || !auth.developer) {
+    if (!user) {
       return NextResponse.json(
-        { error: auth.error || 'Unauthorized' },
+        { success: false, error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    const developer = auth.developer
-    const user = auth.user
+    // Get or create developer profile
+    let developer = await getDeveloperProfile(user.id)
 
-    // Build user object from developer data
-    const userProfile = {
-      id: developer.id,
-      developer_id: developer.id,
-      email: developer.email,
-      name: developer.name,
-      company_name: developer.company_name,
-      nip: developer.nip,
-      plan: developer.subscription_plan,
-      subscription_status: developer.subscription_status,
-      trial_ends_at: null, // Will calculate from created_at + 14 days if trial
-      onboarding_completed: developer.registration_completed,
-      profile_image_url: null // Can be added later if needed
-    }
+    // If no profile exists, create one automatically
+    if (!developer) {
+      console.log('🔧 PROFILE API: Creating new developer profile for:', user.email)
 
-    // Calculate trial end date (14 days from developer profile creation)
-    if (userProfile.subscription_status === 'trial') {
-      if (developer.created_at) {
-        const createdAt = new Date(developer.created_at)
-        userProfile.trial_ends_at = new Date(createdAt.getTime() + 14 * 24 * 60 * 60 * 1000)
+      const clientId = `dev_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      const { data: newDeveloper, error: createError } = await createAdminClient()
+        .from('developers')
+        .insert({
+          user_id: user.id,
+          email: user.email!,
+          name: user.user_metadata?.full_name || user.email!.split('@')[0],
+          company_name: user.user_metadata?.company_name || 'My Company',
+          client_id: clientId,
+          subscription_plan: 'basic',
+          subscription_status: 'trial'
+        })
+        .select()
+        .single()
+
+      if (createError || !newDeveloper) {
+        console.error('❌ PROFILE API: Failed to create profile:', createError?.message)
+        return NextResponse.json(
+          { success: false, error: 'Failed to create profile' },
+          { status: 500 }
+        )
       }
+
+      developer = newDeveloper
+      console.log('✅ PROFILE API: Profile created:', developer.client_id)
     }
 
-    // Check if user has completed onboarding
-    if (!userProfile.onboarding_completed || !userProfile.company_name || !userProfile.nip) {
-      return NextResponse.json({
-        profile_completed: false,
-        reason: 'incomplete_profile',
-        message: 'Profil niekompletny - wymagane dane firmy',
-        user: {
-          id: userProfile.id,
-          email: userProfile.email,
-          name: userProfile.name
-        }
-      })
-    }
-
-    // Check subscription status
-    const now = new Date()
-    const trialEndsAt = userProfile.trial_ends_at ? new Date(userProfile.trial_ends_at) : null
-    const isTrialActive = trialEndsAt && now < trialEndsAt
-    const hasActiveSubscription = userProfile.subscription_status === 'active'
-
-    if (!isTrialActive && !hasActiveSubscription) {
-      return NextResponse.json({
-        profile_completed: true,
-        subscription_required: true,
-        reason: 'subscription_expired',
-        message: 'Subskrypcja wygasła - wymagana płatność',
-        user: {
-          id: userProfile.id,
-          email: userProfile.email,
-          name: userProfile.name,
-          company_name: userProfile.company_name,
-          plan: userProfile.plan,
-          subscription_status: userProfile.subscription_status,
-          trial_ended: true
-        }
-      })
-    }
-
-    // SECURITY FIX: Return only essential data, no sensitive business info
+    // Return developer profile
     return NextResponse.json({
-      profile_completed: true,
-      subscription_required: false,
-      user: {
-        id: userProfile.id,
-        email: userProfile.email,
-        name: userProfile.name,
-        // REMOVED: nip, phone, company_name (sensitive business data)
-        plan: userProfile.plan,
-        subscription_status: userProfile.subscription_status,
-        is_trial_active: isTrialActive,
-        has_active_subscription: hasActiveSubscription,
-        trial_days_remaining: isTrialActive ? Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 0
+      success: true,
+      developer: {
+        id: developer.id,
+        user_id: developer.user_id,
+        email: developer.email,
+        name: developer.name,
+        company_name: developer.company_name,
+        client_id: developer.client_id,
+        subscription_plan: developer.subscription_plan,
+        subscription_status: developer.subscription_status,
+        created_at: developer.created_at
       }
     })
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { ApiKeyManager, ApiResponseBuilder, WebhookManager, WEBHOOK_EVENTS } from '@/lib/api-v1';
 
 // GET /api/v1/webhooks - List webhook endpoints
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get webhooks from database
-    const { data: webhooks, error } = await supabaseAdmin
+    const { data: webhooks, error } = await createAdminClient()
       .from('webhook_endpoints')
       .select(`
         id,
@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check webhook limit (max 5 per developer)
-    const { count } = await supabaseAdmin
+    const { count } = await createAdminClient()
       .from('webhook_endpoints')
       .select('id', { count: 'exact' })
       .eq('developer_id', apiKey.developer_id);
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Save to database
-    const { data: savedWebhook, error } = await supabaseAdmin
+    const { data: savedWebhook, error } = await createAdminClient()
       .from('webhook_endpoints')
       .insert({
         id: webhook.id,

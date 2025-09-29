@@ -14,7 +14,7 @@ import {
 import { OtoraportLogo } from "../icons/otoraport-logo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase-single";
+import { createClient } from "@/lib/supabase/client";
 
 interface HeaderProps {
   showUserMenu?: boolean;
@@ -50,6 +50,7 @@ function AuthenticatedHeader() {
   useEffect(() => {
     async function getUser() {
       try {
+        const supabase = createClient();
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
         if (userError) {

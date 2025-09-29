@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { InAppHelpSystem, HelpContext } from '@/lib/help-system';
 import { sendEmail } from '@/lib/email-service';
 
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Save ticket to database
-    const { data: savedTicket, error: saveError } = await supabaseAdmin
+    const { data: savedTicket, error: saveError } = await createAdminClient()
       .from('support_tickets')
       .insert({
         id: ticket.id,
@@ -195,7 +195,7 @@ export async function GET(request: NextRequest) {
     const developer = auth.developer;
 
     // Build query
-    let query = supabaseAdmin
+    let query = createAdminClient
       .from('support_tickets')
       .select('*')
       .eq('user_id', developer.id)

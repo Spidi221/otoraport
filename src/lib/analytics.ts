@@ -1,5 +1,5 @@
 // Advanced analytics service for OTORAPORT
-import { supabaseAdmin } from './supabase-single'
+import { createAdminClient } from './supabase/server'
 import { subDays, format, startOfMonth, endOfMonth } from 'date-fns'
 import { pl } from 'date-fns/locale'
 
@@ -58,7 +58,7 @@ export class AnalyticsService {
     const days = timeframe === '30d' ? 30 : timeframe === '90d' ? 90 : 365
 
     // Current period data
-    const { data: currentProperties } = await supabaseAdmin
+    const { data: currentProperties } = await createAdminClient()
       .from('properties')
       .select(`
         *,
@@ -68,7 +68,7 @@ export class AnalyticsService {
       .gte('created_at', subDays(new Date(), days).toISOString())
 
     // Previous period for comparison
-    const { data: previousProperties } = await supabaseAdmin
+    const { data: previousProperties } = await createAdminClient()
       .from('properties')
       .select(`
         *,
@@ -120,7 +120,7 @@ export class AnalyticsService {
     const months = timeframe === '3m' ? 3 : timeframe === '6m' ? 6 : 12
     const startDate = subDays(new Date(), months * 30)
 
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
         *,
@@ -177,7 +177,7 @@ export class AnalyticsService {
    * Get property type breakdown
    */
   async getPropertyTypeBreakdown(developerId: string): Promise<PropertyTypeBreakdown[]> {
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
         property_type,
@@ -227,7 +227,7 @@ export class AnalyticsService {
    * Get project performance analysis
    */
   async getProjectPerformance(developerId: string): Promise<ProjectPerformance[]> {
-    const { data: projects } = await supabaseAdmin
+    const { data: projects } = await createAdminClient()
       .from('projects')
       .select(`
         *,
@@ -275,7 +275,7 @@ export class AnalyticsService {
     // In a real implementation, this would analyze market data from multiple sources
     // For now, return mock data that shows realistic competitor landscape
     
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('company_name')
       .eq('id', developerId)

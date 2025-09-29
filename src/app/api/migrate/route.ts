@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function POST() {
   try {
     console.log('Testing database connection and creating test table...')
 
     // Try to check if tables exist by querying them
-    const { data: developersCheck, error: developersCheckError } = await supabaseAdmin
+    const { data: developersCheck, error: developersCheckError } = await createAdminClient()
       .from('developers')
       .select('id')
       .limit(1)
@@ -15,7 +15,7 @@ export async function POST() {
 
     // If table doesn't exist, we need to create it through Supabase Dashboard
     // For now, let's just test if we can insert into existing tables
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await createAdminClient()
       .from('developers')
       .insert({
         email: 'test@example.com',
@@ -35,7 +35,7 @@ export async function POST() {
 
     // Clean up test data
     if (data && data[0]) {
-      await supabaseAdmin
+      await createAdminClient()
         .from('developers')
         .delete()
         .eq('id', data[0].id)

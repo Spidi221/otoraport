@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { validateRegistrationData } from '@/lib/input-validation'
 
 interface CompleteProfileRequest {
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if NIP already exists
-    const { data: existingDeveloper } = await supabaseAdmin
+    const { data: existingDeveloper } = await createAdminClient()
       .from('developers')
       .select('id, nip')
       .eq('nip', cleanNip)
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     const isUpdate = auth.developer.registration_completed || false
 
     // Update existing developer profile
-    const { error: updateError } = await supabaseAdmin
+    const { error: updateError } = await createAdminClient()
       .from('developers')
       .update({
         company_name: company_name.trim(),
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the updated/created developer profile
-    const { data: developerProfile } = await supabaseAdmin
+    const { data: developerProfile } = await createAdminClient()
       .from('developers')
       .select('id, company_name, subscription_plan, client_id, created_at')
       .eq('id', developerId)
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
 
     // Create initial project (only if this is a new profile, not an update)
     if (!isUpdate) {
-      await supabaseAdmin
+      await createAdminClient()
         .from('projects')
         .insert({
           developer_id: developerId,

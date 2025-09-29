@@ -371,8 +371,8 @@ export async function validateApiSetup(): Promise<{
 
   // Check database connectivity
   try {
-    const { supabaseAdmin } = await import('./supabase');
-    const { data, error } = await supabaseAdmin
+    const { createAdminClient } = await import('./supabase');
+    const { data, error } = await createAdminClient()
       .from('api_keys')
       .select('id')
       .limit(1);
@@ -388,8 +388,8 @@ export async function validateApiSetup(): Promise<{
   const requiredTables = ['api_keys', 'api_requests', 'webhook_endpoints', 'webhook_deliveries', 'reports'];
   for (const table of requiredTables) {
     try {
-      const { supabaseAdmin } = await import('./supabase');
-      const { error } = await supabaseAdmin
+      const { createAdminClient } = await import('./supabase');
+      const { error } = await createAdminClient()
         .from(table)
         .select('id')
         .limit(1);

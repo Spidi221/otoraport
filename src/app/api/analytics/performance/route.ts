@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { CDNManager } from '@/lib/performance';
 
 // POST /api/analytics/performance - Track performance metrics
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     try {
       // Save to database
-      await supabaseAdmin
+      await createAdminClient()
         .from('performance_metrics')
         .insert(performanceRecord);
 
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
 
     try {
       // Base query
-      let query = supabaseAdmin
+      let query = createAdminClient
         .from('performance_metrics')
         .select('*')
         .gte('timestamp', startDate.toISOString())

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { sendDeveloperWelcomeEmail } from '@/lib/email-service'
 import bcrypt from 'bcryptjs'
 import { registrationRateLimit } from '@/lib/rate-limit'
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const { data: existingUser } = await supabaseAdmin
+    const { data: existingUser } = await createAdminClient()
       .from('developers')
       .select('id, email')
       .eq('email', email.toLowerCase())
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if company with NIP already exists
-    const { data: existingCompany } = await supabaseAdmin
+    const { data: existingCompany } = await createAdminClient()
       .from('developers')
       .select('id, nip')
       .eq('nip', cleanNip)
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
     trialEndDate.setDate(trialEndDate.getDate() + 14)
 
     // Create user record in developers table
-    const { data: newDeveloper, error: insertError } = await supabaseAdmin
+    const { data: newDeveloper, error: insertError } = await createAdminClient()
       .from('developers')
       .insert({
         email: email.toLowerCase(),
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create initial project for the developer (optional - helps with onboarding)
-    const { error: projectError } = await supabaseAdmin
+    const { error: projectError } = await createAdminClient()
       .from('projects')
       .insert({
         developer_id: newDeveloper.id,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { EmailMarketingEngine, EmailTemplate } from '@/lib/email-marketing';
 
 // GET /api/marketing/templates - List email templates
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
 
     // Get templates from database
-    let query = supabaseAdmin
+    let query = createAdminClient
       .from('email_templates')
       .select(`
         id,
@@ -200,7 +200,7 @@ export async function PUT(request: NextRequest) {
 
     updates.updated_at = new Date().toISOString();
 
-    const { data: updatedTemplate, error } = await supabaseAdmin
+    const { data: updatedTemplate, error } = await createAdminClient()
       .from('email_templates')
       .update(updates)
       .eq('id', template_id)

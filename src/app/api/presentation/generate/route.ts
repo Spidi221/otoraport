@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withSubscriptionCheck } from '@/lib/subscription-middleware'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { generatePresentationHTML, generateRobotsTxt, generateSitemap, type PresentationSiteData } from '@/lib/presentation-generator'
 
 async function generatePresentationSite(request: any) {
@@ -21,7 +21,7 @@ async function generatePresentationSite(request: any) {
     }
 
     // Get developer data
-    const { data: developer, error: devError } = await supabaseAdmin
+    const { data: developer, error: devError } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', developerId)
@@ -35,13 +35,13 @@ async function generatePresentationSite(request: any) {
     }
 
     // Get projects and properties
-    const { data: projects } = await supabaseAdmin
+    const { data: projects } = await createAdminClient()
       .from('projects')
       .select('*')
       .eq('developer_id', developerId)
 
     const projectIds = projects?.map(p => p.id) || []
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select('*')
       .in('project_id', projectIds)
@@ -116,7 +116,7 @@ async function generatePresentationSite(request: any) {
     }
     
     // Update developer record with presentation URL
-    await supabaseAdmin
+    await createAdminClient()
       .from('developers')
       .update({
         presentation_url: `https://${presentationUrl}`,

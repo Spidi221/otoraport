@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Check, Loader2, CreditCard, Zap, Shield, Clock } from 'lucide-react'
-import { supabase } from '@/lib/supabase-single'
+import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 interface PricingPlan {
@@ -82,7 +82,7 @@ export function PricingCard() {
 
   useEffect(() => {
     async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
     }
     getUser()

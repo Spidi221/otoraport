@@ -1,6 +1,6 @@
 // Email service using Resend for OTORAPORT notifications
 import { Resend } from 'resend'
-import { Database } from './supabase-single'
+import { Database } from './supabase/server'
 
 type Developer = Database['public']['Tables']['developers']['Row']
 

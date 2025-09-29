@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { adminService } from '@/lib/admin-service'
 import { cookies } from 'next/headers'
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const accessToken = authCookie
 
     // Get user from Supabase
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken.value)
+    const { data: { user }, error } = await createAdminClient.auth.getUser(accessToken.value)
 
     if (error || !user?.email || !ADMIN_EMAILS.includes(user.email)) {
       return NextResponse.json(
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     const accessToken = authCookie
 
     // Get user from Supabase
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken.value)
+    const { data: { user }, error } = await createAdminClient.auth.getUser(accessToken.value)
 
     if (error || !user?.email || !ADMIN_EMAILS.includes(user.email)) {
       return NextResponse.json(

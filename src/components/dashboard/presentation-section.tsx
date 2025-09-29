@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase-single";
+import { createClient } from "@/lib/supabase/client";
 import { Globe, Eye, Settings, ExternalLink, RefreshCw, Zap, Crown, Lock } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -38,6 +38,7 @@ export function PresentationSection() {
   // Check user profile and deployment status on mount
   useEffect(() => {
     async function getUser() {
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
       if (user) {

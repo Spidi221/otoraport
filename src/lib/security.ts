@@ -252,9 +252,9 @@ export function applySecurityHeaders(headers: Headers): Headers {
 export function validateClientId(clientId: string): boolean {
   if (!clientId || typeof clientId !== 'string') return false;
   
-  // Client ID should be UUID format or at least 10 alphanumeric characters
+  // Client ID should be UUID format or at least 10 alphanumeric characters (with hyphens/underscores)
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const alphanumericRegex = /^[a-zA-Z0-9]{10,50}$/;
+  const alphanumericRegex = /^[a-zA-Z0-9\-_]{10,50}$/;
   
   return uuidRegex.test(clientId) || alphanumericRegex.test(clientId);
 }

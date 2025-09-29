@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { generateMinistryXML, convertToMinistryFormat } from '@/lib/xml-generator'
 import { generateMarkdownFile } from '@/lib/md-generator'
 import { sendEmail } from '@/lib/email-service'
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     console.log(`🔄 Manual regeneration requested for developer: ${developerId}`)
 
     // 1. Pobierz dane dewelopera
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', developerId)
@@ -32,13 +32,13 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Pobierz projekty dewelopera
-    const { data: projects } = await supabaseAdmin
+    const { data: projects } = await createAdminClient()
       .from('projects')
       .select('*')
       .eq('developer_id', developerId)
 
     // 3. Pobierz wszystkie nieruchomości dewelopera
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
         *,
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     console.log(`📊 Found ${properties.length} properties for ${developer.company_name}`)
 
     // 4. Sprawdź czy pliki już istnieją i czy potrzeba regeneracji
-    const { data: existingFiles } = await supabaseAdmin
+    const { data: existingFiles } = await createAdminClient()
       .from('generated_files')
       .select('*')
       .eq('developer_id', developerId)
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     const now = new Date().toISOString()
 
     // Upsert XML file record
-    await supabaseAdmin
+    await createAdminClient()
       .from('generated_files')
       .upsert({
         developer_id: developerId,
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       })
 
     // Upsert Markdown file record
-    await supabaseAdmin
+    await createAdminClient()
       .from('generated_files')
       .upsert({
         developer_id: developerId,
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
 
     // 7. W produkcji: zapisz pliki do storage (Supabase Storage lub S3)
     // TODO: Implementacja storage w przyszłości
-    // await supabaseAdmin.storage
+    // await createAdminClient.storage
     //   .from('generated-files')
     //   .upload(`${developerId}/data.xml`, xmlContent, { upsert: true })
 
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 9. Loguj aktywność w bazie
-    await supabaseAdmin
+    await createAdminClient()
       .from('activity_logs')
       .insert({
         developer_id: developerId,
@@ -247,14 +247,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Pobierz informacje o ostatniej regeneracji
-    const { data: files } = await supabaseAdmin
+    const { data: files } = await createAdminClient()
       .from('generated_files')
       .select('*')
       .eq('developer_id', developerId)
       .order('last_generated', { ascending: false })
 
     // Pobierz ostatnią aktualizację danych
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
         updated_at,

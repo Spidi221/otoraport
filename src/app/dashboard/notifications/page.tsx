@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabase-single'
+import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Bell, CheckCircle, AlertCircle, Info, X } from 'lucide-react'
 
@@ -25,7 +25,7 @@ export default function NotificationsPage() {
   useEffect(() => {
     async function loadNotifications() {
       try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        const supabase = createClient(); const { data: { user }, error: userError } = await supabase.auth.getUser()
 
         if (userError || !user) {
           router.push('/auth/signin')

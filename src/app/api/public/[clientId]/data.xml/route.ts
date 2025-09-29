@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateXMLForMinistry, createSampleData } from '@/lib/generators'
 import { generateAggregatedXML } from '@/lib/multi-project-xml'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { validateClientId, applySecurityHeaders, checkRateLimit } from '@/lib/security'
 
 export async function GET(
@@ -43,7 +43,7 @@ export async function GET(
     
     try {
       // PHASE 2: Try multi-project XML aggregation first
-      const { data: developer, error: devError } = await supabaseAdmin
+      const { data: developer, error: devError } = await createAdminClient()
         .from('developers')
         .select('id, company_name, subscription_plan')
         .eq('client_id', clientId)

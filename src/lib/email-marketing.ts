@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -267,7 +267,7 @@ export class EmailMarketingEngine {
 
     // Save to database (with fallback to mock storage)
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('email_templates')
         .insert(newTemplate);
     } catch (error) {
@@ -280,7 +280,7 @@ export class EmailMarketingEngine {
 
   static async getTemplate(templateId: string): Promise<EmailTemplate | null> {
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await createAdminClient()
         .from('email_templates')
         .select('*')
         .eq('id', templateId)
@@ -317,7 +317,7 @@ export class EmailMarketingEngine {
     }));
 
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('ab_tests')
         .insert(newABTest);
     } catch (error) {
@@ -330,7 +330,7 @@ export class EmailMarketingEngine {
 
   static async getABTest(abTestId: string): Promise<ABTest | null> {
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await createAdminClient()
         .from('ab_tests')
         .select('*')
         .eq('id', abTestId)
@@ -361,7 +361,7 @@ export class EmailMarketingEngine {
     try {
       // In a real implementation, this would update the specific variant metrics
       // For now, we'll increment the counter in the database
-      const { data: abTest } = await supabaseAdmin
+      const { data: abTest } = await createAdminClient()
         .from('ab_tests')
         .select('variants')
         .eq('id', abTestId)
@@ -383,7 +383,7 @@ export class EmailMarketingEngine {
           return variant;
         });
 
-        await supabaseAdmin
+        await createAdminClient()
           .from('ab_tests')
           .update({ variants: updatedVariants })
           .eq('id', abTestId);
@@ -478,7 +478,7 @@ export class EmailMarketingEngine {
     sent_at: string;
   }): Promise<void> {
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('email_logs')
         .insert(log);
     } catch (error) {
@@ -499,7 +499,7 @@ export class EmailMarketingEngine {
     occurred_at: string;
   }): Promise<void> {
     try {
-      await supabaseAdmin
+      await createAdminClient()
         .from('email_events')
         .insert(event);
     } catch (error) {

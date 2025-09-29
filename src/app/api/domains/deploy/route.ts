@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { deployPresentationToDomain } from '@/lib/custom-domains';
 import { generatePresentationHTML, calculateMarketStats, generatePriceHistoryChart } from '@/lib/presentation-generator';
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get developer profile
-    const { data: developer, error: devError } = await supabaseAdmin
+    const { data: developer, error: devError } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', auth.developer.id)
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get all projects and properties for this developer
-    const { data: projects, error: projectsError } = await supabaseAdmin
+    const { data: projects, error: projectsError } = await createAdminClient()
       .from('projects')
       .select(`
         id,
@@ -208,7 +208,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get developer profile
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('custom_domain, presentation_url, presentation_generated_at, subscription_plan')
       .eq('id', auth.developer.id)

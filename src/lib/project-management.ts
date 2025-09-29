@@ -1,5 +1,5 @@
 // Advanced project management system for multi-investment developers
-import { supabaseAdmin } from './supabase-single'
+import { createAdminClient } from './supabase/server'
 import { generateXMLForMinistry, generateMarkdownForMinistry } from './generators'
 
 export interface ProjectDetails {
@@ -50,7 +50,7 @@ export class ProjectManagementService {
    * Get all projects for a developer with detailed metrics
    */
   async getDeveloperProjects(developerId: string): Promise<ProjectDetails[]> {
-    const { data: projects } = await supabaseAdmin
+    const { data: projects } = await createAdminClient()
       .from('projects')
       .select(`
         *,
@@ -106,7 +106,7 @@ export class ProjectManagementService {
    * Get project metrics and recommendations
    */
   async getProjectMetrics(projectId: string): Promise<ProjectMetrics> {
-    const { data: project } = await supabaseAdmin
+    const { data: project } = await createAdminClient()
       .from('projects')
       .select(`
         *,
@@ -219,7 +219,7 @@ export class ProjectManagementService {
     startDate?: string
     expectedCompletionDate?: string
   }) {
-    const { data: project, error } = await supabaseAdmin
+    const { data: project, error } = await createAdminClient()
       .from('projects')
       .insert({
         developer_id: developerId,
@@ -265,7 +265,7 @@ export class ProjectManagementService {
 
     updateData.updated_at = new Date().toISOString()
 
-    const { error } = await supabaseAdmin
+    const { error } = await createAdminClient()
       .from('projects')
       .update(updateData)
       .eq('id', projectId)
@@ -304,7 +304,7 @@ export class ProjectManagementService {
    * Generate XML/MD reports per project or consolidated
    */
   async generateProjectReports(developerId: string, projectId?: string) {
-    const { data: developer } = await supabaseAdmin
+    const { data: developer } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', developerId)
@@ -318,7 +318,7 @@ export class ProjectManagementService {
 
     if (projectId) {
       // Single project report
-      const { data: project } = await supabaseAdmin
+      const { data: project } = await createAdminClient()
         .from('projects')
         .select(`
           *,
@@ -333,7 +333,7 @@ export class ProjectManagementService {
       }
     } else {
       // All projects report
-      const { data: allProjects } = await supabaseAdmin
+      const { data: allProjects } = await createAdminClient()
         .from('projects')
         .select(`
           *,

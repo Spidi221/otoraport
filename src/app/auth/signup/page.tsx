@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { OtoraportLogo } from '@/components/icons/otoraport-logo'
-import { supabase } from '@/lib/supabase-single'
+import { createClient } from '@/lib/supabase/client'
 
 function SignUpContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const supabase = createClient()
   const [selectedPlan, setSelectedPlan] = useState('basic')
   const [selectedPeriod, setSelectedPeriod] = useState('monthly')
   const [formData, setFormData] = useState({

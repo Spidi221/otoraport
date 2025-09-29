@@ -1,7 +1,7 @@
 // Customer Success Automation Engine
 // Proactive support, onboarding automation, and customer health monitoring
 
-import { supabaseAdmin } from './supabase-single';
+import { createAdminClient } from './supabase/server';
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -96,7 +96,7 @@ export class CustomerSuccessEngine {
   static async calculateHealthScore(developerId: string): Promise<CustomerHealthScore> {
     try {
       // Get developer data
-      const { data: developer } = await supabaseAdmin
+      const { data: developer } = await createAdminClient()
         .from('developers')
         .select('*')
         .eq('id', developerId)
@@ -107,14 +107,14 @@ export class CustomerSuccessEngine {
       }
 
       // Get engagement data
-      const { data: fileUploads } = await supabaseAdmin
+      const { data: fileUploads } = await createAdminClient()
         .from('file_uploads')
         .select('*')
         .eq('developer_id', developerId)
         .order('created_at', { ascending: false });
 
       // Get properties data
-      const { data: properties } = await supabaseAdmin
+      const { data: properties } = await createAdminClient()
         .from('properties')
         .select(`
           *,
@@ -168,7 +168,7 @@ export class CustomerSuccessEngine {
    */
   static async getOnboardingProgress(developerId: string): Promise<OnboardingProgress> {
     try {
-      const { data: developer } = await supabaseAdmin
+      const { data: developer } = await createAdminClient()
         .from('developers')
         .select('*')
         .eq('id', developerId)
@@ -317,7 +317,7 @@ export class CustomerSuccessEngine {
       });
 
       // Log email sent
-      await supabaseAdmin
+      await createAdminClient()
         .from('notification_logs')
         .insert([{
           developer_id: developerId,
@@ -342,7 +342,7 @@ export class CustomerSuccessEngine {
   static async getCustomerSuccessMetrics(): Promise<CustomerSuccessMetrics> {
     try {
       // Get developers data
-      const { data: developers } = await supabaseAdmin
+      const { data: developers } = await createAdminClient()
         .from('developers')
         .select('*');
 
@@ -553,7 +553,7 @@ export class CustomerSuccessEngine {
     const developer = await this.getDeveloper(developerId);
     if (!developer) return steps;
 
-    const { data: uploads } = await supabaseAdmin
+    const { data: uploads } = await createAdminClient()
       .from('file_uploads')
       .select('*')
       .eq('developer_id', developerId)
@@ -603,7 +603,7 @@ export class CustomerSuccessEngine {
     }
 
     // Check for data quality blockers
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
         *,
@@ -696,7 +696,7 @@ export class CustomerSuccessEngine {
   }
 
   private static async getDeveloper(developerId: string) {
-    const { data } = await supabaseAdmin
+    const { data } = await createAdminClient()
       .from('developers')
       .select('*')
       .eq('id', developerId)
@@ -711,7 +711,7 @@ export class CustomerSuccessEngine {
         break;
       case 'in_app':
         // Store in-app notification
-        await supabaseAdmin
+        await createAdminClient()
           .from('notification_logs')
           .insert([{
             developer_id: developerId,

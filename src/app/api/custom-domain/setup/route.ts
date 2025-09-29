@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { setupCustomDomain, generateDNSInstructions } from '@/lib/custom-domains'
 import { checkRateLimit, applySecurityHeaders, sanitizeInput } from '@/lib/security'
 
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     const cleanDomain = sanitizeInput(domain.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, ''))
 
     // Get developer and check subscription
-    const { data: developer, error: devError } = await supabaseAdmin
+    const { data: developer, error: devError } = await createAdminClient()
       .from('developers')
       .select('id, company_name, subscription_plan, custom_domain')
       .eq('id', auth.developer.id)
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Save domain to database
-    const { error: updateError } = await supabaseAdmin
+    const { error: updateError } = await createAdminClient()
       .from('developers')
       .update({ 
         custom_domain: cleanDomain,

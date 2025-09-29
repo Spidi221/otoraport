@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { WhiteLabelEngine } from '@/lib/white-label';
 
 // GET /api/white-label/metrics - Get partner dashboard metrics
@@ -101,7 +101,7 @@ async function getDetailedMetrics(partnerId: string, startDate: Date, endDate: D
     if (!partner) throw new Error('Partner not found');
 
     // Get clients in date range
-    const { data: clients } = await supabaseAdmin
+    const { data: clients } = await createAdminClient()
       .from('whitelabel_clients')
       .select('*')
       .eq('partner_id', partnerId)
@@ -121,13 +121,13 @@ async function getDetailedMetrics(partnerId: string, startDate: Date, endDate: D
     const lastMonth = new Date(thisMonth);
     lastMonth.setMonth(lastMonth.getMonth() - 1);
 
-    const { data: thisMonthClients } = await supabaseAdmin
+    const { data: thisMonthClients } = await createAdminClient()
       .from('whitelabel_clients')
       .select('*')
       .eq('partner_id', partnerId)
       .gte('created_at', thisMonth.toISOString());
 
-    const { data: lastMonthClients } = await supabaseAdmin
+    const { data: lastMonthClients } = await createAdminClient()
       .from('whitelabel_clients')
       .select('*')
       .eq('partner_id', partnerId)
@@ -147,7 +147,7 @@ async function getDetailedMetrics(partnerId: string, startDate: Date, endDate: D
 
     // Calculate commission metrics
     const totalCommissionOwed = (clients || []).reduce((sum, client) => sum + (client.commission_earned || 0), 0);
-    const { data: paidCommissions } = await supabaseAdmin
+    const { data: paidCommissions } = await createAdminClient()
       .from('commission_payments')
       .select('amount')
       .eq('partner_id', partnerId)
@@ -238,7 +238,7 @@ function getNextPaymentDate(): string {
 async function getSeasonalTrends(partnerId: string): Promise<any[]> {
   try {
     // Get last 12 months of data
-    const { data: yearData } = await supabaseAdmin
+    const { data: yearData } = await createAdminClient()
       .from('whitelabel_clients')
       .select('created_at, lifetime_value')
       .eq('partner_id', partnerId)

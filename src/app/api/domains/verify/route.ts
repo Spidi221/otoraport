@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { createAdminClient } from '@/lib/supabase/server';
 import { verifyCustomDomain } from '@/lib/custom-domains';
 
 export async function POST(request: NextRequest) {
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     if (verificationResult.verified) {
       // Update domain status in database
-      await supabaseAdmin
+      await createAdminClient()
         .from('developers')
         .update({
           custom_domain: targetDomain,

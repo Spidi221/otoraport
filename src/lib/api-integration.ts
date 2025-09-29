@@ -1,5 +1,5 @@
 // External API integration system for OTORAPORT partners
-import { supabaseAdmin } from './supabase-single'
+import { createAdminClient } from './supabase/server'
 import { analyticsService } from './analytics'
 import { projectManagementService } from './project-management'
 import crypto from 'crypto'
@@ -87,7 +87,7 @@ export class APIIntegrationService {
     const apiKey = this.generateSecureKey()
     const hashedKey = this.hashAPIKey(apiKey)
 
-    const { data: keyRecord, error } = await supabaseAdmin
+    const { data: keyRecord, error } = await createAdminClient()
       .from('api_keys')
       .insert({
         developer_id: developerId,
@@ -131,7 +131,7 @@ export class APIIntegrationService {
   async validateAPIKey(apiKey: string, requiredPermission: APIPermission): Promise<{ isValid: boolean, developerId?: string, keyId?: string }> {
     const hashedKey = this.hashAPIKey(apiKey)
 
-    const { data: keyRecord } = await supabaseAdmin
+    const { data: keyRecord } = await createAdminClient()
       .from('api_keys')
       .select('*')
       .eq('hashed_key', hashedKey)
@@ -167,7 +167,7 @@ export class APIIntegrationService {
     })
 
     // Update last used
-    await supabaseAdmin
+    await createAdminClient()
       .from('api_keys')
       .update({
         last_used_at: new Date().toISOString(),
@@ -189,7 +189,7 @@ export class APIIntegrationService {
     const hoursBack = timeframe === '1h' ? 1 : timeframe === '24h' ? 24 : timeframe === '7d' ? 168 : 720
     const since = new Date(Date.now() - hoursBack * 60 * 60 * 1000).toISOString()
 
-    const { data: requests } = await supabaseAdmin
+    const { data: requests } = await createAdminClient()
       .from('api_requests')
       .select('*')
       .eq('developer_id', developerId)
@@ -250,7 +250,7 @@ export class APIIntegrationService {
   async createWebhook(developerId: string, url: string, events: WebhookEvent[]): Promise<WebhookEndpoint> {
     const secret = this.generateSecureKey(32)
 
-    const { data: webhook, error } = await supabaseAdmin
+    const { data: webhook, error } = await createAdminClient()
       .from('webhooks')
       .insert({
         developer_id: developerId,
@@ -287,7 +287,7 @@ export class APIIntegrationService {
    * Send webhook notification
    */
   async sendWebhookNotification(developerId: string, event: WebhookEvent, data: any) {
-    const { data: webhooks } = await supabaseAdmin
+    const { data: webhooks } = await createAdminClient()
       .from('webhooks')
       .select('*')
       .eq('developer_id', developerId)
@@ -321,7 +321,7 @@ export class APIIntegrationService {
         })
 
         if (response.ok) {
-          await supabaseAdmin
+          await createAdminClient()
             .from('webhooks')
             .update({
               last_success_at: new Date().toISOString(),
@@ -335,7 +335,7 @@ export class APIIntegrationService {
       } catch (error) {
         console.error(`Webhook delivery failed for ${webhook.url}:`, error)
         
-        await supabaseAdmin
+        await createAdminClient()
           .from('webhooks')
           .update({
             last_failure_at: new Date().toISOString(),
@@ -345,7 +345,7 @@ export class APIIntegrationService {
 
         // Disable webhook after 5 failures
         if (webhook.failure_count + 1 >= 5) {
-          await supabaseAdmin
+          await createAdminClient()
             .from('webhooks')
             .update({ is_active: false })
             .eq('id', webhook.id)

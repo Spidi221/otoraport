@@ -1,13 +1,13 @@
 // Database service layer - zastępuje mock data
-import { supabaseAdmin } from '@/lib/supabase-single'
-import type { Database } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
+import type { Database } from '@/lib/supabase'
 
-// Re-export supabaseAdmin for backwards compatibility
-export { supabaseAdmin }
+// Re-export createAdminClient for backwards compatibility
+export { createAdminClient }
 
 // Developer operations
 export async function getDeveloperById(id: string) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('developers')
     .select('*')
     .eq('id', id)
@@ -22,7 +22,7 @@ export async function getDeveloperById(id: string) {
 }
 
 export async function getDeveloperByEmail(email: string) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('developers')
     .select('*')
     .eq('email', email)
@@ -37,7 +37,7 @@ export async function getDeveloperByEmail(email: string) {
 }
 
 export async function createDeveloper(developer: Database['public']['Tables']['developers']['Insert']) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('developers')
     .insert(developer)
     .select()
@@ -55,7 +55,7 @@ export async function updateDeveloper(
   id: string, 
   updates: Database['public']['Tables']['developers']['Update']
 ) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('developers')
     .update(updates)
     .eq('id', id)
@@ -72,7 +72,7 @@ export async function updateDeveloper(
 
 // Project operations
 export async function getProjectsByDeveloperId(developerId: string) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('projects')
     .select('*')
     .eq('developer_id', developerId)
@@ -87,7 +87,7 @@ export async function getProjectsByDeveloperId(developerId: string) {
 }
 
 export async function createProject(project: Database['public']['Tables']['projects']['Insert']) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('projects')
     .insert(project)
     .select()
@@ -103,7 +103,7 @@ export async function createProject(project: Database['public']['Tables']['proje
 
 // Properties operations
 export async function getPropertiesByDeveloperId(developerId: string) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('properties')
     .select(`
       *,
@@ -121,7 +121,7 @@ export async function getPropertiesByDeveloperId(developerId: string) {
 }
 
 export async function getPropertiesByProjectId(projectId: string) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('properties')
     .select('*')
     .eq('project_id', projectId)
@@ -136,7 +136,7 @@ export async function getPropertiesByProjectId(projectId: string) {
 }
 
 export async function createProperty(property: Database['public']['Tables']['properties']['Insert']) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('properties')
     .insert(property)
     .select()
@@ -154,7 +154,7 @@ export async function updateProperty(
   id: string,
   updates: Database['public']['Tables']['properties']['Update']
 ) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('properties')
     .update(updates)
     .eq('id', id)
@@ -170,7 +170,7 @@ export async function updateProperty(
 }
 
 export async function bulkCreateProperties(properties: Database['public']['Tables']['properties']['Insert'][]) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('properties')
     .insert(properties)
     .select()
@@ -185,7 +185,7 @@ export async function bulkCreateProperties(properties: Database['public']['Table
 
 // File operations
 export async function createUploadedFile(file: Database['public']['Tables']['uploaded_files']['Insert']) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('uploaded_files')
     .insert(file)
     .select()
@@ -200,7 +200,7 @@ export async function createUploadedFile(file: Database['public']['Tables']['upl
 }
 
 export async function markFileAsProcessed(fileId: string, propertiesCount: number) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('uploaded_files')
     .update({
       processed: true,
@@ -222,7 +222,7 @@ export async function markFileAsProcessed(fileId: string, propertiesCount: numbe
 export async function upsertGeneratedFile(
   generatedFile: Database['public']['Tables']['generated_files']['Insert']
 ) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('generated_files')
     .upsert(generatedFile, {
       onConflict: 'developer_id,file_type'
@@ -239,7 +239,7 @@ export async function upsertGeneratedFile(
 }
 
 export async function getGeneratedFiles(developerId: string) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('generated_files')
     .select('*')
     .eq('developer_id', developerId)
@@ -257,13 +257,13 @@ export async function getGeneratedFiles(developerId: string) {
 export async function getDeveloperStats(developerId: string) {
   try {
     // Get projects count
-    const { count: projectsCount } = await supabaseAdmin
+    const { count: projectsCount } = await createAdminClient()
       .from('projects')
       .select('*', { count: 'exact', head: true })
       .eq('developer_id', developerId)
 
     // Get properties by status
-    const { data: properties } = await supabaseAdmin
+    const { data: properties } = await createAdminClient()
       .from('properties')
       .select('status, project:projects!inner(developer_id)')
       .eq('project.developer_id', developerId)
@@ -274,7 +274,7 @@ export async function getDeveloperStats(developerId: string) {
     const reservedProperties = properties?.filter(p => p.status === 'reserved').length || 0
 
     // Get last upload
-    const { data: lastUpload } = await supabaseAdmin
+    const { data: lastUpload } = await createAdminClient()
       .from('uploaded_files')
       .select('created_at')
       .eq('developer_id', developerId)

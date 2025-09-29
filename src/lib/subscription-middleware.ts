@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 import { getSubscriptionInfo, hasFeatureAccess, requireActiveSubscription } from '@/lib/subscription-manager'
 
 export interface AuthenticatedRequest extends NextRequest {
@@ -113,7 +113,7 @@ export async function checkUsageLimit(
       const limit = subscription.limits.investments
       if (limit === -1) return { allowed: true } // Unlimited
 
-      const { count } = await supabaseAdmin
+      const { count } = await createAdminClient()
         .from('projects')
         .select('*', { count: 'exact' })
         .eq('developer_id', developerId)
@@ -132,13 +132,13 @@ export async function checkUsageLimit(
       if (limit === -1) return { allowed: true } // Unlimited
 
       // For properties, we typically check per project, but this is total check
-      const { data: projects } = await supabaseAdmin
+      const { data: projects } = await createAdminClient()
         .from('projects')
         .select('id')
         .eq('developer_id', developerId)
 
       const projectIds = projects?.map(p => p.id) || []
-      const { count } = await supabaseAdmin
+      const { count } = await createAdminClient()
         .from('properties')
         .select('*', { count: 'exact' })
         .in('project_id', projectIds)

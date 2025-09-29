@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerAuth, getDeveloperProfile } from '@/lib/supabase-single'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { getServerAuth, getDeveloperProfile } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,11 +22,26 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ PROPERTIES API: Fetching properties for developer:', developer.client_id)
 
-    // Get properties for this developer
-    const { data: properties, error } = await supabaseAdmin
+    // First get developer's projects
+    const { data: projects } = await createAdminClient()
+      .from('projects')
+      .select('id')
+      .eq('developer_id', developer.id)
+
+    const projectIds = projects?.map(p => p.id) || []
+
+    if (projectIds.length === 0) {
+      return NextResponse.json({
+        success: true,
+        properties: []
+      })
+    }
+
+    // Then get properties for those projects
+    const { data: properties, error } = await createAdminClient()
       .from('properties')
       .select('*')
-      .eq('developer_id', developer.id)
+      .in('project_id', projectIds)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -36,10 +51,16 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ PROPERTIES API: Found ${properties?.length || 0} properties`)
 
+    // Return paginated response format expected by frontend
     return NextResponse.json({
       success: true,
-      properties: properties || [],
-      count: properties?.length || 0
+      data: properties || [],
+      pagination: {
+        total: properties?.length || 0,
+        page: 1,
+        limit: properties?.length || 0,
+        totalPages: 1
+      }
     })
 
   } catch (error: any) {

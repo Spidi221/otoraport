@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function GET() {
   try {
     // Test connection
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await createAdminClient()
       .from('developers')
       .select('count(*)', { count: 'exact', head: true })
 
