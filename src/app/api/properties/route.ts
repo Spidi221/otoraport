@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     // Then get properties for those projects
     const { data: properties, error } = await createAdminClient()
       .from('properties')
-      .select('*')
+      .select('id, project_id, raw_data, created_at, updated_at')
       .in('project_id', projectIds)
       .order('created_at', { ascending: false })
 
@@ -51,14 +51,29 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ PROPERTIES API: Found ${properties?.length || 0} properties`)
 
+    // Transform properties - extract data from raw_data JSONB
+    const transformedProperties = properties?.map(prop => ({
+      id: prop.id,
+      project_id: prop.project_id,
+      property_number: (prop.raw_data as any)?.property_number || 'N/A',
+      property_type: (prop.raw_data as any)?.property_type || 'mieszkanie',
+      area: (prop.raw_data as any)?.area || 0,
+      price_per_m2: (prop.raw_data as any)?.price_per_m2 || 0,
+      total_price: (prop.raw_data as any)?.total_price || 0,
+      final_price: (prop.raw_data as any)?.final_price || (prop.raw_data as any)?.total_price || 0,
+      status: (prop.raw_data as any)?.status || 'available',
+      created_at: prop.created_at,
+      updated_at: prop.updated_at
+    })) || []
+
     // Return paginated response format expected by frontend
     return NextResponse.json({
       success: true,
-      data: properties || [],
+      data: transformedProperties,
       pagination: {
-        total: properties?.length || 0,
+        total: transformedProperties.length,
         page: 1,
-        limit: properties?.length || 0,
+        limit: transformedProperties.length,
         totalPages: 1
       }
     })

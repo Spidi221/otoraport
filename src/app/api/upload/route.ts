@@ -174,46 +174,23 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
     }
 
     // Prepare properties for database insert
+    // CRITICAL: Supabase schema cache is broken - ONLY use project_id and raw_data
     const propertiesToInsert = properties.map(property => ({
       project_id: project.id,
-      property_number: property.property_number || null,
-      property_type: property.property_type || 'mieszkanie',
-      price_per_m2: property.price_per_m2 || null,
-      total_price: property.total_price || null,
-      final_price: property.final_price || property.total_price || null,
-      area: property.area || null,
-      parking_space: property.parking_space || null,
-      parking_price: property.parking_price || null,
-      status: property.status || 'available',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      // Store EVERYTHING in raw_data to bypass schema cache validation
+      raw_data: property
     }))
 
-    // Insert properties using raw SQL (bypass Supabase schema cache)
-    console.log(`🔧 DATABASE: Inserting ${propertiesToInsert.length} properties using raw SQL`)
+    // Insert properties in batch
+    console.log(`🔧 DATABASE: Inserting ${propertiesToInsert.length} properties`)
 
-    for (const property of propertiesToInsert) {
-      const { error } = await createAdminClient()
-        .from('properties')
-        .insert({
-          project_id: property.project_id,
-          property_number: property.property_number || 'N/A',
-          property_type: property.property_type || 'mieszkanie',
-          price_per_m2: property.price_per_m2,
-          total_price: property.total_price,
-          final_price: property.final_price,
-          area: property.area,
-          parking_space: property.parking_space,
-          parking_price: property.parking_price,
-          status: property.status || 'available',
-          created_at: property.created_at,
-          updated_at: property.updated_at
-        } as any) // Force bypass type checking
+    const { error: insertError } = await createAdminClient()
+      .from('properties')
+      .insert(propertiesToInsert)
 
-      if (error) {
-        console.error('❌ DATABASE INSERT ERROR for property:', property.property_number, error)
-        throw new Error(`Database insert failed: ${error.message}`)
-      }
+    if (insertError) {
+      console.error('❌ DATABASE INSERT ERROR:', insertError)
+      throw new Error(`Database insert failed: ${insertError.message}`)
     }
 
     console.log(`✅ DATABASE: Saved ${propertiesToInsert.length} properties`)
