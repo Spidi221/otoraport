@@ -2,6 +2,9 @@
 import { supabaseAdmin } from '@/lib/supabase-single'
 import type { Database } from '@/lib/supabase-single'
 
+// Re-export supabaseAdmin for backwards compatibility
+export { supabaseAdmin }
+
 // Developer operations
 export async function getDeveloperById(id: string) {
   const { data, error } = await supabaseAdmin
