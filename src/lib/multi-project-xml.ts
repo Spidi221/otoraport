@@ -210,110 +210,136 @@ export async function generateAggregatedXML(developerId: string): Promise<string
     }
 
     // CRITICAL FIX: Extract all fields from raw_data JSONB column
-    // Transform raw_data back to structured format expected by XML generator
+    // CSV parser stores data in TWO places:
+    // 1. prop.raw_data = { "Cena za m2": "12000", ... } (all CSV columns)
+    // 2. Top-level structured fields that were mapped
+    // We need to extract from JSONB and preserve any existing mapped fields
     const allProperties = (rawProperties || []).map(prop => {
       const data = (prop.raw_data as any) || {}
+
+      // Helper: Try to find field in raw_data by multiple possible names
+      const getRawField = (field: string, aliases: string[] = []): any => {
+        // Check all possible variations in raw_data
+        for (const alias of [field, ...aliases]) {
+          if (data[alias] !== undefined) return data[alias]
+        }
+        return undefined
+      }
+
       return {
         id: prop.id,
         project_id: prop.project_id,
         created_at: prop.created_at,
         updated_at: prop.updated_at,
 
-        // Extract ALL 58 ministry fields from raw_data
-        apartment_number: data.apartment_number || data.property_number,
-        property_type: data.property_type,
-        price_per_m2: data.price_per_m2,
-        base_price: data.base_price || data.total_price,
-        final_price: data.final_price || data.total_price,
-        surface_area: data.surface_area || data.area,
-        status: data.status,
+        // Extract fields: Check structured columns first (if they exist), then raw_data
+        apartment_number: getRawField('apartment_number', ['property_number', 'numer_lokalu', 'lokal']),
+        property_type: getRawField('property_type', ['typ', 'type']),
+        price_per_m2: getRawField('price_per_m2', ['cena_za_m2', 'cena za m2']),
+        base_price: getRawField('base_price', ['total_price', 'cena', 'cena_bazowa']),
+        final_price: getRawField('final_price', ['cena_finalna']),
+        surface_area: getRawField('surface_area', ['area', 'powierzchnia', 'metraz']),
+        status: getRawField('status', ['status_sprzedazy']),
 
-        // Location details
-        wojewodztwo: data.wojewodztwo,
-        powiat: data.powiat,
-        gmina: data.gmina,
-        miejscowosc: data.miejscowosc,
-        ulica: data.ulica,
-        numer_nieruchomosci: data.numer_nieruchomosci,
-        kod_pocztowy: data.kod_pocztowy,
+        // Location details (use fallback to aliases)
+        wojewodztwo: getRawField('wojewodztwo', ['województwo', 'woj']),
+        powiat: getRawField('powiat'),
+        gmina: getRawField('gmina'),
+        miejscowosc: getRawField('miejscowosc', ['miejscowość', 'miasto']),
+        ulica: getRawField('ulica', ['ul', 'street']),
+        numer_nieruchomosci: getRawField('numer_nieruchomosci', ['numer', 'nr']),
+        kod_pocztowy: getRawField('kod_pocztowy', ['kod', 'postal']),
 
-        // Building details
-        budynek: data.budynek,
-        klatka: data.klatka,
-        kondygnacja: data.kondygnacja,
-        liczba_kondygnacji: data.liczba_kondygnacji,
-        liczba_pokoi: data.liczba_pokoi || data.rooms,
-        uklad_mieszkania: data.uklad_mieszkania,
-        stan_wykonczenia: data.stan_wykonczenia,
-        rok_budowy: data.rok_budowy,
-        technologia_budowy: data.technologia_budowy,
+        // Building details (use fallback to aliases)
+        budynek: getRawField('budynek', ['building', 'bud']),
+        klatka: getRawField('klatka', ['klatka_schodowa']),
+        kondygnacja: getRawField('kondygnacja', ['pietro', 'floor']),
+        liczba_kondygnacji: getRawField('liczba_kondygnacji', ['liczba_pieter']),
+        liczba_pokoi: getRawField('liczba_pokoi', ['rooms', 'pokoje']),
+        uklad_mieszkania: getRawField('uklad_mieszkania', ['uklad', 'layout']),
+        stan_wykonczenia: getRawField('stan_wykonczenia', ['stan', 'wykończenie']),
+        rok_budowy: getRawField('rok_budowy', ['rok']),
+        technologia_budowy: getRawField('technologia_budowy', ['technologia']),
 
-        // Surface areas
-        powierzchnia_uzytkowa: data.powierzchnia_uzytkowa || data.surface_area || data.area,
-        powierzchnia_calkowita: data.powierzchnia_calkowita,
-        powierzchnia_balkon: data.powierzchnia_balkon,
-        powierzchnia_taras: data.powierzchnia_taras,
-        powierzchnia_loggia: data.powierzchnia_loggia,
-        powierzchnia_ogrod: data.powierzchnia_ogrod,
-        powierzchnia_piwnicy: data.powierzchnia_piwnicy,
-        powierzchnia_strychu: data.powierzchnia_strychu,
+        // Surface areas (use fallback to aliases)
+        powierzchnia_uzytkowa: getRawField('powierzchnia_uzytkowa', ['powierzchnia', 'area', 'metraz']),
+        powierzchnia_calkowita: getRawField('powierzchnia_calkowita'),
+        powierzchnia_balkon: getRawField('powierzchnia_balkon', ['balkon']),
+        powierzchnia_taras: getRawField('powierzchnia_taras', ['taras']),
+        powierzchnia_loggia: getRawField('powierzchnia_loggia', ['loggia']),
+        powierzchnia_ogrod: getRawField('powierzchnia_ogrod', ['ogrod', 'ogród']),
+        powierzchnia_piwnicy: getRawField('powierzchnia_piwnicy', ['piwnica']),
+        powierzchnia_strychu: getRawField('powierzchnia_strychu', ['strych']),
 
-        // Price details
-        cena_za_m2_poczatkowa: data.cena_za_m2_poczatkowa,
-        cena_bazowa_poczatkowa: data.cena_bazowa_poczatkowa,
-        cena_finalna_poczatkowa: data.cena_finalna_poczatkowa,
-        data_pierwszej_oferty: data.data_pierwszej_oferty,
-        cena_za_m2_aktualna: data.cena_za_m2_aktualna || data.price_per_m2,
-        cena_bazowa_aktualna: data.cena_bazowa_aktualna || data.base_price || data.total_price,
-        cena_finalna_aktualna: data.cena_finalna_aktualna || data.final_price,
-        data_obowiazywania_ceny_od: data.data_obowiazywania_ceny_od,
-        data_obowiazywania_ceny_do: data.data_obowiazywania_ceny_do,
-        waluta: data.waluta,
+        // Price details (use fallback to aliases)
+        cena_za_m2_poczatkowa: getRawField('cena_za_m2_poczatkowa'),
+        cena_bazowa_poczatkowa: getRawField('cena_bazowa_poczatkowa'),
+        cena_finalna_poczatkowa: getRawField('cena_finalna_poczatkowa'),
+        data_pierwszej_oferty: getRawField('data_pierwszej_oferty'),
+        cena_za_m2_aktualna: getRawField('cena_za_m2_aktualna', ['price_per_m2', 'cena_za_m2']),
+        cena_bazowa_aktualna: getRawField('cena_bazowa_aktualna', ['base_price', 'total_price', 'cena']),
+        cena_finalna_aktualna: getRawField('cena_finalna_aktualna', ['final_price']),
+        data_obowiazywania_ceny_od: getRawField('data_obowiazywania_ceny_od'),
+        data_obowiazywania_ceny_do: getRawField('data_obowiazywania_ceny_do'),
+        waluta: getRawField('waluta', ['currency']) || 'PLN',
 
         // Additional elements (parking, storage)
-        miejsca_postojowe_liczba: data.miejsca_postojowe_liczba,
-        miejsca_postojowe_nr: data.miejsca_postojowe_nr,
-        miejsca_postojowe_ceny: data.miejsca_postojowe_ceny,
-        miejsca_postojowe_rodzaj: data.miejsca_postojowe_rodzaj,
-        komorki_lokatorskie_liczba: data.komorki_lokatorskie_liczba,
-        komorki_lokatorskie_nr: data.komorki_lokatorskie_nr,
-        komorki_lokatorskie_ceny: data.komorki_lokatorskie_ceny,
-        komorki_lokatorskie_powierzchnie: data.komorki_lokatorskie_powierzchnie,
+        miejsca_postojowe_liczba: getRawField('miejsca_postojowe_liczba', ['parking_count']),
+        miejsca_postojowe_nr: getRawField('miejsca_postojowe_nr'),
+        miejsca_postojowe_ceny: getRawField('miejsca_postojowe_ceny', ['parking_price']),
+        miejsca_postojowe_rodzaj: getRawField('miejsca_postojowe_rodzaj', ['parking_type']),
+        komorki_lokatorskie_liczba: getRawField('komorki_lokatorskie_liczba'),
+        komorki_lokatorskie_nr: getRawField('komorki_lokatorskie_nr'),
+        komorki_lokatorskie_ceny: getRawField('komorki_lokatorskie_ceny'),
+        komorki_lokatorskie_powierzchnie: getRawField('komorki_lokatorskie_powierzchnie'),
 
         // Amenities
-        pomieszczenia_przynalezne: data.pomieszczenia_przynalezne,
-        winda: data.winda,
-        klimatyzacja: data.klimatyzacja,
-        ogrzewanie: data.ogrzewanie,
-        dostep_dla_niepelnosprawnych: data.dostep_dla_niepelnosprawnych,
-        ekspozycja: data.ekspozycja,
-        widok_z_okien: data.widok_z_okien,
+        pomieszczenia_przynalezne: getRawField('pomieszczenia_przynalezne'),
+        winda: getRawField('winda', ['elevator', 'lift']),
+        klimatyzacja: getRawField('klimatyzacja', ['ac', 'aircon']),
+        ogrzewanie: getRawField('ogrzewanie', ['heating']),
+        dostep_dla_niepelnosprawnych: getRawField('dostep_dla_niepelnosprawnych', ['disabled_access']),
+        ekspozycja: getRawField('ekspozycja', ['exposure']),
+        widok_z_okien: getRawField('widok_z_okien', ['view']),
 
         // Legal info
-        status_sprzedazy: data.status_sprzedazy,
-        data_rezerwacji: data.data_rezerwacji,
-        data_sprzedazy: data.data_sprzedazy,
-        data_przekazania: data.data_przekazania,
-        forma_wlasnosci: data.forma_wlasnosci,
-        ksiega_wieczysta: data.ksiega_wieczysta,
-        udzial_w_gruncie: data.udzial_w_gruncie,
+        status_sprzedazy: getRawField('status_sprzedazy', ['status']),
+        data_rezerwacji: getRawField('data_rezerwacji'),
+        data_sprzedazy: getRawField('data_sprzedazy'),
+        data_przekazania: getRawField('data_przekazania'),
+        forma_wlasnosci: getRawField('forma_wlasnosci'),
+        ksiega_wieczysta: getRawField('ksiega_wieczysta'),
+        udzial_w_gruncie: getRawField('udzial_w_gruncie'),
 
         // Ministry metadata
-        data_pierwszego_raportu: data.data_pierwszego_raportu,
-        data_ostatniej_aktualizacji: data.data_ostatniej_aktualizacji,
-        liczba_zmian_ceny: data.liczba_zmian_ceny,
-        uwagi_ministerstwo: data.uwagi_ministerstwo,
-        uuid_ministerstwo: data.uuid_ministerstwo,
+        data_pierwszego_raportu: getRawField('data_pierwszego_raportu'),
+        data_ostatniej_aktualizacji: getRawField('data_ostatniej_aktualizacji'),
+        liczba_zmian_ceny: getRawField('liczba_zmian_ceny'),
+        uwagi_ministerstwo: getRawField('uwagi_ministerstwo'),
+        uuid_ministerstwo: getRawField('uuid_ministerstwo'),
 
         // Legacy fields
-        price_valid_from: data.price_valid_from,
-        price_valid_to: data.price_valid_to,
-        status_dostepnosci: data.status_dostepnosci
+        price_valid_from: getRawField('price_valid_from'),
+        price_valid_to: getRawField('price_valid_to'),
+        status_dostepnosci: getRawField('status_dostepnosci')
       }
     })
 
     console.log(`Found ${allProperties.length} properties across ${validProjects.length} projects`)
-    console.log('Sample property data:', allProperties[0]) // Debug: check if extraction worked
+
+    // DEBUG: Show extraction results for first property
+    if (allProperties.length > 0) {
+      const sample = allProperties[0]
+      console.log('✅ Sample property extraction:', {
+        id: sample.id,
+        apartment_number: sample.apartment_number,
+        price_per_m2: sample.price_per_m2,
+        surface_area: sample.surface_area,
+        base_price: sample.base_price,
+        status: sample.status
+      })
+      console.log('📦 Raw data keys:', Object.keys((rawProperties?.[0]?.raw_data as any) || {}))
+    }
 
     // Połącz properties z projektami (ręcznie zamiast zagnieżdżonych query)
     const projectsWithProperties = validProjects.map(project => ({
