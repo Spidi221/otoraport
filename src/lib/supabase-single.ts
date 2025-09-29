@@ -178,12 +178,19 @@ export async function getServerAuth(request: Request) {
     return null
   }
 
-  // Extract Supabase token from cookies
-  const tokenMatch = cookies.match(/sb-auth-token=([^;]+)/)
+  // Extract Supabase token from cookies - try both patterns
+  let tokenMatch = cookies.match(/sb-auth-token=([^;]+)/)
   if (!tokenMatch) {
-    console.log('❌ SINGLE CLIENT: No auth token in cookies')
+    // Try dynamic pattern for any Supabase instance
+    tokenMatch = cookies.match(/sb-[a-z0-9]+-auth-token=([^;]+)/)
+  }
+
+  if (!tokenMatch) {
+    console.log('❌ SINGLE CLIENT: No auth token in cookies:', cookies)
     return null
   }
+
+  console.log('✅ SINGLE CLIENT: Found auth token:', tokenMatch[0].substring(0, 30) + '...')
 
   try {
     // Parse the token (it's JSON)
