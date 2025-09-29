@@ -33,7 +33,9 @@ export function PropertiesTable() {
     const fetchProperties = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/properties');
+        const response = await fetch('/api/properties', {
+          credentials: 'include'
+        });
         const result: PaginatedResponse<PropertyData> = await response.json();
 
         if (isApiSuccess(result)) {

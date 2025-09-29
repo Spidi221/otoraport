@@ -20,10 +20,36 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    storageKey: 'sb-auth-token',
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined
+    storageKey: `sb-${supabaseUrl.split('//')[1].split('.')[0]}-auth-token`
+    // Let Supabase use localStorage by default - we'll sync to cookies separately
   }
 })
+
+// AUTO-SYNC: Copy auth tokens from localStorage to cookies for SSR
+if (typeof window !== 'undefined') {
+  supabase.auth.onAuthStateChange((event, session) => {
+    console.log('🔄 AUTH STATE CHANGE:', event, session ? 'Has Session' : 'No Session')
+
+    if (session) {
+      // Copy session to cookie for server-side access
+      const cookieName = `sb-${supabaseUrl.split('//')[1].split('.')[0]}-auth-token`
+      const sessionData = JSON.stringify({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        expires_at: session.expires_at,
+        user: session.user
+      })
+
+      document.cookie = `${cookieName}=${encodeURIComponent(sessionData)}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`
+      console.log('✅ AUTH TOKEN: Synced to cookie:', cookieName)
+    } else {
+      // Remove cookie when logged out
+      const cookieName = `sb-${supabaseUrl.split('//')[1].split('.')[0]}-auth-token`
+      document.cookie = `${cookieName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+      console.log('🗑️ AUTH TOKEN: Removed cookie')
+    }
+  })
+}
 
 // ADMIN CLIENT for server operations
 export const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey, {
@@ -168,31 +194,39 @@ export async function createDeveloperProfile(userId: string, email: string, name
   }
 }
 
-// SERVER-SIDE AUTH for API routes
+// SERVER-SIDE AUTH for API routes - DIRECT METHOD
 export async function getServerAuth(request: Request) {
   console.log('🔍 SINGLE CLIENT: Server auth check')
 
-  const cookies = request.headers.get('cookie')
-  if (!cookies) {
-    console.log('❌ SINGLE CLIENT: No cookies in request')
-    return null
-  }
-
-  // Extract Supabase token from cookies - try both patterns
-  let tokenMatch = cookies.match(/sb-auth-token=([^;]+)/)
-  if (!tokenMatch) {
-    // Try dynamic pattern for any Supabase instance
-    tokenMatch = cookies.match(/sb-[a-z0-9]+-auth-token=([^;]+)/)
-  }
-
-  if (!tokenMatch) {
-    console.log('❌ SINGLE CLIENT: No auth token in cookies:', cookies)
-    return null
-  }
-
-  console.log('✅ SINGLE CLIENT: Found auth token:', tokenMatch[0].substring(0, 30) + '...')
-
   try {
+    const cookies = request.headers.get('cookie')
+    if (!cookies) {
+      console.log('❌ SINGLE CLIENT: No cookies in request')
+      return null
+    }
+
+    // Look for Supabase auth token in cookies
+    // Try multiple patterns for Supabase cookies
+    const patterns = [
+      /sb-[a-z0-9]+-auth-token=([^;]+)/,  // Dynamic project pattern
+      /sb-auth-token=([^;]+)/,             // Simple pattern
+      /supabase-auth-token=([^;]+)/        // Alternative pattern
+    ]
+
+    let tokenMatch = null
+    for (const pattern of patterns) {
+      tokenMatch = cookies.match(pattern)
+      if (tokenMatch) break
+    }
+
+    if (!tokenMatch) {
+      console.log('❌ SINGLE CLIENT: No Supabase auth token found in cookies')
+      console.log('Available cookies:', cookies.substring(0, 200) + '...')
+      return null
+    }
+
+    console.log('✅ SINGLE CLIENT: Found auth token:', tokenMatch[0].substring(0, 30) + '...')
+
     // Parse the token (it's JSON)
     const tokenData = JSON.parse(decodeURIComponent(tokenMatch[1]))
     const accessToken = tokenData.access_token
@@ -202,8 +236,8 @@ export async function getServerAuth(request: Request) {
       return null
     }
 
-    // Verify token with Supabase
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken)
+    // Verify token with Supabase using admin client
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken)
 
     if (error || !user) {
       console.log('❌ SINGLE CLIENT: Token verification failed:', error?.message)

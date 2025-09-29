@@ -55,7 +55,9 @@ export default function AdvancedAnalyticsDashboard() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/analytics/dashboard');
+      const response = await fetch('/api/analytics/dashboard', {
+        credentials: 'include'
+      });
       const data = await response.json();
 
       if (response.ok && data.success) {

@@ -50,7 +50,9 @@ export function PresentationSection() {
 
   const checkUserProfile = async () => {
     try {
-      const response = await fetch('/api/user/profile')
+      const response = await fetch('/api/user/profile', {
+        credentials: 'include'
+      })
       if (response.ok) {
         const data = await response.json()
         setUserProfile(data)
@@ -62,7 +64,9 @@ export function PresentationSection() {
 
   const checkDeploymentStatus = async () => {
     try {
-      const response = await fetch('/api/presentation/deploy')
+      const response = await fetch('/api/presentation/deploy', {
+        credentials: 'include'
+      })
       if (response.ok) {
         const data = await response.json()
         setDeploymentStatus(data.data)

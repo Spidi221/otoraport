@@ -2,22 +2,28 @@
 // GET /api/analytics/dashboard
 
 import { NextRequest, NextResponse } from 'next/server';
-// Note: This import needs to be replaced with new auth system
-import { supabaseAdmin } from '@/lib/supabase-single';
+import { getServerAuth, getDeveloperProfile, supabaseAdmin } from '@/lib/supabase-single';
 import { AnalyticsEngine } from '@/lib/analytics-engine';
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await getAuthenticatedDeveloper(request);
+    console.log('📊 ANALYTICS DASHBOARD: Getting analytics data')
 
-    if (!auth.success || !auth.user || !auth.developer) {
-      return NextResponse.json(
-        { success: false, error: auth.error || 'Unauthorized' },
-        { status: 401 }
-      );
+    // Authenticate user using unified auth system
+    const user = await getServerAuth(request)
+    if (!user) {
+      console.log('❌ ANALYTICS DASHBOARD: Unauthorized - no user')
+      return NextResponse.json({ success: false, error: 'Unauthorized - please sign in' }, { status: 401 })
     }
 
-    const developer = auth.developer;
+    // Get developer profile
+    const developer = await getDeveloperProfile(user.id)
+    if (!developer) {
+      console.log('❌ ANALYTICS DASHBOARD: No developer profile found')
+      return NextResponse.json({ success: false, error: 'Developer profile not found' }, { status: 404 })
+    }
+
+    console.log('✅ ANALYTICS DASHBOARD: Getting analytics for developer:', developer.client_id)
 
     // Check if analytics feature is available
     const hasAnalytics = ['pro', 'enterprise'].includes(developer.subscription_plan);
@@ -172,17 +178,23 @@ function calculateOverallHealthScore(analytics: any): number {
 // POST endpoint for custom analytics queries
 export async function POST(request: NextRequest) {
   try {
-    const auth = await getAuthenticatedDeveloper(request);
+    console.log('📊 ANALYTICS POST: Custom analytics query')
 
-    if (!auth.success || !auth.user || !auth.developer) {
-      return NextResponse.json(
-        { success: false, error: auth.error || 'Unauthorized' },
-        { status: 401 }
-      );
+    // Authenticate user using unified auth system
+    const user = await getServerAuth(request)
+    if (!user) {
+      console.log('❌ ANALYTICS POST: Unauthorized - no user')
+      return NextResponse.json({ success: false, error: 'Unauthorized - please sign in' }, { status: 401 })
+    }
+
+    // Get developer profile
+    const developer = await getDeveloperProfile(user.id)
+    if (!developer) {
+      console.log('❌ ANALYTICS POST: No developer profile found')
+      return NextResponse.json({ success: false, error: 'Developer profile not found' }, { status: 404 })
     }
 
     const { query_type, parameters } = await request.json();
-    const developer = auth.developer;
 
     // Handle different query types
     let result;

@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
-import { supabaseAdmin } from '@/lib/supabase-single'
+import { getServerAuth, getDeveloperProfile, supabaseAdmin } from '@/lib/supabase-single'
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await getAuthenticatedDeveloper(request)
+    console.log('📊 DASHBOARD STATS: Getting dashboard statistics')
 
-    if (!auth.success || !auth.user || !auth.developer) {
-      return NextResponse.json(
-        { error: auth.error || 'Unauthorized' },
-        { status: 401 }
-      )
+    // Authenticate user
+    const user = await getServerAuth(request)
+    if (!user) {
+      console.log('❌ DASHBOARD STATS: Unauthorized - no user')
+      return NextResponse.json({ error: 'Unauthorized - please sign in' }, { status: 401 })
     }
 
-    const developer = auth.developer
+    // Get developer profile
+    const developer = await getDeveloperProfile(user.id)
+    if (!developer) {
+      console.log('❌ DASHBOARD STATS: No developer profile found')
+      return NextResponse.json({ error: 'Developer profile not found' }, { status: 404 })
+    }
+
+    console.log('✅ DASHBOARD STATS: Getting stats for developer:', developer.client_id)
 
     // Get projects count
     const { count: projectsCount } = await supabaseAdmin

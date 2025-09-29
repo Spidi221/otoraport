@@ -61,7 +61,9 @@ export default function PredictiveInsightsDashboard() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/analytics/predictions');
+      const response = await fetch('/api/analytics/predictions', {
+        credentials: 'include'
+      });
       const data = await response.json();
 
       if (response.ok && data.success) {

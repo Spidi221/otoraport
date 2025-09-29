@@ -113,11 +113,7 @@ export function useAuthSimple(): AuthState & AuthActions {
 
     initializeAuth()
 
-    // Safety timeout - force loading to false after 15 seconds
-    const safetyTimeout = setTimeout(() => {
-      console.log('🚨 SIMPLE AUTH: Safety timeout - forcing loading = false')
-      setLoading(false)
-    }, 15000)
+    // Removed safety timeout - was causing premature loading state changes
 
     // Listen for auth state changes - but don't reset loading here
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -136,7 +132,6 @@ export function useAuthSimple(): AuthState & AuthActions {
     )
 
     return () => {
-      clearTimeout(safetyTimeout)
       subscription.unsubscribe()
     }
   }, [])

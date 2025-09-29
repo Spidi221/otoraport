@@ -19,7 +19,9 @@ function StatusCardsComponent() {
   const fetchStats = useCallback(async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/dashboard/stats')
+      const response = await fetch('/api/dashboard/stats', {
+        credentials: 'include'
+      })
       if (response.ok) {
         const result = await response.json()
         setStats(result.data)
