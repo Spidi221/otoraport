@@ -1,7 +1,7 @@
 // Advanced Analytics Engine - Real-time business intelligence
 // Provides revenue insights, property performance, and predictive analytics
 
-import { supabaseAdmin } from './supabase';
+import { supabaseAdmin } from './supabase-single';
 
 export interface BusinessAnalytics {
   // Revenue insights

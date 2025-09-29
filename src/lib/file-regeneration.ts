@@ -1,8 +1,8 @@
 // Auto-regeneration system for XML/MD files when data changes
-import { supabaseAdmin } from './supabase'
+import { supabaseAdmin } from './supabase-single'
 import { generateXMLForMinistry, generateMarkdownForMinistry, createSampleData } from './generators'
 import { sendEmail } from './email-service'
-import { Database } from './supabase'
+import { Database } from './supabase-single'
 
 type Developer = Database['public']['Tables']['developers']['Row']
 

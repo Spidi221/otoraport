@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 import { adminService } from '@/lib/admin-service'
 import { cookies } from 'next/headers'
 

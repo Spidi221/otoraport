@@ -194,7 +194,7 @@ export async function getDeveloperByDomain(domain: string): Promise<{
   subscription_plan: string
 } | null> {
   try {
-    const { supabaseAdmin } = await import('@/lib/supabase')
+    const { supabaseAdmin } = await import('@/lib/supabase-single')
     
     const { data: developer, error } = await supabaseAdmin
       .from('developers')
@@ -264,7 +264,7 @@ function generateVerificationToken(): string {
 }
 
 async function checkDomainExists(domain: string): Promise<boolean> {
-  const { supabaseAdmin } = await import('@/lib/supabase')
+  const { supabaseAdmin } = await import('@/lib/supabase-single')
   
   const { data } = await supabaseAdmin
     .from('developers')
@@ -276,7 +276,7 @@ async function checkDomainExists(domain: string): Promise<boolean> {
 }
 
 async function saveDomainConfig(config: CustomDomainConfig): Promise<void> {
-  const { supabaseAdmin } = await import('@/lib/supabase')
+  const { supabaseAdmin } = await import('@/lib/supabase-single')
   
   await supabaseAdmin
     .from('developers')
@@ -322,7 +322,7 @@ export async function deployPresentationToDomain(
   domain?: string
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
-    const { supabaseAdmin } = await import('@/lib/supabase');
+    const { supabaseAdmin } = await import('@/lib/supabase-single');
 
     // Get developer's custom domain if not provided
     if (!domain) {
@@ -482,7 +482,7 @@ export async function getDomainConfig(developerId: string): Promise<{
   dnsInstructions?: string;
 }> {
   try {
-    const { supabaseAdmin } = await import('@/lib/supabase');
+    const { supabaseAdmin } = await import('@/lib/supabase-single');
 
     const { data: developer } = await supabaseAdmin
       .from('developers')

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
 import { parseCSVSmart, validateMinistryCompliance, parseExcelFileFromBlob, parsePropertyFile } from '@/lib/smart-csv-parser'
 import { sendComplianceNotification } from '@/lib/email-service'

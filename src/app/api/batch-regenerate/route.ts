@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin, Database } from '@/lib/supabase'
+import { supabaseAdmin, Database } from '@/lib/supabase-single'
 
 type DeveloperSelect = {
   id: string

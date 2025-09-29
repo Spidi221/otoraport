@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-single';
 import { CDNManager } from '@/lib/performance';
 
 // POST /api/analytics/performance - Track performance metrics

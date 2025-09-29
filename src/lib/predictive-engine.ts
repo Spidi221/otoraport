@@ -1,7 +1,7 @@
 // Predictive Analytics AI Engine - Machine Learning dla real estate insights
 // Wykorzystuje historyczne dane do przewidywania trendów i optymalizacji
 
-import { supabaseAdmin } from './supabase';
+import { supabaseAdmin } from './supabase-single';
 
 export interface PredictiveInsights {
   // Price predictions

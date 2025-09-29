@@ -1,7 +1,7 @@
 // API endpoint for sending trial expiry warnings (cron job or manual trigger)
 
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 import { sendTrialExpiryWarning } from '@/lib/email-service'
 
 export async function POST(request: NextRequest) {

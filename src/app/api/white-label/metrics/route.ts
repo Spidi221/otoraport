@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-single';
 import { WhiteLabelEngine } from '@/lib/white-label';
 
 // GET /api/white-label/metrics - Get partner dashboard metrics

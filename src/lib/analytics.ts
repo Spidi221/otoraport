@@ -1,5 +1,5 @@
 // Advanced analytics service for OTORAPORT
-import { supabaseAdmin } from './supabase'
+import { supabaseAdmin } from './supabase-single'
 import { subDays, format, startOfMonth, endOfMonth } from 'date-fns'
 import { pl } from 'date-fns/locale'
 

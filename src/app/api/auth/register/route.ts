@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 import { sendDeveloperWelcomeEmail } from '@/lib/email-service'
 import bcrypt from 'bcryptjs'
 import { registrationRateLimit } from '@/lib/rate-limit'

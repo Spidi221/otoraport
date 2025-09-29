@@ -1,7 +1,7 @@
 // Customer Success Automation Engine
 // Proactive support, onboarding automation, and customer health monitoring
 
-import { supabaseAdmin } from './supabase';
+import { supabaseAdmin } from './supabase-single';
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);

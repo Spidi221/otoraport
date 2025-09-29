@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withSubscriptionCheck } from '@/lib/subscription-middleware'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 import { generatePresentationHTML, generateRobotsTxt, generateSitemap, calculateMarketStats, generatePriceHistoryChart, type PresentationSiteData } from '@/lib/presentation-generator'
 
 // Deployment functions

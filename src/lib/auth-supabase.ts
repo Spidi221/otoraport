@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { createSupabaseReqResClient } from '@/lib/supabase-ssr'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 
 /**
  * Get authenticated user from Supabase using SSR client

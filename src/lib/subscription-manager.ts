@@ -1,6 +1,6 @@
 // Subscription management and feature gating system
 
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 
 export interface PlanLimits {
   investments: number // Max number of projects

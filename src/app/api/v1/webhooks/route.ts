@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-single';
 import { ApiKeyManager, ApiResponseBuilder, WebhookManager, WEBHOOK_EVENTS } from '@/lib/api-v1';
 
 // GET /api/v1/webhooks - List webhook endpoints

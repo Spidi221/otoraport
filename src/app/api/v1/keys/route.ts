@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-single';
 import { ApiKeyManager, ApiResponseBuilder, API_PERMISSION_TEMPLATES } from '@/lib/api-v1';
 
 // GET /api/v1/keys - List API keys (authenticated via session)

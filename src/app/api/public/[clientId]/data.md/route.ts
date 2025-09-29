@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateMarkdownForMinistry, createSampleData } from '@/lib/generators'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 import { validateClientId, applySecurityHeaders, checkRateLimit } from '@/lib/security'
 
 export async function GET(

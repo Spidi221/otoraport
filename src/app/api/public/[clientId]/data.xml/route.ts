@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateXMLForMinistry, createSampleData } from '@/lib/generators'
 import { generateAggregatedXML } from '@/lib/multi-project-xml'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 import { validateClientId, applySecurityHeaders, checkRateLimit } from '@/lib/security'
 
 export async function GET(

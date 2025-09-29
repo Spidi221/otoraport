@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedDeveloper } from '@/lib/auth-supabase'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase-single'
 import { sensitiveAPIRateLimit } from '@/lib/rate-limit'
 
 export async function GET(request: NextRequest) {

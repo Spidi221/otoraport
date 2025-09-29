@@ -5,7 +5,7 @@ import { Download, Send, Eye, BarChart3, Globe } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { ErrorDisplay, useErrorHandling, CommonErrors } from "../ui/error-display";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase-single";
 
 export function ActionButtons() {
   const [user, setUser] = useState(null)

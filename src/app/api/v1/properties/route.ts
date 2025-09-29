@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withReadOnlyAuth, withWriteAuth } from '@/lib/api-middleware';
 import { ApiResponseBuilder, type PropertyApiModel } from '@/lib/api-v1';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-single';
 
 /**
  * GET /api/v1/properties

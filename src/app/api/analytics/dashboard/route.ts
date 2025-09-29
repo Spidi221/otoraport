@@ -2,8 +2,8 @@
 // GET /api/analytics/dashboard
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthenticatedDeveloper } from '@/lib/auth-supabase';
-import { supabaseAdmin } from '@/lib/supabase';
+// Note: This import needs to be replaced with new auth system
+import { supabaseAdmin } from '@/lib/supabase-single';
 import { AnalyticsEngine } from '@/lib/analytics-engine';
 
 export async function GET(request: NextRequest) {

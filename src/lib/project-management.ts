@@ -1,5 +1,5 @@
 // Advanced project management system for multi-investment developers
-import { supabaseAdmin } from './supabase'
+import { supabaseAdmin } from './supabase-single'
 import { generateXMLForMinistry, generateMarkdownForMinistry } from './generators'
 
 export interface ProjectDetails {

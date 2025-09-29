@@ -4,7 +4,7 @@
  * CRITICAL: Uses official dane_o_cenach_mieszkan format
  */
 
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-single'
 import { generateXMLForMinistry, DataForGeneration } from '@/lib/generators'
 import { generateMinistryXML, convertToMinistryFormat, validateMinistryXML } from './xml-generator'
 

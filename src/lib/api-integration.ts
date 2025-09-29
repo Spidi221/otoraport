@@ -1,5 +1,5 @@
 // External API integration system for OTORAPORT partners
-import { supabaseAdmin } from './supabase'
+import { supabaseAdmin } from './supabase-single'
 import { analyticsService } from './analytics'
 import { projectManagementService } from './project-management'
 import crypto from 'crypto'

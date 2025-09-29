@@ -1,5 +1,5 @@
 // Bulk operations system for large-scale property management
-import { supabaseAdmin } from './supabase'
+import { supabaseAdmin } from './supabase-single'
 import { analyticsService } from './analytics'
 
 export interface BulkOperationJob {

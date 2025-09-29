@@ -14,7 +14,7 @@ import {
 import { OtoraportLogo } from "../icons/otoraport-logo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase-single";
 
 interface HeaderProps {
   showUserMenu?: boolean;

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase-single";
 import { Globe, Eye, Settings, ExternalLink, RefreshCw, Zap, Crown, Lock } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";

@@ -3,7 +3,7 @@
  * Nowe templates zgodnie z wymaganiami biznesowymi
  */
 
-import { Database } from './supabase';
+import { Database } from './supabase-single';
 
 type Developer = Database['public']['Tables']['developers']['Row'];
 
