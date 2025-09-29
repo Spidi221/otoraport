@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { OtoraportLogo } from '@/components/icons/otoraport-logo'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase-single'
 
 export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false)
