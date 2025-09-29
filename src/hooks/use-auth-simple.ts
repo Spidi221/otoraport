@@ -87,30 +87,47 @@ export function useAuthSimple(): AuthState & AuthActions {
       console.log('🚀 SIMPLE AUTH: Initializing...')
 
       try {
-        // Get current session
-        const session = await getCurrentSession()
+        // Add timeout for safety - prevent infinite loading
+        const sessionPromise = getCurrentSession()
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Session timeout after 10s')), 10000)
+        )
+
+        const session = await Promise.race([sessionPromise, timeoutPromise])
 
         if (session?.user) {
           console.log('✅ SIMPLE AUTH: Session found for:', session.user.email)
           setUser(session.user)
           await loadDeveloperProfile(session.user)
         } else {
-          console.log('⚠️ SIMPLE AUTH: No active session')
+          console.log('⚠️ SIMPLE AUTH: No active session - user not logged in')
+          setUser(null)
+          setDeveloper(null)
         }
       } catch (error) {
         console.error('💥 SIMPLE AUTH: Initialization failed:', error)
+        setUser(null)
+        setDeveloper(null)
       } finally {
+        console.log('✅ SIMPLE AUTH: Loading finished, setting loading = false')
         setLoading(false)
       }
     }
 
     initializeAuth()
 
-    // Listen for auth state changes
+    // Safety timeout - force loading to false after 15 seconds
+    const safetyTimeout = setTimeout(() => {
+      console.log('🚨 SIMPLE AUTH: Safety timeout - forcing loading = false')
+      setLoading(false)
+    }, 15000)
+
+    // Listen for auth state changes - but don't reset loading here
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔄 SIMPLE AUTH: State change:', event, session?.user?.email)
 
+        // Only update user/developer, don't touch loading state from auth changes
         if (session?.user) {
           setUser(session.user)
           await loadDeveloperProfile(session.user)
@@ -118,12 +135,13 @@ export function useAuthSimple(): AuthState & AuthActions {
           setUser(null)
           setDeveloper(null)
         }
-
-        setLoading(false)
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      clearTimeout(safetyTimeout)
+      subscription.unsubscribe()
+    }
   }, [])
 
   // Sign in
