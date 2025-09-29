@@ -215,13 +215,20 @@ export async function generateAggregatedXML(developerId: string): Promise<string
     // 2. Top-level structured fields that were mapped
     // We need to extract from JSONB and preserve any existing mapped fields
     const allProperties = (rawProperties || []).map(prop => {
-      const data = (prop.raw_data as any) || {}
+      // CRITICAL: raw_data może być nested - prop.raw_data.raw_data
+      // Check if data has nested raw_data property
+      const rawData = (prop.raw_data as any) || {}
+      const data = rawData.raw_data || rawData // Use nested if exists, otherwise use top level
 
       // Helper: Try to find field in raw_data by multiple possible names
       const getRawField = (field: string, aliases: string[] = []): any => {
         // Check all possible variations in raw_data
         for (const alias of [field, ...aliases]) {
           if (data[alias] !== undefined) return data[alias]
+        }
+        // Fallback: check top-level rawData too
+        for (const alias of [field, ...aliases]) {
+          if (rawData[alias] !== undefined) return rawData[alias]
         }
         return undefined
       }

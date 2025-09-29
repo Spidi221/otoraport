@@ -329,25 +329,33 @@ function generatePropertyXML(property: MinistryProperty): string {
 }
 
 /**
+ * Helper: Safe number formatting (handles strings from CSV)
+ */
+function safeNumber(value: any): string {
+  const num = typeof value === 'string' ? parseFloat(value) : value
+  return (typeof num === 'number' && !isNaN(num)) ? num.toFixed(2) : '0.00'
+}
+
+/**
  * Generate additional property information XML
  */
 function generateAdditionalInfoXML(property: MinistryProperty): string {
   const additionalInfo = []
 
   if (property.powierzchnia_balkon) {
-    additionalInfo.push(`<balkon><powierzchnia_balkonu>${property.powierzchnia_balkon.toFixed(2)}</powierzchnia_balkonu></balkon>`)
+    additionalInfo.push(`<balkon><powierzchnia_balkonu>${safeNumber(property.powierzchnia_balkon)}</powierzchnia_balkonu></balkon>`)
   }
 
   if (property.powierzchnia_taras) {
-    additionalInfo.push(`<taras><powierzchnia_tarasu>${property.powierzchnia_taras.toFixed(2)}</powierzchnia_tarasu></taras>`)
+    additionalInfo.push(`<taras><powierzchnia_tarasu>${safeNumber(property.powierzchnia_taras)}</powierzchnia_tarasu></taras>`)
   }
 
   if (property.powierzchnia_loggia) {
-    additionalInfo.push(`<loggia><powierzchnia_loggii>${property.powierzchnia_loggia.toFixed(2)}</powierzchnia_loggii></loggia>`)
+    additionalInfo.push(`<loggia><powierzchnia_loggii>${safeNumber(property.powierzchnia_loggia)}</powierzchnia_loggii></loggia>`)
   }
 
   if (property.powierzchnia_ogrod) {
-    additionalInfo.push(`<ogrod><powierzchnia_ogrodu>${property.powierzchnia_ogrod.toFixed(2)}</powierzchnia_ogrodu></ogrod>`)
+    additionalInfo.push(`<ogrod><powierzchnia_ogrodu>${safeNumber(property.powierzchnia_ogrod)}</powierzchnia_ogrodu></ogrod>`)
   }
 
   if (property.parking_included || property.parking_price) {
