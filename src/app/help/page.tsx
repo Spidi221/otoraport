@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,6 @@ import Link from 'next/link'
 export default function HelpPage() {
   const { user, developer } = useAuth()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [helpResources, setHelpResources] = useState<HelpResource[]>([])
   const [filteredResources, setFilteredResources] = useState<HelpResource[]>([])
