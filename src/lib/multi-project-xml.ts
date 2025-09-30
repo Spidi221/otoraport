@@ -221,7 +221,7 @@ export async function generateAggregatedXML(developerId: string): Promise<string
       const data = rawData.raw_data || rawData // Use nested if exists, otherwise use top level
 
       // Helper: Try to find field in raw_data by multiple possible names
-      const getRawField = (field: string, aliases: string[] = []): any => {
+      const getRawField = (field: string, aliases: string[] = [], convertToNumber: boolean = false): any => {
         // Check all possible variations in raw_data
         for (const alias of [field, ...aliases]) {
           if (data[alias] !== undefined && data[alias] !== null && data[alias] !== '') {
@@ -229,6 +229,14 @@ export async function generateAggregatedXML(developerId: string): Promise<string
             // FILTER SOLD PROPERTIES: If value is "X" or "x", consider it as SOLD marker
             if (typeof value === 'string' && (value.trim().toLowerCase() === 'x')) {
               return 'SOLD' // Mark as sold
+            }
+            // Convert to number if requested (for price/area fields)
+            if (convertToNumber && typeof value === 'string') {
+              const parsed = parseFloat(value.replace(',', '.'))
+              return isNaN(parsed) ? undefined : parsed
+            }
+            if (convertToNumber && typeof value === 'number') {
+              return value
             }
             return value
           }
@@ -240,6 +248,14 @@ export async function generateAggregatedXML(developerId: string): Promise<string
             // FILTER SOLD PROPERTIES: If value is "X" or "x", consider it as SOLD marker
             if (typeof value === 'string' && (value.trim().toLowerCase() === 'x')) {
               return 'SOLD' // Mark as sold
+            }
+            // Convert to number if requested (for price/area fields)
+            if (convertToNumber && typeof value === 'string') {
+              const parsed = parseFloat(value.replace(',', '.'))
+              return isNaN(parsed) ? undefined : parsed
+            }
+            if (convertToNumber && typeof value === 'number') {
+              return value
             }
             return value
           }
@@ -282,25 +298,25 @@ export async function generateAggregatedXML(developerId: string): Promise<string
         apartment_number: getRawField('apartment_number', [
           MINISTRY_COLUMNS.property_number,
           'property_number', 'numer_lokalu', 'lokal'
-        ]),
-        property_type: getRawField('property_type', ['typ', 'type']),
+        ], false),
+        property_type: getRawField('property_type', ['typ', 'type'], false),
         price_per_m2: getRawField('price_per_m2', [
           MINISTRY_COLUMNS.price_per_m2,
           'cena_za_m2', 'cena za m2'
-        ]),
+        ], true), // CONVERT TO NUMBER
         base_price: getRawField('base_price', [
           MINISTRY_COLUMNS.total_price,
           'total_price', 'cena', 'cena_bazowa'
-        ]),
+        ], true), // CONVERT TO NUMBER
         final_price: getRawField('final_price', [
           MINISTRY_COLUMNS.total_price,
           'cena_finalna'
-        ]),
+        ], true), // CONVERT TO NUMBER
         surface_area: getRawField('surface_area', [
           MINISTRY_COLUMNS.powierzchnia,
           'area', 'powierzchnia', 'metraz'
-        ]),
-        status: getRawField('status', ['status_sprzedazy']),
+        ], true), // CONVERT TO NUMBER
+        status: getRawField('status', ['status_sprzedazy'], false),
 
         // Location details - MINISTRY EXACT COLUMNS FIRST
         wojewodztwo: getRawField('wojewodztwo', [
@@ -331,52 +347,52 @@ export async function generateAggregatedXML(developerId: string): Promise<string
         ]),
 
         // Building details - MINISTRY EXACT COLUMNS FIRST
-        budynek: getRawField('budynek', ['building', 'bud']),
+        budynek: getRawField('budynek', ['building', 'bud'], false),
         klatka: getRawField('klatka', [
           MINISTRY_COLUMNS.klatka,
           'klatka_schodowa'
-        ]),
+        ], false),
         kondygnacja: getRawField('kondygnacja', [
           MINISTRY_COLUMNS.kondygnacja,
           'pietro', 'floor'
-        ]),
-        liczba_kondygnacji: getRawField('liczba_kondygnacji', ['liczba_pieter']),
+        ], true), // CONVERT TO NUMBER
+        liczba_kondygnacji: getRawField('liczba_kondygnacji', ['liczba_pieter'], true), // CONVERT TO NUMBER
         liczba_pokoi: getRawField('liczba_pokoi', [
           MINISTRY_COLUMNS.liczba_pokoi,
           'rooms', 'pokoje'
-        ]),
+        ], true), // CONVERT TO NUMBER
         uklad_mieszkania: getRawField('uklad_mieszkania', ['uklad', 'layout']),
         stan_wykonczenia: getRawField('stan_wykonczenia', ['stan', 'wykończenie']),
         rok_budowy: getRawField('rok_budowy', ['rok']),
         technologia_budowy: getRawField('technologia_budowy', ['technologia']),
 
         // Surface areas (use fallback to aliases)
-        powierzchnia_uzytkowa: getRawField('powierzchnia_uzytkowa', ['powierzchnia', 'area', 'metraz']),
-        powierzchnia_calkowita: getRawField('powierzchnia_calkowita'),
-        powierzchnia_balkon: getRawField('powierzchnia_balkon', ['balkon']),
-        powierzchnia_taras: getRawField('powierzchnia_taras', ['taras']),
-        powierzchnia_loggia: getRawField('powierzchnia_loggia', ['loggia']),
-        powierzchnia_ogrod: getRawField('powierzchnia_ogrod', ['ogrod', 'ogród']),
-        powierzchnia_piwnicy: getRawField('powierzchnia_piwnicy', ['piwnica']),
-        powierzchnia_strychu: getRawField('powierzchnia_strychu', ['strych']),
+        powierzchnia_uzytkowa: getRawField('powierzchnia_uzytkowa', ['powierzchnia', 'area', 'metraz'], true), // CONVERT TO NUMBER
+        powierzchnia_calkowita: getRawField('powierzchnia_calkowita', [], true), // CONVERT TO NUMBER
+        powierzchnia_balkon: getRawField('powierzchnia_balkon', ['balkon'], true), // CONVERT TO NUMBER
+        powierzchnia_taras: getRawField('powierzchnia_taras', ['taras'], true), // CONVERT TO NUMBER
+        powierzchnia_loggia: getRawField('powierzchnia_loggia', ['loggia'], true), // CONVERT TO NUMBER
+        powierzchnia_ogrod: getRawField('powierzchnia_ogrod', ['ogrod', 'ogród'], true), // CONVERT TO NUMBER
+        powierzchnia_piwnicy: getRawField('powierzchnia_piwnicy', ['piwnica'], true), // CONVERT TO NUMBER
+        powierzchnia_strychu: getRawField('powierzchnia_strychu', ['strych'], true), // CONVERT TO NUMBER
 
         // Price details - MINISTRY EXACT COLUMNS FIRST
-        cena_za_m2_poczatkowa: getRawField('cena_za_m2_poczatkowa'),
-        cena_bazowa_poczatkowa: getRawField('cena_bazowa_poczatkowa'),
-        cena_finalna_poczatkowa: getRawField('cena_finalna_poczatkowa'),
-        data_pierwszej_oferty: getRawField('data_pierwszej_oferty'),
+        cena_za_m2_poczatkowa: getRawField('cena_za_m2_poczatkowa', [], true), // CONVERT TO NUMBER
+        cena_bazowa_poczatkowa: getRawField('cena_bazowa_poczatkowa', [], true), // CONVERT TO NUMBER
+        cena_finalna_poczatkowa: getRawField('cena_finalna_poczatkowa', [], true), // CONVERT TO NUMBER
+        data_pierwszej_oferty: getRawField('data_pierwszej_oferty', [], false),
         cena_za_m2_aktualna: getRawField('cena_za_m2_aktualna', [
           MINISTRY_COLUMNS.price_per_m2,
           'price_per_m2', 'cena_za_m2'
-        ]),
+        ], true), // CONVERT TO NUMBER
         cena_bazowa_aktualna: getRawField('cena_bazowa_aktualna', [
           MINISTRY_COLUMNS.total_price,
           'base_price', 'total_price', 'cena'
-        ]),
+        ], true), // CONVERT TO NUMBER
         cena_finalna_aktualna: getRawField('cena_finalna_aktualna', [
           MINISTRY_COLUMNS.total_price,
           'final_price'
-        ]),
+        ], true), // CONVERT TO NUMBER
         data_obowiazywania_ceny_od: getRawField('data_obowiazywania_ceny_od', [
           MINISTRY_COLUMNS.data_ceny_od
         ]),
