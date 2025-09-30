@@ -44,17 +44,54 @@ export function useAuth(): AuthState & AuthActions {
   // Load developer profile
   const loadDeveloperProfile = async (user: User) => {
     try {
-      const { data: developerData } = await supabase
+      console.log('🔍 USE-AUTH: Loading developer profile for user:', user.id)
+
+      const { data: developerData, error: queryError } = await supabase
         .from('developers')
         .select('*')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle() // Changed from .single() to avoid throwing when no profile exists
+
+      if (queryError) {
+        console.error('❌ USE-AUTH: Error querying developer profile:', queryError.message)
+        return
+      }
 
       if (developerData) {
+        console.log('✅ USE-AUTH: Developer profile found:', developerData.id)
         setDeveloper(developerData)
+      } else {
+        // Auto-create developer profile for existing users without one
+        console.log('⚠️ USE-AUTH: No developer profile found, creating one...')
+
+        const clientId = `dev_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        const companyName = user.email?.split('@')[0] || 'Developer'
+
+        const { data: newDeveloper, error: createError } = await supabase
+          .from('developers')
+          .insert({
+            user_id: user.id,
+            email: user.email || '',
+            company_name: companyName,
+            client_id: clientId,
+            subscription_plan: 'trial',
+            subscription_status: 'trial'
+          })
+          .select()
+          .single()
+
+        if (createError) {
+          console.error('❌ USE-AUTH: Error creating developer profile:', createError.message)
+          return
+        }
+
+        if (newDeveloper) {
+          console.log('✅ USE-AUTH: Developer profile created:', newDeveloper.id)
+          setDeveloper(newDeveloper)
+        }
       }
     } catch (error) {
-      console.error('Error loading developer profile:', error)
+      console.error('💥 USE-AUTH: Unexpected error loading developer profile:', error)
     }
   }
 

@@ -13,8 +13,7 @@ import {
 } from "../ui/dropdown-menu";
 import { OtoraportLogo } from "../icons/otoraport-logo";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 
 interface HeaderProps {
   showUserMenu?: boolean;
@@ -44,47 +43,7 @@ export function PublicHeader() {
 
 // Header for authenticated pages (with session)
 function AuthenticatedHeader() {
-  const [user, setUser] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
-
-  useEffect(() => {
-    async function getUser() {
-      try {
-        const supabase = createClient();
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-        if (userError) {
-          console.error('Failed to fetch user:', userError);
-          return;
-        }
-
-        setUser(user);
-
-        if (user) {
-          const { data: profile, error: profileError } = await supabase
-            .from('developers')
-            .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle(); // Use maybeSingle to avoid error when profile doesn't exist
-
-          if (profileError) {
-            console.error('Failed to fetch developer profile:', profileError);
-          } else if (profile) {
-            setUserProfile(profile);
-          }
-        }
-      } catch (error) {
-        console.error('Auth error:', error);
-      }
-    }
-
-    getUser();
-  }, []);
-
-  // Admin emails from environment variable
-  const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',').map(email => email.trim()) || [];
-
-  const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
+  const { user, developer, signOut, isAdmin } = useAuth();
 
   return (
     <header className="border-b bg-white px-4 py-4 lg:px-6">
@@ -227,11 +186,7 @@ function AuthenticatedHeader() {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-red-600 hover:bg-red-50 cursor-pointer"
-                onClick={async () => {
-                  const supabase = createClient();
-                  await supabase.auth.signOut();
-                  window.location.href = '/auth/signin';
-                }}
+                onClick={() => signOut()}
               >
                 Wyloguj się
               </DropdownMenuItem>
