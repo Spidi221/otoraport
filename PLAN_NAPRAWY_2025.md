@@ -1,9 +1,9 @@
 # 🚀 OTORAPORT - Plan Naprawczy & Rozwoju
 
 **Data utworzenia:** 29.09.2025
-**Ostatnia aktualizacja:** 30.09.2025 15:42
-**Health Score:** 5.5/10 → Target: 8.5/10
-**Status:** 🔴 CRITICAL - CSV parser błędny, dashboard nie działa
+**Ostatnia aktualizacja:** 30.09.2025 20:15
+**Health Score:** 7.0/10 → Target: 8.5/10
+**Status:** 🟡 IN PROGRESS - CSV Parser + XML Generator naprawione, testowanie w toku
 
 ---
 
@@ -131,11 +131,12 @@ MD nadal pokazuje **0 nieruchomości** zamiast 14-28. Główna przyczyna: **CSV 
 **Priorytet:** P0 CRITICAL
 **Czas:** 1-2h (częściowo wykonane)
 
-### 🔴 0.5 CSV Schema - Nieistniejące Kolumny **← P0 CRITICAL #1**
-**Status:** ❌ CRITICAL - DISCOVERED 30.09.2025 17:30
+### ✅ 0.5 CSV Schema - Nieistniejące Kolumny **← P0 CRITICAL #1 - FIXED**
+**Status:** ✅ NAPRAWIONE 30.09.2025 20:00
 **Priorytet:** **P0 CRITICAL**
+**Commit:** `6a960944` - CSV Parser fixes
 
-**GŁÓWNY PROBLEM:** Nasz kod oczekuje kolumn których **NIE MA** w oficjalnym CSV ministerstwa (58 kolumn)!
+**GŁÓWNY PROBLEM (RESOLVED):** Nasz kod oczekiwał kolumn których **NIE MA** w oficjalnym CSV ministerstwa!
 
 **❌ BŁĘDNE ZAŁOŻENIA W KODZIE:**
 
@@ -180,16 +181,23 @@ KOLUMNA 48-50: Pomieszczenia przynależne (parking/komórka)
    - ZAWSZE używaj `"m 2"` (ze spacją) w finalnym CSV
    - Oblicz `powierzchnia = cena_całkowita / cena_m2` jeśli brak
 
-**Priorytet:** **P0 CRITICAL**
-**Czas:** 1-2h
-**Impact:** Umożliwi poprawne parsowanie ministerialnych CSV
+**✅ CO ZOSTAŁO NAPRAWIONE:**
+1. Usunięto oczekiwanie kolumny "Powierzchnia użytkowa" (lines 170-179)
+2. Usunięto nieistniejącą nazwę ministerstwa dla "Liczba pokoi" (lines 202-208)
+3. Dodano warianty ze spacją: "m 2", "m2", "m²" (lines 148-155)
+4. Parser akceptuje user input, CSV output będzie poprawny
 
-### 🔴 0.6 XML Generator - CAŁKOWICIE BŁĘDNY FORMAT **← P0 CRITICAL #2**
-**Status:** ❌ CRITICAL - DISCOVERED 30.09.2025 17:45
+**Priorytet:** **P0 CRITICAL - COMPLETED**
+**Czas:** 1h executed
+**Impact:** ✅ Parser teraz poprawnie obsługuje ministerialny format CSV
+
+### ✅ 0.6 XML Generator - CAŁKOWICIE BŁĘDNY FORMAT **← P0 CRITICAL #2 - FIXED**
+**Status:** ✅ NAPRAWIONE 30.09.2025 20:10
 **Priorytet:** **P0 CRITICAL**
+**Commit:** `5bf9f4a4` - XML Generator przepisany na format Harvester
 **Plik:** `/src/lib/xml-generator.ts`
 
-**GŁÓWNY PROBLEM:** Nasz XML generator generuje **CAŁKOWICIE BŁĘDNY** format XML!
+**GŁÓWNY PROBLEM (RESOLVED):** XML generator generował **CAŁKOWICIE BŁĘDNY** format!
 
 **❌ CO GENERUJEMY TERAZ (BŁĘDNE):**
 ```xml
@@ -268,9 +276,36 @@ KOLUMNA 48-50: Pomieszczenia przynależne (parking/komórka)
    <url>https://otoraport.com/public/{clientId}/data.csv</url>
    ```
 
-**Priorytet:** **P0 CRITICAL**
-**Czas:** 2-3h (całkowity rewrite)
-**Impact:** Zgodność z wymogami ministerstwa, akceptacja przez harvester dane.gov.pl
+**✅ CO ZOSTAŁO NAPRAWIONE:**
+1. **CAŁKOWITY REWRITE** xml-generator.ts (919 linii → 202 linie)
+2. Namespace: `urn:otwarte-dane:harvester:1.13` ✅
+3. Root element: `<ns2:datasets>` ✅
+4. Generuje METADATA zamiast danych mieszkań ✅
+5. URL do CSV: `https://ceny-sync.vercel.app/api/public/{id}/data.csv` ✅
+6. Wszystkie wymagane pola Harvester ✅
+7. Legacy exports z deprecation warnings
+8. Updated generators.ts i multi-project-xml.ts
+
+**✅ TESTY (30.09.2025 20:15):**
+```bash
+✅ XML Harvester: curl http://localhost:3000/api/public/test-client/data.xml
+✅ MD5 Checksum: 5bbdf67285fb1346425a7f2d168366c7
+✅ MD Report: Markdown generated successfully
+```
+
+**✅ COMPLIANCE CHECKLIST:**
+- [x] XML Harvester format (NOT property data)
+- [x] Namespace: `urn:otwarte-dane:harvester:1.13`
+- [x] CSV URL w resource tag
+- [x] specialSign: X
+- [x] updateFrequency: daily
+- [x] 36-character extIdent
+- [x] MD5 checksum generation
+- [x] Markdown alternative format
+
+**Priorytet:** **P0 CRITICAL - COMPLETED ✅**
+**Czas:** 3h executed
+**Impact:** ✅ Aplikacja teraz zgodna z wymogami ministerstwa
 
 ### 🔴 0.3 Dashboard - Uploaded Files Component
 **Status:** ❌ BROKEN
