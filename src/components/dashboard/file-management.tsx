@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Trash2, RefreshCw, FileText, Calendar, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import {
   Table,
   TableBody,
@@ -93,13 +94,13 @@ export function FileManagement() {
       if (data.success) {
         // Remove file from list
         setFiles(files.filter(f => f.id !== fileToDelete))
-        alert('✅ ' + data.message)
+        toast.success(data.message)
       } else {
-        alert('❌ Błąd: ' + data.error)
+        toast.error('Błąd: ' + data.error)
       }
     } catch (error) {
       console.error('Error deleting file:', error)
-      alert('❌ Nie udało się usunąć pliku')
+      toast.error('Nie udało się usunąć pliku')
     } finally {
       setActionLoading(null)
       setDeleteDialogOpen(false)
@@ -123,15 +124,15 @@ export function FileManagement() {
       const data = await response.json()
 
       if (data.success) {
-        alert('✅ ' + data.message)
+        toast.success(data.message)
         // Refresh files list
         await fetchFiles()
       } else {
-        alert('❌ Błąd: ' + data.error)
+        toast.error('Błąd: ' + data.error)
       }
     } catch (error) {
       console.error('Error reprocessing file:', error)
-      alert('❌ Nie udało się ponownie przetworzyć pliku')
+      toast.error('Nie udało się ponownie przetworzyć pliku')
     } finally {
       setActionLoading(null)
     }

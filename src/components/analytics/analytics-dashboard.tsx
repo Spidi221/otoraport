@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  BarChart3, 
-  PieChart, 
+import {
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  PieChart,
   Target,
   Download,
   Eye,
@@ -19,6 +19,7 @@ import {
   Award
 } from 'lucide-react'
 import { PriceAnalytics, MarketTrend, PropertyTypeBreakdown, ProjectPerformance, CompetitorAnalysis } from '@/lib/analytics'
+import { toast } from 'sonner'
 
 interface AnalyticsDashboardProps {
   developerId: string
@@ -80,7 +81,7 @@ export default function AnalyticsDashboard({ developerId }: AnalyticsDashboardPr
       const result = await response.json()
       if (result.success) {
         // In production, would trigger download
-        alert(`Raport ${format.toUpperCase()} zostanie wygenerowany za chwilę`)
+        toast.success(`Raport ${format.toUpperCase()} zostanie wygenerowany za chwilę`)
       }
     } catch (error) {
       console.error('Export failed:', error)

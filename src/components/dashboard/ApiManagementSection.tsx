@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Key, Plus, Trash2, Eye, EyeOff, Copy, Check, Activity, Webhook, AlertTriangle, BarChart3 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ApiKey {
   id: string;
@@ -102,11 +103,11 @@ export function ApiManagementSection() {
         await loadApiKeys();
         setShowNewKeyForm(false);
       } else {
-        alert(result.error);
+        toast.error(result.error);
       }
     } catch (error) {
       console.error('Error creating API key:', error);
-      alert('Failed to create API key');
+      toast.error('Failed to create API key');
     } finally {
       setIsLoading(false);
     }
@@ -126,11 +127,11 @@ export function ApiManagementSection() {
       if (result.success) {
         await loadApiKeys();
       } else {
-        alert(result.error);
+        toast.error(result.error);
       }
     } catch (error) {
       console.error('Error deleting API key:', error);
-      alert('Failed to delete API key');
+      toast.error('Failed to delete API key');
     }
   };
 
@@ -148,11 +149,11 @@ export function ApiManagementSection() {
         await loadWebhooks();
         setShowNewWebhookForm(false);
       } else {
-        alert(result.error);
+        toast.error(result.error);
       }
     } catch (error) {
       console.error('Error creating webhook:', error);
-      alert('Failed to create webhook');
+      toast.error('Failed to create webhook');
     } finally {
       setIsLoading(false);
     }

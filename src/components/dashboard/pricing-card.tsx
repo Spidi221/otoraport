@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Check, Loader2, CreditCard, Zap, Shield, Clock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface PricingPlan {
   id: 'basic' | 'pro' | 'enterprise'
@@ -121,7 +122,7 @@ export function PricingCard() {
 
     } catch (error) {
       console.error('Payment error:', error)
-      alert(error instanceof Error ? error.message : 'Wystąpił błąd podczas płatności')
+      toast.error(error instanceof Error ? error.message : 'Wystąpił błąd podczas płatności')
     } finally {
       setProcessing(null)
     }

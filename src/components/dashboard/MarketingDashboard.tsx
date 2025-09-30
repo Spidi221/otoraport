@@ -20,6 +20,7 @@ import {
   Search,
   Calendar
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface MarketingMetrics {
   total_contacts: number;
@@ -127,12 +128,12 @@ export default function MarketingDashboard() {
 
   const createCampaign = () => {
     // Implementation would open campaign creation modal
-    alert('Campaign creation modal would open here');
+    toast.warning('Campaign creation modal would open here');
   };
 
   const createWorkflow = () => {
     // Implementation would open workflow creation modal
-    alert('Workflow creation modal would open here');
+    toast.warning('Workflow creation modal would open here');
   };
 
   if (loading) {

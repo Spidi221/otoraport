@@ -80,7 +80,7 @@ export function ActionButtons() {
       })
       
       if (response.ok) {
-        alert('Powiadomienie wysłane do ministerstwa!')
+        toast.success('Powiadomienie wysłane do ministerstwa!')
       }
     } catch (error) {
       console.error('Error notifying ministry:', error)

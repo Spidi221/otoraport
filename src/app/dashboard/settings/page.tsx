@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Building2, User, Bell, Shield } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
@@ -59,10 +60,10 @@ export default function SettingsPage() {
 
       if (error) throw error
 
-      alert('Ustawienia zostały zapisane')
+      toast.success('Ustawienia zostały zapisane')
     } catch (error) {
       console.error('Error saving settings:', error)
-      alert('Błąd podczas zapisywania ustawień')
+      toast.error('Błąd podczas zapisywania ustawień')
     } finally {
       setSaving(false)
     }

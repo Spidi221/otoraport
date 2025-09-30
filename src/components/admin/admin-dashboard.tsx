@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  Users, 
-  Building2, 
-  DollarSign, 
+import {
+  Users,
+  Building2,
+  DollarSign,
   AlertTriangle,
   CheckCircle,
   XCircle,
@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { pl } from 'date-fns/locale'
+import { toast } from 'sonner'
 
 interface AdminDashboardProps {
   adminEmail: string
@@ -119,7 +120,7 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
 
       if (response.ok) {
         const result = await response.json()
-        alert(`Cleanup completed: ${result.data.expiredTrials} trials expired, ${result.data.oldLogs} logs removed`)
+        toast.success(`Cleanup completed: ${result.data.expiredTrials} trials expired, ${result.data.oldLogs} logs removed`)
         loadData()
       }
     } catch (error) {
