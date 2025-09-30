@@ -145,7 +145,7 @@ function AuthenticatedHeader() {
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10">
                   <AvatarFallback>
-                    {userProfile?.company_name ? userProfile.company_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || 'U'}
+                    {developer?.company_name ? developer.company_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -153,10 +153,10 @@ function AuthenticatedHeader() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <div className="flex flex-col space-y-1 p-2">
                 <p className="text-sm leading-none">
-                  {userProfile?.company_name || userProfile?.name || 'Ładowanie...'}
+                  {developer?.company_name || developer?.name || 'Ładowanie...'}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email || userProfile?.email || 'Ładowanie...'}
+                  {user?.email || developer?.email || 'Ładowanie...'}
                 </p>
               </div>
               <DropdownMenuSeparator />
