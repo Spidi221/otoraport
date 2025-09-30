@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -61,17 +63,13 @@ export default function NotFound() {
 
           {/* Back Button */}
           <div className="text-center pt-4">
-            <Link
-              href="javascript:history.back()"
+            <button
+              onClick={() => window.history.back()}
               className="text-sm text-gray-600 hover:text-gray-800 inline-flex items-center"
-              onClick={(e) => {
-                e.preventDefault()
-                window.history.back()
-              }}
             >
               <ArrowLeft className="w-3 h-3 mr-1" />
               Wróć do poprzedniej strony
-            </Link>
+            </button>
           </div>
 
           {/* Support Contact */}
