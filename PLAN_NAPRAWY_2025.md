@@ -53,16 +53,22 @@
 - ❌ BŁĄD: `"area"`, `"powierzchnia"`, `"metraz"`
 - ✅ POPRAWNIE: `"Powierzchnia użytkowa lokalu mieszkalnego lub powierzchnia domu jednorodzinnego [m2]"`
 
-**Pełna lista kluczowych kolumn:**
+**Pełna lista kluczowych kolumn (ZWERYFIKOWANE Z OFICJALNEGO CSV):**
 ```
-"Nr lokalu lub domu jednorodzinnego nadany przez dewelopera"
-"Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]"
-"Cena lokalu mieszkalnego lub domu jednorodzinnego [zł]"
-"Powierzchnia użytkowa lokalu mieszkalnego lub powierzchnia domu jednorodzinnego [m2]"
-"Województwo - Lokalizacja Inwestycji mieszkaniowej"
-"Liczba pokoi w lokalu mieszkalnym lub domu jednorodzinnym"
-"Nr przypisanego miejsca parkingowego / garażu [1]"
-"Cena przypisanego miejsca parkingowego / garażu [1]"
+KOLUMNA 37: "Nr lokalu lub domu jednorodzinnego nadany przez dewelopera"
+KOLUMNA 38: "Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]"
+            ⚠️ UWAGA: SPACJA między "m" i "2", NIE "m2"!
+KOLUMNA 40: "Cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]"
+KOLUMNA 29: "Województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego"
+KOLUMNA 30: "Powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego"
+KOLUMNA 31: "Gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego"
+KOLUMNA 48: "Rodzaj pomieszczeń przynależnych, o których mowa w art. 2 ust. 4 ustawy z dnia 24 czerwca 1994 r. o własności lokali"
+KOLUMNA 49: "Oznaczenie pomieszczeń przynależnych, o których mowa w art. 2 ust. 4 ustawy z dnia 24 czerwca 1994 r. o własności lokali"
+KOLUMNA 50: "Wyszczególnienie cen pomieszczeń przynależnych, o których mowa w art. 2 ust. 4 ustawy z dnia 24 czerwca 1994 r. o własności lokali [zł]"
+
+❌ KOLUMNY KTÓRYCH **NIE MA** W OFICJALNYM CSV:
+- "Powierzchnia użytkowa..." - TRZEBA OBLICZYĆ: powierzchnia = cena_całkowita / cena_za_m2
+- "Liczba pokoi" - NIE ISTNIEJE w schemacie ministerstwa
 ```
 
 ### 🔤 **Special Sign "X"**
@@ -76,15 +82,26 @@ if (typeof value === 'string' && value.trim().toLowerCase() === 'x') {
 }
 ```
 
-### ✅ **Compliance Checklist dla Kodu**
+### ❌ **Compliance Checklist dla Kodu - KRYTYCZNE BŁĘDY!**
 
-- [x] XML używa namespace `urn:otwarte-dane:harvester:1.13`
-- [x] `status="published"` na dataset i resource
-- [x] `updateFrequency="daily"`
-- [x] `categories` zawiera `ECON`
-- [x] `hasDynamicData=false`, `hasHighValueData=true`
-- [x] Special sign "X" obsłużony jako SOLD/N/A
-- [ ] CSV parser mapuje na POPRAWNE kolumny (❌ **OBECNIE BŁĘDNE** - P0 CRITICAL)
+**🚨 XML GENERATOR CAŁKOWICIE NIEZGODNY Z WYMOGAMI MINISTERSTWA:**
+
+- [ ] ❌ XML używa namespace `urn:otwarte-dane:harvester:1.13`
+      **OBECNIE:** `urn:otwarte-dane:mieszkania:1.13` (BŁĘDNE!)
+- [ ] ❌ `status="published"` na dataset i resource (BRAK!)
+- [ ] ❌ `updateFrequency="daily"` (BRAK!)
+- [ ] ❌ `categories` zawiera `ECON` (BRAK!)
+- [ ] ❌ `hasDynamicData=false`, `hasHighValueData=true` (BRAK!)
+- [x] ✅ Special sign "X" obsłużony jako SOLD/N/A
+- [ ] ❌ CSV parser mapuje na POPRAWNE kolumny (P0 CRITICAL)
+
+**GŁÓWNY PROBLEM:** Nasz XML generator (/src/lib/xml-generator.ts) generuje:
+- ❌ `<dane_o_cenach_mieszkan>` z danymi mieszkań
+- ✅ Powinien generować: `<ns2:datasets>` z metadata o zbiorze CSV
+
+**WYMOGI MINISTERSTWA:**
+1. XML Harvester (metadata) → wskazuje na plik CSV
+2. Plik CSV (58 kolumn) → zawiera dane mieszkań
 
 ---
 
@@ -114,54 +131,146 @@ MD nadal pokazuje **0 nieruchomości** zamiast 14-28. Główna przyczyna: **CSV 
 **Priorytet:** P0 CRITICAL
 **Czas:** 1-2h (częściowo wykonane)
 
-### 🔴 0.5 CSV Parser - Błędne Mapowanie Kolumn **← ABSOLUTNY PRIORYTET**
-**Status:** ❌ CRITICAL BUG IDENTIFIED 30.09.2025 15:40
-**Priorytet:** **P0 CRITICAL** - To jest **główna przyczyna** wszystkich problemów z danymi!
+### 🔴 0.5 CSV Schema - Nieistniejące Kolumny **← P0 CRITICAL #1**
+**Status:** ❌ CRITICAL - DISCOVERED 30.09.2025 17:30
+**Priorytet:** **P0 CRITICAL**
 
-**Problem:**
-Upload API (`/src/app/api/upload/route.ts`) mapuje kolumny CSV na **NIEPOPRAWNE** pola ministerstwa.
+**GŁÓWNY PROBLEM:** Nasz kod oczekuje kolumn których **NIE MA** w oficjalnym CSV ministerstwa (58 kolumn)!
 
-**Dowód błędnego mapowania:**
-```javascript
-// ❌ OBECNIE W KODZIE (BŁĘDNE):
-const FIELD_MAPPING = {
-  "area": "Powiat adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera"
-  // ^ To jest POWIAT (county), nie powierzchnia (area)!
-}
+**❌ BŁĘDNE ZAŁOŻENIA W KODZIE:**
 
-// ✅ POWINNO BYĆ (zgodnie z dokumentacją ministerstwa):
-const FIELD_MAPPING = {
-  "area": "Powierzchnia użytkowa lokalu mieszkalnego lub powierzchnia domu jednorodzinnego [m2]",
-  "property_number": "Nr lokalu lub domu jednorodzinnego nadany przez dewelopera",
-  "price_per_m2": "Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]",
-  "total_price": "Cena lokalu mieszkalnego lub domu jednorodzinnego [zł]",
-  "rooms": "Liczba pokoi w lokalu mieszkalnym lub domu jednorodzinnym",
-  "parking_nr": "Nr przypisanego miejsca parkingowego / garażu [1]",
-  "parking_price": "Cena przypisanego miejsca parkingowego / garażu [1]"
-}
+1. **Kolumna "Powierzchnia użytkowa..."** - **NIE ISTNIEJE!**
+   - Nasz kod szuka: `"Powierzchnia użytkowa lokalu mieszkalnego..."`
+   - Ministerstwo: **BRAK takiej kolumny**
+   - Rozwiązanie: Oblicz `powierzchnia = kolumna_40 / kolumna_38`
+
+2. **Kolumna "Liczba pokoi"** - **NIE ISTNIEJE!**
+   - Nasz kod szuka: `"Liczba pokoi w lokalu mieszkalnym..."`
+   - Ministerstwo: **BRAK w schemacie 58 kolumn**
+   - Rozwiązanie: Pole opcjonalne, użytkownik może mieć w swoim CSV
+
+3. **Spacja w "m 2"** - **WYMAGA OBSŁUGI OBU WARIANTÓW**
+   - Ministerstwo oficjalnie: `"Cena m 2 powierzchni..."` (ze spacją)
+   - Użytkownicy mogą mieć: `"m2"` lub `"m 2"`
+   - Rozwiązanie: Parser musi akceptować oba, CSV output musi mieć `"m 2"` (ze spacją)
+
+**AKTUALNY STAN (BŁĘDNY):**
+```typescript
+// smart-csv-parser.ts szuka kolumn których nie ma:
+area: ['powierzchnia użytkowa lokalu...'] // ❌ NIE ISTNIEJE
+liczba_pokoi: ['liczba pokoi w lokalu...'] // ❌ NIE ISTNIEJE
+price_per_m2: ['cena m2...'] // ⚠️ Brak wariantu ze spacją
 ```
 
-**Konsekwencja:**
-1. CSV parser zapisuje do `raw_data.area` wartość `"wejherowski"` (nazwa powiatu)
-2. MD generator: `parseFloat("wejherowski")` → `NaN` → `0`
-3. Filtr: `validProperties.filter(p => p.area > 0)` → usuwa WSZYSTKO
-4. **Wynik:** MD pokazuje 0 nieruchomości mimo 21 w bazie
-
-**Impact:**
-- ❌ MD generator pokazuje 0 properties (powinno być 14-28)
-- ❌ Properties table na dashboardzie pusty
-- ❌ XML generator prawdopodobnie też niepoprawny
-- ❌ Dane ministerstwa NIEZGODNE z przepisami
+**POPRAWNE KOLUMNY MINISTERSTWA:**
+```
+KOLUMNA 37: "Nr lokalu lub domu jednorodzinnego nadany przez dewelopera"
+KOLUMNA 38: "Cena m 2 powierzchni użytkowej..." [zł]  ⚠️ SPACJA!
+KOLUMNA 40: "Cena lokalu... stanowiąca iloczyn ceny m2 oraz powierzchni [zł]"
+KOLUMNA 48-50: Pomieszczenia przynależne (parking/komórka)
+```
 
 **Rozwiązanie:**
-1. Znaleźć `FIELD_MAPPING` w `/src/app/api/upload/route.ts`
-2. Zamienić na **PEŁNE nazwy kolumn z dokumentacji ministerstwa**
-3. Użyć `MINISTRY_COLUMNS` z `/src/lib/md-generator.ts` jako źródła prawdy
-4. Cleanup bazy + re-upload CSV
+1. `/src/lib/smart-csv-parser.ts`:
+   - Usunąć oczekiwanie kolumny "Powierzchnia" (obliczyć zamiast czytać)
+   - Dodać warianty: `"m2"`, `"m 2"`, `"m²"` do price_per_m2
+   - Liczba_pokoi → opcjonalna (user może mieć w swoim CSV)
+
+2. Generator CSV output:
+   - ZAWSZE używaj `"m 2"` (ze spacją) w finalnym CSV
+   - Oblicz `powierzchnia = cena_całkowita / cena_m2` jeśli brak
 
 **Priorytet:** **P0 CRITICAL**
-**Czas:** 30min-1h
-**Impact:** Całkowita naprawa generowania danych ministerstwa
+**Czas:** 1-2h
+**Impact:** Umożliwi poprawne parsowanie ministerialnych CSV
+
+### 🔴 0.6 XML Generator - CAŁKOWICIE BŁĘDNY FORMAT **← P0 CRITICAL #2**
+**Status:** ❌ CRITICAL - DISCOVERED 30.09.2025 17:45
+**Priorytet:** **P0 CRITICAL**
+**Plik:** `/src/lib/xml-generator.ts`
+
+**GŁÓWNY PROBLEM:** Nasz XML generator generuje **CAŁKOWICIE BŁĘDNY** format XML!
+
+**❌ CO GENERUJEMY TERAZ (BŁĘDNE):**
+```xml
+<dane_o_cenach_mieszkan xmlns="urn:otwarte-dane:mieszkania:1.13">
+  <informacje_podstawowe>
+    <dostawca_danych>...</dostawca_danych>
+  </informacje_podstawowe>
+  <lokale>
+    <lokal>
+      <numer_lokalu>A1</numer_lokalu>
+      <powierzchnia_uzytkowa>50.5</powierzchnia_uzytkowa>
+      <!-- ... dane mieszkań ... -->
+    </lokal>
+  </lokale>
+</dane_o_cenach_mieszkan>
+```
+
+**✅ CO WYMAGA MINISTERSTWO (POPRAWNE):**
+```xml
+<?xml version='1.0' encoding='UTF-8'?>
+<ns2:datasets xmlns:ns2="urn:otwarte-dane:harvester:1.13">
+  <dataset status="published">
+    <extIdent>36_znakowy_id_dewelopera</extIdent>
+    <title>
+      <polish>Ceny ofertowe mieszkań dewelopera {nazwa} w 2025 r.</polish>
+      <english>Offer prices...</english>
+    </title>
+    <updateFrequency>daily</updateFrequency>
+    <hasDynamicData>false</hasDynamicData>
+    <hasHighValueData>true</hasHighValueData>
+    <categories><category>ECON</category></categories>
+    <resources>
+      <resource status="published">
+        <url>https://deweloper.com/Ceny-YYYY-MM-DD.csv</url>
+        <availability>local</availability>
+        <dataDate>YYYY-MM-DD</dataDate>
+        <specialSigns><specialSign>X</specialSign></specialSigns>
+      </resource>
+    </resources>
+  </dataset>
+</ns2:datasets>
+```
+
+**KLUCZOWE RÓŻNICE:**
+
+1. **Namespace:**
+   - ❌ Używamy: `urn:otwarte-dane:mieszkania:1.13`
+   - ✅ Powinno być: `urn:otwarte-dane:harvester:1.13`
+
+2. **Root element:**
+   - ❌ Używamy: `<dane_o_cenach_mieszkan>`
+   - ✅ Powinno być: `<ns2:datasets>`
+
+3. **Zawartość:**
+   - ❌ Generujemy: XML z danymi mieszkań (powierzchnie, ceny, lokalizacje)
+   - ✅ Powinno być: XML metadata wskazujący na plik CSV
+
+**MINISTERSTWO WYMAGA:**
+- XML Harvester = METADATA o zbiorze danych (wskazuje na CSV)
+- Plik CSV = DANE o mieszkaniach (58 kolumn)
+
+**Rozwiązanie:**
+1. PRZEPISAĆ `/src/lib/xml-generator.ts` na format Harvester:
+   - Namespace: `urn:otwarte-dane:harvester:1.13`
+   - Root: `<ns2:datasets>`
+   - Zawartość: metadata + URL do CSV
+   - Wymagane pola: extIdent, title (PL+EN), updateFrequency, categories, resources
+
+2. DODAĆ generator CSV output:
+   - Plik CSV z 58 kolumnami ministerstwa
+   - Nazwa: `Ceny-ofertowe-mieszkan-{deweloper}-{YYYY-MM-DD}.csv`
+   - URL dostępny publicznie dla harvester
+
+3. XML wskazuje na CSV:
+   ```xml
+   <url>https://otoraport.com/public/{clientId}/data.csv</url>
+   ```
+
+**Priorytet:** **P0 CRITICAL**
+**Czas:** 2-3h (całkowity rewrite)
+**Impact:** Zgodność z wymogami ministerstwa, akceptacja przez harvester dane.gov.pl
 
 ### 🔴 0.3 Dashboard - Uploaded Files Component
 **Status:** ❌ BROKEN
