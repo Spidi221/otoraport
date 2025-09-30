@@ -147,8 +147,9 @@ const COLUMN_PATTERNS: ColumnMapping = {
   // Prices
   price_per_m2: [
     'cena za m²', 'cena za m2', 'cena m2', 'cena m²', 'cena/m2', 'cena/m²',
+    'cena za m 2', 'cena m 2', 'cena/m 2', // warianty ze spacją
     'price_per_m2', 'price_per_sqm', 'cena_za_m2', 'cena_m2', 'cena za metr',
-    // MINISTRY OFFICIAL NAMES:
+    // MINISTRY OFFICIAL NAMES (ze spacją!):
     'cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]',
     'cena metra kwadratowego powierzchni użytkowej'
   ],
@@ -168,12 +169,14 @@ const COLUMN_PATTERNS: ColumnMapping = {
   ],
 
   // Areas and spaces
+  // ⚠️ UWAGA: Ministerstwo NIE MA kolumny "Powierzchnia" w CSV!
+  // Powierzchnia obliczana: area = total_price / price_per_m2 (kolumna 40 / kolumna 38)
+  // Parser akceptuje surface area TYLKO jeśli user ma ją w swoim CSV
   area: [
     'powierzchnia', 'powierzchnia użytkowa', 'powierzchnia m²', 'powierzchnia m2',
-    'area', 'size', 'metraż', 'pow', 'powierzchnia_uzytkowa', 'm2', 'm²',
-    // MINISTRY OFFICIAL NAMES:
-    'powierzchnia użytkowa lokalu mieszkalnego lub powierzchnia domu jednorodzinnego [m2]',
-    'powierzchnia lokalu mieszkalnego lub domu jednorodzinnego'
+    'area', 'size', 'metraż', 'pow', 'powierzchnia_uzytkowa', 'm2', 'm²'
+    // ❌ USUNIĘTO nieistniejące oficjalne nazwy ministerstwa
+    // Ministerstwo: kolumna NIE ISTNIEJE, trzeba obliczyć!
   ],
   powierzchnia_balkon: [
     'balkon', 'powierzchnia balkonu', 'balcony', 'powierzchnia_balkon',
@@ -199,9 +202,10 @@ const COLUMN_PATTERNS: ColumnMapping = {
   ],
   liczba_pokoi: [
     'pokoje', 'liczba pokoi', 'rooms', 'liczba_pokoi', 'ilosc_pokoi',
-    'nr pokoi', 'rooms_count', 'pokoi',
-    // MINISTRY OFFICIAL NAMES:
-    'liczba pokoi w lokalu mieszkalnym lub domu jednorodzinnym'
+    'nr pokoi', 'rooms_count', 'pokoi'
+    // ❌ USUNIĘTO nieistniejącą nazwę ministerstwa
+    // Ministerstwo: kolumna "Liczba pokoi" NIE ISTNIEJE w schemacie 58 kolumn!
+    // Parser akceptuje rooms TYLKO jeśli user ma tę kolumnę w swoim CSV
   ],
   
   // Location fields
