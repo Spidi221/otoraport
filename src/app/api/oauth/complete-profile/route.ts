@@ -125,6 +125,19 @@ export async function POST(request: NextRequest) {
         })
     }
 
+    // 📧 SEND MINISTRY EMAIL TEMPLATE (asynchronously, don't block response)
+    // This sends the developer a ready-to-copy email for the ministry
+    fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/ministry-email-template`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ developerId })
+    }).catch(error => {
+      console.error('Failed to send ministry template email:', error)
+      // Don't fail the profile update if email fails
+    })
+
+    console.log('✅ Profile updated, ministry template email queued for:', auth.user.email)
+
     return NextResponse.json({
       success: true,
       message: isUpdate ? 'Profile updated successfully' : 'Profile completed successfully',

@@ -140,12 +140,12 @@ Email wygenerowany automatycznie: ${new Date().toLocaleString('pl-PL')}
   };
 }
 
-// Template dla dewelopera - potwierdzenie rejestracji
+// Template dla dewelopera - prosty email powitalny (BEZ URLi - te będą w kolejnym mailu)
 export function generateDeveloperWelcomeEmail(developer: Developer): EmailTemplate {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://ceny-sync.vercel.app';
-  
+
   return {
-    subject: `Witamy w OTORAPORT - Twoje dane zostały przesłane do ministerstwa`,
+    subject: `Witamy w OTORAPORT - Rejestracja przebiegła pomyślnie!`,
     
     html: `
 <!DOCTYPE html>
@@ -168,40 +168,40 @@ export function generateDeveloperWelcomeEmail(developer: Developer): EmailTempla
     <h1>🎉 Witamy w OTORAPORT!</h1>
     <p>Automatyzacja raportowania cen nieruchomości</p>
   </div>
-  
+
   <div class="content">
-    <h2>Dziękujemy ${developer.name}!</h2>
-    
+    <h2>Rejestracja przebiegła pomyślnie!</h2>
+
     <div class="success-box">
-      <h3>✅ Rejestracja zakończona pomyślnie</h3>
-      <p>Firma <strong>${developer.company_name}</strong> została zarejestrowana w systemie OTORAPORT. Twoje dane zostały automatycznie przesłane do właściwego organu ministerialnego.</p>
+      <h3>✅ Twoje konto zostało utworzone</h3>
+      <p>Witaj <strong>${developer.name}</strong>! Cieszymy się, że dołączyłeś do OTORAPORT.</p>
     </div>
-    
-    <div class="info-box">
-      <h3>📊 Twoje publiczne endpointy:</h3>
-      <p>Dane Twojej firmy są teraz dostępne pod stałymi adresami URL:</p>
-      <ul>
-        <li><strong>XML:</strong> <code>${baseUrl}/api/public/${developer.id}/data.xml</code></li>
-        <li><strong>Markdown:</strong> <code>${baseUrl}/api/public/${developer.id}/data.md</code></li>
-      </ul>
-      <p>Te adresy automatycznie aktualizują się przy każdej zmianie Twoich danych cenowych.</p>
-    </div>
-    
+
     <div class="next-steps">
-      <h3>🚀 Następne kroki:</h3>
+      <h3>🚀 Co dalej?</h3>
       <ol>
-        <li><strong>Oczekiwanie na potwierdzenie:</strong> Ministerstwo otrzymało powiadomienie o Twojej rejestracji</li>
-        <li><strong>Upload cennika:</strong> Przejdź do dashboardu i prześlij swój pierwszy cennik</li>
-        <li><strong>Automatyczna aktualizacja:</strong> System będzie automatycznie generować raporty</li>
-        <li><strong>Zgodność z prawem:</strong> Twoja firma jest teraz compliance z wymaganiami ustawy</li>
+        <li><strong>Uzupełnij dane firmy:</strong> Przejdź do ustawień i dodaj pełne dane swojej firmy (NIP, adres, telefon)</li>
+        <li><strong>Prześlij pierwszy cennik:</strong> Upload pliku CSV/Excel z ofertą mieszkań</li>
+        <li><strong>Otrzymasz gotowy email:</strong> Po uzupełnieniu danych wyślemy Ci gotową wiadomość do skopiowania i wysłania do ministerstwa</li>
+        <li><strong>Gotowe!</strong> Twoja firma będzie compliance z wymaganiami ustawy</li>
       </ol>
     </div>
-    
+
     <div style="text-align: center; margin: 30px 0;">
       <a href="${baseUrl}/dashboard" class="btn">🏠 Przejdź do Dashboardu</a>
-      <a href="${baseUrl}/upload" class="btn">📁 Prześlij Cennik</a>
+      <a href="${baseUrl}/settings" class="btn">⚙️ Uzupełnij Dane Firmy</a>
     </div>
-    
+
+    <div class="info-box">
+      <h3>💡 Informacja</h3>
+      <p><strong>Gdy uzupełnisz dane firmy</strong>, system automatycznie wygeneruje dla Ciebie:</p>
+      <ul>
+        <li>📧 Gotową wiadomość email do ministerstwa (do skopiowania i wysłania)</li>
+        <li>🔗 Unikalne adresy URL z Twoimi danymi (XML, CSV, MD)</li>
+        <li>📊 Automatycznie aktualizowane raporty cenowe</li>
+      </ul>
+    </div>
+
     <div class="info-box">
       <h3>📞 Potrzebujesz pomocy?</h3>
       <p>W razie pytań jesteśmy do Twojej dyspozycji:</p>
@@ -209,13 +209,12 @@ export function generateDeveloperWelcomeEmail(developer: Developer): EmailTempla
         <li>📧 Email: support@otoraport.pl</li>
         <li>📱 Telefon: +48 800 123 456</li>
         <li>📚 Dokumentacja: <a href="${baseUrl}/docs">otoraport.pl/docs</a></li>
-        <li>💬 Chat na stronie: <a href="${baseUrl}">otoraport.pl</a></li>
       </ul>
     </div>
-    
-    <p>Dziękujemy za wybór OTORAPORT - razem dbamy o przejrzystość rynku nieruchomości! 🏡</p>
+
+    <p>Dziękujemy za wybór OTORAPORT! 🏡</p>
   </div>
-  
+
   <div class="footer">
     <p>© ${new Date().getFullYear()} OTORAPORT - System automatyzacji raportowania cen nieruchomości</p>
     <p>Ten email został wygenerowany automatycznie po Twojej rejestracji</p>
@@ -227,33 +226,31 @@ export function generateDeveloperWelcomeEmail(developer: Developer): EmailTempla
     text: `
 OTORAPORT - Witamy w systemie!
 
-Dziękujemy ${developer.name}!
+REJESTRACJA PRZEBIEGŁA POMYŚLNIE
 
-REJESTRACJA ZAKOŃCZONA POMYŚLNIE
-Firma ${developer.company_name} została zarejestrowana w systemie OTORAPORT.
-Twoje dane zostały automatycznie przesłane do ministerstwa.
+Witaj ${developer.name}! Cieszymy się, że dołączyłeś do OTORAPORT.
 
-TWOJE PUBLICZNE ENDPOINTY:
-XML: ${baseUrl}/api/public/${developer.id}/data.xml
-Markdown: ${baseUrl}/api/public/${developer.id}/data.md
+CO DALEJ?
 
-Te adresy automatycznie aktualizują się przy każdej zmianie danych.
+1. Uzupełnij dane firmy - Przejdź do ustawień i dodaj pełne dane swojej firmy (NIP, adres, telefon)
+2. Prześlij pierwszy cennik - Upload pliku CSV/Excel z ofertą mieszkań
+3. Otrzymasz gotowy email - Po uzupełnieniu danych wyślemy Ci gotową wiadomość do skopiowania i wysłania do ministerstwa
+4. Gotowe! - Twoja firma będzie compliance z wymaganiami ustawy
 
-NASTĘPNE KROKI:
-1. Oczekiwanie na potwierdzenie z ministerstwa
-2. Upload cennika w dashboardzie
-3. Automatyczna aktualizacja raportów
-4. Twoja firma jest teraz compliance z ustawą
+INFORMACJA:
+Gdy uzupełnisz dane firmy, system automatycznie wygeneruje dla Ciebie:
+- Gotową wiadomość email do ministerstwa (do skopiowania i wysłania)
+- Unikalne adresy URL z Twoimi danymi (XML, CSV, MD)
+- Automatycznie aktualizowane raporty cenowe
 
 LINKI:
 - Dashboard: ${baseUrl}/dashboard
-- Upload: ${baseUrl}/upload
-- Dokumentacja: ${baseUrl}/docs
+- Ustawienia: ${baseUrl}/settings
 
 POMOC:
 Email: support@otoraport.pl
 Telefon: +48 800 123 456
-Chat: otoraport.pl
+Dokumentacja: ${baseUrl}/docs
 
 Dziękujemy za wybór OTORAPORT!
 

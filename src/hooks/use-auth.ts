@@ -197,7 +197,7 @@ export function useAuth(): AuthState & AuthActions {
         const clientId = `dev_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
         // Create developer profile
-        const { error: profileError } = await supabase
+        const { data: newDeveloper, error: profileError } = await supabase
           .from('developers')
           .insert({
             user_id: authData.user.id,
@@ -207,11 +207,25 @@ export function useAuth(): AuthState & AuthActions {
             subscription_plan: 'trial',
             subscription_status: 'trial'
           })
+          .select()
+          .single()
 
-        if (profileError) {
+        if (profileError || !newDeveloper) {
           console.error('Error creating developer profile:', profileError)
           return { success: false, error: 'Błąd podczas tworzenia profilu developera' }
         }
+
+        // Send welcome email asynchronously (don't block registration)
+        fetch('/api/welcome-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ developerId: newDeveloper.id })
+        }).catch(error => {
+          console.error('Failed to send welcome email:', error)
+          // Don't fail registration if email fails
+        })
+
+        console.log('✅ Registration successful, welcome email queued')
 
         return { success: true }
       }
