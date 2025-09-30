@@ -14,6 +14,7 @@ import {
 import { OtoraportLogo } from "../icons/otoraport-logo";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
+import { HelpButton } from "../help/HelpButton";
 
 interface HeaderProps {
   showUserMenu?: boolean;
@@ -99,6 +100,13 @@ function AuthenticatedHeader() {
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Help Button */}
+          <HelpButton
+            userId={user?.id || ''}
+            subscriptionPlan={developer?.subscription_plan || 'basic'}
+            onboardingStep={developer?.onboarding_step || 0}
+          />
 
           {/* Admin Panel */}
           {isAdmin && (
