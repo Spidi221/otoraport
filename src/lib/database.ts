@@ -218,6 +218,70 @@ export async function markFileAsProcessed(fileId: string, propertiesCount: numbe
   return data
 }
 
+export async function getUploadedFiles(developerId: string) {
+  const { data, error } = await createAdminClient()
+    .from('uploaded_files')
+    .select(`
+      *,
+      project:projects(id, name)
+    `)
+    .eq('developer_id', developerId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching uploaded files:', error)
+    return []
+  }
+
+  return data
+}
+
+export async function deleteUploadedFile(fileId: string, developerId: string) {
+  try {
+    // First, verify that the file belongs to this developer
+    const { data: file, error: fileError } = await createAdminClient()
+      .from('uploaded_files')
+      .select('id, project_id')
+      .eq('id', fileId)
+      .eq('developer_id', developerId)
+      .single()
+
+    if (fileError || !file) {
+      throw new Error('File not found or access denied')
+    }
+
+    // Delete all properties associated with this file's project
+    // (assuming file is linked to a project)
+    if (file.project_id) {
+      const { error: propertiesError } = await createAdminClient()
+        .from('properties')
+        .delete()
+        .eq('project_id', file.project_id)
+
+      if (propertiesError) {
+        console.error('Error deleting properties:', propertiesError)
+        throw new Error('Failed to delete associated properties')
+      }
+    }
+
+    // Delete the file record
+    const { error: deleteError } = await createAdminClient()
+      .from('uploaded_files')
+      .delete()
+      .eq('id', fileId)
+
+    if (deleteError) {
+      console.error('Error deleting file:', deleteError)
+      throw new Error('Failed to delete file')
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error in deleteUploadedFile:', error)
+    throw error
+  }
+}
+
 // Generated files operations
 export async function upsertGeneratedFile(
   generatedFile: Database['public']['Tables']['generated_files']['Insert']

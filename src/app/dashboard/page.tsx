@@ -12,6 +12,7 @@ import { FloatingHelpButton } from "@/components/help/HelpButton";
 
 // Lazy load heavy components that are below the fold
 const ActionButtons = lazy(() => import("@/components/dashboard/action-buttons").then(m => ({ default: m.ActionButtons })));
+const FileManagement = lazy(() => import("@/components/dashboard/file-management").then(m => ({ default: m.FileManagement })));
 const ChartsSection = lazy(() => import("@/components/dashboard/charts-section").then(m => ({ default: m.ChartsSection })));
 const PropertiesTable = lazy(() => import("@/components/dashboard/properties-table").then(m => ({ default: m.PropertiesTable })));
 const PresentationSection = lazy(() => import("@/components/dashboard/presentation-section").then(m => ({ default: m.PresentationSection })));
@@ -66,6 +67,11 @@ export default function HomePage() {
           {/* Action Buttons */}
           <Suspense fallback={<LoadingState message="Ładowanie akcji..." />}>
             <ActionButtons />
+          </Suspense>
+
+          {/* File Management Section */}
+          <Suspense fallback={<LoadingState message="Ładowanie zarządzania plikami..." />}>
+            <FileManagement />
           </Suspense>
 
           {/* Presentation Section */}

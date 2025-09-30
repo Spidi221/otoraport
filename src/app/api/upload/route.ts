@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 
         // Save properties to database
         if (smartParseResult.data && smartParseResult.data.length > 0) {
-          await savePropertiesToDatabase(developer.id, smartParseResult.data, file.name)
+          await savePropertiesToDatabase(developer.id, smartParseResult.data, file.name, fileContent)
           savedToDatabase = true
           console.log(`✅ UPLOAD API: Saved ${smartParseResult.data.length} properties to database`)
         }
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function savePropertiesToDatabase(developerId: string, properties: any[], fileName: string) {
+async function savePropertiesToDatabase(developerId: string, properties: any[], fileName: string, fileContent: string) {
   try {
     // First, get or create a project for this upload
     let { data: project } = await createAdminClient()
@@ -173,6 +173,28 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
 
     if (!project?.id) {
       throw new Error('Failed to create or get project')
+    }
+
+    // Save uploaded file record with content for reprocessing
+    const { data: fileRecord, error: fileError } = await createAdminClient()
+      .from('uploaded_files')
+      .insert({
+        developer_id: developerId,
+        project_id: project.id,
+        file_name: fileName,
+        file_size: fileContent.length,
+        file_content: fileContent, // Store content for reprocessing
+        processed: true,
+        processed_at: new Date().toISOString()
+      })
+      .select('id')
+      .single()
+
+    if (fileError) {
+      console.error('❌ Error creating file record:', fileError)
+      // Don't throw - continue with properties insert
+    } else {
+      console.log(`✅ File record created: ${fileRecord.id}`)
     }
 
     // Prepare properties for database insert
