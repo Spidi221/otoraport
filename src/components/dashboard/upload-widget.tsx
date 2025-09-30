@@ -113,13 +113,16 @@ export function UploadWidget() {
             </div>
             <div className="flex flex-col gap-2 text-center">
               <p className="text-sm font-medium">
-                {uploading 
-                  ? "Przesyłanie i przetwarzanie..." 
+                {uploading
+                  ? "Przesyłanie i przetwarzanie..."
                   : "Przeciągnij plik tutaj lub kliknij aby wybrać"
                 }
               </p>
               <p className="text-xs text-muted-foreground">
-                CSV, XLSX lub XML do 10MB
+                {uploading
+                  ? "Może potrwać 1-2 minuty dla dużych plików..."
+                  : "CSV, XLSX lub XML do 10MB"
+                }
               </p>
             </div>
             <Button 
