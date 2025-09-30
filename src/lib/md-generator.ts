@@ -87,7 +87,29 @@ function extractFromRawData(property: any): any {
       MINISTRY_COLUMNS.total_price,
       'cena_finalna'
     ], true),
-    status: getRawField('status', ['status_sprzedazy'], false) || 'available',
+    // SMART STATUS DETECTION: Check prices for SOLD markers, then status field
+    status: (() => {
+      // 1. Check if price fields indicate SOLD
+      const pricePerM2 = getRawField('price_per_m2', [MINISTRY_COLUMNS.price_per_m2], false)
+      const basePrice = getRawField('base_price', [MINISTRY_COLUMNS.total_price], false)
+
+      if (pricePerM2 === 'SOLD' || pricePerM2 === 'X' ||
+          basePrice === 'SOLD' || basePrice === 'X') {
+        return 'sold'
+      }
+
+      // 2. Check status field if exists
+      const statusField = getRawField('status', ['status_sprzedazy', 'dostępność', 'availability'], false)
+      if (statusField) {
+        const statusLower = String(statusField).toLowerCase()
+        if (statusLower.includes('sprzed') || statusLower.includes('sold')) return 'sold'
+        if (statusLower.includes('rezerw') || statusLower.includes('reserved')) return 'reserved'
+        if (statusLower.includes('dostęp') || statusLower.includes('available')) return 'available'
+      }
+
+      // 3. Default to available if has valid price
+      return 'available'
+    })(),
     parking_space: getRawField('parking_space', [
       MINISTRY_COLUMNS.parking_nr,
       'miejsca_postojowe_nr'
@@ -129,20 +151,41 @@ export function generateMarkdownFile(options: XMLGeneratorOptions): string {
     return acc;
   }, {} as Record<string, { project: any, properties: typeof properties }>);
 
-  // Statistyki - filter out properties with 0 prices (likely invalid)
+  // IMPROVED FILTERING: Exclude SOLD properties and ensure numeric values
   console.log('🔍 MD GENERATOR: Before filter - properties:', properties.length)
   properties.forEach((p, i) => {
-    console.log(`Property ${i}: price_per_m2=${p.price_per_m2}, area=${p.area}, valid=${p.price_per_m2 > 0 && p.area > 0}`)
+    console.log(`Property ${i}: price_per_m2=${p.price_per_m2}, area=${p.area}, status=${p.status}, valid=${typeof p.price_per_m2 === 'number' && typeof p.area === 'number' && p.status !== 'sold'}`)
   })
-  const validProperties = properties.filter(p => p.price_per_m2 > 0 && p.area > 0)
+
+  // Filter: Only numeric prices, valid area, not SOLD
+  const validProperties = properties.filter(p => {
+    const hasNumericPrice = typeof p.price_per_m2 === 'number' && p.price_per_m2 > 0
+    const hasValidArea = typeof p.area === 'number' && p.area > 0
+    const isNotSold = p.status !== 'sold'
+
+    return hasNumericPrice && hasValidArea && isNotSold
+  })
   console.log('🔍 MD GENERATOR: After filter - validProperties:', validProperties.length)
-  const totalProperties = validProperties.length;
-  const availableProperties = validProperties.filter(p => p.status === 'available').length;
-  const soldProperties = validProperties.filter(p => p.status === 'sold').length;
-  const reservedProperties = validProperties.filter(p => p.status === 'reserved').length;
-  const averagePrice = validProperties.length > 0 ? validProperties.reduce((sum, p) => sum + p.price_per_m2, 0) / validProperties.length : 0;
-  const minPrice = validProperties.length > 0 ? Math.min(...validProperties.map(p => p.price_per_m2)) : 0;
-  const maxPrice = validProperties.length > 0 ? Math.max(...validProperties.map(p => p.price_per_m2)) : 0;
+
+  // Count all properties including SOLD (for total statistics)
+  const allPropertiesWithStatus = properties.filter(p =>
+    (typeof p.price_per_m2 === 'number' && p.price_per_m2 > 0) || p.status === 'sold'
+  )
+  const totalProperties = allPropertiesWithStatus.length
+  const availableProperties = allPropertiesWithStatus.filter(p => p.status === 'available').length
+  const soldProperties = allPropertiesWithStatus.filter(p => p.status === 'sold').length
+  const reservedProperties = allPropertiesWithStatus.filter(p => p.status === 'reserved').length
+
+  // Price statistics: ONLY from available properties (not SOLD)
+  const numericPrices = validProperties
+    .map(p => p.price_per_m2)
+    .filter(price => typeof price === 'number' && price > 0)
+
+  const averagePrice = numericPrices.length > 0
+    ? numericPrices.reduce((sum, p) => sum + p, 0) / numericPrices.length
+    : 0
+  const minPrice = numericPrices.length > 0 ? Math.min(...numericPrices) : 0
+  const maxPrice = numericPrices.length > 0 ? Math.max(...numericPrices) : 0
 
   const markdown = `# Raport Cen Mieszkań - ${developer.company_name}
 
@@ -194,14 +237,43 @@ ${project ? `**Lokalizacja:** ${project.location}
 
 | Nr lokalu | Typ | Powierzchnia | Cena/m² | Cena całkowita | Status | Miejsce parkingowe |
 |-----------|-----|--------------|---------|----------------|--------|--------------------|
-${projectProperties.map(property => 
-  `| ${property.property_number} | ${property.property_type} | ${property.area}m² | ${property.price_per_m2.toLocaleString('pl-PL')} zł | ${property.final_price.toLocaleString('pl-PL')} zł | ${getStatusLabel(property.status)} | ${property.parking_space || 'Brak'} ${property.parking_price ? `(${property.parking_price.toLocaleString('pl-PL')} zł)` : ''} |`
-).join('\n')}
+${projectProperties.map(property => {
+  // Safe formatting: handle both numeric prices and "SOLD" strings
+  const pricePerM2Display = typeof property.price_per_m2 === 'number'
+    ? `${property.price_per_m2.toLocaleString('pl-PL')} zł`
+    : property.price_per_m2 === 'SOLD' ? 'Sprzedane' : 'N/A'
+
+  const finalPriceDisplay = typeof property.final_price === 'number'
+    ? `${property.final_price.toLocaleString('pl-PL')} zł`
+    : property.final_price === 'SOLD' ? 'Sprzedane' : 'N/A'
+
+  const parkingDisplay = property.parking_space || 'N/A'
+  const parkingPriceDisplay = property.parking_price && typeof property.parking_price === 'number'
+    ? ` (${property.parking_price.toLocaleString('pl-PL')} zł)`
+    : ''
+
+  return `| ${property.property_number} | ${property.property_type} | ${property.area}m² | ${pricePerM2Display} | ${finalPriceDisplay} | ${getStatusLabel(property.status)} | ${parkingDisplay}${parkingPriceDisplay} |`
+}).join('\n')}
 
 **Analiza cenowa projektu ${projectName}:**
-- Średnia cena za m²: ${(projectProperties.reduce((sum, p) => sum + p.price_per_m2, 0) / projectProperties.length).toLocaleString('pl-PL')} zł
-- Najniższa cena za m²: ${Math.min(...projectProperties.map(p => p.price_per_m2)).toLocaleString('pl-PL')} zł  
-- Najwyższa cena za m²: ${Math.max(...projectProperties.map(p => p.price_per_m2)).toLocaleString('pl-PL')} zł
+${(() => {
+  // Filter only properties with numeric prices for analysis
+  const numericProjectPrices = projectProperties
+    .map(p => p.price_per_m2)
+    .filter(price => typeof price === 'number' && price > 0)
+
+  if (numericProjectPrices.length === 0) {
+    return '- Brak danych cenowych (wszystkie nieruchomości sprzedane lub brak cen)'
+  }
+
+  const avgPrice = numericProjectPrices.reduce((sum, p) => sum + p, 0) / numericProjectPrices.length
+  const minPrice = Math.min(...numericProjectPrices)
+  const maxPrice = Math.max(...numericProjectPrices)
+
+  return `- Średnia cena za m²: ${avgPrice.toLocaleString('pl-PL')} zł
+- Najniższa cena za m²: ${minPrice.toLocaleString('pl-PL')} zł
+- Najwyższa cena za m²: ${maxPrice.toLocaleString('pl-PL')} zł`
+})()}
 
 `;
 }).join('\n---\n\n')}
