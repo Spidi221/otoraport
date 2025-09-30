@@ -566,25 +566,16 @@ export async function generateAggregatedXML(developerId: string): Promise<string
     }
 
     // CRITICAL: Generate XML using official Ministry Schema 1.13
-    console.log('Converting to Ministry format and validating...')
-    const ministryOptions = convertToMinistryFormat(
-      allPropertiesFinal,
-      aggregatedData.developer,
-      aggregatedData.projects
-    )
+    console.log('Generating Ministry Harvester Schema 1.13 XML...')
 
-    // Validate before generation
-    const validation = validateMinistryXML(ministryOptions)
-    if (!validation.valid) {
-      console.warn('Ministry XML validation warnings:', validation.errors)
-      console.warn('Continuing with generation despite warnings...')
-    }
+    // Generate Harvester XML (metadata pointing to CSV)
+    const xmlContent = generateHarvesterXML({
+      properties: allPropertiesFinal,
+      developer: aggregatedData.developer,
+      projects: aggregatedData.projects
+    })
 
-    // Generate Ministry-compliant XML
-    const xmlContent = generateMinistryXML(ministryOptions)
-
-    console.log(`Generated Ministry Schema 1.13 XML with ${allPropertiesFinal.length} AVAILABLE properties from ${validProjects.length} projects`)
-    console.log(`Validation: ${validation.valid ? 'PASSED' : 'WARNINGS'} (${validation.errors.length} issues)`)
+    console.log(`✅ Generated Ministry Schema 1.13 XML with ${allPropertiesFinal.length} AVAILABLE properties from ${validProjects.length} projects`)
 
     return xmlContent
 
