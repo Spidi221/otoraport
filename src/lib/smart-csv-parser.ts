@@ -134,7 +134,10 @@ const COLUMN_PATTERNS: ColumnMapping = {
   property_number: [
     'nr lokalu', 'numer lokalu', 'nr mieszkania', 'numer mieszkania',
     'lokal', 'mieszkanie', 'nr', 'property_number', 'apartment_number',
-    'nr_lokalu', 'numer_lokalu', 'mieszkanie_nr'
+    'nr_lokalu', 'numer_lokalu', 'mieszkanie_nr',
+    // MINISTRY OFFICIAL NAMES:
+    'nr lokalu lub domu jednorodzinnego nadany przez dewelopera',
+    'oznaczenie lokalu nadane przez dewelopera'
   ],
   property_type: [
     'typ', 'typ lokalu', 'typ mieszkania', 'rodzaj', 'property_type',
@@ -144,21 +147,31 @@ const COLUMN_PATTERNS: ColumnMapping = {
   // Prices
   price_per_m2: [
     'cena za m²', 'cena za m2', 'cena m2', 'cena m²', 'cena/m2', 'cena/m²',
-    'price_per_m2', 'price_per_sqm', 'cena_za_m2', 'cena_m2', 'cena za metr'
+    'price_per_m2', 'price_per_sqm', 'cena_za_m2', 'cena_m2', 'cena za metr',
+    // MINISTRY OFFICIAL NAMES:
+    'cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]',
+    'cena metra kwadratowego powierzchni użytkowej'
   ],
   total_price: [
     'cena całkowita', 'cena', 'cena brutto', 'cena bazowa', 'total_price',
-    'price', 'cena_calkowita', 'cena_bazowa', 'cena_brutto'
+    'price', 'cena_calkowita', 'cena_bazowa', 'cena_brutto',
+    // MINISTRY OFFICIAL NAMES:
+    'cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]',
+    'cena będąca iloczynem powierzchni oraz metrażu'
   ],
   final_price: [
     'cena finalna', 'cena końcowa', 'cena ostateczna', 'final_price',
-    'cena_finalna', 'cena_koncowa', 'cena_ostateczna'
+    'cena_finalna', 'cena_koncowa', 'cena_ostateczna',
+    // MINISTRY OFFICIAL NAMES:
+    'cena lokalu mieszkalnego lub domu jednorodzinnego uwzględniająca cenę lokalu stanowiącą iloczyn powierzchni oraz metrażu i innych składowych ceny, o których mowa w art. 19a ust. 1 pkt 1), 2) lub 3) [zł]',
+    'cena uwzględniająca wszystkie składowe'
   ],
-  
+
   // Areas and spaces
   area: [
     'powierzchnia', 'powierzchnia użytkowa', 'powierzchnia m²', 'powierzchnia m2',
-    'area', 'size', 'metraż', 'pow', 'powierzchnia_uzytkowa', 'm2', 'm²'
+    'area', 'size', 'metraż', 'pow', 'powierzchnia_uzytkowa', 'm2', 'm²',
+    // MINISTRY: obszar nie jest bezpośrednio w CSV, kalkulujemy z ceny
   ],
   powierzchnia_balkon: [
     'balkon', 'powierzchnia balkonu', 'balcony', 'powierzchnia_balkon',
@@ -190,20 +203,35 @@ const COLUMN_PATTERNS: ColumnMapping = {
   // Location fields
   wojewodztwo: [
     'województwo', 'wojewodztwo', 'voivodeship', 'region',
-    'woj', 'woj.', 'province'
+    'woj', 'woj.', 'province',
+    // MINISTRY OFFICIAL NAMES:
+    'województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
+    'województwo adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
   ],
   powiat: [
-    'powiat', 'county', 'district', 'pow', 'pow.'
+    'powiat', 'county', 'district', 'pow', 'pow.',
+    // MINISTRY OFFICIAL NAMES:
+    'powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
+    'powiat adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
   ],
   gmina: [
-    'gmina', 'municipality', 'commune', 'gm', 'gm.'
+    'gmina', 'municipality', 'commune', 'gm', 'gm.',
+    // MINISTRY OFFICIAL NAMES:
+    'gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
+    'gmina adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
   ],
   miejscowosc: [
     'miejscowość', 'miejscowosc', 'miasto', 'city', 'town',
-    'locality', 'place'
+    'locality', 'place',
+    // MINISTRY OFFICIAL NAMES:
+    'miejscowość lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
+    'miejscowość adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
   ],
   ulica: [
-    'ulica', 'ul', 'ul.', 'street', 'adres', 'address'
+    'ulica', 'ul', 'ul.', 'street', 'adres', 'address',
+    // MINISTRY OFFICIAL NAMES:
+    'ulica lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
+    'ulica adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
   ],
   numer_nieruchomosci: [
     'numer nieruchomości', 'nr nieruchomości', 'numer_nieruchomosci',
@@ -233,7 +261,11 @@ const COLUMN_PATTERNS: ColumnMapping = {
   ],
   price_valid_from: [
     'data od', 'obowiązuje od', 'price_valid_from', 'valid_from',
-    'cena od', 'od kiedy'
+    'cena od', 'od kiedy',
+    // MINISTRY OFFICIAL NAMES:
+    'data od której cena obowiązuje cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego',
+    'data od której obowiązuje cena lokalu mieszkalnego lub domu jednorodzinnego uwzględniająca cenę lokalu stanowiącą iloczyn powierzchni oraz metrażu i innych składowych ceny, o których mowa w art. 19a ust. 1 pkt 1), 2) lub 3)',
+    'data od której cena obowiązuje'
   ],
   price_valid_to: [
     'data do', 'obowiązuje do', 'price_valid_to', 'valid_to',
@@ -391,14 +423,20 @@ const COLUMN_PATTERNS: ColumnMapping = {
   // Developer info (Ministry compliance enhanced)
   developer_name: [
     'deweloper', 'nazwa dewelopera', 'developer', 'developer_name',
-    'firma', 'nazwa_dewelopera'
+    'firma', 'nazwa_dewelopera',
+    // MINISTRY OFFICIAL NAMES:
+    'nazwa dewelopera'
   ],
   company_name: [
     'nazwa firmy', 'company', 'company_name', 'nazwa_firmy',
-    'firma', 'spółka', 'spolka'
+    'firma', 'spółka', 'spolka',
+    // MINISTRY OFFICIAL NAMES:
+    'nazwa dewelopera'
   ],
   nip: [
-    'nip', 'nr nip', 'numer nip', 'tax_id', 'vat_id', 'nr_nip'
+    'nip', 'nr nip', 'numer nip', 'tax_id', 'vat_id', 'nr_nip',
+    // MINISTRY OFFICIAL NAMES:
+    'nr nip'
   ],
   phone: [
     'telefon', 'tel', 'phone', 'numer telefonu', 'kontakt',
@@ -412,7 +450,9 @@ const COLUMN_PATTERNS: ColumnMapping = {
   // Enhanced developer fields (Ministry required)
   forma_prawna: [
     'forma prawna', 'typ spółki', 'legal_form', 'forma_prawna',
-    'rodzaj działalności', 'status prawny firmy'
+    'rodzaj działalności', 'status prawny firmy',
+    // MINISTRY OFFICIAL NAMES:
+    'forma prawna dewelopera'
   ],
   adres_siedziby: [
     'adres siedziby', 'siedziba', 'headquarters_address', 'adres_siedziby',
@@ -808,7 +848,7 @@ export class SmartCSVParser {
         const headerIndex = this.headers.indexOf(headerName)
         if (headerIndex !== -1 && headerIndex < row.length) {
           const value = row[headerIndex]?.trim()
-          
+
           if (value) {
             switch (fieldName) {
               case 'price_per_m2':
@@ -822,13 +862,28 @@ export class SmartCSVParser {
                   ;(property as any)[fieldName] = numValue
                 }
                 break
-              
+
               default:
                 // String fields
                 ;(property as any)[fieldName] = value
             }
           }
         }
+      }
+
+      // MINISTRY CSV FIX: Calculate area if missing (area = total_price / price_per_m2)
+      if (!property.area && property.total_price && property.price_per_m2 && property.price_per_m2 > 0) {
+        property.area = Math.round((property.total_price / property.price_per_m2) * 100) / 100
+      }
+
+      // MINISTRY CSV FIX: Calculate price_per_m2 if missing
+      if (!property.price_per_m2 && property.total_price && property.area && property.area > 0) {
+        property.price_per_m2 = Math.round((property.total_price / property.area) * 100) / 100
+      }
+
+      // MINISTRY CSV FIX: Calculate total_price if missing
+      if (!property.total_price && property.price_per_m2 && property.area && property.area > 0) {
+        property.total_price = Math.round(property.price_per_m2 * property.area * 100) / 100
       }
 
       // Only include rows with at least property number or any other data
