@@ -3,17 +3,122 @@
 
 import { XMLGeneratorOptions } from './xml-generator';
 
+// MINISTRY CSV EXACT COLUMN NAMES (from schema 1.13)
+const MINISTRY_COLUMNS = {
+  property_number: 'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera',
+  price_per_m2: 'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]',
+  total_price: 'Cena lokalu mieszkalnego lub domu jednorodzinnego [zł]',
+  powierzchnia: 'Powierzchnia użytkowa lokalu mieszkalnego lub powierzchnia domu jednorodzinnego [m2]',
+  wojewodztwo: 'Województwo - Lokalizacja Inwestycji mieszkaniowej',
+  liczba_pokoi: 'Liczba pokoi w lokalu mieszkalnym lub domu jednorodzinnym',
+  parking_nr: 'Nr przypisanego miejsca parkingowego / garażu [1]',
+  parking_cena: 'Cena przypisanego miejsca parkingowego / garażu [1]',
+}
+
+// CRITICAL FIX: Extract fields from nested raw_data JSONB structure
+// CSV parser stores: { raw_data: { property_number: X, raw_data: { "CSV Column": value } } }
+function extractFromRawData(property: any): any {
+  const rawData = (property.raw_data as any) || {}
+  const nestedData = rawData.raw_data || rawData // Use nested if exists, otherwise top level
+
+  // Helper: Get value from raw_data with fallback to nested raw_data and top-level
+  const getRawField = (field: string, aliases: string[] = [], convertToNumber: boolean = false): any => {
+    // Check all possible variations
+    for (const alias of [field, ...aliases]) {
+      // 1. Check nested data first (ministry CSV columns)
+      if (nestedData[alias] !== undefined && nestedData[alias] !== null && nestedData[alias] !== '') {
+        const value = nestedData[alias]
+        // FILTER SOLD: If value is "X", mark as sold
+        if (typeof value === 'string' && value.trim().toLowerCase() === 'x') {
+          return 'SOLD'
+        }
+        // Convert to number if requested
+        if (convertToNumber && typeof value === 'string') {
+          const parsed = parseFloat(value.replace(',', '.').replace(/[^\d.-]/g, ''))
+          return isNaN(parsed) ? 0 : parsed
+        }
+        if (convertToNumber && typeof value === 'number') {
+          return value
+        }
+        return value
+      }
+      // 2. Fallback: check top-level rawData (CSV parser calculated fields like area)
+      if (rawData[alias] !== undefined && rawData[alias] !== null && rawData[alias] !== '') {
+        const value = rawData[alias]
+        // FILTER SOLD: If value is "X", mark as sold
+        if (typeof value === 'string' && value.trim().toLowerCase() === 'x') {
+          return 'SOLD'
+        }
+        // Convert to number if requested
+        if (convertToNumber && typeof value === 'string') {
+          const parsed = parseFloat(value.replace(',', '.').replace(/[^\d.-]/g, ''))
+          return isNaN(parsed) ? 0 : parsed
+        }
+        if (convertToNumber && typeof value === 'number') {
+          return value
+        }
+        return value
+      }
+    }
+    return convertToNumber ? 0 : 'N/A'
+  }
+
+  return {
+    id: property.id,
+    project_id: property.project_id,
+    property_number: getRawField('property_number', [
+      MINISTRY_COLUMNS.property_number,
+      'apartment_number', 'numer_lokalu'
+    ], false),
+    property_type: getRawField('property_type', ['typ', 'type'], false) || 'mieszkanie',
+    area: getRawField('area', [
+      MINISTRY_COLUMNS.powierzchnia,
+      'surface_area', 'powierzchnia', 'metraz'
+    ], true),
+    price_per_m2: getRawField('price_per_m2', [
+      MINISTRY_COLUMNS.price_per_m2,
+      'cena_za_m2', 'cena za m2'
+    ], true),
+    base_price: getRawField('base_price', [
+      MINISTRY_COLUMNS.total_price,
+      'total_price', 'cena', 'cena_bazowa'
+    ], true),
+    final_price: getRawField('final_price', [
+      MINISTRY_COLUMNS.total_price,
+      'cena_finalna'
+    ], true),
+    status: getRawField('status', ['status_sprzedazy'], false) || 'available',
+    parking_space: getRawField('parking_space', [
+      MINISTRY_COLUMNS.parking_nr,
+      'miejsca_postojowe_nr'
+    ], false),
+    parking_price: getRawField('parking_price', [
+      MINISTRY_COLUMNS.parking_cena,
+      'miejsca_postojowe_ceny'
+    ], true),
+  }
+}
+
 export function generateMarkdownFile(options: XMLGeneratorOptions): string {
-  const { properties, developer, projects } = options;
-  
+  const { properties: rawProperties, developer, projects } = options;
+
+  console.log('🔍 MD GENERATOR: Starting generation with', rawProperties.length, 'raw properties')
+  console.log('🔍 MD GENERATOR: First raw property:', JSON.stringify(rawProperties[0], null, 2))
+
+  // CRITICAL FIX: Extract data from raw_data JSONB using same logic as XML generator
+  const properties = rawProperties.map(extractFromRawData)
+
+  console.log('🔍 MD GENERATOR: After extraction, got', properties.length, 'properties')
+  console.log('🔍 MD GENERATOR: First extracted property:', JSON.stringify(properties[0], null, 2))
+
   const currentDate = new Date().toLocaleDateString('pl-PL');
   const currentYear = new Date().getFullYear();
-  
+
   // Grupowanie nieruchomości per projekt
   const propertiesByProject = properties.reduce((acc, property) => {
     const project = projects.find(p => p.id === property.project_id);
     const projectName = project?.name || 'Nieznany projekt';
-    
+
     if (!acc[projectName]) {
       acc[projectName] = {
         project: project,
@@ -24,14 +129,20 @@ export function generateMarkdownFile(options: XMLGeneratorOptions): string {
     return acc;
   }, {} as Record<string, { project: any, properties: typeof properties }>);
 
-  // Statistyki
-  const totalProperties = properties.length;
-  const availableProperties = properties.filter(p => p.status === 'available').length;
-  const soldProperties = properties.filter(p => p.status === 'sold').length;
-  const reservedProperties = properties.filter(p => p.status === 'reserved').length;
-  const averagePrice = properties.reduce((sum, p) => sum + p.price_per_m2, 0) / properties.length;
-  const minPrice = Math.min(...properties.map(p => p.price_per_m2));
-  const maxPrice = Math.max(...properties.map(p => p.price_per_m2));
+  // Statistyki - filter out properties with 0 prices (likely invalid)
+  console.log('🔍 MD GENERATOR: Before filter - properties:', properties.length)
+  properties.forEach((p, i) => {
+    console.log(`Property ${i}: price_per_m2=${p.price_per_m2}, area=${p.area}, valid=${p.price_per_m2 > 0 && p.area > 0}`)
+  })
+  const validProperties = properties.filter(p => p.price_per_m2 > 0 && p.area > 0)
+  console.log('🔍 MD GENERATOR: After filter - validProperties:', validProperties.length)
+  const totalProperties = validProperties.length;
+  const availableProperties = validProperties.filter(p => p.status === 'available').length;
+  const soldProperties = validProperties.filter(p => p.status === 'sold').length;
+  const reservedProperties = validProperties.filter(p => p.status === 'reserved').length;
+  const averagePrice = validProperties.length > 0 ? validProperties.reduce((sum, p) => sum + p.price_per_m2, 0) / validProperties.length : 0;
+  const minPrice = validProperties.length > 0 ? Math.min(...validProperties.map(p => p.price_per_m2)) : 0;
+  const maxPrice = validProperties.length > 0 ? Math.max(...validProperties.map(p => p.price_per_m2)) : 0;
 
   const markdown = `# Raport Cen Mieszkań - ${developer.company_name}
 
@@ -100,10 +211,10 @@ ${projectProperties.map(property =>
 ## 📈 Szczegółowa Analiza Rynkowa
 
 ### Rozkład powierzchni mieszkań
-${generateSurfaceAnalysis(properties)}
+${generateSurfaceAnalysis(validProperties)}
 
 ### Rozkład cen za m²
-${generatePriceAnalysis(properties)}
+${generatePriceAnalysis(validProperties)}
 
 ### Trendy sprzedaży
 - **Wskaźnik dostępności:** ${((availableProperties / totalProperties) * 100).toFixed(1)}%

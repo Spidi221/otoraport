@@ -1,46 +1,85 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getUploadedFiles } from '@/lib/database'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  console.log('📋 FILES LIST API: Fetching uploaded files...')
+
   try {
-    // Get authenticated user
+    // Create server client with proper SSR cookie handling
     const supabase = await createClient()
+
+    // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
+      console.log('❌ FILES LIST API: Authentication failed:', authError?.message)
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized - please sign in' },
         { status: 401 }
       )
     }
+
+    console.log('✅ FILES LIST API: User authenticated:', user.email)
 
     // Get developer profile
     const { data: developer, error: profileError } = await supabase
       .from('developers')
       .select('id')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (profileError || !developer) {
+    if (profileError) {
+      console.error('❌ FILES LIST API: Profile query failed:', profileError.message)
       return NextResponse.json(
-        { error: 'Developer profile not found' },
-        { status: 404 }
+        { error: 'Database error' },
+        { status: 500 }
       )
     }
 
-    // Get uploaded files
-    const files = await getUploadedFiles(developer.id)
+    if (!developer) {
+      console.log('⚠️ FILES LIST API: No developer profile found')
+      return NextResponse.json(
+        { success: true, files: [] },
+        { status: 200 }
+      )
+    }
+
+    console.log('✅ FILES LIST API: Developer found:', developer.id)
+
+    // Fetch uploaded files with project info
+    const { data: files, error: filesError } = await supabase
+      .from('uploaded_files')
+      .select(`
+        id,
+        file_name,
+        file_size,
+        created_at,
+        processed,
+        processed_at,
+        project:projects(id, name)
+      `)
+      .eq('developer_id', developer.id)
+      .order('created_at', { ascending: false })
+
+    if (filesError) {
+      console.error('❌ FILES LIST API: Error fetching files:', filesError.message)
+      return NextResponse.json(
+        { error: 'Failed to fetch files' },
+        { status: 500 }
+      )
+    }
+
+    console.log(`✅ FILES LIST API: Found ${files?.length || 0} files`)
 
     return NextResponse.json({
       success: true,
-      files
+      files: files || []
     })
 
   } catch (error) {
-    console.error('Error fetching files:', error)
+    console.error('💥 FILES LIST API: Unexpected error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch files' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

@@ -51,20 +51,60 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ PROPERTIES API: Found ${properties?.length || 0} properties`)
 
-    // Transform properties - extract data from raw_data JSONB
-    const transformedProperties = properties?.map(prop => ({
-      id: prop.id,
-      project_id: prop.project_id,
-      property_number: (prop.raw_data as any)?.property_number || 'N/A',
-      property_type: (prop.raw_data as any)?.property_type || 'mieszkanie',
-      area: (prop.raw_data as any)?.area || 0,
-      price_per_m2: (prop.raw_data as any)?.price_per_m2 || 0,
-      total_price: (prop.raw_data as any)?.total_price || 0,
-      final_price: (prop.raw_data as any)?.final_price || (prop.raw_data as any)?.total_price || 0,
-      status: (prop.raw_data as any)?.status || 'available',
-      created_at: prop.created_at,
-      updated_at: prop.updated_at
-    })) || []
+    // CRITICAL FIX: Extract data from nested raw_data JSONB structure
+    // CSV parser stores: { raw_data: { property_number: X, raw_data: { "CSV Column": value } } }
+    const transformedProperties = properties?.map(prop => {
+      const rawData = (prop.raw_data as any) || {}
+
+      // Helper: Get value from raw_data with fallback to nested raw_data.raw_data
+      const getValue = (field: string, ministryColumn?: string): any => {
+        // Check top level first
+        if (rawData[field] !== undefined && rawData[field] !== null && rawData[field] !== '') {
+          return rawData[field]
+        }
+
+        // Check nested raw_data
+        const nestedData = rawData.raw_data || {}
+
+        // Try ministry column name first (exact match from CSV)
+        if (ministryColumn && nestedData[ministryColumn] !== undefined && nestedData[ministryColumn] !== null && nestedData[ministryColumn] !== '') {
+          const value = nestedData[ministryColumn]
+          // Parse numbers if string
+          if (typeof value === 'string') {
+            const parsed = parseFloat(value.replace(',', '.').replace(/[^\d.-]/g, ''))
+            return isNaN(parsed) ? value : parsed
+          }
+          return value
+        }
+
+        // Try field name
+        if (nestedData[field] !== undefined && nestedData[field] !== null && nestedData[field] !== '') {
+          const value = nestedData[field]
+          // Parse numbers if string
+          if (typeof value === 'string') {
+            const parsed = parseFloat(value.replace(',', '.').replace(/[^\d.-]/g, ''))
+            return isNaN(parsed) ? value : parsed
+          }
+          return value
+        }
+
+        return null
+      }
+
+      return {
+        id: prop.id,
+        project_id: prop.project_id,
+        property_number: getValue('property_number', 'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera') || getValue('apartment_number') || 'N/A',
+        property_type: getValue('property_type') || 'mieszkanie',
+        area: getValue('area', 'Powierzchnia użytkowa lokalu mieszkalnego lub powierzchnia domu jednorodzinnego [m2]') || getValue('surface_area') || 0,
+        price_per_m2: getValue('price_per_m2', 'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]') || 0,
+        total_price: getValue('total_price', 'Cena lokalu mieszkalnego lub domu jednorodzinnego [zł]') || getValue('base_price') || 0,
+        final_price: getValue('final_price') || getValue('total_price', 'Cena lokalu mieszkalnego lub domu jednorodzinnego [zł]') || getValue('base_price') || 0,
+        status: getValue('status') || getValue('status_sprzedazy') || 'available',
+        created_at: prop.created_at,
+        updated_at: prop.updated_at
+      }
+    }) || []
 
     // Return paginated response format expected by frontend
     return NextResponse.json({

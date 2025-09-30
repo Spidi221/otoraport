@@ -38,14 +38,23 @@ export function PropertiesTable() {
         });
         const result: PaginatedResponse<PropertyData> = await response.json();
 
+        console.log('🔍 PROPERTIES TABLE: API response:', result)
+        console.log('🔍 PROPERTIES TABLE: success:', result.success)
+        console.log('🔍 PROPERTIES TABLE: data:', result.data)
+        console.log('🔍 PROPERTIES TABLE: data length:', result.data?.length)
+        console.log('🔍 PROPERTIES TABLE: pagination:', result.pagination)
+        console.log('🔍 PROPERTIES TABLE: isApiSuccess check:', isApiSuccess(result))
+
         if (isApiSuccess(result)) {
+          console.log('✅ PROPERTIES TABLE: Setting properties:', result.data.length, 'items')
           setProperties(result.data);
           setPagination(result.pagination);
         } else {
+          console.error('❌ PROPERTIES TABLE: API failed, error:', result.error)
           setError(result.error || 'Nie udało się pobrać danych nieruchomości');
         }
       } catch (err) {
-        console.error('Error fetching properties:', err);
+        console.error('💥 PROPERTIES TABLE: Error fetching properties:', err);
         setError('Wystąpił błąd podczas pobierania danych');
       } finally {
         setIsLoading(false);

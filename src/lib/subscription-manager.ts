@@ -262,16 +262,32 @@ export async function getUsageStats(developerId: string): Promise<{
  * Middleware function to check subscription before API calls
  */
 export async function requireActiveSubscription(developerId: string): Promise<{ valid: boolean, error?: string }> {
+  // 🔧 DEVELOPMENT MODE: Bypass dla whitelisted emails
+  if (process.env.NODE_ENV === 'development') {
+    const { data: developer } = await createAdminClient()
+      .from('developers')
+      .select('email')
+      .eq('id', developerId)
+      .single()
+
+    const DEV_WHITELIST = process.env.DEV_WHITELIST_EMAILS?.split(',').map(e => e.trim()) || []
+    if (developer?.email && DEV_WHITELIST.includes(developer.email)) {
+      console.log(`🔓 DEV MODE: Bypassing subscription check for ${developer.email}`)
+      return { valid: true }
+    }
+  }
+
+  // ✅ PRODUCTION LOGIC: Normalna walidacja dla pozostałych
   const subscription = await getSubscriptionInfo(developerId)
-  
+
   if (!subscription) {
     return { valid: false, error: 'Subscription not found' }
   }
 
   if (!subscription.isActive) {
-    return { 
-      valid: false, 
-      error: subscription.status === 'expired' 
+    return {
+      valid: false,
+      error: subscription.status === 'expired'
         ? 'Subscription expired. Please renew to continue.'
         : 'Subscription inactive. Please check your payment method.'
     }

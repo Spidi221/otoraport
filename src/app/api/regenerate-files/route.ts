@@ -38,11 +38,17 @@ export async function POST(request: NextRequest) {
       .eq('developer_id', developerId)
 
     // 3. Pobierz wszystkie nieruchomości dewelopera
+    // CRITICAL: Must explicitly select raw_data column (JSONB columns not included in *)
     const { data: properties } = await createAdminClient()
       .from('properties')
       .select(`
-        *,
-        projects!inner(developer_id)
+        id,
+        project_id,
+        raw_data,
+        status,
+        created_at,
+        updated_at,
+        projects!inner(id, name, developer_id)
       `)
       .eq('projects.developer_id', developerId)
       .eq('status', 'available')

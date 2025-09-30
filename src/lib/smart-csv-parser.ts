@@ -171,7 +171,9 @@ const COLUMN_PATTERNS: ColumnMapping = {
   area: [
     'powierzchnia', 'powierzchnia użytkowa', 'powierzchnia m²', 'powierzchnia m2',
     'area', 'size', 'metraż', 'pow', 'powierzchnia_uzytkowa', 'm2', 'm²',
-    // MINISTRY: obszar nie jest bezpośrednio w CSV, kalkulujemy z ceny
+    // MINISTRY OFFICIAL NAMES:
+    'powierzchnia użytkowa lokalu mieszkalnego lub powierzchnia domu jednorodzinnego [m2]',
+    'powierzchnia lokalu mieszkalnego lub domu jednorodzinnego'
   ],
   powierzchnia_balkon: [
     'balkon', 'powierzchnia balkonu', 'balcony', 'powierzchnia_balkon',
@@ -197,7 +199,9 @@ const COLUMN_PATTERNS: ColumnMapping = {
   ],
   liczba_pokoi: [
     'pokoje', 'liczba pokoi', 'rooms', 'liczba_pokoi', 'ilosc_pokoi',
-    'nr pokoi', 'rooms_count', 'pokoi'
+    'nr pokoi', 'rooms_count', 'pokoi',
+    // MINISTRY OFFICIAL NAMES:
+    'liczba pokoi w lokalu mieszkalnym lub domu jednorodzinnym'
   ],
   
   // Location fields
@@ -275,19 +279,29 @@ const COLUMN_PATTERNS: ColumnMapping = {
   // Parking and storage
   parking_space: [
     'parking', 'miejsce parkingowe', 'garaż', 'parking space', 'parking_space',
-    'miejsce_parkingowe', 'mp', 'parking_spot', 'garage'
+    'miejsce_parkingowe', 'mp', 'parking_spot', 'garage',
+    // MINISTRY OFFICIAL NAMES:
+    'nr przypisanego miejsca parkingowego / garażu [1]',
+    'numer miejsca parkingowego garażu'
   ],
   parking_price: [
     'cena parkingu', 'cena garażu', 'parking price', 'parking_price',
-    'cena_parkingu', 'cena_garazu', 'parking_cost'
+    'cena_parkingu', 'cena_garazu', 'parking_cost',
+    // MINISTRY OFFICIAL NAMES:
+    'cena przypisanego miejsca parkingowego / garażu [1]',
+    'cena miejsca parkingowego garażu'
   ],
   miejsca_postojowe_nr: [
     'nr miejsc parkingowych', 'parking_numbers', 'parking_spaces',
-    'miejsca_postojowe_nr', 'numery parkingów'
+    'miejsca_postojowe_nr', 'numery parkingów',
+    // MINISTRY OFFICIAL NAMES:
+    'nr przypisanego miejsca parkingowego / garażu [1]'
   ],
   miejsca_postojowe_ceny: [
     'ceny miejsc parkingowych', 'parking_prices', 'parking_costs',
-    'miejsca_postojowe_ceny', 'ceny parkingów'
+    'miejsca_postojowe_ceny', 'ceny parkingów',
+    // MINISTRY OFFICIAL NAMES:
+    'cena przypisanego miejsca parkingowego / garażu [1]'
   ],
   komorki_nr: [
     'nr komórek', 'storage_numbers', 'komorki_nr',

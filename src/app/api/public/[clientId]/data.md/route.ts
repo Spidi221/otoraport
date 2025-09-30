@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateMarkdownForMinistry, createSampleData } from '@/lib/generators'
+import { generateMarkdownFile } from '@/lib/md-generator'
+import { createSampleData } from '@/lib/generators'
 import { createAdminClient } from '@/lib/supabase/server'
 import { validateClientId, applySecurityHeaders, checkRateLimit } from '@/lib/security'
 
@@ -59,35 +60,19 @@ export async function GET(
           .eq('developer_id', developer.id)
 
         // Get properties for these projects
+        // CRITICAL: Must explicitly select raw_data column (JSONB columns not included in *)
         const projectIds = projects?.map(p => p.id) || []
         const { data: properties } = await createAdminClient()
           .from('properties')
-          .select('*')
+          .select('id, project_id, raw_data, status, created_at, updated_at')
           .in('project_id', projectIds)
 
-        data = { 
-          developer: {
-            id: developer.id,
-            email: developer.email,
-            name: developer.name,
-            company_name: developer.company_name,
-            nip: developer.nip,
-            phone: developer.phone
-          }, 
-          projects: projects || [], 
-          properties: (properties || []).map(prop => ({
-            id: prop.id,
-            property_number: prop.property_number || 'N/A',
-            property_type: prop.property_type || 'mieszkanie',
-            price_per_m2: prop.price_per_m2,
-            total_price: prop.total_price,
-            final_price: prop.final_price || prop.total_price,
-            area: prop.area,
-            parking_space: prop.parking_space,
-            parking_price: prop.parking_price,
-            status: prop.status || 'dostępne',
-            raw_data: prop
-          }))
+        // CRITICAL: Pass raw properties with raw_data for extraction
+        data = {
+          developer,
+          projects: projects || [],
+          properties: properties || [],
+          generatedAt: new Date()
         }
         
         console.log(`Found real data: ${properties?.length || 0} properties for ${developer.company_name}`)
@@ -97,8 +82,8 @@ export async function GET(
       data = createSampleData(clientId)
     }
 
-    // Generate Markdown according to ministry requirements
-    const markdownContent = generateMarkdownForMinistry(data)
+    // Generate Markdown according to ministry requirements (using fixed generator)
+    const markdownContent = generateMarkdownFile(data)
 
     // SECURITY: Set appropriate headers for Markdown response with security headers
     const headers = applySecurityHeaders(new Headers({

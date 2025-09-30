@@ -55,13 +55,18 @@ export function FileManagement() {
       const response = await fetch('/api/files/list')
       const data = await response.json()
 
+      console.log('🔍 FILE MANAGEMENT: API response:', data)
+      console.log('🔍 FILE MANAGEMENT: Files array:', data.files)
+      console.log('🔍 FILE MANAGEMENT: Files length:', data.files?.length)
+
       if (data.success) {
         setFiles(data.files || [])
+        console.log('✅ FILE MANAGEMENT: Files state updated:', data.files?.length, 'files')
       } else {
-        console.error('Failed to fetch files:', data.error)
+        console.error('❌ FILE MANAGEMENT: Failed to fetch files:', data.error)
       }
     } catch (error) {
-      console.error('Error fetching files:', error)
+      console.error('💥 FILE MANAGEMENT: Error fetching files:', error)
     } finally {
       setLoading(false)
     }

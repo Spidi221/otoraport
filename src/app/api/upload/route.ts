@@ -147,20 +147,27 @@ export async function POST(request: NextRequest) {
 
 async function savePropertiesToDatabase(developerId: string, properties: any[], fileName: string, fileContent: string) {
   try {
+    // CRITICAL FIX: Use sanitized project name to prevent duplicates
+    const sanitizedFileName = fileName.replace(/\.(csv|xlsx?)$/i, '').trim()
+    const projectName = `Import from ${sanitizedFileName}`
+
+    console.log(`🔍 DATABASE: Looking for existing project: "${projectName}"`)
+
     // First, get or create a project for this upload
     let { data: project } = await createAdminClient()
       .from('projects')
       .select('id')
       .eq('developer_id', developerId)
-      .eq('name', `Import from ${fileName}`)
+      .eq('name', projectName)
       .maybeSingle()
 
     if (!project) {
+      console.log(`📦 DATABASE: Creating new project: "${projectName}"`)
       const { data: newProject } = await createAdminClient()
         .from('projects')
         .insert({
           developer_id: developerId,
-          name: `Import from ${fileName}`,
+          name: projectName,
           description: `Automatically created from CSV upload: ${fileName}`,
           status: 'active',
           created_at: new Date().toISOString()
@@ -169,6 +176,20 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
         .single()
 
       project = newProject
+    } else {
+      console.log(`♻️ DATABASE: Found existing project (id: ${project.id}), will replace properties`)
+
+      // CRITICAL FIX: Delete old properties before inserting new ones (re-upload scenario)
+      const { error: deleteError } = await createAdminClient()
+        .from('properties')
+        .delete()
+        .eq('project_id', project.id)
+
+      if (deleteError) {
+        console.error('⚠️ DATABASE: Error deleting old properties:', deleteError.message)
+      } else {
+        console.log(`🗑️ DATABASE: Cleared old properties for project ${project.id}`)
+      }
     }
 
     if (!project?.id) {
@@ -217,7 +238,7 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
       throw new Error(`Database insert failed: ${insertError.message}`)
     }
 
-    console.log(`✅ DATABASE: Saved ${propertiesToInsert.length} properties`)
+    console.log(`✅ DATABASE: Saved ${propertiesToInsert.length} properties to project ${project.id}`)
 
   } catch (error) {
     console.error('❌ DATABASE: Error saving properties:', error)
