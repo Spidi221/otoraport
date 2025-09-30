@@ -101,6 +101,8 @@ export async function POST(request: NextRequest) {
         propertiesCount = smartParseResult.totalRows
 
         console.log(`✅ UPLOAD API: Parsed ${smartParseResult.validRows}/${smartParseResult.totalRows} valid rows`)
+        console.log('🔍 UPLOAD API: Sample data:', JSON.stringify(smartParseResult.data[0], null, 2))
+        console.log('🗺️ UPLOAD API: Mappings:', JSON.stringify(smartParseResult.mappings, null, 2))
 
         // Save properties to database
         if (smartParseResult.data && smartParseResult.data.length > 0) {

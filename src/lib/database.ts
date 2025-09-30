@@ -1,6 +1,6 @@
 // Database service layer - zastępuje mock data
 import { createAdminClient } from '@/lib/supabase/server'
-import type { Database } from '@/lib/supabase'
+// Note: Database types should come from @/types/supabase if needed
 
 // Re-export createAdminClient for backwards compatibility
 export { createAdminClient }

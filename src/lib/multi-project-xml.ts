@@ -224,13 +224,52 @@ export async function generateAggregatedXML(developerId: string): Promise<string
       const getRawField = (field: string, aliases: string[] = []): any => {
         // Check all possible variations in raw_data
         for (const alias of [field, ...aliases]) {
-          if (data[alias] !== undefined) return data[alias]
+          if (data[alias] !== undefined && data[alias] !== null && data[alias] !== '') {
+            const value = data[alias]
+            // FILTER SOLD PROPERTIES: If value is "X" or "x", consider it as SOLD marker
+            if (typeof value === 'string' && (value.trim().toLowerCase() === 'x')) {
+              return 'SOLD' // Mark as sold
+            }
+            return value
+          }
         }
         // Fallback: check top-level rawData too
         for (const alias of [field, ...aliases]) {
-          if (rawData[alias] !== undefined) return rawData[alias]
+          if (rawData[alias] !== undefined && rawData[alias] !== null && rawData[alias] !== '') {
+            const value = rawData[alias]
+            // FILTER SOLD PROPERTIES: If value is "X" or "x", consider it as SOLD marker
+            if (typeof value === 'string' && (value.trim().toLowerCase() === 'x')) {
+              return 'SOLD' // Mark as sold
+            }
+            return value
+          }
         }
         return undefined
+      }
+
+      // MINISTRY CSV EXACT COLUMN NAMES (from 2025-09-11.csv)
+      const MINISTRY_COLUMNS = {
+        property_number: 'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera',
+        price_per_m2: 'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]',
+        total_price: 'Cena lokalu mieszkalnego lub domu jednorodzinnego [zł]',
+        powierzchnia: 'Powierzchnia użytkowa lokalu mieszkalnego lub powierzchnia domu jednorodzinnego [m2]',
+        wojewodztwo: 'Województwo - Lokalizacja Inwestycji mieszkaniowej',
+        powiat: 'Powiat - Lokalizacja Inwestycji mieszkaniowej',
+        gmina: 'Gmina - Lokalizacja Inwestycji mieszkaniowej',
+        miejscowosc: 'Miejscowość - Lokalizacja Inwestycji mieszkaniowej',
+        ulica: 'Ulica - Lokalizacja Inwestycji mieszkaniowej',
+        kod_pocztowy: 'Kod pocztowy - Lokalizacja Inwestycji mieszkaniowej',
+        liczba_pokoi: 'Liczba pokoi w lokalu mieszkalnym lub domu jednorodzinnym',
+        kondygnacja: 'Kondygnacja, na której znajduje się lokal mieszkalny lub dom jednorodzinny',
+        klatka: 'Numer klatki schodowej',
+        numer_budynku: 'Numer budynku',
+        data_ceny_od: 'Data obowiązywania ceny lokalu mieszkalnego lub domu jednorodzinnego [od]',
+        data_ceny_do: 'Data obowiązywania ceny lokalu mieszkalnego lub domu jednorodzinnego [do]',
+        parking_nr: 'Nr przypisanego miejsca parkingowego / garażu [1]',
+        parking_cena: 'Cena przypisanego miejsca parkingowego / garażu [1]',
+        komorka_nr: 'Nr przypisanej komórki lokatorskiej [1]',
+        komorka_powierzchnia: 'Powierzchnia przypisanej komórki lokatorskiej [1] [m 2 ]',
+        komorka_cena: 'Cena przypisanej komórki lokatorskiej [1]'
       }
 
       return {
@@ -239,30 +278,73 @@ export async function generateAggregatedXML(developerId: string): Promise<string
         created_at: prop.created_at,
         updated_at: prop.updated_at,
 
-        // Extract fields: Check structured columns first (if they exist), then raw_data
-        apartment_number: getRawField('apartment_number', ['property_number', 'numer_lokalu', 'lokal']),
+        // Extract fields: Check MINISTRY columns first (exact names), then aliases
+        apartment_number: getRawField('apartment_number', [
+          MINISTRY_COLUMNS.property_number,
+          'property_number', 'numer_lokalu', 'lokal'
+        ]),
         property_type: getRawField('property_type', ['typ', 'type']),
-        price_per_m2: getRawField('price_per_m2', ['cena_za_m2', 'cena za m2']),
-        base_price: getRawField('base_price', ['total_price', 'cena', 'cena_bazowa']),
-        final_price: getRawField('final_price', ['cena_finalna']),
-        surface_area: getRawField('surface_area', ['area', 'powierzchnia', 'metraz']),
+        price_per_m2: getRawField('price_per_m2', [
+          MINISTRY_COLUMNS.price_per_m2,
+          'cena_za_m2', 'cena za m2'
+        ]),
+        base_price: getRawField('base_price', [
+          MINISTRY_COLUMNS.total_price,
+          'total_price', 'cena', 'cena_bazowa'
+        ]),
+        final_price: getRawField('final_price', [
+          MINISTRY_COLUMNS.total_price,
+          'cena_finalna'
+        ]),
+        surface_area: getRawField('surface_area', [
+          MINISTRY_COLUMNS.powierzchnia,
+          'area', 'powierzchnia', 'metraz'
+        ]),
         status: getRawField('status', ['status_sprzedazy']),
 
-        // Location details (use fallback to aliases)
-        wojewodztwo: getRawField('wojewodztwo', ['województwo', 'woj']),
-        powiat: getRawField('powiat'),
-        gmina: getRawField('gmina'),
-        miejscowosc: getRawField('miejscowosc', ['miejscowość', 'miasto']),
-        ulica: getRawField('ulica', ['ul', 'street']),
-        numer_nieruchomosci: getRawField('numer_nieruchomosci', ['numer', 'nr']),
-        kod_pocztowy: getRawField('kod_pocztowy', ['kod', 'postal']),
+        // Location details - MINISTRY EXACT COLUMNS FIRST
+        wojewodztwo: getRawField('wojewodztwo', [
+          MINISTRY_COLUMNS.wojewodztwo,
+          'województwo', 'woj'
+        ]),
+        powiat: getRawField('powiat', [
+          MINISTRY_COLUMNS.powiat
+        ]),
+        gmina: getRawField('gmina', [
+          MINISTRY_COLUMNS.gmina
+        ]),
+        miejscowosc: getRawField('miejscowosc', [
+          MINISTRY_COLUMNS.miejscowosc,
+          'miejscowość', 'miasto'
+        ]),
+        ulica: getRawField('ulica', [
+          MINISTRY_COLUMNS.ulica,
+          'ul', 'street'
+        ]),
+        numer_nieruchomosci: getRawField('numer_nieruchomosci', [
+          MINISTRY_COLUMNS.numer_budynku,
+          'numer', 'nr'
+        ]),
+        kod_pocztowy: getRawField('kod_pocztowy', [
+          MINISTRY_COLUMNS.kod_pocztowy,
+          'kod', 'postal'
+        ]),
 
-        // Building details (use fallback to aliases)
+        // Building details - MINISTRY EXACT COLUMNS FIRST
         budynek: getRawField('budynek', ['building', 'bud']),
-        klatka: getRawField('klatka', ['klatka_schodowa']),
-        kondygnacja: getRawField('kondygnacja', ['pietro', 'floor']),
+        klatka: getRawField('klatka', [
+          MINISTRY_COLUMNS.klatka,
+          'klatka_schodowa'
+        ]),
+        kondygnacja: getRawField('kondygnacja', [
+          MINISTRY_COLUMNS.kondygnacja,
+          'pietro', 'floor'
+        ]),
         liczba_kondygnacji: getRawField('liczba_kondygnacji', ['liczba_pieter']),
-        liczba_pokoi: getRawField('liczba_pokoi', ['rooms', 'pokoje']),
+        liczba_pokoi: getRawField('liczba_pokoi', [
+          MINISTRY_COLUMNS.liczba_pokoi,
+          'rooms', 'pokoje'
+        ]),
         uklad_mieszkania: getRawField('uklad_mieszkania', ['uklad', 'layout']),
         stan_wykonczenia: getRawField('stan_wykonczenia', ['stan', 'wykończenie']),
         rok_budowy: getRawField('rok_budowy', ['rok']),
@@ -278,27 +360,51 @@ export async function generateAggregatedXML(developerId: string): Promise<string
         powierzchnia_piwnicy: getRawField('powierzchnia_piwnicy', ['piwnica']),
         powierzchnia_strychu: getRawField('powierzchnia_strychu', ['strych']),
 
-        // Price details (use fallback to aliases)
+        // Price details - MINISTRY EXACT COLUMNS FIRST
         cena_za_m2_poczatkowa: getRawField('cena_za_m2_poczatkowa'),
         cena_bazowa_poczatkowa: getRawField('cena_bazowa_poczatkowa'),
         cena_finalna_poczatkowa: getRawField('cena_finalna_poczatkowa'),
         data_pierwszej_oferty: getRawField('data_pierwszej_oferty'),
-        cena_za_m2_aktualna: getRawField('cena_za_m2_aktualna', ['price_per_m2', 'cena_za_m2']),
-        cena_bazowa_aktualna: getRawField('cena_bazowa_aktualna', ['base_price', 'total_price', 'cena']),
-        cena_finalna_aktualna: getRawField('cena_finalna_aktualna', ['final_price']),
-        data_obowiazywania_ceny_od: getRawField('data_obowiazywania_ceny_od'),
-        data_obowiazywania_ceny_do: getRawField('data_obowiazywania_ceny_do'),
+        cena_za_m2_aktualna: getRawField('cena_za_m2_aktualna', [
+          MINISTRY_COLUMNS.price_per_m2,
+          'price_per_m2', 'cena_za_m2'
+        ]),
+        cena_bazowa_aktualna: getRawField('cena_bazowa_aktualna', [
+          MINISTRY_COLUMNS.total_price,
+          'base_price', 'total_price', 'cena'
+        ]),
+        cena_finalna_aktualna: getRawField('cena_finalna_aktualna', [
+          MINISTRY_COLUMNS.total_price,
+          'final_price'
+        ]),
+        data_obowiazywania_ceny_od: getRawField('data_obowiazywania_ceny_od', [
+          MINISTRY_COLUMNS.data_ceny_od
+        ]),
+        data_obowiazywania_ceny_do: getRawField('data_obowiazywania_ceny_do', [
+          MINISTRY_COLUMNS.data_ceny_do
+        ]),
         waluta: getRawField('waluta', ['currency']) || 'PLN',
 
-        // Additional elements (parking, storage)
+        // Additional elements (parking, storage) - MINISTRY EXACT COLUMNS
         miejsca_postojowe_liczba: getRawField('miejsca_postojowe_liczba', ['parking_count']),
-        miejsca_postojowe_nr: getRawField('miejsca_postojowe_nr'),
-        miejsca_postojowe_ceny: getRawField('miejsca_postojowe_ceny', ['parking_price']),
+        miejsca_postojowe_nr: getRawField('miejsca_postojowe_nr', [
+          MINISTRY_COLUMNS.parking_nr
+        ]),
+        miejsca_postojowe_ceny: getRawField('miejsca_postojowe_ceny', [
+          MINISTRY_COLUMNS.parking_cena,
+          'parking_price'
+        ]),
         miejsca_postojowe_rodzaj: getRawField('miejsca_postojowe_rodzaj', ['parking_type']),
         komorki_lokatorskie_liczba: getRawField('komorki_lokatorskie_liczba'),
-        komorki_lokatorskie_nr: getRawField('komorki_lokatorskie_nr'),
-        komorki_lokatorskie_ceny: getRawField('komorki_lokatorskie_ceny'),
-        komorki_lokatorskie_powierzchnie: getRawField('komorki_lokatorskie_powierzchnie'),
+        komorki_lokatorskie_nr: getRawField('komorki_lokatorskie_nr', [
+          MINISTRY_COLUMNS.komorka_nr
+        ]),
+        komorki_lokatorskie_ceny: getRawField('komorki_lokatorskie_ceny', [
+          MINISTRY_COLUMNS.komorka_cena
+        ]),
+        komorki_lokatorskie_powierzchnie: getRawField('komorki_lokatorskie_powierzchnie', [
+          MINISTRY_COLUMNS.komorka_powierzchnia
+        ]),
 
         // Amenities
         pomieszczenia_przynalezne: getRawField('pomieszczenia_przynalezne'),
@@ -334,9 +440,23 @@ export async function generateAggregatedXML(developerId: string): Promise<string
 
     console.log(`Found ${allProperties.length} properties across ${validProjects.length} projects`)
 
+    // FILTER SOLD PROPERTIES: Remove properties where price_per_m2 or base_price is "SOLD"
+    const beforeFilterCount = allProperties.length
+    const availableProperties = allProperties.filter(prop => {
+      const isSold = prop.price_per_m2 === 'SOLD' || prop.base_price === 'SOLD' || prop.final_price === 'SOLD'
+      if (isSold) {
+        console.log(`🚫 FILTERED OUT sold property: ${prop.apartment_number} (price markers: ${prop.price_per_m2}, ${prop.base_price})`)
+      }
+      return !isSold
+    })
+    console.log(`✅ FILTER: ${beforeFilterCount} total properties → ${availableProperties.length} available (${beforeFilterCount - availableProperties.length} sold filtered out)`)
+
+    // Use filtered properties from here on
+    const allPropertiesFinal = availableProperties
+
     // DEBUG: Show extraction results for first property
-    if (allProperties.length > 0) {
-      const sample = allProperties[0]
+    if (allPropertiesFinal.length > 0) {
+      const sample = allPropertiesFinal[0]
       console.log('✅ Sample property extraction:', {
         id: sample.id,
         apartment_number: sample.apartment_number,
@@ -351,7 +471,7 @@ export async function generateAggregatedXML(developerId: string): Promise<string
     // Połącz properties z projektami (ręcznie zamiast zagnieżdżonych query)
     const projectsWithProperties = validProjects.map(project => ({
       ...project,
-      properties: allProperties.filter(prop => prop.project_id === project.id)
+      properties: allPropertiesFinal.filter(prop => prop.project_id === project.id)
     }))
 
     console.log(`Projects with properties:`, projectsWithProperties.map(p => ({ name: p.name, propertiesCount: p.properties.length })))
@@ -366,7 +486,7 @@ export async function generateAggregatedXML(developerId: string): Promise<string
       }))
     })
 
-    console.log(`Total properties across all projects: ${allPropertiesWithContext.length}`)
+    console.log(`Total AVAILABLE properties across all projects: ${allPropertiesWithContext.length}`)
 
     if (allPropertiesWithContext.length === 0) {
       console.warn(`No properties found for developer ${developerId}`)
@@ -432,7 +552,7 @@ export async function generateAggregatedXML(developerId: string): Promise<string
     // CRITICAL: Generate XML using official Ministry Schema 1.13
     console.log('Converting to Ministry format and validating...')
     const ministryOptions = convertToMinistryFormat(
-      allProperties,
+      allPropertiesFinal,
       aggregatedData.developer,
       aggregatedData.projects
     )
@@ -447,7 +567,7 @@ export async function generateAggregatedXML(developerId: string): Promise<string
     // Generate Ministry-compliant XML
     const xmlContent = generateMinistryXML(ministryOptions)
 
-    console.log(`Generated Ministry Schema 1.13 XML with ${allProperties.length} properties from ${validProjects.length} projects`)
+    console.log(`Generated Ministry Schema 1.13 XML with ${allPropertiesFinal.length} AVAILABLE properties from ${validProjects.length} projects`)
     console.log(`Validation: ${validation.valid ? 'PASSED' : 'WARNINGS'} (${validation.errors.length} issues)`)
 
     return xmlContent

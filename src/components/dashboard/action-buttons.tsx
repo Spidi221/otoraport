@@ -11,10 +11,10 @@ export function ActionButtons() {
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const { errors, addError, removeError, clearErrors } = useErrorHandling()
-  const supabase = createClient()
 
   useEffect(() => {
     async function getUser() {
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
     }

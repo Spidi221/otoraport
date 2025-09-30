@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
 interface Developer {
@@ -36,6 +36,7 @@ export function useAuth(): AuthState & AuthActions {
   const [developer, setDeveloper] = useState<Developer | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const supabase = createClient()
 
   // Determine if current user is admin
   const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email) : false

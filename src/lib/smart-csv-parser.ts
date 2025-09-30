@@ -663,13 +663,21 @@ export class SmartCSVParser {
 
     // Parse header
     this.headers = this.parseCSVLine(lines[0])
-    
+    console.log(`📊 PARSER: Header has ${this.headers.length} columns`)
+    console.log(`📊 PARSER: First 5 headers:`, this.headers.slice(0, 5))
+
     // Parse data rows
-    this.rows = lines.slice(1).map(line => this.parseCSVLine(line))
+    this.rows = lines.slice(1).map((line, idx) => {
+      const parsed = this.parseCSVLine(line)
+      if (idx < 3) { // Log first 3 data rows
+        console.log(`📊 PARSER: Row ${idx + 2} has ${parsed.length} columns. First 3 values:`, parsed.slice(0, 3))
+      }
+      return parsed
+    })
   }
 
   private parseCSVLine(line: string): string[] {
-    // Simple CSV parser - handles quoted fields and semicolon/comma separation
+    // RFC 4180 compliant CSV parser - handles quoted fields, escaped quotes, and commas
     const result: string[] = []
     let current = ''
     let inQuotes = false
@@ -680,9 +688,17 @@ export class SmartCSVParser {
 
     while (i < line.length) {
       const char = line[i]
-      
+      const nextChar = line[i + 1]
+
       if (char === '"') {
-        inQuotes = !inQuotes
+        if (inQuotes && nextChar === '"') {
+          // Escaped quote ("") inside quoted field
+          current += '"'
+          i++ // Skip next quote
+        } else {
+          // Toggle quote state (don't add quote to output)
+          inQuotes = !inQuotes
+        }
       } else if (char === separator && !inQuotes) {
         result.push(current.trim())
         current = ''
@@ -691,7 +707,7 @@ export class SmartCSVParser {
       }
       i++
     }
-    
+
     result.push(current.trim())
     return result
   }
@@ -760,6 +776,19 @@ export class SmartCSVParser {
     // Parse data using discovered mappings
     const data = this.parseData()
 
+    // Count valid rows - any row with meaningful data
+    const validRowsCount = data.filter(row => {
+      const hasPropertyNumber = !!row.property_number
+      const hasPricePerM2 = !!row.price_per_m2
+      const hasTotalPrice = !!row.total_price
+      const hasRawPropertyNumber = !!row.raw_data?.["Nr lokalu lub domu jednorodzinnego nadany przez dewelopera"]
+      const hasAnyData = Object.keys(row.raw_data || {}).length > 0
+
+      return hasPropertyNumber || hasPricePerM2 || hasTotalPrice || hasRawPropertyNumber || hasAnyData
+    }).length
+
+    console.log(`📊 PARSER: validRows calculation: ${validRowsCount}/${data.length} rows have data`)
+
     return {
       success: Object.keys(mappings).length >= 3, // Need at least 3 key fields
       data,
@@ -768,7 +797,7 @@ export class SmartCSVParser {
       suggestions,
       confidence,
       totalRows: this.rows.length,
-      validRows: data.filter(row => row.property_number).length
+      validRows: validRowsCount
     }
   }
 
@@ -829,18 +858,29 @@ export class SmartCSVParser {
   private parseData(): ParsedProperty[] {
     const results: ParsedProperty[] = []
 
-    for (const row of this.rows) {
-      if (row.length !== this.headers.length) {
-        continue // Skip malformed rows
+    console.log(`🔍 PARSER: parseData() - Processing ${this.rows.length} rows, headers: ${this.headers.length} columns`)
+
+    for (let i = 0; i < this.rows.length; i++) {
+      const row = this.rows[i]
+
+      // MINISTRY CSV FIX: Accept rows with different column counts
+      // Some rows may have trailing empty columns or missing optional fields
+      if (row.length < this.headers.length * 0.5) {
+        console.log(`⚠️ PARSER: Skipping row ${i + 2} - has ${row.length} columns, expected ${this.headers.length} (less than 50%)`)
+        continue // Skip rows with way too few columns
       }
+
+      console.log(`✅ PARSER: Processing row ${i + 2} - ${row.length} columns (${this.headers.length} expected)`)
 
       const property: ParsedProperty = {
         raw_data: {}
       }
 
-      // Build raw data object
+      // Build raw data object - only map columns that exist in this row
       this.headers.forEach((header, index) => {
-        property.raw_data[header] = row[index]
+        if (index < row.length) {
+          property.raw_data[header] = row[index] || ''
+        }
       })
 
       // Map known fields
@@ -886,9 +926,9 @@ export class SmartCSVParser {
         property.total_price = Math.round(property.price_per_m2 * property.area * 100) / 100
       }
 
-      // Only include rows with at least property number or any other data
-      // FIX: raw_data is an object, not array - check Object.keys().length
-      if (property.property_number || Object.keys(property.raw_data).length > 0) {
+      // Include ALL rows - validation happens later
+      // Even if property_number is empty, we still want the row (might have other data)
+      if (Object.keys(property.raw_data).length > 0) {
         results.push(property)
       }
     }
