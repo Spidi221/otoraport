@@ -1,7 +1,8 @@
-// Ministry Schema 1.13 XML Generator
+// Ministry Schema 1.13 HARVESTER XML Generator
 // Full compliance with Housing Price Transparency Act
+// CRITICAL: Generates Harvester metadata XML, not property data XML!
 
-import { generateMinistryXML, convertToMinistryFormat, MinistryXMLOptions } from './xml-generator'
+import { generateXMLFile as generateHarvesterXML, XMLGeneratorOptions } from './xml-generator'
 
 interface Property {
   id: string
@@ -103,100 +104,77 @@ export interface DataForGeneration {
 }
 
 /**
- * Generate XML according to Ministry Schema 1.13 specification
- * CRITICAL: Uses official dane_o_cenach_mieszkan format required by Ministry
+ * Generate Harvester XML according to Ministry Schema 1.13 specification
+ * CRITICAL: Generates METADATA XML pointing to CSV, NOT property data XML!
+ *
+ * Ministry wymaga:
+ * 1. XML Harvester (ten funkcja) - metadane o datasecie + URL do CSV
+ * 2. CSV file (osobny endpoint) - dane o mieszkaniach (58 kolumn)
  */
 export function generateXMLForMinistry(data: DataForGeneration): string {
-  console.log('Generating Ministry Schema 1.13 XML...')
+  console.log('Generating Ministry Harvester Schema 1.13 XML...')
 
   try {
-    // Convert legacy data format to Ministry format
-    const ministryOptions = convertToMinistryFormat(
-      data.properties,
-      data.developer,
-      data.projects
-    )
+    // Create Harvester XML options (only needs developer info)
+    const harvesterOptions: XMLGeneratorOptions = {
+      properties: [], // Not used in Harvester XML
+      developer: {
+        id: data.developer.id,
+        company_name: data.developer.company_name || data.developer.name,
+        nip: data.developer.nip || '',
+        email: data.developer.email,
+      },
+      projects: [] // Not used in Harvester XML
+    }
 
-    // Generate Ministry-compliant XML
-    return generateMinistryXML(ministryOptions)
+    // Generate Harvester metadata XML
+    return generateHarvesterXML(harvesterOptions)
 
   } catch (error) {
-    console.error('Ministry XML generation failed:', error)
+    console.error('Harvester XML generation failed:', error)
 
-    // Fallback to basic compliant structure
-    return generateFallbackMinistryXML(data)
+    // Fallback to basic Harvester structure
+    return generateFallbackHarvesterXML(data)
   }
 }
 
 /**
- * Fallback XML generator for emergency cases
+ * Fallback Harvester XML generator for emergency cases
+ * Generates basic Harvester metadata structure
  */
-function generateFallbackMinistryXML(data: DataForGeneration): string {
-  const { developer, properties } = data
-  const currentDate = new Date().toISOString()
-  const currentDateStr = currentDate.split('T')[0]
+function generateFallbackHarvesterXML(data: DataForGeneration): string {
+  const { developer } = data
+  const currentDate = new Date().toISOString().split('T')[0]
+  const currentYear = new Date().getFullYear()
 
-  const propertiesXML = properties.map(property => `
-        <lokal>
-          <numer_lokalu>${property.property_number || 'N/A'}</numer_lokalu>
-          <typ_lokalu>mieszkanie</typ_lokalu>
-          <powierzchnia_uzytkowa>${property.area || 0}</powierzchnia_uzytkowa>
-          <cena_za_m2>${property.price_per_m2 || 0}</cena_za_m2>
-          <cena_calkowita>${property.total_price || 0}</cena_calkowita>
-          <waluta>PLN</waluta>
-          <status_sprzedazy>${mapLegacyStatus(property.status)}</status_sprzedazy>
-          <data_pierwszej_publikacji>${currentDateStr}</data_pierwszej_publikacji>
-          <data_ostatniej_aktualizacji>${currentDateStr}</data_ostatniej_aktualizacji>
+  // Generate simple 36-char ID
+  const extIdent = `FALLBACK_${developer.id}_${developer.nip || '0000000000'}`.substring(0, 36).padEnd(36, '0')
+  const csvUrl = `https://ceny-sync.vercel.app/api/public/${developer.id}/data.csv`
 
-          <lokalizacja>
-            <wojewodztwo>${property.wojewodztwo || 'mazowieckie'}</wojewodztwo>
-            <powiat>${property.powiat || 'warszawa'}</powiat>
-            <gmina>${property.gmina || 'Warszawa'}</gmina>
-            <miejscowosc>${property.miejscowosc || 'Warszawa'}</miejscowosc>
-          </lokalizacja>
-        </lokal>
-  `).join('')
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<dane_o_cenach_mieszkan xmlns="urn:otwarte-dane:mieszkania:1.13">
-  <informacje_podstawowe>
-    <data_publikacji>${currentDateStr}</data_publikacji>
-
-    <dostawca_danych>
-      <nazwa>${developer.company_name || developer.name}</nazwa>
-      <nip>${developer.nip || 'BRAK_DANYCH'}</nip>
-      <adres_siedziby>${developer.headquarters_address || 'Brak danych'}</adres_siedziby>
-      <email>${developer.email}</email>
-      ${developer.phone ? `<telefon>${developer.phone}</telefon>` : ''}
-    </dostawca_danych>
-
-    <liczba_inwestycji>1</liczba_inwestycji>
-    <liczba_lokali>${properties.length}</liczba_lokali>
-  </informacje_podstawowe>
-
-  <inwestycje>
-    <inwestycja>
-      <id_inwestycji>default</id_inwestycji>
-      <nazwa>Nieruchomości ${developer.company_name || developer.name}</nazwa>
-
-      <lokalizacja>
-        <wojewodztwo>mazowieckie</wojewodztwo>
-        <powiat>warszawa</powiat>
-        <gmina>Warszawa</gmina>
-      </lokalizacja>
-
-      <lokale>
-        ${propertiesXML}
-      </lokale>
-    </inwestycja>
-  </inwestycje>
-
-  <metadata>
-    <wersja_schematu>1.13</wersja_schematu>
-    <data_wygenerowania>${currentDate}</data_wygenerowania>
-    <checksum>FALLBACK</checksum>
-  </metadata>
-</dane_o_cenach_mieszkan>`
+  return `<?xml version='1.0' encoding='UTF-8'?>
+<ns2:datasets xmlns:ns2="urn:otwarte-dane:harvester:1.13">
+\t<dataset status="published">
+\t\t<extIdent>${extIdent}</extIdent>
+\t\t<title>
+\t\t\t<polish>Ceny ofertowe mieszkań dewelopera ${developer.company_name || developer.name} w ${currentYear} r.</polish>
+\t\t\t<english>Offer prices of apartments of developer ${developer.company_name || developer.name} in ${currentYear}.</english>
+\t\t</title>
+\t\t<updateFrequency>daily</updateFrequency>
+\t\t<categories>
+\t\t\t<category>ECON</category>
+\t\t</categories>
+\t\t<resources>
+\t\t\t<resource status="published">
+\t\t\t\t<extIdent>${extIdent}_${currentDate.replace(/-/g, '')}</extIdent>
+\t\t\t\t<url>${csvUrl}</url>
+\t\t\t\t<dataDate>${currentDate}</dataDate>
+\t\t\t\t<specialSigns>
+\t\t\t\t\t<specialSign>X</specialSign>
+\t\t\t\t</specialSigns>
+\t\t\t</resource>
+\t\t</resources>
+\t</dataset>
+</ns2:datasets>`
 }
 
 /**

@@ -1,12 +1,12 @@
 /**
- * Multi-Project XML Aggregation for Ministry Schema 1.13
- * Based on CLAUDE.md specification - combines all projects into single Ministry-compliant XML
- * CRITICAL: Uses official dane_o_cenach_mieszkan format
+ * Multi-Project Harvester XML Aggregation for Ministry Schema 1.13
+ * Based on CLAUDE.md specification - generates Harvester metadata XML
+ * CRITICAL: Uses Harvester format (metadata pointing to CSV), NOT property data XML!
  */
 
 import { createAdminClient } from '@/lib/supabase/server'
 import { generateXMLForMinistry, DataForGeneration } from '@/lib/generators'
-import { generateMinistryXML, convertToMinistryFormat, validateMinistryXML } from './xml-generator'
+import { generateXMLFile as generateHarvesterXML, validateHarvesterXML } from './xml-generator'
 
 /**
  * Creates empty data structure when developer has no projects yet
