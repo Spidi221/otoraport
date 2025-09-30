@@ -40,53 +40,54 @@ export async function GET(
     console.log(`Ministry Markdown request for client: ${clientId}`)
 
     let data: any = null
-    
+
     try {
-      // Try to get real data from database
+      // Get developer by client_id
       const { data: developer, error: devError } = await createAdminClient()
         .from('developers')
         .select('*')
         .eq('client_id', clientId)
         .single()
-      
+
       if (devError || !developer) {
         console.log('Developer not found, using sample data')
         data = createSampleData(clientId)
       } else {
-        // Get projects for this developer
+        console.log(`🔍 MD: Developer found: ${developer.id} (${developer.company_name})`)
+
+        // Get projects (same query as XML generation)
         const { data: projects, error: projectsError } = await createAdminClient()
           .from('projects')
-          .select('*')
+          .select('id, name, location, status, developer_id, created_at')
           .eq('developer_id', developer.id)
+          .eq('status', 'active')
 
-        console.log(`🔍 MD: Found ${projects?.length || 0} projects for developer ${developer.id}`)
-        if (projectsError) console.error('❌ MD: Projects query error:', projectsError)
+        console.log(`🔍 MD: Found ${projects?.length || 0} projects`)
+        if (projectsError) console.error('❌ MD: Projects error:', projectsError)
 
-        // Get properties for these projects
-        // CRITICAL: Must explicitly select raw_data column (JSONB columns not included in *)
-        const projectIds = projects?.map(p => p.id) || []
+        const validProjects = projects || []
+        const projectIds = validProjects.map(p => p.id)
         console.log(`🔍 MD: Project IDs:`, projectIds)
 
-        const { data: properties, error: propertiesError } = await createAdminClient()
+        // Get properties (EXACTLY same query as XML generation)
+        const { data: rawProperties, error: propertiesError } = await createAdminClient()
           .from('properties')
-          .select('id, project_id, raw_data, status, created_at, updated_at')
+          .select('id, project_id, raw_data, created_at, updated_at')
           .in('project_id', projectIds)
 
-        console.log(`🔍 MD: Found ${properties?.length || 0} properties`)
-        if (propertiesError) console.error('❌ MD: Properties query error:', propertiesError)
+        console.log(`🔍 MD: Found ${rawProperties?.length || 0} properties`)
+        if (propertiesError) console.error('❌ MD: Properties error:', propertiesError)
 
-        // CRITICAL: Pass raw properties with raw_data for extraction
+        // Pass properties array directly (MD generator will extract from raw_data)
         data = {
           developer,
-          projects: projects || [],
-          properties: properties || [],
+          projects: validProjects,
+          properties: rawProperties || [],
           generatedAt: new Date()
         }
-
-        console.log(`Found real data: ${properties?.length || 0} properties for ${developer.company_name}`)
       }
     } catch (dbError) {
-      console.log('Database query failed, using sample data:', dbError)
+      console.log('❌ MD: Database error:', dbError)
       data = createSampleData(clientId)
     }
 
