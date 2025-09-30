@@ -83,9 +83,9 @@ function SignUpContent() {
         console.log('User registered:', data.user.email)
         console.log('Session:', data.session)
         
-        // FORCE CREATE PROFILE - skip email confirmation for dev
+        // Check if email confirmation is required
         if (process.env.NODE_ENV === 'development' || data.session) {
-          // Development or confirmed user
+          // Development or user already has session (auto-confirmed)
           await createDeveloperProfile(data.user)
           setMessage('Konto zostało utworzone! Przekierowywanie...')
           setTimeout(() => {
@@ -94,6 +94,10 @@ function SignUpContent() {
         } else {
           // Production - email confirmation needed
           setMessage('Rejestracja udana! Sprawdź email i kliknij link potwierdzający.')
+          // Redirect to verify-email page
+          setTimeout(() => {
+            router.push('/verify-email')
+          }, 2000)
         }
       }
     } catch (error) {
