@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Input } from "../ui/input";
 import { PropertyData, PaginatedResponse, isApiSuccess, PropertyStatus } from "@/types/api";
+import { Search, X } from "lucide-react";
 
 const getStatusBadge = (status: PropertyStatus) => {
   switch (status) {
@@ -20,11 +22,13 @@ const getStatusBadge = (status: PropertyStatus) => {
 
 export function PropertiesTable() {
   const [properties, setProperties] = useState<PropertyData[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({ 
-    total: 0, 
-    page: 1, 
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
     limit: 10,
     totalPages: 0
   });
@@ -48,6 +52,7 @@ export function PropertiesTable() {
         if (isApiSuccess(result)) {
           console.log('✅ PROPERTIES TABLE: Setting properties:', result.data.length, 'items')
           setProperties(result.data);
+          setFilteredProperties(result.data);
           setPagination(result.pagination);
         } else {
           console.error('❌ PROPERTIES TABLE: API failed, error:', result.error)
@@ -64,10 +69,53 @@ export function PropertiesTable() {
     fetchProperties();
   }, []);
 
+  // Search filtering effect
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredProperties(properties);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = properties.filter((property) => {
+      return (
+        property.property_number?.toLowerCase().includes(query) ||
+        property.property_type?.toLowerCase().includes(query) ||
+        property.project_name?.toLowerCase().includes(query) ||
+        property.area?.toString().includes(query) ||
+        property.price_per_m2?.toString().includes(query) ||
+        property.total_price?.toString().includes(query) ||
+        property.status?.toLowerCase().includes(query)
+      );
+    });
+
+    setFilteredProperties(filtered);
+  }, [searchQuery, properties]);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Nieruchomości</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Nieruchomości</CardTitle>
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Szukaj nieruchomości..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -125,19 +173,30 @@ export function PropertiesTable() {
                     </div>
                   </td>
                 </tr>
-              ) : properties.length === 0 ? (
+              ) : filteredProperties.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-8 text-center">
                     <div className="text-gray-500">
-                      <p className="font-medium">Brak nieruchomości</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Wgraj plik CSV lub XML z danymi nieruchomości, aby zobaczyć je tutaj.
-                      </p>
+                      {searchQuery ? (
+                        <>
+                          <p className="font-medium">Nie znaleziono wyników</p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Spróbuj użyć innego zapytania wyszukiwania
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-medium">Brak nieruchomości</p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Wgraj plik CSV lub XML z danymi nieruchomości, aby zobaczyć je tutaj.
+                          </p>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
               ) : (
-                properties.map((property) => (
+                filteredProperties.map((property) => (
                   <tr key={property.id} className="border-b last:border-b-0">
                     <td className="py-3 font-mono text-sm">{property.property_number}</td>
                     <td className="py-3 text-sm">{property.property_type}</td>
@@ -155,20 +214,22 @@ export function PropertiesTable() {
           </table>
         </div>
         
-        {/* Pagination */}
+        {/* Pagination and search results */}
         <div className="flex items-center justify-between pt-4">
           <div className="text-sm text-muted-foreground">
             {isLoading ? (
               'Ładowanie...'
             ) : error ? (
               'Błąd pobierania danych'
+            ) : searchQuery ? (
+              `Znaleziono ${filteredProperties.length} z ${properties.length} nieruchomości`
             ) : properties.length === 0 ? (
               'Brak nieruchomości do wyświetlenia'
             ) : (
               `Pokazano ${Math.min(pagination.limit, properties.length)} z ${pagination.total} nieruchomości`
             )}
           </div>
-          {pagination.total > pagination.limit && (
+          {!searchQuery && pagination.total > pagination.limit && (
             <div className="text-sm text-muted-foreground">
               Strona {pagination.page} z {Math.ceil(pagination.total / pagination.limit)}
             </div>
