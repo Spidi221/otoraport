@@ -54,18 +54,26 @@ export async function GET(
         data = createSampleData(clientId)
       } else {
         // Get projects for this developer
-        const { data: projects } = await createAdminClient()
+        const { data: projects, error: projectsError } = await createAdminClient()
           .from('projects')
           .select('*')
           .eq('developer_id', developer.id)
 
+        console.log(`🔍 MD: Found ${projects?.length || 0} projects for developer ${developer.id}`)
+        if (projectsError) console.error('❌ MD: Projects query error:', projectsError)
+
         // Get properties for these projects
         // CRITICAL: Must explicitly select raw_data column (JSONB columns not included in *)
         const projectIds = projects?.map(p => p.id) || []
-        const { data: properties } = await createAdminClient()
+        console.log(`🔍 MD: Project IDs:`, projectIds)
+
+        const { data: properties, error: propertiesError } = await createAdminClient()
           .from('properties')
           .select('id, project_id, raw_data, status, created_at, updated_at')
           .in('project_id', projectIds)
+
+        console.log(`🔍 MD: Found ${properties?.length || 0} properties`)
+        if (propertiesError) console.error('❌ MD: Properties query error:', propertiesError)
 
         // CRITICAL: Pass raw properties with raw_data for extraction
         data = {
@@ -74,7 +82,7 @@ export async function GET(
           properties: properties || [],
           generatedAt: new Date()
         }
-        
+
         console.log(`Found real data: ${properties?.length || 0} properties for ${developer.company_name}`)
       }
     } catch (dbError) {
