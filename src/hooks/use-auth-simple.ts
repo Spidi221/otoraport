@@ -252,3 +252,5 @@ export function useAuthSimple(): AuthState & AuthActions {
     refreshProfile
   }
 }
+// Alias for compatibility
+export { useAuthSimple as useAuth }

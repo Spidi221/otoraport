@@ -13,7 +13,7 @@ import {
 } from "../ui/dropdown-menu";
 import { OtoraportLogo } from "../icons/otoraport-logo";
 import Link from "next/link";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-simple";
 import { useState } from "react";
 
 interface HeaderProps {

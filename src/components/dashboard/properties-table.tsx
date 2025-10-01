@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import useSWR from "swr";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -52,7 +52,6 @@ const getStatusBadge = (status: PropertyStatus) => {
 export function PropertiesTable() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20); // 20 items per page
-  const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [projectFilter, setProjectFilter] = useState<string>('all');
@@ -95,8 +94,11 @@ export function PropertiesTable() {
     setSelectedIds(new Set());
   }, [page]);
 
-  // Get unique project names for filter
-  const uniqueProjects = Array.from(new Set(properties.map(p => p.project_name).filter(Boolean)));
+  // Get unique project names for filter (memoized to prevent infinite re-renders)
+  const uniqueProjects = React.useMemo(() =>
+    Array.from(new Set(properties.map(p => p.project_name).filter(Boolean))),
+    [properties]
+  );
 
   // Sort handler
   const handleSort = (column: string) => {
@@ -118,8 +120,8 @@ export function PropertiesTable() {
       <ArrowDown className="w-4 h-4 ml-1" />;
   };
 
-  // Search and filter effect
-  useEffect(() => {
+  // Search and filter with useMemo (not useEffect to avoid infinite loops)
+  const filteredProperties = React.useMemo(() => {
     let filtered = [...properties];
 
     // Apply search filter
@@ -165,7 +167,7 @@ export function PropertiesTable() {
       });
     }
 
-    setFilteredProperties(filtered);
+    return filtered;
   }, [searchQuery, statusFilter, projectFilter, sortColumn, sortDirection, properties]);
 
   // Bulk operations handlers

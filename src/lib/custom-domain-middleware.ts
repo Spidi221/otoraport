@@ -13,6 +13,7 @@ export async function handleCustomDomain(request: NextRequest): Promise<NextResp
   // Skip if it's the main domain or subdomain
   if (
     hostname === 'localhost:3000' ||
+    hostname === 'localhost:3001' ||
     hostname === 'localhost:3006' ||
     hostname.includes('otoraport.pl') ||
     hostname.includes('vercel.app') ||
