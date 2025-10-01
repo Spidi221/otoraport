@@ -29,7 +29,7 @@ export function generateMinistryDataXML(options: MinistryXMLOptions): string {
   console.log(`Generating Ministry Property Data XML for ${developer.company_name} with ${properties.length} properties`)
 
   // Start XML document
-  let xml = `<?xml version="1.0" encoding="UTF-8"?>
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <dane_o_cenach_mieszkan xmlns="urn:otwarte-dane:mieszkania:1.13">
   <informacje_podstawowe>
     <data_publikacji>${escapeXml(currentDate)}</data_publikacji>

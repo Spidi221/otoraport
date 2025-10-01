@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { parseCSVSmart, SmartCSVParser, parseExcelFile } from '@/lib/smart-csv-parser'
+import { validateUploadFile } from '@/lib/security'
 
 export async function POST(request: NextRequest) {
   console.log('🚀 UPLOAD API: Starting file upload...')
@@ -89,7 +90,17 @@ export async function POST(request: NextRequest) {
 
     console.log('📁 UPLOAD API: File received:', file.name, file.size, 'bytes')
 
-    // Validate file type
+    // SECURITY: Validate file (size, type, name)
+    const fileValidation = validateUploadFile(file)
+    if (!fileValidation.valid) {
+      console.log('❌ UPLOAD API: File validation failed:', fileValidation.error)
+      return NextResponse.json(
+        { error: fileValidation.error },
+        { status: 400 }
+      )
+    }
+
+    // Validate file extension
     const fileExtension = file.name.split('.').pop()?.toLowerCase()
     const validExtensions = ['csv', 'xlsx', 'xls']
 
@@ -191,36 +202,67 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * Generate a URL-safe slug from project name
+ * Example: "Osiedle Słoneczne 2025" -> "osiedle-sloneczne-2025"
+ */
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD') // Normalize Polish characters
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+    .replace(/ł/g, 'l')
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with dash
+    .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
+    .substring(0, 255) // Limit to schema max length
+}
+
 async function savePropertiesToDatabase(developerId: string, properties: any[], fileName: string, fileContent: string) {
   try {
     // CRITICAL FIX: Extract meaningful project name from filename
     const projectName = SmartCSVParser.extractProjectName(fileName)
+    const projectSlug = generateSlug(projectName)
 
-    console.log(`🔍 DATABASE: Looking for existing project: "${projectName}"`)
+    console.log(`🔍 DATABASE: Looking for existing project: "${projectName}" (slug: ${projectSlug})`)
 
     // First, get or create a project for this upload
-    let { data: project } = await createAdminClient()
+    let { data: project, error: projectLookupError } = await createAdminClient()
       .from('projects')
       .select('id')
       .eq('developer_id', developerId)
-      .eq('name', projectName)
+      .eq('slug', projectSlug)
       .maybeSingle()
+
+    if (projectLookupError) {
+      console.error('❌ DATABASE: Error looking up project:', projectLookupError.message)
+      throw new Error(`Failed to lookup project: ${projectLookupError.message}`)
+    }
 
     if (!project) {
       console.log(`📦 DATABASE: Creating new project: "${projectName}"`)
-      const { data: newProject } = await createAdminClient()
+
+      const { data: newProject, error: insertError } = await createAdminClient()
         .from('projects')
         .insert({
           developer_id: developerId,
           name: projectName,
-          description: `Automatically created from CSV upload: ${fileName}`,
-          status: 'active',
-          created_at: new Date().toISOString()
+          slug: projectSlug,
+          description: `Automatically created from CSV upload: ${fileName}`
         })
         .select('id')
         .single()
 
+      if (insertError) {
+        console.error('❌ DATABASE: Project insert error:', insertError)
+        throw new Error(`Failed to create project: ${insertError.message}`)
+      }
+
+      if (!newProject) {
+        throw new Error('Project insert returned no data')
+      }
+
       project = newProject
+      console.log(`✅ DATABASE: Created project ${project.id}`)
     } else {
       console.log(`♻️ DATABASE: Found existing project (id: ${project.id}), will replace properties`)
 
@@ -238,38 +280,79 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
     }
 
     if (!project?.id) {
-      throw new Error('Failed to create or get project')
-    }
-
-    // Save uploaded file record with content for reprocessing
-    const { data: fileRecord, error: fileError } = await createAdminClient()
-      .from('uploaded_files')
-      .insert({
-        developer_id: developerId,
-        project_id: project.id,
-        file_name: fileName,
-        file_size: fileContent.length,
-        file_content: fileContent, // Store content for reprocessing
-        processed: true,
-        processed_at: new Date().toISOString()
-      })
-      .select('id')
-      .single()
-
-    if (fileError) {
-      console.error('❌ Error creating file record:', fileError)
-      // Don't throw - continue with properties insert
-    } else {
-      console.log(`✅ File record created: ${fileRecord.id}`)
+      throw new Error('Failed to create or get project - no project ID')
     }
 
     // Prepare properties for database insert
-    // CRITICAL: Supabase schema cache is broken - ONLY use project_id and raw_data
-    const propertiesToInsert = properties.map(property => ({
-      project_id: project.id,
-      // Store EVERYTHING in raw_data to bypass schema cache validation
-      raw_data: property
-    }))
+    // Map parsed properties to database schema
+    const propertiesToInsert = properties.map(property => {
+      // Parse numeric values safely
+      const parseDecimal = (value: any): number | null => {
+        if (!value || value === 'X' || value === 'x') return null
+        const parsed = parseFloat(String(value).replace(/[^\d.-]/g, ''))
+        return isNaN(parsed) ? null : parsed
+      }
+
+      const parseDate = (value: any): string | null => {
+        if (!value || value === 'X' || value === 'x') return null
+        return String(value)
+      }
+
+      return {
+        project_id: project.id,
+        developer_id: developerId,
+
+        // Lokalizacja (wymagane: wojewodztwo, powiat, gmina)
+        wojewodztwo: property.wojewodztwo || 'nieznane',
+        powiat: property.powiat || 'nieznane',
+        gmina: property.gmina || 'nieznane',
+        miejscowosc: property.miejscowosc || null,
+        ulica: property.ulica || null,
+        nr_budynku: property.numer_nieruchomosci || null,
+        kod_pocztowy: property.kod_pocztowy || null,
+
+        // Podstawowe dane (wymagane: property_type, apartment_number)
+        property_type: property.property_type === 'dom jednorodzinny' ? 'dom' : 'mieszkanie',
+        apartment_number: property.property_number || property.apartment_number || `Property-${Date.now()}`,
+        area: parseDecimal(property.area),
+
+        // Ceny (wymagane: price_per_m2, base_price, final_price)
+        price_per_m2: parseDecimal(property.price_per_m2) || parseDecimal(property.final_price) || 1,
+        price_valid_from: parseDate(property.price_valid_from) || new Date().toISOString().split('T')[0],
+        base_price: parseDecimal(property.base_price) || parseDecimal(property.total_price) || parseDecimal(property.final_price) || 1,
+        base_price_valid_from: parseDate(property.price_valid_from) || new Date().toISOString().split('T')[0],
+        final_price: parseDecimal(property.final_price) || parseDecimal(property.total_price) || 1,
+        final_price_valid_from: parseDate(property.price_valid_from) || new Date().toISOString().split('T')[0],
+
+        // Parking (opcjonalne)
+        parking_type: property.parking_type || null,
+        parking_designation: property.parking_designation || null,
+        parking_price: parseDecimal(property.parking_price),
+        parking_date: parseDate(property.parking_date),
+
+        // Storage (opcjonalne)
+        storage_type: property.storage_type || null,
+        storage_designation: property.storage_designation || null,
+        storage_price: parseDecimal(property.storage_price),
+        storage_date: parseDate(property.storage_date),
+
+        // Necessary rights (opcjonalne)
+        necessary_rights_type: property.necessary_rights_type || null,
+        necessary_rights_description: property.necessary_rights_description || null,
+        necessary_rights_price: parseDecimal(property.necessary_rights_price),
+        necessary_rights_date: parseDate(property.necessary_rights_date),
+
+        // Other services (opcjonalne)
+        other_services_type: property.other_services_type || null,
+        other_services_price: parseDecimal(property.other_services_price),
+        prospectus_url: property.prospectus_url || null,
+
+        // Dodatkowe
+        rooms: property.rooms ? parseInt(property.rooms) : null,
+        floor: property.floor ? parseInt(property.floor) : null,
+        status: property.status === 'X' || property.status === 'x' ? 'sold' : 'available'
+      }
+    })
 
     // Insert properties in batch
     console.log(`🔧 DATABASE: Inserting ${propertiesToInsert.length} properties`)

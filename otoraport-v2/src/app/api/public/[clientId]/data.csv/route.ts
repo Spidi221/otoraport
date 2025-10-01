@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { validateClientId, applySecurityHeaders, checkRateLimit } from '@/lib/security'
 import type { Database } from '@/types/database'
 
 type Developer = Database['public']['Tables']['developers']['Row']
@@ -20,7 +21,33 @@ export async function GET(
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   try {
+    // SECURITY: Rate limiting
+    const rateLimitResult = await checkRateLimit(request, {
+      windowMs: 60 * 1000,
+      maxRequests: 60,
+    });
+
+    if (!rateLimitResult.allowed) {
+      const headers = applySecurityHeaders(new Headers({
+        'Retry-After': Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString()
+      }));
+
+      return new NextResponse(
+        JSON.stringify({ error: 'Rate limit exceeded' }),
+        { status: 429, headers }
+      );
+    }
+
     const { clientId } = await params
+
+    // SECURITY: Validate client ID
+    if (!validateClientId(clientId)) {
+      const headers = applySecurityHeaders(new Headers());
+      return new NextResponse(
+        JSON.stringify({ error: 'Invalid client ID format' }),
+        { status: 400, headers }
+      );
+    }
 
     // Get developer data (using admin client to bypass RLS)
     const supabase = createAdminClient()
@@ -48,17 +75,34 @@ export async function GET(
     // Generate CSV with 58 ministry fields
     const csvContent = generateMinistryCSV(developer, properties || [])
 
+    // Set headers with security
+    const headers = applySecurityHeaders(new Headers({
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': `inline; filename="ceny-mieszkan-${clientId}-${new Date().toISOString().split('T')[0]}.csv"`,
+      'Cache-Control': 'public, max-age=300, s-maxage=3600, must-revalidate', // Browser: 5min, CDN: 1h
+      'X-Generated-At': new Date().toISOString(),
+      'X-Schema-Version': '1.13',
+      'X-Client-ID': clientId.substring(0, 8) + '****'
+    }))
+
     return new NextResponse(csvContent, {
       status: 200,
-      headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="ceny-mieszkan-${clientId}-${new Date().toISOString().split('T')[0]}.csv"`,
-        'Cache-Control': 'public, max-age=300, s-maxage=3600', // Browser: 5min, CDN: 1h
-      },
+      headers
     })
   } catch (error) {
     console.error('CSV generation error:', error)
-    return new NextResponse('Internal server error', { status: 500 })
+
+    const headers = applySecurityHeaders(new Headers({
+      'Content-Type': 'application/json'
+    }));
+
+    return new NextResponse(
+      JSON.stringify({
+        error: 'Internal server error generating CSV',
+        timestamp: new Date().toISOString()
+      }),
+      { status: 500, headers }
+    )
   }
 }
 

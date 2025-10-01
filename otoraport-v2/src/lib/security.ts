@@ -118,7 +118,6 @@ export async function checkRateLimit(
 
   const key = keyGenerator(request);
   const now = Date.now();
-  const windowStart = now - windowMs;
 
   // Clean up old entries
   for (const [storedKey, data] of rateLimitStore.entries()) {

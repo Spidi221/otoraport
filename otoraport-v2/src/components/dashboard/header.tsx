@@ -25,7 +25,7 @@ export function PublicHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <header className="border-b bg-white px-4 py-4 lg:px-6">
+    <header className="border-b bg-white/95 backdrop-blur-lg shadow-sm px-4 py-4 lg:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <OtoraportLogo />
 
@@ -33,10 +33,10 @@ export function PublicHeader() {
         <div className="hidden md:flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Link href="/auth/signin">
-              <Button variant="ghost">Zaloguj się</Button>
+              <Button variant="ghost" className="text-gray-700 hover:text-blue-600">Zaloguj się</Button>
             </Link>
             <Link href="/auth/signup">
-              <Button>Dołącz za darmo</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold shadow-md">Dołącz za darmo</Button>
             </Link>
           </div>
         </div>
@@ -104,7 +104,7 @@ function AuthenticatedHeader() {
   };
 
   return (
-    <header className="border-b bg-white px-4 py-4 lg:px-6">
+    <header className="border-b bg-white/95 backdrop-blur-lg shadow-sm px-4 py-4 lg:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <OtoraportLogo />
 

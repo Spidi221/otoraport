@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Test files
+test-create-developer.mjs
+ceny-mieszkan-*.csv
+*.OLD_PROJECT_BACKUP

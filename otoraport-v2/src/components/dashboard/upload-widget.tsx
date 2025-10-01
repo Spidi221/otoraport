@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import { Upload, FileText, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
-import { api } from "@/lib/api-client";
 
 interface UploadResult {
   fileName: string;
@@ -32,17 +31,26 @@ export function UploadWidget() {
     setUploadResult(null);
 
     try {
-      // Use API client with automatic cookie handling
-      const result = await api.uploadFile(file);
+      // Upload with FormData (credentials: 'include' for auth cookies)
+      const formData = new FormData();
+      formData.append('file', file);
 
-      if (!result.success) {
-        throw new Error(result.error || 'Wystąpił błąd podczas przesyłania');
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Wystąpił błąd podczas przesyłania');
       }
 
       // Simplified result: just filename and count
       setUploadResult({
         fileName: file.name,
-        propertiesAdded: result.data?.validRecords || result.data?.recordsCount || 0
+        propertiesAdded: data?.data?.validRecords || data?.data?.recordsCount || 0
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Wystąpił nieznany błąd');
@@ -123,9 +131,9 @@ export function UploadWidget() {
                 }
               </p>
             </div>
-            <Button 
-              size="sm" 
-              className="w-full" 
+            <Button
+              size="sm"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
               onClick={openFileDialog}
               disabled={uploading}
             >

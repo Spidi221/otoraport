@@ -239,7 +239,7 @@ function SignUpContent() {
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
                 disabled={isLoading}
               >
                 {isLoading ? 'Tworzenie konta...' : 'Utwórz konto'}
@@ -259,7 +259,7 @@ function SignUpContent() {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full mt-4"
+                className="w-full mt-4 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50"
                 onClick={handleGoogleSignUp}
                 disabled={isLoading}
               >

@@ -11,7 +11,6 @@ import { ChatWidget } from "@/components/ChatWidget";
 // Lazy load heavy components that are below the fold
 const ActionButtons = lazy(() => import("@/components/dashboard/action-buttons").then(m => ({ default: m.ActionButtons })));
 const PropertiesTable = lazy(() => import("@/components/dashboard/properties-table").then(m => ({ default: m.PropertiesTable })));
-const PricingCard = lazy(() => import("@/components/dashboard/pricing-card").then(m => ({ default: m.PricingCard })));
 
 export default function HomePage() {
   // Use unified auth hook
@@ -63,11 +62,6 @@ export default function HomePage() {
           {/* Properties Table */}
           <Suspense fallback={<LoadingState message="Ładowanie tabeli nieruchomości..." />}>
             <PropertiesTable />
-          </Suspense>
-
-          {/* Subscription Info */}
-          <Suspense fallback={<LoadingState message="Ładowanie..." />}>
-            <PricingCard />
           </Suspense>
         </div>
 
