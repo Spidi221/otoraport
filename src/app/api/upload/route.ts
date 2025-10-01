@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { parseCSVSmart, SmartCSVParser } from '@/lib/smart-csv-parser'
+import { parseCSVSmart, SmartCSVParser, parseExcelFile } from '@/lib/smart-csv-parser'
 
 export async function POST(request: NextRequest) {
   console.log('🚀 UPLOAD API: Starting file upload...')
@@ -88,19 +88,35 @@ export async function POST(request: NextRequest) {
 
     console.log('📁 UPLOAD API: File received:', file.name, file.size, 'bytes')
 
-    // Parse CSV file
-    const fileContent = await file.text()
+    // Validate file type
+    const fileExtension = file.name.split('.').pop()?.toLowerCase()
+    const validExtensions = ['csv', 'xlsx', 'xls']
+
+    if (!fileExtension || !validExtensions.includes(fileExtension)) {
+      return NextResponse.json(
+        { error: 'Unsupported file format. Please use CSV or Excel (.xlsx, .xls)' },
+        { status: 400 }
+      )
+    }
+
+    // Parse file based on type
     let smartParseResult = null
     let propertiesCount = 0
     let savedToDatabase = false
 
     try {
-      if (file.name.toLowerCase().endsWith('.csv')) {
+      if (fileExtension === 'csv') {
         console.log('📊 UPLOAD API: Parsing CSV file...')
+
+        // Get file content with proper encoding detection for Polish characters
+        const arrayBuffer = await file.arrayBuffer()
+        const fileContent = detectEncodingAndDecode(arrayBuffer)
+
         smartParseResult = parseCSVSmart(fileContent)
         propertiesCount = smartParseResult.totalRows
 
         console.log(`✅ UPLOAD API: Parsed ${smartParseResult.validRows}/${smartParseResult.totalRows} valid rows`)
+        console.log(`📋 UPLOAD API: Format detected - ${smartParseResult.detectedFormat?.toUpperCase()} (${smartParseResult.formatConfidence?.toFixed(1)}%)`)
         console.log('🔍 UPLOAD API: Sample data:', JSON.stringify(smartParseResult.data[0], null, 2))
         console.log('🗺️ UPLOAD API: Mappings:', JSON.stringify(smartParseResult.mappings, null, 2))
 
@@ -110,16 +126,38 @@ export async function POST(request: NextRequest) {
           savedToDatabase = true
           console.log(`✅ UPLOAD API: Saved ${smartParseResult.data.length} properties to database`)
         }
-      } else {
-        return NextResponse.json(
-          { error: 'Currently only CSV files are supported' },
-          { status: 400 }
-        )
+      } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+        console.log('📊 UPLOAD API: Parsing Excel file...')
+
+        // Convert File to Buffer for Excel parser
+        const arrayBuffer = await file.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+
+        // Parse Excel file (uses same smart parser as CSV)
+        smartParseResult = parseExcelFile(buffer)
+        propertiesCount = smartParseResult.totalRows
+
+        console.log(`✅ UPLOAD API: Parsed ${smartParseResult.validRows}/${smartParseResult.totalRows} valid rows from Excel`)
+        console.log(`📋 UPLOAD API: Format detected - ${smartParseResult.detectedFormat?.toUpperCase()} (${smartParseResult.formatConfidence?.toFixed(1)}%)`)
+        console.log('🔍 UPLOAD API: Sample data:', JSON.stringify(smartParseResult.data[0], null, 2))
+        console.log('🗺️ UPLOAD API: Mappings:', JSON.stringify(smartParseResult.mappings, null, 2))
+
+        // Save properties to database
+        if (smartParseResult.data && smartParseResult.data.length > 0) {
+          // Convert buffer to base64 string for storage (Excel files need special handling)
+          const fileContentForStorage = buffer.toString('base64')
+          await savePropertiesToDatabase(developer.id, smartParseResult.data, file.name, fileContentForStorage)
+          savedToDatabase = true
+          console.log(`✅ UPLOAD API: Saved ${smartParseResult.data.length} properties to database`)
+        }
       }
     } catch (parseError) {
       console.error('❌ UPLOAD API: Parse error:', parseError)
       return NextResponse.json(
-        { error: 'Failed to parse file' },
+        {
+          error: 'Failed to parse file',
+          details: parseError instanceof Error ? parseError.message : 'Unknown error'
+        },
         { status: 400 }
       )
     }
@@ -243,4 +281,70 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
     console.error('❌ DATABASE: Error saving properties:', error)
     throw error
   }
+}
+
+/**
+ * Detect encoding and decode ArrayBuffer to string with Polish character support
+ * Tries UTF-8 first, then Windows-1250 (common in Polish Excel exports), then ISO-8859-2
+ */
+function detectEncodingAndDecode(arrayBuffer: ArrayBuffer): string {
+  const uint8Array = new Uint8Array(arrayBuffer)
+
+  // Check for BOM (Byte Order Mark)
+  if (uint8Array.length >= 3 && uint8Array[0] === 0xEF && uint8Array[1] === 0xBB && uint8Array[2] === 0xBF) {
+    console.log('📝 ENCODING: UTF-8 BOM detected')
+    // Skip BOM and decode as UTF-8
+    const decoder = new TextDecoder('utf-8')
+    return decoder.decode(uint8Array.slice(3))
+  }
+
+  // Try UTF-8 first (most common)
+  try {
+    const decoder = new TextDecoder('utf-8', { fatal: true })
+    const decoded = decoder.decode(uint8Array)
+
+    // Validate UTF-8: check if Polish characters are correctly decoded
+    const hasPolishChars = /[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/.test(decoded)
+    const hasReplacementChars = /�/.test(decoded)
+
+    if (!hasReplacementChars) {
+      console.log(`📝 ENCODING: UTF-8 successful${hasPolishChars ? ' (Polish characters detected)' : ''}`)
+      return decoded
+    }
+  } catch (error) {
+    console.log('📝 ENCODING: UTF-8 decode failed, trying Windows-1250...')
+  }
+
+  // Try Windows-1250 (common in Polish Windows Excel exports)
+  try {
+    const decoder = new TextDecoder('windows-1250')
+    const decoded = decoder.decode(uint8Array)
+
+    // Check if Polish characters appear correctly
+    const hasPolishChars = /[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/.test(decoded)
+    if (hasPolishChars) {
+      console.log('📝 ENCODING: Windows-1250 successful (Polish characters detected)')
+      return decoded
+    }
+
+    // Even without Polish chars, Windows-1250 might be correct
+    console.log('📝 ENCODING: Windows-1250 used (fallback)')
+    return decoded
+  } catch (error) {
+    console.log('📝 ENCODING: Windows-1250 failed, trying ISO-8859-2...')
+  }
+
+  // Try ISO-8859-2 (Latin-2, Central European)
+  try {
+    const decoder = new TextDecoder('iso-8859-2')
+    const decoded = decoder.decode(uint8Array)
+    console.log('📝 ENCODING: ISO-8859-2 used (fallback)')
+    return decoded
+  } catch (error) {
+    console.log('⚠️ ENCODING: All decoders failed, using UTF-8 with replacement chars')
+  }
+
+  // Final fallback: UTF-8 with replacement characters
+  const decoder = new TextDecoder('utf-8')
+  return decoder.decode(uint8Array)
 }

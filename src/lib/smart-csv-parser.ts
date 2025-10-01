@@ -607,6 +607,9 @@ export interface SmartParseResult {
   confidence: number
   totalRows: number
   validRows: number
+  detectedFormat?: 'ministerial' | 'inpro' | 'custom'
+  formatConfidence?: number
+  formatDetails?: string
 }
 
 export interface ParsedProperty {
@@ -731,6 +734,118 @@ export class SmartCSVParser {
   }
 
   /**
+   * Detect CSV format type (ministerial/INPRO/custom) based on column signatures
+   */
+  private detectFormat(): { format: 'ministerial' | 'inpro' | 'custom', confidence: number, details: string } {
+    // MINISTERIAL FORMAT SIGNATURE: Official government schema columns (58 fields)
+    // UNIQUE fields that differentiate from INPRO
+    const ministerialSignatures = [
+      'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera',
+      'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]',
+      'Cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]',
+      'Nazwa dewelopera', // First column in ministerial schema
+      'Forma prawna dewelopera', // Second column in ministerial schema
+      'Rodzaj nieruchomości: lokal mieszkalny, dom jednorodzinny' // Exact ministerial wording
+    ]
+
+    // INPRO FORMAT SIGNATURE: Developer software export (40+ columns with ministerial compliance)
+    // UNIQUE fields that differentiate from ministerial
+    const inproSignatures = [
+      'Id nieruchomości', // UNIQUE to INPRO (ministerial doesn't have this)
+      'Adres strony internetowej dewelopera',
+      'Adres strony internetowej inwestycji',
+      'Nr nieruchomości nadany przez dewelopera', // INPRO-specific wording
+      'Inne świadczenia pieniężne',
+      'Data od której obowiązuje cena za m2 nieruchomości', // INPRO-specific date format
+      'Data od której obowiązuje cena nieruchomości'
+    ]
+
+    // CUSTOM FORMAT: Simple Polish/English column names
+    const customSignatures = [
+      'nr lokalu', 'numer lokalu', 'apartment',
+      'powierzchnia', 'area', 'metraz',
+      'cena', 'price', 'cena całkowita',
+      'status', 'dostępność', 'availability'
+    ]
+
+    let ministerialScore = 0
+    let inproScore = 0
+    let customScore = 0
+
+    const normalizedHeaders = this.headers.map(h => h.toLowerCase().trim())
+
+    // Score MINISTERIAL format
+    ministerialSignatures.forEach(sig => {
+      const normalized = sig.toLowerCase().trim()
+      if (normalizedHeaders.some(h => h.includes(normalized) || normalized.includes(h))) {
+        ministerialScore++
+      }
+    })
+
+    // Score INPRO format
+    inproSignatures.forEach(sig => {
+      const normalized = sig.toLowerCase().trim()
+      if (normalizedHeaders.some(h => h.includes(normalized) || normalized.includes(h))) {
+        inproScore++
+      }
+    })
+
+    // Score CUSTOM format (simpler columns)
+    customSignatures.forEach(sig => {
+      if (normalizedHeaders.some(h => h === sig || h.includes(sig))) {
+        customScore++
+      }
+    })
+
+    // Determine format based on highest score
+    const ministerialConfidence = (ministerialScore / ministerialSignatures.length) * 100
+    const inproConfidence = (inproScore / inproSignatures.length) * 100
+    const customConfidence = (customScore / customSignatures.length) * 100
+
+    // Priority detection:
+    // 1. Check for unique MINISTERIAL markers first (official government schema)
+    // 2. Then check for unique INPRO markers
+    // 3. Fallback to custom format
+
+    if (ministerialScore >= 4) {
+      // Strong ministerial signature (4+ unique fields including "Nazwa dewelopera", "Forma prawna")
+      return {
+        format: 'ministerial',
+        confidence: Math.min(ministerialConfidence, 95),
+        details: `Ministry Schema 1.13 compliant format (${ministerialScore}/${ministerialSignatures.length} official columns found)`
+      }
+    } else if (inproScore >= 4) {
+      // Strong INPRO signature (4+ unique fields including "Id nieruchomości")
+      return {
+        format: 'inpro',
+        confidence: Math.min(inproConfidence, 95),
+        details: `INPRO developer software export detected (${inproScore}/${inproSignatures.length} signature columns found)`
+      }
+    } else if (ministerialScore >= 2 && inproScore < 2) {
+      // Weak ministerial signature but clearly not INPRO
+      return {
+        format: 'ministerial',
+        confidence: Math.min(ministerialConfidence, 75),
+        details: `Likely Ministry format (${ministerialScore}/${ministerialSignatures.length} official columns found)`
+      }
+    } else if (inproScore >= 2) {
+      // Weak INPRO signature
+      return {
+        format: 'inpro',
+        confidence: Math.min(inproConfidence, 75),
+        details: `Likely INPRO format (${inproScore}/${inproSignatures.length} signature columns found)`
+      }
+    } else {
+      // Custom format
+      return {
+        format: 'custom',
+        confidence: Math.max(customConfidence, 50), // At least 50% for any valid CSV
+        details: `Custom developer export (${customScore}/${customSignatures.length} common field patterns found)`
+      }
+    }
+  }
+
+  /**
    * Intelligent column mapping using fuzzy string matching
    */
   public analyzeColumns(): SmartParseResult {
@@ -738,8 +853,13 @@ export class SmartCSVParser {
     const suggestions: { [key: string]: string[] } = {}
     const errors: string[] = []
 
+    // Detect format type
+    const formatDetection = this.detectFormat()
+    console.log(`🔍 PARSER: Format detected - ${formatDetection.format.toUpperCase()} (${formatDetection.confidence.toFixed(1)}% confidence)`)
+    console.log(`📋 PARSER: ${formatDetection.details}`)
+
     // Normalize headers for comparison
-    const normalizedHeaders = this.headers.map(header => 
+    const normalizedHeaders = this.headers.map(header =>
       header.toLowerCase()
         .replace(/[^\w\s]/g, '')
         .replace(/\s+/g, ' ')
@@ -815,7 +935,10 @@ export class SmartCSVParser {
       suggestions,
       confidence,
       totalRows: this.rows.length,
-      validRows: validRowsCount
+      validRows: validRowsCount,
+      detectedFormat: formatDetection.format,
+      formatConfidence: formatDetection.confidence,
+      formatDetails: formatDetection.details
     }
   }
 
