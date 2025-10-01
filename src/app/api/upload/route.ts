@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { parseCSVSmart } from '@/lib/smart-csv-parser'
+import { parseCSVSmart, SmartCSVParser } from '@/lib/smart-csv-parser'
 
 export async function POST(request: NextRequest) {
   console.log('🚀 UPLOAD API: Starting file upload...')
@@ -147,9 +147,8 @@ export async function POST(request: NextRequest) {
 
 async function savePropertiesToDatabase(developerId: string, properties: any[], fileName: string, fileContent: string) {
   try {
-    // CRITICAL FIX: Use sanitized project name to prevent duplicates
-    const sanitizedFileName = fileName.replace(/\.(csv|xlsx?)$/i, '').trim()
-    const projectName = `Import from ${sanitizedFileName}`
+    // CRITICAL FIX: Extract meaningful project name from filename
+    const projectName = SmartCSVParser.extractProjectName(fileName)
 
     console.log(`🔍 DATABASE: Looking for existing project: "${projectName}"`)
 

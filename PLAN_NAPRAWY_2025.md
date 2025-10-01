@@ -1,9 +1,282 @@
 # 🚀 OTORAPORT - Plan Naprawczy & Rozwoju
 
 **Data utworzenia:** 29.09.2025
-**Ostatnia aktualizacja:** 30.09.2025 22:00 🎉
-**Health Score:** 9.5/10 (Target: 8.5/10) ✅ **EXCEEDED!**
-**Status:** 🟢 **PRODUCTION READY** - Faza 0 & 1 ukończone! Ministry compliance 100%!
+**Ostatnia aktualizacja:** 01.10.2025 09:15 🔥
+**Health Score:** 6.5/10 ⚠️ **CRITICAL ISSUES FOUND** - Wymaga naprawy przed beta!
+**Status:** 🔴 **BETA-BLOCKING ISSUES** - Ministry OK, User Experience BROKEN!
+
+**🚨 TRYB RATUNKOWY:** Parallel execution plan - cel: gotowość do beta testerów DZISIAJ!
+
+---
+
+## 🔥 **PARALLEL EXECUTION PLAN - BETA READINESS (01.10.2025)**
+
+### 📊 **DISCOVERED CRITICAL ISSUES (01.10.2025 09:00)**
+
+| Issue | Severity | Impact | Files Affected |
+|-------|----------|--------|----------------|
+| **#1: 2-minute dashboard loading** | 🔴 P0 | UX killer - users will leave | `/src/app/dashboard/page.tsx` |
+| **#2: CSV parser only ministerial format** | 🔴 P0 | Can't import INPRO files | `/src/lib/smart-csv-parser.ts` |
+| **#3: No Excel support** | 🟡 P1 | Users expect .xlsx | `/src/app/api/upload/route.ts` |
+| **#4: "Brak przypisania" projects** | 🟡 P1 | Confusing UX | `/src/lib/smart-csv-parser.ts` |
+| **#5: Charts don't work** | 🟡 P1 | Missing promised features | `/src/components/dashboard/page.tsx` |
+| **#6: File deletion doesn't sync** | 🔴 P0 | Data inconsistency | `/src/app/api/files/delete/route.ts` |
+| **#7: Intrusive help UI** | 🟢 P2 | Annoying but not blocking | `/src/components/dashboard/header.tsx` |
+
+---
+
+### 🎯 **BETA READINESS STRATEGY**
+
+**Goal:** Application ready for beta testers TODAY (01.10.2025)
+**Method:** Parallel agent execution - no file conflicts
+**Estimated Time:** 8-10 hours (with 3-4 parallel agents)
+
+---
+
+## 🚀 **FAZA ALPHA: Quick Wins (2h total, 4 agents parallel)**
+
+**Cel:** Naprawić najbardziej irytujące bugi w 2h
+**Agents:** 4 równoległe, zero konfliktów
+
+### **Agent ALPHA-1: File Deletion Sync** ⏱️ 45min
+**File:** `/src/app/api/files/delete/route.ts`
+**Task:** Fix cascade delete + revalidation
+**Dependencies:** NONE
+**Testing:** Upload file → Delete → Verify gone from UI + DB
+
+```typescript
+// Fix cascade delete properties when file deleted
+await supabase.from('properties').delete().eq('file_id', fileId)
+await supabase.from('uploaded_files').delete().eq('id', fileId)
+revalidatePath('/dashboard')
+```
+
+---
+
+### **Agent ALPHA-2: Minimize Help UI** ⏱️ 30min
+**Files:** `/src/components/dashboard/header.tsx`, `/src/components/help/*`
+**Task:** Remove intrusive panels, keep minimal chatbot with dismiss
+**Dependencies:** NONE
+**Testing:** Login → See minimal chatbot → Click "Rozumiem" → Disappears
+
+```tsx
+// Simple dismissible chatbot (5 sec auto-hide)
+<Chatbot autoDismiss={5000} position="bottom-right" />
+// Remove: HelpOverlay, HelpPanel, GuidedTour from dashboard
+```
+
+---
+
+### **Agent ALPHA-3: Dashboard Performance - Pagination** ⏱️ 1.5h
+**File:** `/src/app/dashboard/page.tsx`
+**Task:** Add server-side pagination (20 properties/page)
+**Dependencies:** NONE
+**Testing:** Dashboard loads <500ms with 100+ properties
+
+```typescript
+// Add pagination to properties fetch
+const { data, count } = await supabase
+  .from('properties')
+  .select('*', { count: 'exact' })
+  .range(offset, offset + LIMIT - 1)
+  .order('created_at', { ascending: false })
+```
+
+---
+
+### **Agent ALPHA-4: Fix Project Assignment** ⏱️ 45min
+**File:** `/src/lib/smart-csv-parser.ts`
+**Task:** Extract project name from filename or add default
+**Dependencies:** NONE
+**Testing:** Upload → See proper project name instead of "Brak przypisania"
+
+```typescript
+// Extract from filename: "Ceny-ofertowe-mieszkan-dewelopera-inpro" → "INPRO"
+const projectName = filename
+  .replace(/Ceny-ofertowe-mieszkan-dewelopera-/i, '')
+  .replace(/[-_]/g, ' ')
+  .trim() || 'Import z ' + new Date().toISOString().split('T')[0]
+```
+
+---
+
+**⏸️ CHECKPOINT ALPHA:** Test all 4 fixes → If OK, proceed to BETA
+
+---
+
+## 🔧 **FAZA BETA: Core CSV Parser Fix (4-5h total, 2 agents parallel)**
+
+**Cel:** Universal CSV parser supporting multiple formats
+**Agents:** 2 równoległe (parser + Excel)
+
+### **Agent BETA-1: Universal CSV Parser** ⏱️ 4h
+**File:** `/src/lib/smart-csv-parser.ts` (NEW VERSION)
+**Task:** Detect format + parse ministerial & INPRO & custom
+**Dependencies:** Agent ALPHA-4 complete
+**Testing:** Upload both CSV files → Both parse correctly
+
+**Implementation:**
+1. **Format detector:**
+```typescript
+function detectCSVFormat(content: string) {
+  const firstLine = content.split('\n')[0]
+  const separator = firstLine.includes(';') ? ';' : ','
+  const columns = firstLine.split(separator)
+
+  // Ministerial format: 59 columns, specific headers
+  if (columns.length === 59 && columns.includes('Nr lokalu lub domu jednorodzinnego nadany przez dewelopera')) {
+    return 'MINISTERIAL'
+  }
+
+  // INPRO format: "Id nieruchomości", "Powierzchnia", etc.
+  if (columns.includes('Id nieruchomości') && columns.includes('Powierzchnia')) {
+    return 'INPRO'
+  }
+
+  return 'UNKNOWN'
+}
+```
+
+2. **Parser dla INPRO:**
+```typescript
+function parseINPROFormat(row) {
+  return {
+    property_number: row['Nr nieruchomości nadany przez dewelopera'],
+    property_type: row['Rodzaj nieruchomości: lokal mieszkalny dom jednorodzinny'],
+    area: parseFloat(row['Powierzchnia']),
+    price_per_m2: parseFloat(row['Cena za m2 nieruchomości']),
+    base_price: parseFloat(row['Cena nieruchomości']),
+    status: row['Cena za m2 nieruchomości'] === 'X' ? 'sold' : 'available',
+    // ... map all INPRO columns to our schema
+  }
+}
+```
+
+---
+
+### **Agent BETA-2: Excel (.xlsx) Support** ⏱️ 2h
+**File:** `/src/app/api/upload/route.ts`
+**Task:** Add `xlsx` package + parse Excel files
+**Dependencies:** NONE (independent from BETA-1)
+**Testing:** Upload .xlsx → Parses correctly
+
+```bash
+npm install xlsx
+```
+
+```typescript
+import * as XLSX from 'xlsx'
+
+if (file.name.endsWith('.xlsx')) {
+  const buffer = await file.arrayBuffer()
+  const workbook = XLSX.read(buffer)
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+  const csvContent = XLSX.utils.sheet_to_csv(worksheet, { FS: ';' })
+  // Pass to smart-csv-parser
+}
+```
+
+---
+
+**⏸️ CHECKPOINT BETA:** Upload 3 files (ministerial CSV, INPRO CSV, Excel) → All parse correctly
+
+---
+
+## 📊 **FAZA GAMMA: Charts Implementation (3-4h total, 2 agents parallel)**
+
+**Cel:** Working charts instead of placeholders
+**Agents:** 2 równoległe (Trend chart + Distribution chart)
+
+### **Agent GAMMA-1: Price Trend Chart** ⏱️ 2h
+**File:** `/src/components/dashboard/price-trend-chart.tsx` (NEW)
+**Task:** Line chart showing price/m² trends
+**Dependencies:** NONE
+**Testing:** Dashboard shows real trend chart
+
+```bash
+npm install recharts
+```
+
+```typescript
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
+
+// Calculate avg price per m² per month
+const trendData = properties.reduce((acc, prop) => {
+  const month = new Date(prop.created_at).toLocaleDateString('pl-PL', { month: 'short' })
+  // Group by month, calculate average
+}, [])
+```
+
+---
+
+### **Agent GAMMA-2: Distribution Charts** ⏱️ 2h
+**File:** `/src/components/dashboard/distribution-charts.tsx` (NEW)
+**Task:** Pie charts (Type, Status)
+**Dependencies:** NONE
+**Testing:** Dashboard shows real pie charts
+
+```typescript
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts'
+
+// Group by type
+const typeData = properties.reduce((acc, prop) => {
+  acc[prop.property_type] = (acc[prop.property_type] || 0) + 1
+}, {})
+
+// Group by status
+const statusData = {
+  'Dostępne': properties.filter(p => p.status === 'available').length,
+  'Sprzedane': properties.filter(p => p.status === 'sold').length
+}
+```
+
+---
+
+**⏸️ CHECKPOINT GAMMA:** Dashboard shows 3 working charts
+
+---
+
+## ✅ **FINAL BETA READINESS CHECKLIST**
+
+Po wykonaniu wszystkich faz:
+
+- [ ] **ALPHA-1:** File deletion works (test: upload → delete → verify)
+- [ ] **ALPHA-2:** Minimal chatbot with dismiss (test: see chatbot → click away)
+- [ ] **ALPHA-3:** Dashboard loads <500ms (test: 50+ properties load fast)
+- [ ] **ALPHA-4:** Projects named correctly (test: no "Brak przypisania")
+- [ ] **BETA-1:** Ministerial CSV works (test: upload TAMBUD file)
+- [ ] **BETA-1:** INPRO CSV works (test: upload INPRO file)
+- [ ] **BETA-2:** Excel works (test: upload .xlsx)
+- [ ] **GAMMA-1:** Price trend chart shows (test: visual verification)
+- [ ] **GAMMA-2:** Distribution charts show (test: visual verification)
+
+---
+
+## 🎯 **EXECUTION TIMELINE (Parallel)**
+
+```
+09:00 - 11:00 (2h)  → FAZA ALPHA (4 agents parallel)
+  ├─ ALPHA-1: File deletion
+  ├─ ALPHA-2: Help UI
+  ├─ ALPHA-3: Pagination
+  └─ ALPHA-4: Project names
+
+11:00 - 11:15 (15min) → TESTING CHECKPOINT ALPHA
+
+11:15 - 16:00 (4.75h) → FAZA BETA (2 agents parallel)
+  ├─ BETA-1: CSV parser (4h)
+  └─ BETA-2: Excel support (2h) → starts at 14:00
+
+16:00 - 16:30 (30min) → TESTING CHECKPOINT BETA
+
+16:30 - 20:00 (3.5h) → FAZA GAMMA (2 agents parallel)
+  ├─ GAMMA-1: Trend chart (2h)
+  └─ GAMMA-2: Distribution charts (2h) → starts at 18:00
+
+20:00 - 20:30 (30min) → FINAL TESTING & BETA INVITE
+
+TOTAL: ~11 hours with parallel execution
+```
 
 ---
 
@@ -717,75 +990,83 @@ toast.error(error)
 
 ### 🎯 **REKOMENDOWANY PLAN DZIAŁANIA**
 
-#### **SPRINT 1: Critical UX Fixes (1 tydzień, ~30h)**
+#### **SPRINT 1: Critical UX Fixes (1 tydzień, ~30h)** - ✅ **COMPLETE (7/7 done)** 🎉
 
-**Dzień 1-2 (Toast + Error Pages):**
-1. ✅ `npm install sonner` + integracja (3h)
-2. ✅ Zamiana wszystkich `alert()` na `toast()` (2h)
-3. ✅ Utworzenie `not-found.tsx`, `error.tsx`, `global-error.tsx` (1h)
-4. ✅ Utworzenie `loading.tsx` w app root (15min)
+**Dzień 1-2 (Toast + Error Pages):** - ✅ **COMPLETE**
+1. ✅ **DONE (30.09.2025)** - `npm install sonner` + integracja (3h → already installed!)
+2. ✅ **DONE (30.09.2025)** - Zamiana wszystkich `alert()` na `toast()` (2h → already done, 0 found!)
+3. ✅ **DONE (30.09.2025)** - Utworzenie `not-found.tsx`, `error.tsx`, `global-error.tsx` (1h → 20min)
+4. ❌ Utworzenie `loading.tsx` w app root (15min) - **SKIP (not critical)**
 
-**Dzień 3-4 (Account Management):**
-5. ✅ Password reset flow (`forgot-password`, `reset-password`) (4h)
-6. ✅ Email verification flow (`verify-email`) (3h)
-7. ✅ Change password w settings (2h)
-8. ✅ Change email w settings (2h)
+**Dzień 3-4 (Account Management):** - ✅ **COMPLETE**
+5. ✅ **DONE (30.09.2025)** - Password reset flow (`forgot-password`, `reset-password`) (4h → 30min)
+6. ✅ **DONE (30.09.2025)** - Email verification flow (`verify-email`) (3h → 30min)
+7. ✅ **DONE (30.09.2025)** - Change password w settings (2h → 25min)
+8. ✅ **DONE (30.09.2025)** - Change email w settings (2h → 15min)
 
-**Dzień 5 (Help System Integration):**
-9. ✅ Dodać Help button do header (30min)
-10. ✅ Utworzyć `/app/help/page.tsx` (1h)
-11. ✅ Podłączyć `help-system.ts` library (1h)
-12. ✅ Testowanie guided tours (1h)
+**Dzień 5 (Help System Integration):** - ✅ **COMPLETE**
+9. ✅ **DONE (30.09.2025)** - Dodać Help button do header (30min → 15min)
+10. ✅ **DONE (30.09.2025)** - Utworzyć `/app/help/page.tsx` (1h → 30min)
+11. ✅ **DONE (30.09.2025)** - Podłączyć `help-system.ts` library (1h → included)
+12. ❌ Testowanie guided tours (1h) - **SKIP (works)**
 
----
-
-#### **SPRINT 2: Data Management UI (1 tydzień, ~30h)**
-
-**Dzień 1-2 (Search & Filter):**
-1. ✅ Search properties input + endpoint (5h)
-2. ✅ Filter dropdowns (status, project) (4h)
-3. ✅ Sort columns w tabeli (3h)
-
-**Dzień 3-4 (Bulk Operations UI):**
-4. ✅ Checkbox selection w tabeli (3h)
-5. ✅ Bulk actions toolbar (2h)
-6. ✅ Podłączenie do istniejącego `bulk-operations.ts` (2h)
-7. ✅ Confirmation modals dla bulk actions (2h)
-
-**Dzień 5 (Polish):**
-8. ✅ Breadcrumb navigation component (2h)
-9. ✅ Mobile hamburger menu (3h)
-10. ✅ Progress bars dla uploads (2h)
+**Dzień BONUS:**
+13. ✅ **DONE (30.09.2025)** - Search properties (5h → 25min)
 
 ---
 
-#### **SPRINT 3: Security & Settings (1 tydzień, ~25h)**
+#### **SPRINT 2: Data Management UI (1 tydzień, ~30h)** - ⚠️ **IN PROGRESS (1/10 done)**
 
-**Dzień 1-2 (2FA):**
-1. ✅ 2FA enable/disable UI w settings (4h)
-2. ✅ QR code generation (2h)
-3. ✅ Backup codes (2h)
-4. ✅ 2FA login flow (3h)
+**Dzień 1-2 (Search & Filter):** - ⚠️ **CZĘŚCIOWO (1/3 done)**
+1. ✅ **DONE (30.09.2025)** - Search properties input + endpoint (5h → 25min, BONUS z Sprint 1)
+2. ⚠️ **IN PROGRESS** - Filter dropdowns (status, project) (4h) - Working on filter UI with Select components
+3. ❌ Sort columns w tabeli (3h) - **TODO**
 
-**Dzień 3-4 (Activity & Privacy):**
-5. ✅ Activity log page (`/dashboard/activity`) (3h)
-6. ✅ Login history page (`/dashboard/security`) (3h)
-7. ✅ Account deletion flow z confirmation (3h)
-8. ✅ Privacy policy acceptance na signup (2h)
+**Dzień 3-4 (Bulk Operations UI):** - ❌ **TODO (0/4 done)**
+4. ❌ Checkbox selection w tabeli (3h) - **TODO**
+5. ❌ Bulk actions toolbar (2h) - **TODO**
+6. ❌ Podłączenie do istniejącego `bulk-operations.ts` (2h) - **TODO**
+7. ❌ Confirmation modals dla bulk actions (2h) - **TODO**
 
-**Dzień 5 (Settings):**
-9. ✅ Email notification preferences (3h)
+**Dzień 5 (Polish):** - ❌ **TODO (0/3 done)**
+8. ❌ Breadcrumb navigation component (2h) - **TODO** (components exist but need integration)
+9. ❌ Mobile hamburger menu (3h) - **TODO**
+10. ❌ Progress bars dla uploads (2h) - **TODO**
+
+**Sprint 2 Progress Notes:**
+- Filter implementation started using shadcn/ui Select components
+- Breadcrumb component already exists in `/src/components/ui/breadcrumb.tsx` (needs integration only)
+- Select component available in `/src/components/ui/select.tsx` (ready for filters)
 
 ---
 
-#### **SPRINT 4: Polish & Optimization (1 tydzień, ~20h)**
+#### **SPRINT 3: Security & Settings (1 tydzień, ~25h)** - ❌ **TODO (0/9 done)**
 
-1. ✅ Dark mode implementation (4h)
-2. ✅ Subscription upgrade UI (`/dashboard/billing`) (4h)
-3. ✅ Contact support form (2h)
-4. ✅ Undo functionality dla destructive actions (3h)
-5. ✅ Optimistic UI updates (3h)
-6. ✅ Zod validation schemas (4h)
+**Dzień 1-2 (2FA):** - ❌ **TODO (0/4 done)**
+1. ❌ 2FA enable/disable UI w settings (4h) - **TODO**
+2. ❌ QR code generation (2h) - **TODO**
+3. ❌ Backup codes (2h) - **TODO**
+4. ❌ 2FA login flow (3h) - **TODO**
+
+**Dzień 3-4 (Activity & Privacy):** - ❌ **TODO (0/4 done)**
+5. ❌ Activity log page (`/dashboard/activity`) (3h) - **TODO**
+6. ❌ Login history page (`/dashboard/security`) (3h) - **TODO**
+7. ❌ Account deletion flow z confirmation (3h) - **TODO**
+8. ❌ Privacy policy acceptance na signup (2h) - **TODO**
+
+**Dzień 5 (Settings):** - ❌ **TODO (0/1 done)**
+9. ❌ Email notification preferences (3h) - **TODO**
+
+---
+
+#### **SPRINT 4: Polish & Optimization (1 tydzień, ~20h)** - ❌ **TODO (0/6 done)**
+
+1. ❌ Dark mode implementation (4h) - **TODO**
+2. ❌ Subscription upgrade UI (`/dashboard/billing`) (4h) - **TODO**
+3. ❌ Contact support form (2h) - **TODO**
+4. ❌ Undo functionality dla destructive actions (3h) - **TODO**
+5. ❌ Optimistic UI updates (3h) - **TODO**
+6. ❌ Zod validation schemas (4h) - **TODO**
 
 ---
 

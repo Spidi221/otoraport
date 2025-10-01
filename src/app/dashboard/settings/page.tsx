@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Building2, User, Bell, Shield } from 'lucide-react'
+import { Building2, User, Bell, Shield, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function SettingsPage() {
@@ -16,6 +16,22 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  })
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [emailData, setEmailData] = useState({
+    newEmail: '',
+    confirmEmail: ''
+  })
+  const [changingEmail, setChangingEmail] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -77,6 +93,98 @@ export default function SettingsPage() {
     )
   }
 
+  const handleChangePassword = async () => {
+    if (!passwordData.newPassword || !passwordData.confirmPassword) {
+      toast.error('Wypełnij wszystkie pola')
+      return
+    }
+
+    if (passwordData.newPassword.length < 8) {
+      toast.error('Hasło musi mieć minimum 8 znaków')
+      return
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('Hasła nie są identyczne')
+      return
+    }
+
+    setChangingPassword(true)
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      })
+
+      if (error) {
+        console.error('Password update error:', error)
+        toast.error('Błąd podczas zmiany hasła: ' + error.message)
+      } else {
+        toast.success('Hasło zostało zmienione pomyślnie')
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        })
+      }
+    } catch (error) {
+      console.error('Password change error:', error)
+      toast.error('Wystąpił błąd podczas zmiany hasła')
+    } finally {
+      setChangingPassword(false)
+    }
+  }
+
+  const handleChangeEmail = async () => {
+    if (!emailData.newEmail || !emailData.confirmEmail) {
+      toast.error('Wypełnij wszystkie pola')
+      return
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(emailData.newEmail)) {
+      toast.error('Podaj prawidłowy adres email')
+      return
+    }
+
+    if (emailData.newEmail !== emailData.confirmEmail) {
+      toast.error('Adresy email nie są identyczne')
+      return
+    }
+
+    if (emailData.newEmail === user?.email) {
+      toast.error('Nowy email jest taki sam jak obecny')
+      return
+    }
+
+    setChangingEmail(true)
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.updateUser({
+        email: emailData.newEmail
+      })
+
+      if (error) {
+        console.error('Email update error:', error)
+        toast.error('Błąd podczas zmiany emaila: ' + error.message)
+      } else {
+        toast.success('Email został zmieniony! Sprawdź obie skrzynki (stary i nowy email) aby potwierdzić zmianę.')
+        setEmailData({
+          newEmail: '',
+          confirmEmail: ''
+        })
+      }
+    } catch (error) {
+      console.error('Email change error:', error)
+      toast.error('Wystąpił błąd podczas zmiany emaila')
+    } finally {
+      setChangingEmail(false)
+    }
+  }
+
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-6">
@@ -121,7 +229,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">Email (obecny)</Label>
                   <Input
                     id="email"
                     type="email"
@@ -141,6 +249,47 @@ export default function SettingsPage() {
               <Button onClick={() => handleSave({ name: 'Updated' })} disabled={saving}>
                 {saving ? 'Zapisywanie...' : 'Zapisz zmiany'}
               </Button>
+
+              {/* Change Email Section */}
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="text-lg font-medium">Zmień adres email</h3>
+                <p className="text-sm text-gray-600">
+                  Po zmianie emaila otrzymasz wiadomości weryfikacyjne na oba adresy (stary i nowy).
+                  Musisz potwierdzić zmianę w obu wiadomościach.
+                </p>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="newEmail">Nowy adres email</Label>
+                    <Input
+                      id="newEmail"
+                      type="email"
+                      value={emailData.newEmail}
+                      onChange={(e) => setEmailData({...emailData, newEmail: e.target.value})}
+                      placeholder="nowy@email.pl"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmEmail">Potwierdź nowy email</Label>
+                    <Input
+                      id="confirmEmail"
+                      type="email"
+                      value={emailData.confirmEmail}
+                      onChange={(e) => setEmailData({...emailData, confirmEmail: e.target.value})}
+                      placeholder="nowy@email.pl"
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleChangeEmail}
+                  disabled={changingEmail}
+                  className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                >
+                  {changingEmail ? 'Wysyłanie...' : 'Zmień adres email'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -203,10 +352,68 @@ export default function SettingsPage() {
               <CardTitle>Bezpieczeństwo</CardTitle>
               <CardDescription>Zarządzaj ustawieniami bezpieczeństwa</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Button variant="outline" onClick={() => createClient().auth.signOut()}>
-                Wyloguj się ze wszystkich urządzeń
-              </Button>
+            <CardContent className="space-y-6">
+              {/* Change Password Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Zmień hasło</h3>
+
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">Nowe hasło</Label>
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showPasswords.new ? 'text' : 'password'}
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      placeholder="Minimum 8 znaków"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords({...showPasswords, new: !showPasswords.new})}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Potwierdź nowe hasło</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showPasswords.confirm ? 'text' : 'password'}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      placeholder="Powtórz hasło"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords({...showPasswords, confirm: !showPasswords.confirm})}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleChangePassword}
+                  disabled={changingPassword}
+                  className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                >
+                  {changingPassword ? 'Zapisywanie...' : 'Zmień hasło'}
+                </Button>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t pt-6">
+                <Button variant="outline" onClick={() => createClient().auth.signOut()}>
+                  Wyloguj się ze wszystkich urządzeń
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -252,7 +252,18 @@ export async function deleteUploadedFile(fileId: string, developerId: string) {
 
     // Delete all properties associated with this file's project
     // (assuming file is linked to a project)
+    let deletedPropertiesCount = 0
+
     if (file.project_id) {
+      // First, count properties to be deleted
+      const { count } = await createAdminClient()
+        .from('properties')
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', file.project_id)
+
+      deletedPropertiesCount = count || 0
+
+      // Delete all properties
       const { error: propertiesError } = await createAdminClient()
         .from('properties')
         .delete()
@@ -262,6 +273,8 @@ export async function deleteUploadedFile(fileId: string, developerId: string) {
         console.error('Error deleting properties:', propertiesError)
         throw new Error('Failed to delete associated properties')
       }
+
+      console.log(`🗑️ Deleted ${deletedPropertiesCount} properties for project ${file.project_id}`)
     }
 
     // Delete the file record
@@ -275,7 +288,7 @@ export async function deleteUploadedFile(fileId: string, developerId: string) {
       throw new Error('Failed to delete file')
     }
 
-    return { success: true }
+    return { success: true, deletedPropertiesCount }
   } catch (error) {
     console.error('Error in deleteUploadedFile:', error)
     throw error

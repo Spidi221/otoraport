@@ -8,7 +8,6 @@ import { StatusCards } from "@/components/dashboard/status-cards";
 import { LoadingState } from "@/components/ui/loading";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ChatWidget } from "@/components/ChatWidget";
-import { FloatingHelpButton } from "@/components/help/HelpButton";
 
 // Lazy load heavy components that are below the fold
 const ActionButtons = lazy(() => import("@/components/dashboard/action-buttons").then(m => ({ default: m.ActionButtons })));
@@ -93,15 +92,6 @@ export default function HomePage() {
 
         <ScrollToTop />
         <ChatWidget />
-
-        {/* Floating Help Button */}
-        {user && (
-          <FloatingHelpButton
-            userId={user.id}
-            subscriptionPlan={developer?.subscription_plan || 'basic'}
-            onboardingStep={1}
-          />
-        )}
       </main>
     </div>
   );

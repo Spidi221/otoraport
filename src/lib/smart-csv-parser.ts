@@ -979,7 +979,7 @@ export class SmartCSVParser {
         const headerIndex = this.headers.indexOf(headerName)
         if (headerIndex !== -1 && headerIndex < row.length) {
           const value = row[headerIndex]?.trim()
-          
+
           if (value && ['developer_name', 'company_name', 'nip', 'phone', 'email', 'investment_name', 'investment_address', 'investment_city'].includes(fieldName)) {
             if (!(fieldName in developerInfo) || !developerInfo[fieldName as keyof DeveloperInfo]) {
               ;(developerInfo as any)[fieldName] = value
@@ -990,6 +990,45 @@ export class SmartCSVParser {
     }
 
     return developerInfo
+  }
+
+  /**
+   * Extract project name from filename
+   */
+  public static extractProjectName(filename: string): string {
+    // Remove file extension
+    let name = filename
+      .replace(/\.csv$/i, '')
+      .replace(/\.xlsx$/i, '')
+      .replace(/\.xls$/i, '')
+
+    // Remove common prefixes
+    name = name
+      .replace(/^Ceny-ofertowe-mieszkan-dewelopera-/i, '')
+      .replace(/^Wzorcowy_zakres_danych_dotyczących_cen_mieszkań/i, 'Ministerstwo')
+      .replace(/^dane-/i, '')
+      .replace(/^data-/i, '')
+      .replace(/^export-/i, '')
+      .replace(/^raport-/i, '')
+
+    // Replace separators with spaces
+    name = name
+      .replace(/[-_]/g, ' ')
+      .trim()
+
+    // If name is empty or too generic (just date or numbers), use date-based default
+    if (!name || name.length < 3 || /^\d{4}[-\s]\d{2}[-\s]\d{2}$/.test(name)) {
+      const date = new Date().toISOString().split('T')[0]
+      name = `Import z ${date}`
+    } else {
+      // Capitalize first letter of each word
+      name = name
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+    }
+
+    return name
   }
 
   /**

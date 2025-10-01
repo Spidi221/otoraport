@@ -22,6 +22,14 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ PROPERTIES API: Fetching properties for developer:', developer.client_id)
 
+    // Parse pagination parameters
+    const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '20')
+    const offset = (page - 1) * limit
+
+    console.log(`📄 PROPERTIES API: Pagination - page: ${page}, limit: ${limit}, offset: ${offset}`)
+
     // First get developer's projects
     const { data: projects } = await createAdminClient()
       .from('projects')
@@ -33,23 +41,36 @@ export async function GET(request: NextRequest) {
     if (projectIds.length === 0) {
       return NextResponse.json({
         success: true,
-        properties: []
+        data: [],
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: limit,
+          totalPages: 0
+        }
       })
     }
 
-    // Then get properties for those projects
+    // Get total count first (without pagination)
+    const { count: totalCount } = await createAdminClient()
+      .from('properties')
+      .select('id', { count: 'exact', head: true })
+      .in('project_id', projectIds)
+
+    // Then get paginated properties
     const { data: properties, error } = await createAdminClient()
       .from('properties')
       .select('id, project_id, raw_data, created_at, updated_at')
       .in('project_id', projectIds)
       .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
 
     if (error) {
       console.error('❌ PROPERTIES API: Database error:', error.message)
       return NextResponse.json({ error: 'Failed to fetch properties' }, { status: 500 })
     }
 
-    console.log(`✅ PROPERTIES API: Found ${properties?.length || 0} properties`)
+    console.log(`✅ PROPERTIES API: Found ${properties?.length || 0} properties (page ${page} of ${Math.ceil((totalCount || 0) / limit)})`)
 
     // CRITICAL FIX: Extract data from nested raw_data JSONB structure
     // CSV parser stores: { raw_data: { property_number: X, raw_data: { "CSV Column": value } } }
@@ -111,10 +132,10 @@ export async function GET(request: NextRequest) {
       success: true,
       data: transformedProperties,
       pagination: {
-        total: transformedProperties.length,
-        page: 1,
-        limit: transformedProperties.length,
-        totalPages: 1
+        total: totalCount || 0,
+        page: page,
+        limit: limit,
+        totalPages: Math.ceil((totalCount || 0) / limit)
       }
     })
 

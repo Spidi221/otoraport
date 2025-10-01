@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Settings, User, Shield } from "lucide-react";
+import { Bell, Settings, User, Shield, Menu, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
@@ -14,7 +14,7 @@ import {
 import { OtoraportLogo } from "../icons/otoraport-logo";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
-import { HelpButton } from "../help/HelpButton";
+import { useState } from "react";
 
 interface HeaderProps {
   showUserMenu?: boolean;
@@ -22,12 +22,15 @@ interface HeaderProps {
 
 // Header for public pages (without session)
 export function PublicHeader() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <header className="border-b bg-white px-4 py-4 lg:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <OtoraportLogo />
-        
-        <div className="flex items-center gap-4">
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Link href="/auth/signin">
               <Button variant="ghost">Zaloguj się</Button>
@@ -37,7 +40,55 @@ export function PublicHeader() {
             </Link>
           </div>
         </div>
+
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setIsMobileMenuOpen(true)}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+
+          {/* Menu Panel */}
+          <div className="fixed right-0 top-0 h-full w-80 max-w-full bg-white shadow-xl transition-transform duration-300">
+            <div className="flex items-center justify-between border-b px-4 py-4">
+              <span className="text-lg font-semibold">Menu</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="flex flex-col gap-2 p-4">
+              <Link href="/auth/signin" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start">
+                  Zaloguj się
+                </Button>
+              </Link>
+              <Link href="/auth/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button className="w-full">
+                  Dołącz za darmo
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -45,13 +96,20 @@ export function PublicHeader() {
 // Header for authenticated pages (with session)
 function AuthenticatedHeader() {
   const { user, developer, signOut, isAdmin } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleSignOut = () => {
+    setIsMobileMenuOpen(false);
+    signOut();
+  };
 
   return (
     <header className="border-b bg-white px-4 py-4 lg:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <OtoraportLogo />
-        
-        <div className="flex items-center gap-4">
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-4">
           {/* Notifications Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -100,13 +158,6 @@ function AuthenticatedHeader() {
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Help Button */}
-          <HelpButton
-            userId={user?.id || ''}
-            subscriptionPlan={developer?.subscription_plan || 'basic'}
-            onboardingStep={developer?.onboarding_step || 0}
-          />
 
           {/* Admin Panel */}
           {isAdmin && (
@@ -201,7 +252,131 @@ function AuthenticatedHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setIsMobileMenuOpen(true)}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+
+          {/* Menu Panel */}
+          <div className="fixed right-0 top-0 h-full w-80 max-w-full bg-white shadow-xl transition-transform duration-300 overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b px-4 py-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>
+                    {developer?.company_name ? developer.company_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <p className="text-sm font-medium">
+                    {developer?.company_name || developer?.name || 'Użytkownik'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {user?.email || developer?.email || ''}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Navigation Items */}
+            <div className="flex flex-col">
+              {/* Main Navigation */}
+              <div className="border-b p-4">
+                <h3 className="mb-3 text-xs font-semibold uppercase text-gray-500">Nawigacja</h3>
+                <div className="flex flex-col gap-2">
+                  <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start">
+                      <User className="mr-3 h-4 w-4" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard/settings" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start">
+                      <User className="mr-3 h-4 w-4" />
+                      Profil użytkownika
+                    </Button>
+                  </Link>
+                  <Link href="/settings/domains" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start">
+                      <Settings className="mr-3 h-4 w-4" />
+                      Domeny niestandardowe
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard/notifications" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start relative">
+                      <Bell className="mr-3 h-4 w-4" />
+                      Powiadomienia
+                      <Badge
+                        variant="destructive"
+                        className="ml-auto h-5 min-w-[20px] rounded-full px-1 text-xs"
+                      >
+                        2
+                      </Badge>
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Admin Section (if admin) */}
+              {isAdmin && (
+                <div className="border-b p-4">
+                  <h3 className="mb-3 text-xs font-semibold uppercase text-gray-500">Administracja</h3>
+                  <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50">
+                      <Shield className="mr-3 h-4 w-4" />
+                      Panel Administracyjny
+                    </Button>
+                  </Link>
+                </div>
+              )}
+
+              {/* Account Section */}
+              <div className="p-4">
+                <h3 className="mb-3 text-xs font-semibold uppercase text-gray-500">Konto</h3>
+                <div className="flex flex-col gap-2">
+                  <Link href="/dashboard/settings" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start">
+                      <Settings className="mr-3 h-4 w-4" />
+                      Ustawienia
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={handleSignOut}
+                  >
+                    <X className="mr-3 h-4 w-4" />
+                    Wyloguj się
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
