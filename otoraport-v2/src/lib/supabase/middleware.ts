@@ -16,9 +16,19 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
+  // Get env vars with fallback
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+  // If env vars missing, return no user (will redirect to signin)
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn('⚠️ MIDDLEWARE: Supabase env vars missing - returning no user')
+    return { user: null, response }
+  }
+
   const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
