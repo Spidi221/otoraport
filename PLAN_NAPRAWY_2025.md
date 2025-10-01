@@ -1,1409 +1,548 @@
 # 🚀 OTORAPORT - Plan Naprawczy & Rozwoju
 
 **Data utworzenia:** 29.09.2025
-**Ostatnia aktualizacja:** 01.10.2025 09:15 🔥
-**Health Score:** 6.5/10 ⚠️ **CRITICAL ISSUES FOUND** - Wymaga naprawy przed beta!
-**Status:** 🔴 **BETA-BLOCKING ISSUES** - Ministry OK, User Experience BROKEN!
+**Ostatnia aktualizacja:** 01.10.2025 18:30 🔥
+**Health Score:** 7.2/10 ⚠️ **PARSOWANIE WYMAGA NAPRAWY**
+**Status:** 🟡 **MINISTRY COMPLIANCE OK, DATA QUALITY ISSUES**
 
-**🚨 TRYB RATUNKOWY:** Parallel execution plan - cel: gotowość do beta testerów DZISIAJ!
-
----
-
-## 🔥 **PARALLEL EXECUTION PLAN - BETA READINESS (01.10.2025)**
-
-### 📊 **DISCOVERED CRITICAL ISSUES (01.10.2025 09:00)**
-
-| Issue | Severity | Impact | Files Affected |
-|-------|----------|--------|----------------|
-| **#1: 2-minute dashboard loading** | 🔴 P0 | UX killer - users will leave | `/src/app/dashboard/page.tsx` |
-| **#2: CSV parser only ministerial format** | 🔴 P0 | Can't import INPRO files | `/src/lib/smart-csv-parser.ts` |
-| **#3: No Excel support** | 🟡 P1 | Users expect .xlsx | `/src/app/api/upload/route.ts` |
-| **#4: "Brak przypisania" projects** | 🟡 P1 | Confusing UX | `/src/lib/smart-csv-parser.ts` |
-| **#5: Charts don't work** | 🟡 P1 | Missing promised features | `/src/components/dashboard/page.tsx` |
-| **#6: File deletion doesn't sync** | 🔴 P0 | Data inconsistency | `/src/app/api/files/delete/route.ts` |
-| **#7: Intrusive help UI** | 🟢 P2 | Annoying but not blocking | `/src/components/dashboard/header.tsx` |
+**🎯 PRIORYTET:** Naprawić błędy parsowania + dodać brakujący XML z danymi
 
 ---
 
-### 🎯 **BETA READINESS STRATEGY**
+## 📊 **AKTUALNY STAN APLIKACJI (01.10.2025 18:30)**
 
-**Goal:** Application ready for beta testers TODAY (01.10.2025)
-**Method:** Parallel agent execution - no file conflicts
-**Estimated Time:** 8-10 hours (with 3-4 parallel agents)
+### ✅ **UKOŃCZONE DZISIAJ (FAZA GAMMA-DIAGNOSTICS)**
 
----
+| Task | Status | Czas | Szczegóły |
+|------|--------|------|-----------|
+| **Upload widget text fix** | ✅ DONE | 5min | "CSV, XML" → "CSV, Excel (XLS, XLSX)" |
+| **Cache invalidation after upload** | ✅ DONE | 10min | Added `revalidatePath()` after file save |
+| **Ministry compliance analysis** | ✅ DONE | 30min | Zidentyfikowano brakujący data.xml |
+| **Parser bugs analysis** | ✅ DONE | 20min | 4 krytyczne błędy wykryte |
 
-## 🚀 **FAZA ALPHA: Quick Wins (2h total, 4 agents parallel)**
-
-**Cel:** Naprawić najbardziej irytujące bugi w 2h
-**Agents:** 4 równoległe, zero konfliktów
-
-### **Agent ALPHA-1: File Deletion Sync** ⏱️ 45min
-**File:** `/src/app/api/files/delete/route.ts`
-**Task:** Fix cascade delete + revalidation
-**Dependencies:** NONE
-**Testing:** Upload file → Delete → Verify gone from UI + DB
-
-```typescript
-// Fix cascade delete properties when file deleted
-await supabase.from('properties').delete().eq('file_id', fileId)
-await supabase.from('uploaded_files').delete().eq('id', fileId)
-revalidatePath('/dashboard')
-```
+**🎉 QUICK WINS:**
+- Pliki teraz pokazują się po uploadzie (cache fix)
+- Poprawiony tekst w widgecie uploadu
+- Zidentyfikowane problemy z parserem
 
 ---
 
-### **Agent ALPHA-2: Minimize Help UI** ⏱️ 30min
-**Files:** `/src/components/dashboard/header.tsx`, `/src/components/help/*`
-**Task:** Remove intrusive panels, keep minimal chatbot with dismiss
-**Dependencies:** NONE
-**Testing:** Login → See minimal chatbot → Click "Rozumiem" → Disappears
+## 🚨 **KRYTYCZNE PROBLEMY ZNALEZIONE (01.10.2025)**
 
-```tsx
-// Simple dismissible chatbot (5 sec auto-hide)
-<Chatbot autoDismiss={5000} position="bottom-right" />
-// Remove: HelpOverlay, HelpPanel, GuidedTour from dashboard
-```
+### ❌ **PROBLEM #1: BRAK MINISTERIALNEGO XML Z DANYMI**
 
----
+**Status:** 🔴 **CRITICAL - Ministry Non-Compliant**
 
-### **Agent ALPHA-3: Dashboard Performance - Pagination** ⏱️ 1.5h
-**File:** `/src/app/dashboard/page.tsx`
-**Task:** Add server-side pagination (20 properties/page)
-**Dependencies:** NONE
-**Testing:** Dashboard loads <500ms with 100+ properties
-
-```typescript
-// Add pagination to properties fetch
-const { data, count } = await supabase
-  .from('properties')
-  .select('*', { count: 'exact' })
-  .range(offset, offset + LIMIT - 1)
-  .order('created_at', { ascending: false })
-```
-
----
-
-### **Agent ALPHA-4: Fix Project Assignment** ⏱️ 45min
-**File:** `/src/lib/smart-csv-parser.ts`
-**Task:** Extract project name from filename or add default
-**Dependencies:** NONE
-**Testing:** Upload → See proper project name instead of "Brak przypisania"
-
-```typescript
-// Extract from filename: "Ceny-ofertowe-mieszkan-dewelopera-inpro" → "INPRO"
-const projectName = filename
-  .replace(/Ceny-ofertowe-mieszkan-dewelopera-/i, '')
-  .replace(/[-_]/g, ' ')
-  .trim() || 'Import z ' + new Date().toISOString().split('T')[0]
-```
-
----
-
-**⏸️ CHECKPOINT ALPHA:** Test all 4 fixes → If OK, proceed to BETA
-
----
-
-## 🔧 **FAZA BETA: Core CSV Parser Fix (4-5h total, 2 agents parallel)**
-
-**Cel:** Universal CSV parser supporting multiple formats
-**Agents:** 2 równoległe (parser + Excel)
-
-### **Agent BETA-1: Universal CSV Parser** ⏱️ 4h
-**File:** `/src/lib/smart-csv-parser.ts` (NEW VERSION)
-**Task:** Detect format + parse ministerial & INPRO & custom
-**Dependencies:** Agent ALPHA-4 complete
-**Testing:** Upload both CSV files → Both parse correctly
-
-**Implementation:**
-1. **Format detector:**
-```typescript
-function detectCSVFormat(content: string) {
-  const firstLine = content.split('\n')[0]
-  const separator = firstLine.includes(';') ? ';' : ','
-  const columns = firstLine.split(separator)
-
-  // Ministerial format: 59 columns, specific headers
-  if (columns.length === 59 && columns.includes('Nr lokalu lub domu jednorodzinnego nadany przez dewelopera')) {
-    return 'MINISTERIAL'
-  }
-
-  // INPRO format: "Id nieruchomości", "Powierzchnia", etc.
-  if (columns.includes('Id nieruchomości') && columns.includes('Powierzchnia')) {
-    return 'INPRO'
-  }
-
-  return 'UNKNOWN'
-}
-```
-
-2. **Parser dla INPRO:**
-```typescript
-function parseINPROFormat(row) {
-  return {
-    property_number: row['Nr nieruchomości nadany przez dewelopera'],
-    property_type: row['Rodzaj nieruchomości: lokal mieszkalny dom jednorodzinny'],
-    area: parseFloat(row['Powierzchnia']),
-    price_per_m2: parseFloat(row['Cena za m2 nieruchomości']),
-    base_price: parseFloat(row['Cena nieruchomości']),
-    status: row['Cena za m2 nieruchomości'] === 'X' ? 'sold' : 'available',
-    // ... map all INPRO columns to our schema
-  }
-}
-```
-
----
-
-### **Agent BETA-2: Excel (.xlsx) Support** ⏱️ 2h
-**File:** `/src/app/api/upload/route.ts`
-**Task:** Add `xlsx` package + parse Excel files
-**Dependencies:** NONE (independent from BETA-1)
-**Testing:** Upload .xlsx → Parses correctly
-
-```bash
-npm install xlsx
-```
-
-```typescript
-import * as XLSX from 'xlsx'
-
-if (file.name.endsWith('.xlsx')) {
-  const buffer = await file.arrayBuffer()
-  const workbook = XLSX.read(buffer)
-  const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-  const csvContent = XLSX.utils.sheet_to_csv(worksheet, { FS: ';' })
-  // Pass to smart-csv-parser
-}
-```
-
----
-
-**⏸️ CHECKPOINT BETA:** Upload 3 files (ministerial CSV, INPRO CSV, Excel) → All parse correctly
-
----
-
-## 📊 **FAZA GAMMA: Charts Implementation (3-4h total, 2 agents parallel)**
-
-**Cel:** Working charts instead of placeholders
-**Agents:** 2 równoległe (Trend chart + Distribution chart)
-
-### **Agent GAMMA-1: Price Trend Chart** ⏱️ 2h
-**File:** `/src/components/dashboard/price-trend-chart.tsx` (NEW)
-**Task:** Line chart showing price/m² trends
-**Dependencies:** NONE
-**Testing:** Dashboard shows real trend chart
-
-```bash
-npm install recharts
-```
-
-```typescript
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
-
-// Calculate avg price per m² per month
-const trendData = properties.reduce((acc, prop) => {
-  const month = new Date(prop.created_at).toLocaleDateString('pl-PL', { month: 'short' })
-  // Group by month, calculate average
-}, [])
-```
-
----
-
-### **Agent GAMMA-2: Distribution Charts** ⏱️ 2h
-**File:** `/src/components/dashboard/distribution-charts.tsx` (NEW)
-**Task:** Pie charts (Type, Status)
-**Dependencies:** NONE
-**Testing:** Dashboard shows real pie charts
-
-```typescript
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts'
-
-// Group by type
-const typeData = properties.reduce((acc, prop) => {
-  acc[prop.property_type] = (acc[prop.property_type] || 0) + 1
-}, {})
-
-// Group by status
-const statusData = {
-  'Dostępne': properties.filter(p => p.status === 'available').length,
-  'Sprzedane': properties.filter(p => p.status === 'sold').length
-}
-```
-
----
-
-**⏸️ CHECKPOINT GAMMA:** Dashboard shows 3 working charts
-
----
-
-## ✅ **FINAL BETA READINESS CHECKLIST**
-
-Po wykonaniu wszystkich faz:
-
-- [ ] **ALPHA-1:** File deletion works (test: upload → delete → verify)
-- [ ] **ALPHA-2:** Minimal chatbot with dismiss (test: see chatbot → click away)
-- [ ] **ALPHA-3:** Dashboard loads <500ms (test: 50+ properties load fast)
-- [ ] **ALPHA-4:** Projects named correctly (test: no "Brak przypisania")
-- [ ] **BETA-1:** Ministerial CSV works (test: upload TAMBUD file)
-- [ ] **BETA-1:** INPRO CSV works (test: upload INPRO file)
-- [ ] **BETA-2:** Excel works (test: upload .xlsx)
-- [ ] **GAMMA-1:** Price trend chart shows (test: visual verification)
-- [ ] **GAMMA-2:** Distribution charts show (test: visual verification)
-
----
-
-## 🎯 **EXECUTION TIMELINE (Parallel)**
-
-```
-09:00 - 11:00 (2h)  → FAZA ALPHA (4 agents parallel)
-  ├─ ALPHA-1: File deletion
-  ├─ ALPHA-2: Help UI
-  ├─ ALPHA-3: Pagination
-  └─ ALPHA-4: Project names
-
-11:00 - 11:15 (15min) → TESTING CHECKPOINT ALPHA
-
-11:15 - 16:00 (4.75h) → FAZA BETA (2 agents parallel)
-  ├─ BETA-1: CSV parser (4h)
-  └─ BETA-2: Excel support (2h) → starts at 14:00
-
-16:00 - 16:30 (30min) → TESTING CHECKPOINT BETA
-
-16:30 - 20:00 (3.5h) → FAZA GAMMA (2 agents parallel)
-  ├─ GAMMA-1: Trend chart (2h)
-  └─ GAMMA-2: Distribution charts (2h) → starts at 18:00
-
-20:00 - 20:30 (30min) → FINAL TESTING & BETA INVITE
-
-TOTAL: ~11 hours with parallel execution
-```
-
----
-
-## 🎉 **MAJOR MILESTONE ACHIEVED - 30.09.2025**
-
-### ✅ **FAZA 0: CRITICAL BUGS - 100% COMPLETED!**
-
-| Task | Status | Evidence |
-|------|--------|----------|
-| 0.1 CSV Parser Duplikaty | ✅ FIXED | 21/21 records loading |
-| 0.2 MD Generator Raw Data | ✅ FIXED | Smart status, statistics, SOLD filtering |
-| 0.3 Dashboard Files Component | ✅ **WORKS** | `Found 1 files` in production logs |
-| 0.4 Dashboard Properties Table | ✅ **WORKS** | `Found 21 properties` in production logs |
-| 0.5 CSV Schema Ministry Columns | ✅ FIXED | Parser supports ministry 59 columns |
-| 0.6 XML Generator Harvester | ✅ FIXED | Schema 1.13 compliant |
-| **0.7 CSV Endpoint** | ✅ **ADDED** | `/api/public/{id}/data.csv` - 59 columns! |
-| 0.8 Logout Button | ✅ WORKS | Uses `useAuth().signOut()` |
-| 0.9 Analytics Page | ✅ FIXED | No `supabaseAdmin` errors |
-
-**Commit History (30.09.2025):**
-- `6a960944` - CSV Parser ministry columns
-- `5bf9f4a4` - XML Generator rewrite (Harvester Schema 1.13)
-- `e23cb293` - MD Generator smart status detection + SOLD filtering
-- `8ac895ff` - CSV Endpoint implementation (59 columns)
-
----
-
-### ✅ **FAZA 1: SECURITY - 95% COMPLETED!**
-
-| Task | Status | Action Required |
-|------|--------|-----------------|
-| 1.1 RLS `developers` | ✅ **DONE** | SQL executed in Supabase |
-| 1.2 RLS `uploaded_files` | ✅ **DONE** | SQL executed in Supabase |
-| 1.3 Rate Limiting | ✅ **DONE** | Implemented in public endpoints |
-| 1.4 Admin Check Server-Side | ⚠️ **TODO** | P1 priority (not critical) |
-| 1.5 Input Validation (Zod) | ⚠️ **TODO** | P2 priority (nice-to-have) |
-
-**SQL File:** `enable_rls_fixed.sql` - **EXECUTED** ✅
-
----
-
-## 📋 **MINISTRY COMPLIANCE: 100% ✅**
-
-### ✅ **XML Harvester Schema 1.13 - COMPLIANT**
-
+**Co mamy:**
 ```xml
-<?xml version='1.0' encoding='UTF-8'?>
+<!-- ✅ Harvester XML - metadata dla dane.gov.pl -->
 <ns2:datasets xmlns:ns2="urn:otwarte-dane:harvester:1.13">
   <dataset status="published">
-    <extIdent>36_character_unique_id</extIdent>
-    <updateFrequency>daily</updateFrequency>
-    <hasDynamicData>false</hasDynamicData>
-    <hasHighValueData>true</hasHighValueData>
-    <categories><category>ECON</category></categories>
-    <resources>
-      <resource status="published">
-        <url>https://ceny-sync.vercel.app/api/public/{id}/data.csv</url>
-        <specialSigns><specialSign>X</specialSign></specialSigns>
-      </resource>
-    </resources>
+    <extIdent>NFWU05...</extIdent>
+    <url>https://.../data.csv</url>
   </dataset>
 </ns2:datasets>
 ```
 
-**Test Results:**
-```bash
-✅ XML: curl http://localhost:3000/api/public/{id}/data.xml
-✅ CSV: curl http://localhost:3000/api/public/{id}/data.csv (59 columns)
-✅ MD5: curl http://localhost:3000/api/public/{id}/data.md5
-✅ MD:  curl http://localhost:3000/api/public/{id}/data.md
+**Czego brakuje:**
+```xml
+<!-- ❌ Data XML - faktyczne ceny mieszkań -->
+<dane_o_cenach_mieszkan xmlns="urn:otwarte-dane:mieszkania:1.13">
+  <informacje_podstawowe>
+    <data_publikacji>2025-10-01</data_publikacji>
+    <dostawca_danych>
+      <nazwa>Unnamed Company</nazwa>
+      <nip>1234567890</nip>
+    </dostawca_danych>
+  </informacje_podstawowe>
+  <oferty>
+    <oferta>
+      <nr_lokalu>B2/2</nr_lokalu>
+      <powierzchnia_uzytkowa>109.45</powierzchnia_uzytkowa>
+      <cena_za_m2>11831.89</cena_za_m2>
+      <!-- ... 58 pól zgodnie ze schematem -->
+    </oferta>
+  </oferty>
+</dane_o_cenach_mieszkan>
 ```
+
+**Wymagane działania:**
+1. Stworzyć `/src/lib/ministry-xml-generator.ts` (Schema 1.13)
+2. Endpoint `/api/public/[clientId]/prices.xml` (faktyczne dane)
+3. Generator musi używać 58 pól z wzorcowego CSV ministerstwa
+
+**Czas:** 6-8h (nowy generator + endpoint + testy)
 
 ---
 
-### ✅ **CSV Generator - 59 Columns COMPLIANT**
+### ❌ **PROBLEM #2: INPRO Parser - Duplikaty Numerów**
 
-**File:** `/src/lib/csv-generator.ts` (NEW!)
-**Endpoint:** `/api/public/[clientId]/data.csv` (NEW!)
+**Status:** 🔴 **CRITICAL - Data Quality**
 
-**Features:**
-- ✅ 59 kolumn zgodnych z oficjalnym szablonem ministerstwa
-- ✅ Separator: semicolon (;)
-- ✅ Encoding: UTF-8
-- ✅ Polish number format (comma decimal separator)
-- ✅ Special sign "X" handled correctly
-- ✅ SOLD properties filtered (only available properties)
-- ✅ Rate limiting + security headers
-
-**Test:**
-```bash
-$ curl http://localhost:3000/api/public/demo-9a17b9b6/data.csv | wc -l
-14  # 1 header + 13 available properties (7 sold filtered out)
-
-$ curl http://localhost:3000/api/public/demo-9a17b9b6/data.csv | head -n 1 | awk -F';' '{print NF}'
-59 kolumn  # ✅ CORRECT!
-```
-
----
-
-### ✅ **MD Generator - FULLY FIXED**
-
-**File:** `/src/lib/md-generator.ts`
-
-**Fixes Applied:**
-1. ✅ Smart status detection (checks multiple sources)
-2. ✅ SOLD filtering (7 properties correctly filtered)
-3. ✅ Statistics accurate (All: 21, Available: 14, Sold: 7)
-4. ✅ Safe rendering ("Sprzedane" instead of "SOLD zł")
-5. ✅ Numeric price analysis (NaN fixed)
-6. ✅ Status emoji (🟢 Dostępne, 🔴 Sprzedane)
-
-**Test Results (confirmed by user):**
+**Co pokazuje MD raport:**
 ```markdown
-✅ Wszystkie: 21 | Dostępne: 14 | Sprzedane: 7
-✅ Średnia cena za m²: 6827,616 zł
-✅ Status indicators working correctly
+| Nr lokalu | Typ | Powierzchnia | Status |
+|-----------|-----|--------------|--------|
+| 0000306071 | Apartament | 33.06m² | 🟢 Dostępne |  ← BŁĄD
+| 0000306071 | Apartament | 29.72m² | 🟢 Dostępne |  ← BŁĄD (ten sam!)
+| 0000306071 | Mieszkanie | 38.09m² | 🟢 Dostępne |  ← BŁĄD
 ```
 
----
-
-## 📊 **CURRENT STATE - PRODUCTION READY**
-
-### ✅ **Compliance Score: 100/100**
-
-| Component | Status | Score |
-|-----------|--------|-------|
-| XML Harvester Schema 1.13 | ✅ | 20/20 |
-| CSV Endpoint (59 columns) | ✅ | 20/20 |
-| MD Report Generator | ✅ | 15/15 |
-| CSV Parser (Ministry columns) | ✅ | 15/15 |
-| Special Sign "X" handling | ✅ | 10/10 |
-| MD5 Checksum | ✅ | 10/10 |
-| Security (RLS, rate limiting) | ✅ | 10/10 |
-| **TOTAL** | ✅ | **100/100** |
-
-### ✅ **API Endpoints - ALL WORKING**
-
-```bash
-✅ GET /api/public/{clientId}/data.xml   # Harvester metadata
-✅ GET /api/public/{clientId}/data.csv   # Property data (59 columns)
-✅ GET /api/public/{clientId}/data.md    # Human-readable report
-✅ GET /api/public/{clientId}/data.md5   # Checksum for validation
-✅ POST /api/upload                      # CSV file upload (with parser)
-✅ GET /api/properties                   # User properties (21 found)
-✅ GET /api/files/list                   # Uploaded files (1 found)
-✅ GET /api/dashboard/stats              # Dashboard statistics
+**Powinno być:**
+```markdown
+| A.1.1.1M | Apartament | 33.06m² | 🟢 Dostępne |  ← UNIKALNY
+| A.1.1.2M | Apartament | 29.72m² | 🟢 Dostępne |  ← UNIKALNY
+| A.2.1.1M | Mieszkanie | 38.09m² | 🟢 Dostępne |  ← UNIKALNY
 ```
 
-### ✅ **Dashboard - FULLY FUNCTIONAL**
+**Root cause:** Parser wyciąga niewłaściwą kolumnę jako `property_number`
 
-```bash
-✅ Files Component: Shows uploaded files
-✅ Properties Table: Displays 21 properties
-✅ Statistics: Accurate counts and metrics
-✅ Logout: Working correctly
-✅ File Upload: CSV parser working
-✅ Re-process: File reprocessing works
+**Fix location:** `/src/lib/smart-csv-parser.ts` - INPRO format mapping
+
+**Czas:** 2-3h (analiza + fix + testy)
+
+---
+
+### ❌ **PROBLEM #3: Status vs Cena - Parser Confusion**
+
+**Status:** 🔴 **CRITICAL - Data Quality**
+
+**Co pokazuje MD raport:**
+```markdown
+| Nr lokalu | Cena/m² | Cena całkowita | Status |
+|-----------|---------|----------------|--------|
+| B2/2 | Sprzedane | 1 zł | 🔴 Sprzedane |  ← "Sprzedane" to nie cena!
 ```
 
----
-
-## 🎯 **SUCCESS METRICS - ACHIEVED & EXCEEDED**
-
-| Metric | Before | Target | **Achieved** | Status |
-|--------|--------|--------|--------------|--------|
-| Health Score | 4.5/10 | 8.5/10 | **9.5/10** | ✅ EXCEEDED |
-| CSV Import | 19% (4/21) | 100% | **100%** | ✅ ACHIEVED |
-| MD Properties | 0 | 14-28 | **14** | ✅ ACHIEVED |
-| Ministry Compliance | 75% | 100% | **100%** | ✅ ACHIEVED |
-| API Working | 60% | 95% | **100%** | ✅ EXCEEDED |
-| Critical Bugs | 7 | 0 | **0** | ✅ ACHIEVED |
-
----
-
-## 🚀 **POZOSTAŁE ZADANIA (Nie critical!)**
-
-### ✅ **FAZA 1.6: Two-Stage Email System - COMPLETED! (30.09.2025)**
-
-**Status:** ✅ **FULLY IMPLEMENTED**
-
-**Files Created/Modified:**
-- `/src/app/api/welcome-email/route.ts` - Welcome email endpoint (Email #1)
-- `/src/app/api/ministry-email-template/route.ts` - Ministry template endpoint (Email #2)
-- Updated `/src/hooks/use-auth.ts` - Auto-send welcome email on registration
-- Updated `/src/app/api/oauth/complete-profile/route.ts` - Auto-send ministry email after NIP completion
-- Modified `/src/lib/email-templates.ts` - Updated welcome email (removed URLs)
-
-**Email #1 - Welcome Email (on registration):**
-- 🎉 Simple "registration successful" message
-- ❌ NO URLs included (as per user requirement)
-- 📝 Prompts user to complete company data (NIP, address, phone)
-- 💡 Informs user they will receive ready-to-copy ministry email after completing data
-- ✅ HTML + plain text versions
-- 🔄 Asynchronous sending (doesn't block registration)
-
-**Email #2 - Ministry Template Email (after completing company data):**
-- 📧 Sent automatically when user completes profile with NIP
-- 📋 Ready-to-copy email template for ministry
-- 🔗 Includes real URLs from database (XML, CSV, MD endpoints)
-- 📧 Target recipient: dane@ministerstwo.gov.pl
-- 📝 Copy-paste instructions for user
-- ✅ Full compliance with ministry requirements
-- ✉️ Powered by Resend API
-
-**Integration Points:**
-1. Registration (`/src/hooks/use-auth.ts`) → Welcome email sent
-2. Profile completion with NIP (`/api/oauth/complete-profile`) → Ministry email sent
-
-**User Workflow:**
-```
-User registers → Email #1 (welcome) → Complete company data → Email #2 (ministry template) → Copy & send to ministry → ✅ Compliance
+**Powinno być:**
+```markdown
+| B2/2 | N/A | N/A | 🔴 Sprzedane |  ← Status poprawny, ceny puste dla sprzedanych
 ```
 
----
+**Root cause:** Parser nie rozpoznaje statusu "Sprzedane" jako status, tylko jako wartość ceny
 
-### ⚠️ **FAZA 1: Security (P1 - Nice-to-have)**
+**Fix location:** `/src/lib/smart-csv-parser.ts` - status detection logic
 
-**1.3 Admin Check Server-Side (2h)**
-- Problem: `ADMIN_EMAILS` exposed in client code
-- Solution: Move to middleware.ts
-- Priorytet: P1 (not critical for production)
-
-**1.4 Input Validation with Zod (4-5h)**
-- Add Zod schemas for property validation
-- Priorytet: P2 (nice-to-have)
+**Czas:** 1-2h
 
 ---
 
-### 🏗️ **FAZA 2: CORE FEATURES (Tydzień 1-2)**
+### ❌ **PROBLEM #4: INPRO Total Price = 0 zł**
 
-**2.1 File Management Interface (6-8h)**
-- Enhanced file list with actions
-- Download, Re-process, Delete buttons
-- Status indicators
+**Status:** 🔴 **CRITICAL - Data Quality**
 
-**2.2 Notification System (4-6h)**
-- Database table for notifications
-- In-app notification center
-- Email notifications
-
-**2.3 Error Handling & Toasts (3-4h)**
-- Package: `react-hot-toast`
-- User-friendly error messages
-- Success notifications
-
-**2.4 Auto-Refresh After Upload (2h)**
-- Use SWR/React Query
-- Automatic data revalidation
-
----
-
-### 📈 **FAZA 3: UX IMPROVEMENTS (Tydzień 2-3)**
-
-**3.1 Empty States (2-3h)**
-- Better empty state designs
-- Call-to-action buttons
-
-**3.2 Loading States & Skeletons (2h)**
-- shadcn/ui Skeleton components
-- Smooth loading transitions
-
-**3.3 Mobile Responsive Table (3-4h)**
-- Card view for mobile devices
-- Touch-friendly interactions
-
-**3.4 Breadcrumb Navigation (2h)**
-- Clear navigation path
-- Better UX
-
----
-
-### 📊 **FAZA 4: DATA VISUALIZATION (Tydzień 3)**
-
-**4.1 Real Charts (6-8h)**
-- Package: `recharts`
-- Price trends, distribution, status overview
-
-**4.2 Interactive Data Table (8-10h)**
-- Package: `@tanstack/react-table`
-- Sorting, filtering, search, export
-
----
-
-### ⚡ **FAZA 5: PERFORMANCE (Tydzień 3-4)**
-
-**5.1 API Pagination (3-4h)**
-- For datasets with 100+ properties
-
-**5.2 Convert to Server Components (4-6h)**
-- Next.js 15 optimization
-
-**5.3 XML Endpoint Caching (15min)**
-- Add `export const revalidate = 3600`
-
----
-
-### 🧹 **FAZA 6: TECHNICAL DEBT (Tydzień 4)**
-
-**6.1 Delete Unused API Routes (2-3h)**
-- Reduce from 91 to ~40 routes
-
-**6.2 Consolidate Auth Systems (3-4h)**
-- Remove duplicate files
-
-**6.3 TypeScript Types Generation (1h)**
-- Generate Supabase types
-
-**6.4 Fix Duplicate Indexes (5min)**
-- Clean up database indexes
-
-**6.5 Optimize RLS Policies (15min)**
-- Remove overlapping policies
-
----
-
-## 🔍 **FAZA 7: KOMPLEKSOWA ANALIZA BRAKÓW (30.09.2025)**
-
-**Data analizy:** 30.09.2025 23:30
-**Data weryfikacji:** 30.09.2025 23:45 ✅ **ZAKTUALIZOWANO**
-**Metoda:** Analiza konkurencji + badanie best practices SaaS 2025 + przegląd kodu + weryfikacja implementacji
-**Agent analityczny:** 3 agenty przez 45 minut
-**Status:** ✅ **RAPORT UKOŃCZONY + ZWERYFIKOWANY**
-
-### 📊 **EXECUTIVE SUMMARY (ZAKTUALIZOWANY)**
-
-**Ogólna ocena kompletności:** 65-70% ⚠️ (wcześniej: 73-75% - przeszacowane)
-**Backend infrastruktura:** ⭐⭐⭐⭐⭐ (95%) - DOSKONAŁA
-**Frontend UI/UX:** ⭐⭐⭐☆☆ (60%) - WYMAGA ZNACZNEJ PRACY (wcześniej: 73%)
-**User-facing features:** ⭐⭐⭐☆☆ (55%) - WYMAGA DUŻO PRACY (wcześniej: 65%)
-
-**Kluczowy wniosek:**
-> Aplikacja ma **ŚWIETNY backend** (bulk operations, help system, subscription management), ale **brakuje UI** do istniejących funkcji. **79% kluczowych funkcji (11/14) NIE JEST zaimplementowanych**. Wiele systemów jest gotowych w 80%, ale potrzebuje ostatnich 20% integracji z interfejsem.
-
-**🚨 KRYTYCZNE ODKRYCIE:**
-> **20 wystąpień `alert()` w kodzie** zamiast nowoczesnych toast notifications. Brak podstawowych funkcji autoryzacji (reset hasła, zmiana hasła, weryfikacja email). Help system w pełni zbudowany ale niewidoczny dla użytkowników.
-
----
-
-### 🔴 **KRYTYCZNE BRAKI (Launch Blockers)**
-
-#### 1. **Password Reset / Forgot Password** 🔴 CRITICAL
-- **Status:** Link istnieje, strona NIE (`/forgot-password`)
-- **Impact:** Użytkownicy zablokow
-
-ani nie mogą odzyskać konta
-- **Plik:** `/src/app/auth/signin/page.tsx:259` - link do nieistniejącej strony
-- **Czas:** 2-3h
-- **Priorytet:** P0
-
-#### 2. **Email Verification** 🔴 CRITICAL
-- **Status:** Brak przepływu weryfikacji email
-- **Impact:** Ryzyko bezpieczeństwa, spam accounts
-- **Supabase:** Ma wbudowaną funkcję, nie wykorzystaną
-- **Czas:** 3-4h
-- **Priorytet:** P0
-
-#### 3. **Toast Notification System** 🔴 CRITICAL
-- **Status:** Używane `alert()` zamiast toast
-- **Impact:** Kiepski UX, nieprofesjonalne wrażenie
-- **Obecne:** 12 wystąpień `alert()` w kodzie
-- **Rozwiązanie:** `npm install sonner` (zalecane) lub `react-hot-toast`
-- **Czas:** 2-3h (zamiana wszystkich alert())
-- **Priorytet:** P0
-
-#### 4. **Search Properties** 🔴 CRITICAL
-- **Status:** Brak UI, backend może wspierać
-- **Impact:** Nieużywalne przy >50 nieruchomościach
-- **Gdzie:** `/src/components/dashboard/properties-table.tsx`
-- **Czas:** 4-5h (UI + endpoint + fuzzy matching)
-- **Priorytet:** P0
-
-#### 5. **Two-Factor Authentication (2FA)** 🔴 CRITICAL
-- **Status:** Biblioteka istnieje (`/src/lib/enterprise-auth.ts`), brak UI
-- **Impact:** Poważna luka bezpieczeństwa dla enterprise
-- **Supabase:** Wspiera natywnie MFA
-- **Czas:** 6-8h (UI + flow + testing)
-- **Priorytet:** P0
-
-#### 6. **Help System UI Integration** 🔴 CRITICAL
-- **Status:** System jest GOTOWY (`/src/lib/help-system.ts` - 590 linii), ale niewidoczny
-- **Impact:** Użytkownicy nie wiedzą jak używać aplikacji
-- **Komponenty:** `HelpButton`, `HelpOverlay`, `GuidedTour` - wszystko gotowe!
-- **Czas:** 1-2h (dodać przycisk + routing)
-- **Priorytet:** P0
-
-**Podsumowanie Critical:** 6 tasków, ~20-25h pracy, wszystkie blokują produkcję dla enterprise
-
----
-
-### 🟡 **WYSOKIE PRIORYTETY (Should Have)**
-
-| Feature | Status | Impact | Czas |
-|---------|--------|--------|------|
-| **Change Password** | Brak UI | Użytkownicy nie mogą zmienić hasła | 2h |
-| **Change Email** | Brak UI | Użytkownicy utknęli z błędnym emailem | 2h |
-| **Account Deletion** | Brak | GDPR non-compliance | 3h |
-| **Filter & Sort Properties** | Backend gotowy, brak UI | Zarządzanie danymi trudne | 4-5h |
-| **Bulk Select Checkboxes** | `bulk-operations.ts` gotowy, brak UI | Funkcje bulk nieużywalne | 3h |
-| **Contact Support Form** | `help-system.ts` ma ticketing, brak UI | Brak wsparcia dla userów | 2h |
-| **Subscription Upgrade UI** | `subscription-manager.ts` gotowy, brak UI | Nie ma self-service | 4h |
-| **Email Notification Preferences** | Tab istnieje, pokazuje "wkrótce" | Użytkownicy nie kontrolują emaili | 3h |
-| **Dark Mode** | Brak | Preferencja użytkowników | 4h |
-| **Activity/Login History** | Backend endpoint (`/api/security/logs`), brak UI | Brak transparentności | 3h |
-| **Next.js Error Pages** | Brak `not-found.tsx`, `error.tsx` | Użytkownicy widzą generyczne błędy | 1h |
-| **Breadcrumb Navigation** | Brak | Użytkownicy czują się zagubieni | 2h |
-
-**Podsumowanie High:** 12 tasków, ~33-35h pracy
-
----
-
-### 🟢 **ŚREDNIE/NISKIE PRIORYTETY (Nice to Have)**
-
-- Remember Me option (1h)
-- Push notifications (6h)
-- Live chat widget (4h)
-- Video tutorials (8h)
-- Multi-language i18n (16h)
-- Timezone settings (2h)
-- Connected devices management (3h)
-- API key management UI (3h)
-- Community forum (40h)
-
----
-
-### 📋 **SZCZEGÓŁOWA ANALIZA PO KATEGORIACH**
-
-#### 1. **USER ACCOUNT MANAGEMENT** (Score: 60%)
-
-**✅ ISTNIEJE:**
-- Email/Password login (`/src/app/auth/signin/page.tsx`)
-- Google OAuth (`/src/app/auth/signin/page.tsx:119-152`)
-- Basic profile editing (`/src/app/dashboard/settings/page.tsx:106-144`)
-- Session management (Supabase)
-
-**❌ BRAKUJE:**
-- Password reset/forgot password 🔴
-- Email verification 🔴
-- Change password 🟡
-- Change email 🟡
-- Account deletion 🟡
-- Login history UI 🟢
-- Remember me 🟢
-
-**Evidence:**
-```tsx
-// signin/page.tsx:259 - Link do nieistniejącej strony
-<Link href="/forgot-password">Zapomniałeś hasła?</Link>
-// ❌ Brak /src/app/forgot-password/page.tsx
+**Co pokazuje MD raport:**
+```markdown
+| Nr lokalu | Powierzchnia | Cena/m² | Cena całkowita |
+|-----------|--------------|---------|----------------|
+| 0000306071 | 33.06m² | 27 060 zł | 0 zł |  ← Powinno być 894 403 zł
+| 0000306071 | 29.72m² | 28 290 zł | 0 zł |  ← Powinno być 840 583 zł
 ```
 
+**Expected calculation:**
+- 33.06m² × 27,060 zł/m² = 894,403 zł ❌ (pokazuje 0 zł)
+- 29.72m² × 28,290 zł/m² = 840,583 zł ❌ (pokazuje 0 zł)
+
+**Root cause:** Parser nie wyciąga `Cena nieruchomości` z INPRO formatu
+
+**Fix location:** `/src/lib/smart-csv-parser.ts` - INPRO total_price mapping
+
+**Czas:** 1-2h
+
 ---
 
-#### 2. **NOTIFICATIONS & COMMUNICATION** (Score: 50%)
+### ⚠️ **PROBLEM #5: Sprzedane = 0m² powierzchni**
 
-**✅ ISTNIEJE:**
-- Notifications page (`/src/app/dashboard/notifications/page.tsx`)
-- Email templates (`/src/lib/email-templates.ts`)
-- Email service (Resend)
-- Alert components (`/src/components/ui/alert.tsx`)
+**Status:** 🟡 **MEDIUM - Data Display**
 
-**⚠️ CZĘŚCIOWO:**
-- In-app notifications (mock data only, linia 36-53)
-- Toast messages (brak systemu, użyte `alert()`)
-
-**❌ BRAKUJE:**
-- Real-time notifications 🔴
-- Toast/Snackbar system 🔴
-- Email notification preferences 🟡
-- Push notifications 🟢
-- Notification badge counter 🟢
-- Deadline reminders 🟡
-
-**Evidence:**
-```tsx
-// notifications/page.tsx:36 - Mock data
-setNotifications([
-  { id: '1', title: 'Witamy w OTORAPORT!', ... }
-  // ❌ Hardcoded, nie z bazy
-])
-
-// Używane alert() zamiast toast:
-alert('✅ ' + data.message)  // ❌ 12 wystąpień w kodzie
+**Co pokazuje MD raport:**
+```markdown
+| Nr lokalu | Powierzchnia | Cena | Status |
+|-----------|--------------|------|--------|
+| N/A | 0m² | 0 zł | 🔴 Sprzedane |
 ```
 
----
+**Możliwe przyczyny:**
+1. Źródłowy CSV nie ma powierzchni dla sprzedanych (najbardziej prawdopodobne)
+2. Parser usuwa te dane gdy widzi status "Sprzedane"
+3. Problem z kalkulacją (jeśli cena całkowita / cena m² = 0/0)
 
-#### 3. **DATA MANAGEMENT** (Score: 75%)
+**Fix location:** Sprawdzić oryginalne CSV + logic w parserze
 
-**✅ ISTNIEJE (Backend):**
-- CSV/Excel upload (`/src/lib/smart-csv-parser.ts`)
-- Bulk operations (`/src/lib/bulk-operations.ts` - KOMPLETNY!)
-- Bulk price update (lines 73-128)
-- Bulk status change (lines 133-185)
-- Bulk export (lines 190-237) - CSV/XLSX/JSON
-- Pagination (`properties-table.tsx:25-30`)
-
-**❌ BRAKUJE (Frontend UI):**
-- Search properties 🔴
-- Filter by status 🟡
-- Filter by project 🟡
-- Sort columns 🟡
-- Bulk select checkboxes 🟡 (funkcje są, UI nie ma!)
-- Data import history 🟢
-- Undo/Redo 🟢
-
-**Evidence:**
-```tsx
-// properties-table.tsx - Brak UI
-<CardHeader>
-  <CardTitle>Nieruchomości</CardTitle>
-  {/* ❌ Brak search input, filter dropdowns, sort buttons */}
-</CardHeader>
-
-// bulk-operations.ts MA wszystko gotowe:
-export async function bulkUpdatePrices(...)  // ✅
-export async function bulkChangeStatus(...)  // ✅
-export async function bulkExportData(...)    // ✅
-// Ale żadna funkcja nie jest dostępna z UI! ❌
-```
+**Czas:** 1h (diagnostyka + ewentualna naprawa)
 
 ---
 
-#### 4. **SUPPORT & HELP** (Score: 30%)
+## 🎯 **PLAN NAPRAWY - FAZA DELTA (PARSER FIXES)**
 
-**✅ ISTNIEJE (Wszystko gotowe!):**
-- Help system library (`/src/lib/help-system.ts` - 590 linii!)
-- Contextual help (lines 91-96)
-- Guided tours (lines 169-181, 520-589)
-- Chatbot system (lines 222-353)
-- Support ticket creation (lines 371-394)
-- FAQ content (line 504)
-- Onboarding tutorial (`/src/app/onboarding/page.tsx`)
-- Help components (`/src/components/help/`)
+### 🚀 **EXECUTION STRATEGY**
 
-**❌ BRAKUJE (tylko UI!):**
-- Help button w header 🔴 (button komponent ISTNIEJE!)
-- Help routing 🔴 (brak `/app/help/`)
-- Contact form UI 🟡 (backend gotowy)
-- Knowledge base search 🟡
-- Live chat widget 🟢
-- Video tutorials 🟢
+**Goal:** Naprawić wszystkie błędy parsowania + dodać ministerialny XML
+**Method:** 3 agenty równolegle (zero konfliktów plików)
+**Timeline:** 10-14h (1.5 dnia roboczego)
 
-**Evidence:**
+---
+
+### **Agent DELTA-1: Ministry Data XML Generator** ⏱️ 6-8h
+
+**Priority:** 🔴 P0 (ministry compliance blocker)
+
+**Task:** Stworzyć generator XML z faktycznymi danymi cenowymi (Schema 1.13)
+
+**Files to create:**
+- `/src/lib/ministry-xml-generator.ts` (nowy plik)
+- `/src/app/api/public/[clientId]/prices.xml/route.ts` (nowy endpoint)
+
+**Implementation:**
 ```typescript
-// help-system.ts MA WSZYSTKO:
-export const helpSystem = {
-  getContextualHelp: () => {...},      // ✅
-  searchResources: () => {...},        // ✅
-  getChatbotResponse: () => {...},     // ✅
-  createSupportTicket: () => {...},    // ✅
-  getGuidedTour: () => {...}           // ✅
+// /src/lib/ministry-xml-generator.ts
+export function generateMinistryDataXML(
+  developer: Developer,
+  properties: Property[]
+): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<dane_o_cenach_mieszkan xmlns="urn:otwarte-dane:mieszkania:1.13">
+  <informacje_podstawowe>
+    <data_publikacji>${new Date().toISOString().split('T')[0]}</data_publikacji>
+    <dostawca_danych>
+      <nazwa>${developer.company_name}</nazwa>
+      <nip>${developer.nip}</nip>
+      <email>${developer.email}</email>
+      <!-- ... wszystkie pola dewelopera -->
+    </dostawca_danych>
+  </informacje_podstawowe>
+  <oferty>
+    ${properties.map(prop => `
+    <oferta>
+      <nr_lokalu>${prop.property_number}</nr_lokalu>
+      <rodzaj_nieruchomości>${prop.property_type}</rodzaj_nieruchomości>
+      <powierzchnia_uzytkowa>${prop.area}</powierzchnia_uzytkowa>
+      <cena_za_m2>${prop.price_per_m2}</cena_za_m2>
+      <cena_calkowita>${prop.total_price}</cena_calkowita>
+      <wojewodztwo>${prop.wojewodztwo}</wojewodztwo>
+      <powiat>${prop.powiat}</powiat>
+      <gmina>${prop.gmina}</gmina>
+      <!-- ... wszystkie 58 pól -->
+    </oferta>
+    `).join('')}
+  </oferty>
+</dane_o_cenach_mieszkan>`
+}
+```
+
+**Dependencies:** NONE (nowy plik)
+
+**Testing:**
+```bash
+curl http://localhost:3000/api/public/{clientId}/prices.xml
+# Powinien zwrócić XML z pełnymi danymi mieszkań (nie metadata!)
+```
+
+---
+
+### **Agent DELTA-2: INPRO Parser Fixes** ⏱️ 4-6h
+
+**Priority:** 🔴 P0 (data quality blocker)
+
+**Task:** Naprawić 3 błędy w INPRO parsing logic:
+1. Duplikaty numerów mieszkań
+2. Total price = 0 zł
+3. Status vs cena confusion
+
+**File:** `/src/lib/smart-csv-parser.ts` (existing)
+
+**Implementation:**
+
+```typescript
+// FIX #1: Unikalne numery mieszkań
+function parseINPROFormat(row: any) {
+  return {
+    // BEFORE (BŁĄD):
+    // property_number: row['Id nieruchomości']  // zawsze to samo!
+
+    // AFTER (POPRAWKA):
+    property_number: row['Nr nieruchomości nadany przez dewelopera']  // unikalny!
+  }
 }
 
-// Komponenty ISTNIEJĄ:
-// /src/components/help/HelpButton.tsx        ✅
-// /src/components/help/HelpOverlay.tsx       ✅
-// /src/components/help/GuidedTour.tsx        ✅
+// FIX #2: Total price extraction
+function parseINPROFormat(row: any) {
+  return {
+    // BEFORE (BŁĄD):
+    // total_price: 0  // hardcoded!
 
-// Ale nie są użyte w dashboardzie! ❌
-// Header nie ma przycisku Help ❌
+    // AFTER (POPRAWKA):
+    total_price: parseFloat(row['Cena nieruchomości']?.toString().replace(/[^0-9,.]/g, '')
+      .replace(',', '.')) || 0
+  }
+}
+
+// FIX #3: Status detection
+function detectStatus(row: any): 'available' | 'sold' | 'reserved' {
+  // Sprawdź kolumnę "Status" lub "Dostępność"
+  const statusField = row['Status'] || row['Dostępność'] || row['status']
+
+  if (/sprzeda/i.test(statusField)) return 'sold'
+  if (/rezerwa/i.test(statusField)) return 'reserved'
+
+  // Sprawdź czy cena = "X" (ministerialny sposób oznaczenia sprzedanego)
+  if (row['Cena za m2 nieruchomości'] === 'X') return 'sold'
+
+  return 'available'
+}
 ```
 
----
+**Dependencies:** NONE (tylko edycja istniejącego pliku)
 
-#### 5. **SETTINGS & PREFERENCES** (Score: 70%)
-
-**✅ ISTNIEJE:**
-- Settings page (`/src/app/dashboard/settings/page.tsx`)
-- Profile tab (name, email, phone)
-- Company tab (NIP, REGON)
-- Notifications tab (placeholder)
-- Security tab (logout all devices)
-- Subscription backend (`/src/lib/subscription-manager.ts`)
-- Custom domains (`/src/lib/custom-domains.ts`)
-
-**❌ BRAKUJE:**
-- Language selection 🟡
-- Timezone selection 🟢
-- Dark mode 🟡
-- Email notification settings 🟡 (tab pokazuje "wkrótce")
-- Billing history UI 🟡
-- Subscription upgrade UI 🟡
-- API key management UI 🟢
-
-**Evidence:**
-```tsx
-// settings/page.tsx:193 - Tab istnieje ale pusty
-<CardContent>
-  <p className="text-gray-600">
-    Opcje powiadomień będą dostępne wkrótce.
-  </p>
-</CardContent>
-```
+**Testing:**
+1. Upload pliku INPRO
+2. Sprawdź czy:
+   - Numery mieszkań są unikalne (A.1.1.1M, A.1.1.2M etc.)
+   - Ceny całkowite != 0 zł
+   - Status "Sprzedane" pokazuje się w kolumnie status, nie cena
 
 ---
 
-#### 6. **SECURITY & PRIVACY** (Score: 65%)
+### **Agent DELTA-3: Sold Properties Data Fix** ⏱️ 1-2h
 
-**✅ ISTNIEJE:**
-- Privacy policy page (`/src/app/privacy/page.tsx`)
-- Terms of service (`/src/app/terms/page.tsx`)
-- Cookie policy (`/src/app/cookies/page.tsx`)
-- RODO page (`/src/app/rodo/page.tsx`)
-- Security logs API (`/src/app/api/security/logs/route.ts`)
-- Input validation (`/src/lib/input-validation.ts`)
-- Rate limiting (`/src/lib/security.ts`)
-- CSRF protection (`/src/app/api/csrf-token/route.ts`)
+**Priority:** 🟡 P1 (data display issue)
 
-**❌ BRAKUJE:**
-- Two-Factor Authentication UI 🔴 (lib istnieje!)
-- Activity log UI 🟡 (endpoint istnieje!)
-- Login history UI 🟡
-- Privacy policy acceptance flow 🟡
-- Terms acceptance tracking 🟡
-- Data export (GDPR) 🟡
-- Connected devices management 🟢
+**Task:** Zdiagnozować i naprawić problem z 0m² dla sprzedanych mieszkań
 
-**Evidence:**
-```bash
-# ✅ /src/lib/enterprise-auth.ts - 2FA library istnieje
-# ❌ Brak UI dla włączenia 2FA
-# ❌ Brak user settings
+**File:** `/src/lib/smart-csv-parser.ts` (existing)
 
-# ✅ /src/app/api/security/logs/route.ts - endpoint działa
-# ❌ Brak strony do wyświetlenia logów
-```
+**Investigation steps:**
+1. Sprawdzić oryginalne CSV - czy sprzedane mają powierzchnię
+2. Sprawdzić logic parsera - czy przypadkiem nie zeruje pól dla sprzedanych
+3. Jeśli dane są w CSV - naprawić ekstrakcję
+4. Jeśli brak w CSV - dodać placeholder "N/A" zamiast "0m²"
 
----
-
-#### 7. **UI/UX COMPLETENESS** (Score: 73%)
-
-**✅ DOSKONAŁE (90-95%):**
-- Loading states (`/src/components/ui/loading.tsx`)
-  - LoadingSpinner, LoadingState, Skeleton, SkeletonCard, SkeletonTable
-- Responsive design (extensive Tailwind usage)
-- Empty states (EmptyState component)
-- Advanced features (Help system, ChatWidget, GuidedTour)
-
-**✅ DOBRE (70-80%):**
-- Error boundaries (`ErrorBoundary.tsx`)
-- Error states (ErrorState component)
-- Form validation (FormError, FormInput)
-
-**⚠️ WYMAGA PRACY (40-50%):**
-- Feedback & confirmation (używa `alert()` zamiast toast)
-- Navigation & breadcrumbs (brak breadcrumbs, brak mobile menu)
-
-**❌ BRAKUJE:**
-- Toast notification system 🔴
-- Next.js error pages (`not-found.tsx`, `error.tsx`, `global-error.tsx`) 🔴
-- Breadcrumb navigation 🟡
-- Mobile hamburger menu 🟡
-- Progress bars (tylko spinnery) 🟡
-- Back buttons 🟢
-
-**Evidence - Loading States:**
-```tsx
-// ✅ DOSKONAŁE komponenty w loading.tsx:
-- LoadingSpinner (3 rozmiary)
-- LoadingState (pełny loading UI)
-- Skeleton (animated pulse)
-- SkeletonCard
-- SkeletonTable (configurable)
-
-// Używane w całej apce:
-<Suspense fallback={<LoadingState message="Ładowanie..." />}>
-```
-
-**Evidence - Brak Toast:**
-```tsx
-// ❌ 12 wystąpień alert() w kodzie:
-alert('✅ ' + data.message)
-alert('❌ Błąd: ' + error)
-confirm('Czy na pewno?')
-
-// Powinno być (sonner):
-toast.success(data.message)
-toast.error(error)
-// Nie wymaga confirm, można toast z przyciskami
-```
-
----
-
-### 📁 **BRAKUJĄCE KRYTYCZNE PLIKI**
-
-```bash
-❌ /src/app/forgot-password/page.tsx           # P0
-❌ /src/app/reset-password/page.tsx            # P0
-❌ /src/app/verify-email/page.tsx              # P0
-❌ /src/app/not-found.tsx                      # P0
-❌ /src/app/error.tsx                          # P0
-❌ /src/app/global-error.tsx                   # P0
-❌ /src/app/help/page.tsx                      # P0 (system gotowy!)
-❌ /src/app/help/[article]/page.tsx            # P1
-❌ /src/app/dashboard/activity/page.tsx        # P1
-❌ /src/app/dashboard/billing/page.tsx         # P1
-❌ /src/app/dashboard/security/page.tsx        # P1
-❌ /src/components/ui/toast.tsx                # P0 (lub sonner)
-❌ /src/hooks/use-toast.ts                     # P0
-```
-
-**Istniejące ale niekompletne:**
-```bash
-⚠️ /src/app/dashboard/settings/page.tsx       # Notifications tab pusty
-⚠️ /src/app/dashboard/notifications/page.tsx  # Mock data only
-⚠️ /src/components/dashboard/properties-table.tsx  # Brak search/filter/sort
-⚠️ /src/components/dashboard/header.tsx       # Brak Help button
-```
-
----
-
-### 🎯 **REKOMENDOWANY PLAN DZIAŁANIA**
-
-#### **SPRINT 1: Critical UX Fixes (1 tydzień, ~30h)** - ✅ **COMPLETE (7/7 done)** 🎉
-
-**Dzień 1-2 (Toast + Error Pages):** - ✅ **COMPLETE**
-1. ✅ **DONE (30.09.2025)** - `npm install sonner` + integracja (3h → already installed!)
-2. ✅ **DONE (30.09.2025)** - Zamiana wszystkich `alert()` na `toast()` (2h → already done, 0 found!)
-3. ✅ **DONE (30.09.2025)** - Utworzenie `not-found.tsx`, `error.tsx`, `global-error.tsx` (1h → 20min)
-4. ❌ Utworzenie `loading.tsx` w app root (15min) - **SKIP (not critical)**
-
-**Dzień 3-4 (Account Management):** - ✅ **COMPLETE**
-5. ✅ **DONE (30.09.2025)** - Password reset flow (`forgot-password`, `reset-password`) (4h → 30min)
-6. ✅ **DONE (30.09.2025)** - Email verification flow (`verify-email`) (3h → 30min)
-7. ✅ **DONE (30.09.2025)** - Change password w settings (2h → 25min)
-8. ✅ **DONE (30.09.2025)** - Change email w settings (2h → 15min)
-
-**Dzień 5 (Help System Integration):** - ✅ **COMPLETE**
-9. ✅ **DONE (30.09.2025)** - Dodać Help button do header (30min → 15min)
-10. ✅ **DONE (30.09.2025)** - Utworzyć `/app/help/page.tsx` (1h → 30min)
-11. ✅ **DONE (30.09.2025)** - Podłączyć `help-system.ts` library (1h → included)
-12. ❌ Testowanie guided tours (1h) - **SKIP (works)**
-
-**Dzień BONUS:**
-13. ✅ **DONE (30.09.2025)** - Search properties (5h → 25min)
-
----
-
-#### **SPRINT 2: Data Management UI (1 tydzień, ~30h)** - ⚠️ **IN PROGRESS (1/10 done)**
-
-**Dzień 1-2 (Search & Filter):** - ⚠️ **CZĘŚCIOWO (1/3 done)**
-1. ✅ **DONE (30.09.2025)** - Search properties input + endpoint (5h → 25min, BONUS z Sprint 1)
-2. ⚠️ **IN PROGRESS** - Filter dropdowns (status, project) (4h) - Working on filter UI with Select components
-3. ❌ Sort columns w tabeli (3h) - **TODO**
-
-**Dzień 3-4 (Bulk Operations UI):** - ❌ **TODO (0/4 done)**
-4. ❌ Checkbox selection w tabeli (3h) - **TODO**
-5. ❌ Bulk actions toolbar (2h) - **TODO**
-6. ❌ Podłączenie do istniejącego `bulk-operations.ts` (2h) - **TODO**
-7. ❌ Confirmation modals dla bulk actions (2h) - **TODO**
-
-**Dzień 5 (Polish):** - ❌ **TODO (0/3 done)**
-8. ❌ Breadcrumb navigation component (2h) - **TODO** (components exist but need integration)
-9. ❌ Mobile hamburger menu (3h) - **TODO**
-10. ❌ Progress bars dla uploads (2h) - **TODO**
-
-**Sprint 2 Progress Notes:**
-- Filter implementation started using shadcn/ui Select components
-- Breadcrumb component already exists in `/src/components/ui/breadcrumb.tsx` (needs integration only)
-- Select component available in `/src/components/ui/select.tsx` (ready for filters)
-
----
-
-#### **SPRINT 3: Security & Settings (1 tydzień, ~25h)** - ❌ **TODO (0/9 done)**
-
-**Dzień 1-2 (2FA):** - ❌ **TODO (0/4 done)**
-1. ❌ 2FA enable/disable UI w settings (4h) - **TODO**
-2. ❌ QR code generation (2h) - **TODO**
-3. ❌ Backup codes (2h) - **TODO**
-4. ❌ 2FA login flow (3h) - **TODO**
-
-**Dzień 3-4 (Activity & Privacy):** - ❌ **TODO (0/4 done)**
-5. ❌ Activity log page (`/dashboard/activity`) (3h) - **TODO**
-6. ❌ Login history page (`/dashboard/security`) (3h) - **TODO**
-7. ❌ Account deletion flow z confirmation (3h) - **TODO**
-8. ❌ Privacy policy acceptance na signup (2h) - **TODO**
-
-**Dzień 5 (Settings):** - ❌ **TODO (0/1 done)**
-9. ❌ Email notification preferences (3h) - **TODO**
-
----
-
-#### **SPRINT 4: Polish & Optimization (1 tydzień, ~20h)** - ❌ **TODO (0/6 done)**
-
-1. ❌ Dark mode implementation (4h) - **TODO**
-2. ❌ Subscription upgrade UI (`/dashboard/billing`) (4h) - **TODO**
-3. ❌ Contact support form (2h) - **TODO**
-4. ❌ Undo functionality dla destructive actions (3h) - **TODO**
-5. ❌ Optimistic UI updates (3h) - **TODO**
-6. ❌ Zod validation schemas (4h) - **TODO**
-
----
-
-### 📊 **PODSUMOWANIE LICZBOWE**
-
-| Kategoria | Completeness | Critical Missing | High Priority | Medium/Low |
-|-----------|-------------|------------------|---------------|------------|
-| **Account Management** | 60% | 2 | 3 | 2 |
-| **Notifications** | 50% | 2 | 2 | 3 |
-| **Data Management** | 75% | 1 | 4 | 3 |
-| **Support & Help** | 30% | 1 | 1 | 4 |
-| **Settings** | 70% | 0 | 4 | 4 |
-| **Security** | 65% | 1 | 5 | 3 |
-| **UI/UX** | 73% | 2 | 4 | 3 |
-| **TOTAL** | **65%** | **9** | **23** | **22** |
-
-**Łączny szacowany czas pracy:**
-- 🔴 Critical: ~25-30h (1 tydzień)
-- 🟡 High Priority: ~35-40h (1 tydzień)
-- 🟢 Medium/Low: ~60-70h (2 tygodnie)
-- **TOTAL: ~120-140h (1 miesiąc pracy)**
-
----
-
-### 🏆 **KLUCZOWE WNIOSKI**
-
-1. **Backend jest ŚWIETNY** - bulk operations, help system, subscription manager - wszystko gotowe
-2. **Frontend jest NIEKOMPLETNY** - wiele funkcji backend nie ma UI
-3. **80/20 Problem** - większość systemów ma 80%, brakuje 20% UI
-4. **Quick Wins:** Toast (3h), Help button (1h), Error pages (1h) = 5h na wielką różnicę
-5. **Biggest Pain:** Brak search/filter (użytkownicy frustrują się przy >50 properties)
-6. **Security Risk:** Brak 2FA i email verification dla enterprise
-
-**Zalecenie:**
-> **SPRINT 1 (Critical UX) jest MUST-HAVE przed produkcją.** Bez toast notifications i password reset aplikacja nie jest gotowa. Pozostałe sprinty można robić iteracyjnie po deploymencie.
-
----
-
-*Analiza wykonana: 30.09.2025 23:30*
-*Weryfikacja wykonana: 30.09.2025 23:45* ✅
-*Następna analiza: Po deploymencie do produkcji + feedback od pierwszych userów*
-*Metodologia: Konkurencja (SaaS best practices 2025) + Agent-based code analysis + Expert review + Code verification*
-
----
-
-## 🔍 **FAZA 7.1: WERYFIKACJA IMPLEMENTACJI (30.09.2025 23:45)**
-
-**Metoda:** Głęboka analiza kodu przez agenta sprawdzającego 14 kluczowych funkcji
-**Status:** ✅ **WERYFIKACJA UKOŃCZONA**
-
-### 📊 **WYNIKI WERYFIKACJI (14 funkcji)**
-
-| Feature | Status | Lokalizacja | Notatki |
-|---------|--------|-------------|---------|
-| **1. Password Reset** | ❌ **BRAK** | - | Link w signin:259 → 404 |
-| **2. Email Verification** | ❌ **BRAK** | - | Supabase niewykorzystane |
-| **3. Toast Notifications** | ❌ **BRAK** | 20× `alert()` | Brak sonner/react-hot-toast |
-| **4. Search Properties** | ❌ **BRAK** | properties-table.tsx | Brak search input |
-| **5. 2FA/MFA UI** | ⚠️ **CZĘŚCIOWO** | /lib/enterprise-auth.ts | Backend ✅, UI ❌ |
-| **6. Help Button** | ⚠️ **CZĘŚCIOWO** | /components/help/ | Komponenty ✅, integracja ❌ |
-| **7. Change Password** | ❌ **BRAK** | settings:199-211 | Security tab pusty |
-| **8. Change Email** | ❌ **BRAK** | settings:128 | Email disabled |
-| **9. Account Deletion** | ❌ **BRAK** | - | GDPR violation |
-| **10. Filter/Sort** | ❌ **BRAK** | properties-table.tsx | Brak controls |
-| **11. Bulk Select** | ❌ **BRAK** | properties-table.tsx | Brak checkboxów |
-| **12. Contact Support** | ❌ **BRAK** | - | Help placeholder → 404 |
-| **13. not-found.tsx** | ❌ **BRAK** | - | Next.js default |
-| **14. error.tsx** | ❌ **BRAK** | - | Next.js default |
-
-**Statystyki:**
-- ✅ **W PEŁNI ZAIMPLEMENTOWANE:** 0/14 (0%)
-- ⚠️ **CZĘŚCIOWO (backend gotowy):** 2/14 (14%)
-- ❌ **BRAK IMPLEMENTACJI:** 12/14 (86%)
-
----
-
-### 🚨 **KRYTYCZNE ODKRYCIA**
-
-#### **1. Alert() Katastrofa - 20 wystąpień**
-```bash
-# Znalezione pliki z alert():
-/src/app/dashboard/settings/page.tsx                    (2×)
-/src/components/dashboard/ApiManagementSection.tsx      (6×)
-/src/components/dashboard/file-management.tsx           (6×)
-/src/components/dashboard/pricing-card.tsx              (1×)
-/src/components/analytics/analytics-dashboard.tsx       (1×)
-/src/components/admin/admin-dashboard.tsx               (1×)
-/src/components/dashboard/MarketingDashboard.tsx        (2×)
-/src/components/dashboard/action-buttons.tsx            (1×)
-
-# Wpływ: Browser-blocking alerts zamiast toast
-```
-
-#### **2. Broken Link - Password Reset**
+**Implementation (if data missing in source):**
 ```typescript
-// /src/app/auth/signin/page.tsx:259
-<Link href="/forgot-password">Zapomniałeś hasła?</Link>
-// ❌ /app/forgot-password/page.tsx NIE ISTNIEJE → 404
+// Lepsze wyświetlanie brakujących danych
+const displayArea = property.area > 0 ? `${property.area}m²` : 'Brak danych'
+const displayPrice = property.total_price > 0 ? `${property.total_price} zł` : 'Brak danych'
 ```
 
-#### **3. GDPR Violation - Brak Account Deletion**
-- Użytkownicy nie mogą usunąć konta
-- Naruszenie "Right to Erasure" (Art. 17 RODO)
-- Potencjalne kary UOKiK
+**Dependencies:** NONE
 
-#### **4. Hidden Help System (261 + 413 linii kodu niewidocznego!)**
+**Testing:** Upload CSV, sprawdź czy sprzedane mają powierzchnię
+
+---
+
+## ⏸️ **CHECKPOINT DELTA - Quality Assurance**
+
+**Before marking complete, verify:**
+
+1. **Ministry Data XML:**
+   - [ ] Endpoint `/api/public/{clientId}/prices.xml` działa
+   - [ ] XML zawiera pełne dane mieszkań (nie metadata!)
+   - [ ] Wszystkie 58 pól ministerstwa wypełnione
+   - [ ] Walidacja względem Schema 1.13
+
+2. **INPRO Parser:**
+   - [ ] Numery mieszkań unikalne (np. A.1.1.1M, A.1.1.2M, nie duplikaty)
+   - [ ] Ceny całkowite != 0 zł (kalkulacja surface × price_per_m2)
+   - [ ] Status "Sprzedane" w kolumnie status, nie cena
+
+3. **Data Quality:**
+   - [ ] Sprzedane mieszkania pokazują powierzchnię (jeśli jest w źródle)
+   - [ ] Brak wartości "0m²" i "0 zł" (chyba że faktycznie 0)
+
+4. **Integration Test:**
+   - [ ] Upload INPRO CSV → wszystkie dane poprawne
+   - [ ] Upload ministerialny CSV → wszystkie dane poprawne
+   - [ ] Download XML → pełny raport cenowy
+   - [ ] MD report → statystyki poprawne
+
+---
+
+## 📊 **TIMELINE DELTA (Parallel Execution)**
+
+```
+DAY 1 (8h) - START: 01.10.2025 19:00
+├─ 19:00-22:00 (3h)  → Agent DELTA-1: Ministry XML (część 1)
+├─ 19:00-22:00 (3h)  → Agent DELTA-2: INPRO fixes (równolegle!)
+└─ 22:00-23:00 (1h)  → Agent DELTA-3: Sold properties fix
+
+DAY 2 (6h) - 02.10.2025
+├─ 09:00-14:00 (5h)  → Agent DELTA-1: Ministry XML (część 2 + testy)
+└─ 14:00-15:00 (1h)  → CHECKPOINT DELTA - comprehensive testing
+
+TOTAL: 14h (z testami)
+```
+
+---
+
+## 🎯 **SUCCESS CRITERIA - UPDATED**
+
+### **Ministry Compliance:**
+- ✅ Harvester XML (metadata) - **DONE**
+- ❌ Data XML (prices) - **TODO (DELTA-1)**
+- ✅ CSV endpoint (59 columns) - **DONE**
+- ✅ MD report - **DONE** (minor data quality issues)
+- ✅ MD5 checksum - **DONE**
+
+### **Data Quality:**
+- ❌ INPRO properties - **BROKEN** (duplikaty, 0 zł) → **DELTA-2**
+- ✅ Ministry properties - **OK**
+- ⚠️ Sold properties - **PARTIAL** (0m² issue) → **DELTA-3**
+
+### **User Experience:**
+- ✅ File upload - **FIXED TODAY** (cache revalidation)
+- ✅ Upload widget text - **FIXED TODAY**
+- ✅ Files showing after upload - **FIXED TODAY**
+- ⚠️ Properties table - **PARTIAL** (shows incorrect data from bad parser)
+
+---
+
+## 📋 **FAZY ZROBIONE (Reference)**
+
+### ✅ **FAZA 0: CRITICAL BUGS (30.09.2025) - COMPLETE**
+- CSV Parser Duplikaty ✅
+- MD Generator Raw Data ✅
+- Dashboard Components ✅
+- CSV Schema Ministry Columns ✅
+- XML Generator Harvester ✅
+- CSV Endpoint ✅
+
+### ✅ **FAZA ALPHA (01.10.2025) - COMPLETE**
+- ALPHA-1: File Deletion Cascade ✅
+- ALPHA-2: Help UI Minimized ✅
+- ALPHA-3: Dashboard Pagination ✅
+- ALPHA-4: Project Name Extraction ✅
+
+### ✅ **FAZA BETA (01.10.2025) - COMPLETE**
+- BETA-1: Multi-format CSV Parser ✅
+- BETA-2: Excel Support (.xlsx, .xls) ✅
+
+### ✅ **FAZA GAMMA-DIAGNOSTICS (01.10.2025) - COMPLETE**
+- Upload widget text fix ✅
+- Cache invalidation ✅
+- Ministry compliance analysis ✅
+- Parser bugs identification ✅
+
+---
+
+## 🚀 **FAZY DO ZROBIENIA (Kolejność)**
+
+### ⏳ **FAZA DELTA: Parser & XML Fixes** ← **CURRENT (01.10.2025)**
+**Status:** 🔴 IN PLANNING
+**ETA:** 14h (1.5 dnia)
+**Agents:** 3 równolegle
+
+**Taski:**
+1. ❌ Ministry Data XML generator (6-8h)
+2. ❌ INPRO parser fixes (4-6h)
+3. ❌ Sold properties data fix (1-2h)
+
+---
+
+### ⏹️ **FAZA EPSILON: Charts Implementation** (Odłożone)
+**Status:** ⚪ NOT STARTED
+**ETA:** 6-8h
+**Priority:** P2 (nice-to-have, not blocking)
+
+**Taski:**
+1. Price trend chart (Recharts)
+2. Distribution pie charts
+3. Status overview chart
+
+**Reason for delay:** Wykresy są ważne, ale naprawienie błędów parsowania ma wyższy priorytet
+
+---
+
+## 📊 **OVERALL PROJECT STATUS**
+
+| Component | Status | Score | Notes |
+|-----------|--------|-------|-------|
+| **Ministry Compliance** | ⚠️ PARTIAL | 80% | Brak data.xml (DELTA-1) |
+| **CSV Parser** | ❌ BROKEN | 60% | INPRO błędy (DELTA-2) |
+| **Data Quality** | ❌ POOR | 55% | Duplikaty, 0 zł (DELTA-2) |
+| **File Upload** | ✅ WORKS | 95% | Cache fixed today |
+| **User Experience** | ⚠️ OK | 75% | Pokazuje błędne dane |
+| **Backend Infrastructure** | ✅ EXCELLENT | 95% | Solid foundation |
+| **Security (RLS)** | ✅ GOOD | 90% | Working correctly |
+| **OVERALL** | ⚠️ | **75%** | **Needs DELTA fixes** |
+
+---
+
+## 🎯 **IMMEDIATE NEXT STEPS (01.10.2025 Evening)**
+
+### **Option A: Start DELTA Phase Tonight** ⭐ RECOMMENDED
+**Pros:**
+- Naprawimy krytyczne błędy parsowania
+- Dodamy brakujący ministerialny XML
+- Aplikacja będzie w pełni zgodna z ministerstwem
+
+**Plan:**
 ```bash
-# Gotowe komponenty:
-✅ /src/components/help/HelpButton.tsx          (261 linii)
-✅ /src/components/help/HelpOverlay.tsx         (413 linii)
-✅ /src/components/help/GuidedTour.tsx
-✅ /src/lib/help-system.ts                      (590 linii)
+# Tonight (3h)
+19:00-22:00 → Launch DELTA-1 & DELTA-2 agents parallel
+22:00-23:00 → Launch DELTA-3 agent
 
-# Brak integracji:
-❌ Brak help button w /src/components/dashboard/header.tsx
-❌ Brak routing /app/help/
+# Tomorrow (6h)
+09:00-14:00 → Finish DELTA-1
+14:00-15:00 → Comprehensive testing & commit
 ```
 
----
+### **Option B: Commit Current Fixes & Continue Tomorrow**
+**Pros:**
+- Zapisujemy dzisiejsze naprawy (cache, upload widget)
+- Zaczynamy DELTA rano ze świeżą głową
 
-### 📋 **AKTUALIZACJA ESTYMACJI CZASU**
-
-**Oryginalne estymacje (przed weryfikacją):**
-- Critical (P0): ~20-25h
-- High Priority (P1): ~33-35h
-- **TOTAL:** ~53-60h
-
-**Zaktualizowane estymacje (po weryfikacji):**
-
-#### **Critical (P0) - 6 tasków:**
-1. Password Reset: **6h** (było 2-3h) - wymaga 3 plików + API
-2. Email Verification: **4h** (było 3-4h) - zgodnie z estymacją
-3. Toast System: **5h** (było 2-3h) - 20 zamian alert()
-4. Search Properties: **5h** (było 4-5h) - zgodnie z estymacją
-5. 2FA UI: **8h** (było 6-8h) - QR codes + verification
-6. Help Integration: **2h** (było 1-2h) - zgodnie z estymacją
-- **SUBTOTAL P0: 30h** (było ~20-25h)
-
-#### **High Priority (P1) - 6 tasków:**
-7. Change Password: **3h** (było 2h) - pełny flow z validation
-8. Change Email: **4h** (było 2h) - wymaga verification
-9. Account Deletion: **5h** (było 3h) - GDPR compliance
-10. Filter/Sort: **6h** (było 4-5h) - multiple filters
-11. Bulk Select: **5h** (było 3h) - checkboxes + toolbar
-12. Contact Support: **4h** (było 2h) - formularz + endpoint
-- **SUBTOTAL P1: 27h** (było ~16-18h)
-
-#### **Error Pages - 2 pliki:**
-13. not-found.tsx: **1h**
-14. error.tsx: **1h**
-- **SUBTOTAL Errors: 2h**
-
-**📊 TOTAL REVISED:** **~59h** (7.5 dni roboczych @ 8h/dzień)
-
----
-
-### ✅ **POZYTYWNE ODKRYCIA**
-
-1. **Help System w 100% gotowy** - tylko dodać przycisk (2h)
-2. **Enterprise Auth backend kompletny** - tylko UI (8h)
-3. **Properties table działa** - tylko brak search/filter/bulk (16h)
-4. **Settings page fundament istnieje** - tylko wypełnić (12h)
-
-**Quick Wins (mniej niż 3h każdy):**
-- Help button integration (2h)
-- Error pages (2h)
-- Change password UI (3h - jeśli Supabase API działa)
-
----
-
-### 🎯 **ZAKTUALIZOWANE ZALECENIA**
-
-#### **SPRINT 1: Critical Auth & UX (2 tygodnie, 30h)**
-**Tydzień 1 (15h):**
-- Toast system (sonner) - 5h
-- Password reset flow - 6h
-- Help button integration - 2h
-- Error pages - 2h
-
-**Tydzień 2 (15h):**
-- Email verification - 4h
-- Search properties - 5h
-- 2FA UI - 6h (jeśli czas pozwala, inaczej przenieść do Sprint 2)
-
-#### **SPRINT 2: Data Management (1 tydzień, 27h)**
-- Filter/sort properties - 6h
-- Bulk select - 5h
-- Change password - 3h
-- Change email - 4h
-- Account deletion - 5h
-- Contact support - 4h
-
-#### **SPRINT 3: 2FA (jeśli nie w Sprint 1) + Polish**
-- 2FA UI (jeśli nie zrobione) - 8h
-- Dark mode - 4h
-- Billing UI - 4h
-- Optimizations - 4h
-
-**TOTAL PROJECT TIME:** ~59h (~8 dni roboczych)
-
----
-
-*Weryfikacja zakończona: 30.09.2025 23:45*
-*Następny krok: Rozpoczęcie Sprint 1 lub deployment do produkcji bez tych funkcji (z ryzykiem)*
-
----
-
-## 📝 **EXECUTION SUMMARY (30.09.2025)**
-
-### ✅ **COMPLETED TODAY:**
-
-1. ✅ Ministry documentation analysis
-2. ✅ CSV Parser fixes (duplikaty + ministry columns)
-3. ✅ MD Generator fixes (smart status, SOLD filtering, statistics)
-4. ✅ XML Generator rewrite (Harvester Schema 1.13)
-5. ✅ **CSV Endpoint implementation (59 columns)** 🎉
-6. ✅ Public endpoints testing and validation
-7. ✅ RLS security policies execution
-8. ✅ Dashboard components verification
-9. ✅ Ministry compliance verification (100%)
-10. ✅ Git commits and documentation update
-
-### 🎯 **TOTAL TIME INVESTED:** ~8-10 hours
-
-### 🏆 **ACHIEVEMENTS:**
-
-- ✅ FAZA 0: 100% Complete (9/9 tasks)
-- ✅ FAZA 1: 95% Complete (3/5 tasks, 2 remaining are P1/P2)
-- ✅ Ministry Compliance: 100%
-- ✅ Production Ready: YES
-- ✅ All Critical Bugs: FIXED
-
----
-
-## 🎉 **IMMEDIATE NEXT STEPS (Optional!)**
-
-### Option A: Deploy to Production 🚀
+**Plan:**
 ```bash
-# Ready for deployment!
-vercel --prod
+# Tonight (30min)
+→ Commit upload widget + cache fixes
+→ Update this document
 
-# All endpoints will work:
-# - /api/public/{clientId}/data.xml  ✅
-# - /api/public/{clientId}/data.csv  ✅
-# - /api/public/{clientId}/data.md   ✅
-# - /api/public/{clientId}/data.md5  ✅
+# Tomorrow morning
+→ Start DELTA phase (fresh)
 ```
 
-### Option B: Work on Features (Not Critical)
-- File Management UI
-- Notification System
-- Error Toasts
-- Charts & Visualizations
+---
 
-### Option C: Polish & Optimize (Nice-to-have)
-- Admin check server-side
-- Input validation
-- Performance optimization
-- UI/UX improvements
+## 💾 **FILES CHANGED TODAY (01.10.2025)**
+
+1. **`/src/components/dashboard/upload-widget.tsx`**
+   - Line 124: Changed "CSV, XLSX lub XML" → "CSV, Excel (XLS, XLSX)"
+
+2. **`/src/app/api/upload/route.ts`**
+   - Line 2: Added `import { revalidatePath } from 'next/cache'`
+   - Lines 167-171: Added cache revalidation after successful upload
+
+3. **`PLAN_NAPRAWY_2025.md`** (this file)
+   - Comprehensive update with:
+     - Current status analysis
+     - Ministry compliance gap analysis
+     - Parser bugs identification
+     - DELTA phase planning
 
 ---
 
-## 📞 **FINAL STATUS**
+## 📞 **FINAL RECOMMENDATION**
 
-**Application Status:** 🟢 **PRODUCTION READY**
+**Status:** 🟡 **75% Complete - Parser Fixes Required**
 
-**Ministry Compliance:** ✅ **100%**
+**Recommendation:**
+> Execute FAZA DELTA (14h) before production deployment. Current bugs will cause:
+> - Ministry rejection (missing data.xml)
+> - User confusion (wrong property numbers, 0 zł prices)
+> - Support tickets (data quality issues)
 
-**Critical Bugs:** ✅ **0**
+**Quick wins available:**
+- Ministry XML generator: 6-8h
+- INPRO parser fixes: 4-6h
+- Data quality improvements: 1-2h
 
-**Remaining Work:** ⚠️ **Features & Polish only (not critical)**
-
-**Recommendation:** ⚠️ **Ministry compliance 100%, but USER FEATURES need work before production**
-
----
-
-## 📊 **FINAL ASSESSMENT AFTER VERIFICATION (30.09.2025 23:45)**
-
-### ✅ **GOTOWE DO PRODUKCJI (Ministry Compliance):**
-- XML Harvester Schema 1.13: ✅ 100%
-- CSV Endpoint (59 kolumn): ✅ 100%
-- MD5 Checksum: ✅ 100%
-- Public API endpoints: ✅ 100%
-- RLS Security: ✅ 95%
-- Dashboard basic functionality: ✅ 100%
-
-### ⚠️ **WYMAGA PRACY (User Experience):**
-- Authentication features: ❌ 33% (2/6 brak)
-- User management: ❌ 16% (5/6 brak)
-- UX basics: ❌ 0% (toast, search, errors)
-- Help system: ⚠️ 50% (gotowy, niewidoczny)
-
-### 📊 **KOMPLETNOŚĆ APLIKACJI:**
-
-**Backend Infrastructure:**
-- Ministry compliance: ✅ 100%
-- Database & API: ✅ 95%
-- Security: ✅ 90%
-- **BACKEND TOTAL: 95%** ⭐⭐⭐⭐⭐
-
-**Frontend User Features:**
-- Auth flows: ❌ 33%
-- Data management: ❌ 40%
-- Settings & preferences: ❌ 60%
-- Help & support: ⚠️ 50%
-- Error handling: ❌ 30%
-- **FRONTEND TOTAL: 43%** ⭐⭐☆☆☆
-
-**OVERALL APPLICATION: 69%** (było 75% przed weryfikacją)
-
-### 🚦 **DEPLOYMENT DECISION:**
-
-**Option A: Deploy Now (z ryzykiem)**
-- ✅ Ministry compliance działa
-- ✅ Basic features działają
-- ❌ Brak password reset (użytkownicy mogą się zablokować)
-- ❌ Brak search (frustracja przy >50 properties)
-- ❌ 20× alert() (nieprofesjonalne)
-- ❌ GDPR violation (brak account deletion)
-
-**Option B: Sprint 1 (2 tygodnie), potem deploy** ⭐ ZALECANE
-- 30h pracy = podstawowe user features
-- Password reset + Email verification
-- Toast notifications (zamiana 20× alert)
-- Help button integration
-- Search properties
-- Error pages
-
-**Option C: Pełny roadmap (2 miesiące)**
-- 59h wszystkich funkcji
-- Production-ready dla enterprise
-- GDPR compliant
-- Professional UX
+**After DELTA:**
+- ✅ Full ministry compliance (100%)
+- ✅ Accurate data parsing (100%)
+- ✅ Production ready (90%)
 
 ---
 
-*Last updated: 30.09.2025 23:45* ✅
-*Verification completed: 14/14 features checked*
-*Next step: **Decyzja: deploy teraz czy Sprint 1?***
-*Status: **⚠️ MINISTRY READY, USER FEATURES INCOMPLETE***
+*Last updated: 01.10.2025 18:30*
+*Next update: After DELTA phase completion*
+*Status: Ready for DELTA execution*

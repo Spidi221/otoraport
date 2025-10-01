@@ -121,7 +121,7 @@ export function UploadWidget() {
               <p className="text-xs text-muted-foreground">
                 {uploading
                   ? "Może potrwać 1-2 minuty dla dużych plików..."
-                  : "CSV, XLSX lub XML do 10MB"
+                  : "CSV, Excel (XLS, XLSX) do 10MB"
                 }
               </p>
             </div>

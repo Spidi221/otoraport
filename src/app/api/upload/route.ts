@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { parseCSVSmart, SmartCSVParser, parseExcelFile } from '@/lib/smart-csv-parser'
 
@@ -160,6 +161,13 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       )
+    }
+
+    // Revalidate cache to show uploaded files immediately
+    if (savedToDatabase) {
+      console.log('🔄 UPLOAD API: Revalidating cache...')
+      revalidatePath('/dashboard')
+      revalidatePath('/api/files/list')
     }
 
     return NextResponse.json({
