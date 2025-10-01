@@ -50,11 +50,11 @@ export async function POST(request: NextRequest) {
         .insert({
           user_id: user.id,
           email: user.email!,
-          name: user.email!.split('@')[0],
           company_name: 'My Company',
+          nip: '0000000000',  // Required field - placeholder
           client_id: clientId,
-          subscription_plan: 'basic',
-          subscription_status: 'trial'
+          subscription_plan: 'trial',
+          subscription_status: 'active'
         })
         .select()
         .single()
