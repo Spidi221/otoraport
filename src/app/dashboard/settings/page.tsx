@@ -69,6 +69,7 @@ export default function SettingsPage() {
   const handleSave = async (formData: any) => {
     setSaving(true)
     try {
+      const supabase = createClient()
       const { error } = await supabase
         .from('developers')
         .update(formData)
@@ -77,6 +78,17 @@ export default function SettingsPage() {
       if (error) throw error
 
       toast.success('Ustawienia zostały zapisane')
+
+      // Reload profile to show updated data
+      const { data: updatedProfile } = await supabase
+        .from('developers')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (updatedProfile) {
+        setProfile(updatedProfile)
+      }
     } catch (error) {
       console.error('Error saving settings:', error)
       toast.error('Błąd podczas zapisywania ustawień')
