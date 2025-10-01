@@ -19,9 +19,35 @@ export function createClient() {
   // Create singleton client to avoid multiple instances
   if (client) return client
 
+  // Get env vars with fallback for build time
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+  // Don't create client if env vars missing (build time)
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn('Supabase env vars missing - client not created')
+    // Return mock client for build time
+    return {
+      auth: {
+        signInWithPassword: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        signInWithOAuth: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        signUp: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        signOut: async () => ({ error: new Error('Supabase not configured') }),
+        getUser: async () => ({ data: { user: null }, error: null }),
+        getSession: async () => ({ data: { session: null }, error: null }),
+      },
+      from: () => ({
+        select: () => ({ data: null, error: new Error('Supabase not configured') }),
+        insert: () => ({ data: null, error: new Error('Supabase not configured') }),
+        update: () => ({ data: null, error: new Error('Supabase not configured') }),
+        delete: () => ({ data: null, error: new Error('Supabase not configured') }),
+      }),
+    } as any
+  }
+
   client = createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         get(name: string) {

@@ -3,6 +3,9 @@
  * Handles email confirmation links from Supabase
  */
 
+// Force dynamic rendering - prevent static generation during build
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
