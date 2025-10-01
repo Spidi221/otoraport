@@ -548,7 +548,11 @@ export function PropertiesTable() {
                       <td className="py-3 text-sm text-muted-foreground">
                         {property.project_name || 'Brak przypisania'}
                       </td>
-                      <td className="py-3 text-sm">{property.area}m²</td>
+                      <td className="py-3 text-sm">
+                        {property.area !== null && property.area !== undefined && property.area > 0
+                          ? `${property.area}m²`
+                          : <span className="text-gray-400 italic">Brak danych</span>}
+                      </td>
                       <td className="py-3 text-sm">{property.price_per_m2.toLocaleString('pl-PL')} zł</td>
                       <td className="py-3 text-sm font-medium">{property.total_price.toLocaleString('pl-PL')} zł</td>
                       <td className="py-3">{getStatusBadge(property.status)}</td>

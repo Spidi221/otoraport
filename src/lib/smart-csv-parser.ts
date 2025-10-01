@@ -132,12 +132,18 @@ interface ColumnMapping {
 const COLUMN_PATTERNS: ColumnMapping = {
   // Basic property info
   property_number: [
-    'nr lokalu', 'numer lokalu', 'nr mieszkania', 'numer mieszkania',
-    'lokal', 'mieszkanie', 'nr', 'property_number', 'apartment_number',
-    'nr_lokalu', 'numer_lokalu', 'mieszkanie_nr',
+    // INPRO FORMAT (highest priority - exact match required)
+    'nr nieruchomości nadany przez dewelopera',
+    'nr nieruchomosci nadany przez dewelopera',
     // MINISTRY OFFICIAL NAMES:
     'nr lokalu lub domu jednorodzinnego nadany przez dewelopera',
-    'oznaczenie lokalu nadane przez dewelopera'
+    'oznaczenie lokalu nadane przez dewelopera',
+    // GENERIC NAMES (lower priority)
+    'nr lokalu', 'numer lokalu', 'nr mieszkania', 'numer mieszkania',
+    'lokal', 'mieszkanie', 'property_number', 'apartment_number',
+    'nr_lokalu', 'numer_lokalu', 'mieszkanie_nr',
+    // FALLBACK (avoid these if better match exists)
+    'nr' // Too generic, only as last resort
   ],
   property_type: [
     'typ', 'typ lokalu', 'typ mieszkania', 'rodzaj', 'property_type',
@@ -146,19 +152,27 @@ const COLUMN_PATTERNS: ColumnMapping = {
   
   // Prices
   price_per_m2: [
-    'cena za m²', 'cena za m2', 'cena m2', 'cena m²', 'cena/m2', 'cena/m²',
-    'cena za m 2', 'cena m 2', 'cena/m 2', // warianty ze spacją
-    'price_per_m2', 'price_per_sqm', 'cena_za_m2', 'cena_m2', 'cena za metr',
+    // INPRO FORMAT (highest priority)
+    'cena za m2 nieruchomości',
+    'cena za m2 nieruchomosci',
     // MINISTRY OFFICIAL NAMES (ze spacją!):
     'cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]',
-    'cena metra kwadratowego powierzchni użytkowej'
+    'cena metra kwadratowego powierzchni użytkowej',
+    // GENERIC NAMES
+    'cena za m²', 'cena za m2', 'cena m2', 'cena m²', 'cena/m2', 'cena/m²',
+    'cena za m 2', 'cena m 2', 'cena/m 2', // warianty ze spacją
+    'price_per_m2', 'price_per_sqm', 'cena_za_m2', 'cena_m2', 'cena za metr'
   ],
   total_price: [
-    'cena całkowita', 'cena', 'cena brutto', 'cena bazowa', 'total_price',
-    'price', 'cena_calkowita', 'cena_bazowa', 'cena_brutto',
+    // INPRO FORMAT (highest priority)
+    'cena nieruchomości',
+    'cena nieruchomosci',
     // MINISTRY OFFICIAL NAMES:
     'cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]',
-    'cena będąca iloczynem powierzchni oraz metrażu'
+    'cena będąca iloczynem powierzchni oraz metrażu',
+    // GENERIC NAMES
+    'cena całkowita', 'cena calkowita', 'cena', 'cena brutto', 'cena bazowa',
+    'total_price', 'price', 'cena_calkowita', 'cena_bazowa', 'cena_brutto'
   ],
   final_price: [
     'cena finalna', 'cena końcowa', 'cena ostateczna', 'final_price',
@@ -994,6 +1008,36 @@ export class SmartCSVParser {
   }
 
   /**
+   * Detect property status for INPRO format
+   * INPRO convention: "X" in price field means sold
+   */
+  private detectINPROStatus(row: any, rawData: { [key: string]: any }): 'available' | 'sold' | 'reserved' | undefined {
+    // Check explicit status field first
+    const statusField = rawData['Status'] || rawData['status'] || rawData['Status dostępności']
+    if (statusField) {
+      const statusLower = String(statusField).toLowerCase()
+      if (/sprzeda/i.test(statusLower) || /sold/i.test(statusLower)) return 'sold'
+      if (/rezerwa/i.test(statusLower) || /reserved/i.test(statusLower)) return 'reserved'
+      if (/dostępn/i.test(statusLower) || /available/i.test(statusLower)) return 'available'
+    }
+
+    // INPRO CONVENTION: "X" marker in price fields means sold
+    const pricePerM2Field = rawData['Cena za m2 nieruchomości'] || rawData['Cena za m2 nieruchomosci']
+    const totalPriceField = rawData['Cena nieruchomości'] || rawData['Cena nieruchomosci']
+
+    if (pricePerM2Field === 'X' || totalPriceField === 'X') {
+      return 'sold'
+    }
+
+    // If prices are valid numbers, property is available
+    if (pricePerM2Field && !isNaN(Number(pricePerM2Field))) {
+      return 'available'
+    }
+
+    return undefined
+  }
+
+  /**
    * Parse actual data using discovered column mappings
    */
   private parseData(): ParsedProperty[] {
@@ -1037,6 +1081,11 @@ export class SmartCSVParser {
               case 'final_price':
               case 'area':
               case 'parking_price':
+                // INPRO FIX: Skip parsing if value is "X" (sold marker)
+                if (value === 'X') {
+                  console.log(`🔍 PARSER: Detected "X" marker in ${fieldName} - property likely sold`)
+                  break
+                }
                 // Parse numbers, handle Polish number format
                 const numValue = this.parseNumber(value)
                 if (numValue !== null) {
@@ -1050,6 +1099,13 @@ export class SmartCSVParser {
             }
           }
         }
+      }
+
+      // INPRO FIX: Detect status using INPRO conventions (must be after raw_data is built)
+      const detectedStatus = this.detectINPROStatus(row, property.raw_data)
+      if (detectedStatus && !property.status) {
+        property.status = detectedStatus
+        console.log(`🔍 PARSER: Auto-detected status for property ${property.property_number || 'unknown'}: ${detectedStatus}`)
       }
 
       // MINISTRY CSV FIX: Calculate area if missing (area = total_price / price_per_m2)

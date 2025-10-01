@@ -112,15 +112,26 @@ export async function GET(request: NextRequest) {
         return null
       }
 
+      // Extract values with proper fallbacks
+      const areaValue = getValue('area', 'Powierzchnia użytkowa lokalu mieszkalnego lub powierzchnia domu jednorodzinnego [m2]') || getValue('surface_area')
+      const pricePerM2Value = getValue('price_per_m2', 'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]')
+      const totalPriceValue = getValue('total_price', 'Cena lokalu mieszkalnego lub domu jednorodzinnego [zł]') || getValue('base_price')
+
+      // Calculate area if missing (CRITICAL FIX for sold properties showing 0m²)
+      let finalArea = areaValue
+      if (!finalArea && totalPriceValue && pricePerM2Value && pricePerM2Value > 0) {
+        finalArea = Math.round((totalPriceValue / pricePerM2Value) * 100) / 100
+      }
+
       return {
         id: prop.id,
         project_id: prop.project_id,
         property_number: getValue('property_number', 'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera') || getValue('apartment_number') || 'N/A',
         property_type: getValue('property_type') || 'mieszkanie',
-        area: getValue('area', 'Powierzchnia użytkowa lokalu mieszkalnego lub powierzchnia domu jednorodzinnego [m2]') || getValue('surface_area') || 0,
-        price_per_m2: getValue('price_per_m2', 'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]') || 0,
-        total_price: getValue('total_price', 'Cena lokalu mieszkalnego lub domu jednorodzinnego [zł]') || getValue('base_price') || 0,
-        final_price: getValue('final_price') || getValue('total_price', 'Cena lokalu mieszkalnego lub domu jednorodzinnego [zł]') || getValue('base_price') || 0,
+        area: finalArea || null, // CRITICAL: Use null instead of 0 when area is truly missing
+        price_per_m2: pricePerM2Value || 0,
+        total_price: totalPriceValue || 0,
+        final_price: getValue('final_price') || totalPriceValue || 0,
         status: getValue('status') || getValue('status_sprzedazy') || 'available',
         created_at: prop.created_at,
         updated_at: prop.updated_at

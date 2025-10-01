@@ -22,7 +22,7 @@ export interface PropertyData {
   readonly id: string;
   readonly property_number: string;
   readonly property_type: 'apartment' | 'house' | 'commercial' | 'other';
-  readonly area: number;
+  readonly area: number | null; // CRITICAL: Allow null for sold properties without area data
   readonly price_per_m2: number;
   readonly total_price: number;
   readonly status: 'available' | 'reserved' | 'sold';
