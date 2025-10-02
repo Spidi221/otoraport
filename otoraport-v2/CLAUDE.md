@@ -1662,106 +1662,150 @@ curl https://otoraport.vercel.app/api/public/dev_test/data.xml
 
 ---
 
-# 🔄 KRYTYCZNA ZMIANA LOGIKI APLIKACJI (02.10.2025 - PARSING FIX)
+# 🔄 KRYTYCZNA ZMIANA LOGIKI APLIKACJI (02.10.2025 - FINALNA WERSJA)
 
-## 📊 ANALIZA 3 PLIKÓW TESTOWYCH
+## 📊 ANALIZA 4 PLIKÓW TESTOWYCH
 
-### **Test #1: "2025-10-02.xlsx - wzorcowy zakres danych.csv" ❌ BŁĄD**
+### **Test #1: "2025-09-11.csv" (TAMBUD) - WZORCOWY FORMAT MINISTERSTWA**
+- **Rozmiar:** 22 linie (21 mieszkań + header)
+- **Format:** 58 kolumn ministerstwa (separator: `;`)
+- **Kluczowe odkrycie:** "X" w **3 kolumnach**:
+  - **Kolumna 39:** `Cena m2` = **"X"** (wielkie)
+  - **Kolumna 41:** `Cena bazowa` = **"x"** (małe)
+  - **Kolumna 43:** `Cena końcowa` = **"X"** lub **"#VALUE!"** (błąd Excel)
+
+**Przykłady:**
+```csv
+# SPRZEDANE (line 2, mieszkanie B2/2):
+B2/2;X;2025-09-11;x;2025-09-11;#VALUE!
+     ↑               ↑              ↑
+  cena/m2      cena bazowa    cena końcowa
+
+# DOSTĘPNE (line 3, mieszkanie B5/2):
+B5/2;11831,88671;2025-09-11;1295000;2025-09-11;1299000
+     ↑                       ↑                  ↑
+   liczba                 liczba            liczba
+```
+
+### **Test #2: "2025-10-02.xlsx - wzorcowy zakres danych.csv"**
 - **Rozmiar:** 21 linii (20 mieszkań + header)
-- **Format:** Polskie długie nagłówki (format ministerstwa)
-- **Problem:** Niektóre ceny = "x" zamiast liczb (mieszkanie sprzedane)
-- **Co parser robi:** Wykrywa "X" i pomija pole (line 1084-1088)
-- **Status:** Parser ma logikę ale może nie zapisywać do bazy
+- **Format:** Ten sam co #1 (eksport z Excel)
+- **Separator:** `,` (comma)
+- **Status:** ✅ OK
 
-### **Test #2: "Ceny-ofertowe-mieszkan-dewelopera-inpro_s__a-2025-10-02.csv" ✅ OK**
+### **Test #3: "Ceny-ofertowe-mieszkan-dewelopera-inpro_s__a-2025-10-02.csv"**
 - **Rozmiar:** 4 linie (3 mieszkania)
 - **Format:** INPRO z dodatkowymi kolumnami (Id nieruchomości, Powierzchnia, Piętro, Liczba pokoi)
-- **Przeszedł:** Parser toleruje extra kolumny
+- **Status:** ✅ OK - Parser toleruje extra kolumny
 
-### **Test #3: "atal - Dane.csv" ⚠️ PROBLEM: 6109 MIESZKAŃ!**
+### **Test #4: "atal - Dane.csv" ⚠️ PROBLEM GŁÓWNY!**
 - **Rozmiar:** 6110 linii (6109 mieszkań!)
 - **Problem:** WSZYSTKIE mieszkania (dostępne + sprzedane + rezerwacje)
-- **Co się stało:** Parser wrzucił WSZYSTKIE do bazy (brak filtrowania)
-- **Konsekwencja:** CSV endpoint zwraca WSZYSTKIE (ministerstwo dostanie 6109 mieszkań z czego część jest sprzedana!)
+- **Rzeczywistość:**
+  - ~2700 mieszkań dostępnych (ceny = liczby)
+  - ~3400 mieszkań sprzedanych (ceny = "X")
+  - Total: 6100 mieszkań
+- **Co się stało:**
+  - Parser wrzucił ~3600 do bazy (pomijał niektóre z "X"?)
+  - Poprzedni upload: 1300 mieszkań
+  - **Razem w bazie: 4900** (zamiast oczekiwanych 2700!)
+
+**Root cause:** Parser NIE filtruje sprzedanych podczas upload!
 
 ---
 
-## 🧠 WŁAŚCIWA LOGIKA APLIKACJI (INSIGHT OD USERA)
+## ❌ **DLACZEGO "ZAPISZ WSZYSTKO AS-IS" TO ZŁY POMYSŁ**
 
-### **❌ STARA LOGIKA (ZŁA):**
-```
-1. User → Upload CSV → Parser mapuje kolumny → Tworzy nasze pola
-2. Zapisz do bazy: properties table
-3. CSV Endpoint → Czyta bazę → Generuje CSV 58 kolumn → Zwraca WSZYSTKIE mieszkania
-4. XML Endpoint → Wskazuje na CSV URL
-5. Ministerstwo → Pobiera CSV z WSZYSTKIMI (w tym sprzedane!)
-```
+Jeśli zapiszemy mieszkania sprzedane do bazy:
 
-**Problem:** Ministerstwo dostaje mieszkania sprzedane (co jest błędem compliance!)
+1. ❌ **Ministerstwo compliance BROKEN** - dostanie mieszkania sprzedane!
+2. ❌ **CSV endpoint musi filtrować** - dodatkowy query overhead
+3. ❌ **Liczby się nie zgadzają** - User oczekuje 2700, ma 6109
+4. ❌ **Baza zaśmiecona** - 57% rekordów to garbage (sprzedane)
+5. ❌ **Dashboard confusion** - User widzi sprzedane mieszkania
+
+**Wniosek:** NIE zapisujemy sprzedanych! Ministerstwo ich nie chce, więc po co je trzymać?
 
 ---
 
-### **✅ NOWA LOGIKA (WŁAŚCIWA):**
+## ✅ **FINALNA LOGIKA: "FILTER ON UPLOAD"**
 
-#### **1. Upload - AS-IS Storage**
+### **Zasada:** Zapisuj TYLKO dostępne, pomiń sprzedane podczas parsowania
+
+### **1. Upload - Filtruj podczas parsowania**
 ```typescript
-// CSV ministerstwa MA już dane firmy w KAŻDYM wierszu
-// (kolumny 1-28: developer info powtarzane w każdym wierszu)
-// NIE TRZEBA parsować developer data z pierwszego wiersza!
+Parser wykrywa "X" lub "x" w kolumnach 39/41/43 (ceny):
+  → Ustaw flag: isSold = true
+  → SKIP ten wiersz (nie dodawaj do results[])
+  → Log: "🚫 Pomijam mieszkanie {nr} - sprzedane"
 
-User → Upload CSV (gotowy format ministerstwa z 58 kolumnami)
-     → Parser wykrywa wszystkie kolumny (w tym developer data)
-     → Zapisuje WSZYSTKO AS-IS do properties.raw_data (JSONB)
-     → Zapisuje zmapowane pola (price, area, status, etc.)
-     → Auto-detect status:
-        - "X" w cenie = 'sold'
-        - Poprawna cena = 'available'
-        - Status field explicit = 'reserved'/'sold'/'available'
+Tylko mieszkania z cenami liczbowymi:
+  → Dodaj do results[]
+  → Zapisz do bazy (bez pola status, bo wszystko jest available)
 ```
 
-#### **2. Multi-Project (2+ inwestycje)**
+**Korzyści:**
+- ✅ Baza zawiera TYLKO dostępne mieszkania (clean)
+- ✅ CSV endpoint nie musi filtrować (wszystko już OK)
+- ✅ Liczby się zgadzają (2700 = 2700)
+- ✅ Ministerstwo compliance 100% native
+- ✅ Mniejsza baza (2700 vs 6109 rekordów)
+- ✅ Szybsze queries (brak WHERE status)
+
+**Wady:**
+- ❌ Brak historii sprzedanych (ale developer może re-upload)
+- ❌ Nie można przywrócić sprzedanego przez UI (trzeba re-upload)
+
+### **2. Multi-Project (2+ inwestycje)**
 ```typescript
 Developer ma:
-  - Inwestycja A: 100 mieszkań (plik A.csv)
-  - Inwestycja B: 50 mieszkań (plik B.csv)
+  - Inwestycja A: 100 dostępnych (plik A.csv ma 150, ale 50 sprzedanych)
+  - Inwestycja B: 50 dostępnych (plik B.csv ma 80, ale 30 sprzedanych)
 
 Flow:
-  Upload #1 (A.csv) → 100 properties (developer_id = X, project_id = A)
-  Upload #2 (B.csv) → 50 properties (developer_id = X, project_id = B)
+  Upload #1 (A.csv 150 mieszkań)
+    → Parser filtruje: 100 available, 50 sold (skip)
+    → Zapisz 100 do bazy (project_id = A)
+
+  Upload #2 (B.csv 80 mieszkań)
+    → Parser filtruje: 50 available, 30 sold (skip)
+    → Zapisz 50 do bazy (project_id = B)
 
 CSV Endpoint:
-  → SELECT * FROM properties
-    WHERE developer_id = X
-    AND status = 'available'  ← KLUCZOWE!
-  → Zwraca 130 mieszkań (A + B połączone, tylko available)
+  → SELECT * FROM properties WHERE developer_id = X
+  → Zwraca 150 mieszkań (A + B połączone, wszystkie available)
+  → BRAK potrzeby filtrowania (baza jest już clean)
 
 XML Endpoint:
   → Wskazuje na JEDEN CSV (wszystkie inwestycje developera)
-  → Ministerstwo pobiera JEDEN PLIK z połączonymi inwestycjami
+  → Ministerstwo pobiera JEDEN PLIK z 150 mieszkaniami
 ```
 
-#### **3. Status Management w Dashboardzie**
+### **3. CSV Endpoint - Safety filter (defensywny)**
+```typescript
+// Nawet jeśli coś się pomyli w parserze, endpoint ma safety:
+const { data: properties } = await supabase
+  .from('properties')
+  .select('*')
+  .eq('developer_id', developer.id)
+  // .eq('status', 'available')  ← Opcjonalnie, jeśli dodamy pole status
+  .order('created_at', { ascending: false })
+```
+
+### **4. Dashboard - Tylko dostępne**
 ```typescript
 Dashboard UI:
-  [Lista mieszkań]
+  [Lista mieszkań] - wszystkie z bazy (wszystkie są available)
 
   Mieszkanie #12A [Dostępne ✓]
     - Powierzchnia: 50m²
     - Cena: 500,000 zł
-    - [Oznacz jako sprzedane] ← Button
+    - [Usuń] ← Button (hard delete)
 
-  Mieszkanie #15B [Sprzedane ✗]
-    - Powierzchnia: 60m²
-    - Cena: ---
-    - [Przywróć dostępność] ← Button
-
-API Endpoint:
-  PUT /api/properties/[id]
-  Body: { status: 'sold' | 'available' | 'reserved' }
-
-  → Update status w bazie
-  → CSV endpoint automatycznie filtruje (WHERE status = 'available')
-  → Ministerstwo dostaje TYLKO dostępne mieszkania
+  BRAK opcji "Oznacz jako sprzedane"
+  → Zamiast tego: developer robi nowy upload z zaktualizowanym CSV
+  → Stare mieszkania można usunąć przed uploadem lub pozostawić
+```
 ```
 
 ---

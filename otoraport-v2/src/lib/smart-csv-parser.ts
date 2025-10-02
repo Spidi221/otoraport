@@ -1068,6 +1068,53 @@ export class SmartCSVParser {
         }
       })
 
+      // 🚫 FILTER ON UPLOAD: Skip sold properties (ministry compliance)
+      // Check columns 39, 41, 43 (price fields) for "X", "x", or "#VALUE!" markers
+      const pricePerM2Header = this.mappings['price_per_m2']
+      const totalPriceHeader = this.mappings['total_price']
+      const finalPriceHeader = this.mappings['final_price']
+
+      let isSold = false
+
+      // Check price_per_m2 (column 39)
+      if (pricePerM2Header) {
+        const idx = this.headers.indexOf(pricePerM2Header)
+        if (idx !== -1 && idx < row.length) {
+          const value = String(row[idx] || '').trim().toUpperCase()
+          if (value === 'X' || value === '#VALUE!') {
+            isSold = true
+          }
+        }
+      }
+
+      // Check total_price/base_price (column 41)
+      if (totalPriceHeader && !isSold) {
+        const idx = this.headers.indexOf(totalPriceHeader)
+        if (idx !== -1 && idx < row.length) {
+          const value = String(row[idx] || '').trim().toUpperCase()
+          if (value === 'X' || value === '#VALUE!') {
+            isSold = true
+          }
+        }
+      }
+
+      // Check final_price (column 43)
+      if (finalPriceHeader && !isSold) {
+        const idx = this.headers.indexOf(finalPriceHeader)
+        if (idx !== -1 && idx < row.length) {
+          const value = String(row[idx] || '').trim().toUpperCase()
+          if (value === 'X' || value === '#VALUE!') {
+            isSold = true
+          }
+        }
+      }
+
+      // Skip sold properties entirely
+      if (isSold) {
+        console.log(`🚫 PARSER: Skipping sold property at row ${i + 2} (apartment: ${property.raw_data[this.mappings['property_number'] || ''] || 'unknown'})`)
+        continue
+      }
+
       // Map known fields
       for (const [fieldName, headerName] of Object.entries(this.mappings)) {
         const headerIndex = this.headers.indexOf(headerName)
