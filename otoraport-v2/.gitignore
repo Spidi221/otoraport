@@ -44,3 +44,25 @@ next-env.d.ts
 test-create-developer.mjs
 ceny-mieszkan-*.csv
 *.OLD_PROJECT_BACKUP
+
+# Logs
+logs
+*.log
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+.env
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/ 

@@ -1730,3 +1730,7 @@ CSV endpoint będzie czysty dla ministerstwa - **VERIFIED**.
 - ATAL issues: prawdopodobnie problem ze źródłowym plikiem, nie parserem
 
 ---
+
+## Task Master AI Instructions
+**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
+@./.taskmaster/CLAUDE.md
