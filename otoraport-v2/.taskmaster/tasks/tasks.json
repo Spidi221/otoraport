@@ -1,0 +1,447 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Fix OAuth Configuration & Environment Variables",
+        "description": "Resolve critical deployment blockers - configure Google OAuth callback URLs in Supabase and set NEXT_PUBLIC_APP_URL environment variable",
+        "details": "Add OAuth callback URLs (http://localhost:3000/auth/callback, https://otoraport.vercel.app/auth/callback) in Supabase Authentication settings. Configure NEXT_PUBLIC_APP_URL environment variable in Vercel deployment. These are identified as the only remaining blockers for production deployment according to the audit report.",
+        "testStrategy": "Test Google OAuth login flow works correctly, verify ministry XML endpoints contain correct base URLs, confirm environment variables are properly set in both development and production",
+        "priority": "high",
+        "dependencies": [],
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Access and Verify Supabase & Vercel Configurations",
+            "description": "Gain access to the project's Supabase dashboard and Vercel deployment settings to verify the current, incorrect configurations for Google OAuth and environment variables.",
+            "dependencies": [],
+            "details": "Log into the Supabase project and navigate to Authentication > URL Configuration to document the existing Redirect URLs. Then, log into the Vercel project, go to Settings > Environment Variables, and document the current value or absence of NEXT_PUBLIC_APP_URL.\n<info added on 2025-10-03T15:45:15.543Z>\nI'll analyze the codebase to understand the current OAuth configuration and provide an accurate update for the subtask.Based on my analysis of the codebase, here's the update for the subtask:\n\n**Configuration Verification Completed:**\n\nDevelopment environment properly configured:\n- .env.local contains NEXT_PUBLIC_APP_URL=http://localhost:3000 ✓\n- OAuth callback route exists at /src/app/auth/callback/route.ts ✓\n- Authentication pages use window.location.origin/auth/callback for OAuth redirects (found in signin/signup pages) ✓\n- NEXT_PUBLIC_APP_URL used in 3 files with fallback to https://otoraport.vercel.app: data.xml/route.ts:64, data.md5/route.ts:62, and action-buttons.tsx:121 ✓\n\n**Required Actions Identified:**\n1. Supabase Authentication Settings: Add callback URLs for both environments:\n   - Development: http://localhost:3000/auth/callback\n   - Production: https://otoraport.vercel.app/auth/callback\n\n2. Vercel Environment Variables: Add NEXT_PUBLIC_APP_URL=https://otoraport.vercel.app to production environment variables\n</info added on 2025-10-03T15:45:15.543Z>",
+            "status": "done",
+            "testStrategy": "Confirm successful login to both Supabase and Vercel dashboards and take screenshots of the relevant settings pages to establish a baseline before making changes.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-03T15:45:30.000Z"
+          },
+          {
+            "id": 2,
+            "title": "Update Google OAuth Callback URLs in Supabase",
+            "description": "Add the required callback URLs for both local development and production environments to the Google OAuth provider settings within the Supabase project.",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "In the Supabase dashboard under Authentication > URL Configuration, add 'http://localhost:3000/auth/callback' and 'https://otoraport.vercel.app/auth/callback' to the 'Redirect URLs' list. Save the changes.",
+            "status": "done",
+            "testStrategy": "After saving, reload the Supabase settings page to ensure the new URLs have persisted correctly in the input field.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-03T15:59:08.824Z"
+          },
+          {
+            "id": 3,
+            "title": "Configure NEXT_PUBLIC_APP_URL in Vercel",
+            "description": "Set the NEXT_PUBLIC_APP_URL environment variable in the Vercel project settings for the production, preview, and development environments.",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "In the Vercel project settings under Environment Variables, add a new variable 'NEXT_PUBLIC_APP_URL' with the value 'https://otoraport.vercel.app'. Ensure this variable is applied to the Production, Preview, and Development environments.",
+            "status": "done",
+            "testStrategy": "Trigger a new deployment and inspect the deployment logs to confirm the environment variable is successfully loaded and available to the build process.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-03T15:59:09.274Z"
+          },
+          {
+            "id": 4,
+            "title": "Test Google OAuth Flow in Local Development",
+            "description": "Run the application locally and test the complete Google OAuth login and logout flow to ensure the 'http://localhost:3000/auth/callback' URL is working correctly.",
+            "dependencies": [
+              "1.2"
+            ],
+            "details": "Start the Next.js development server. Navigate to the login page and attempt to sign in using a Google account. Verify successful redirection back to the application and that the user session is established.",
+            "status": "deferred",
+            "testStrategy": "Use browser developer tools to monitor the network tab during the OAuth redirect flow, confirming the redirect from Google goes to the correct localhost callback URL.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-03T16:29:33.918Z"
+          },
+          {
+            "id": 5,
+            "title": "Deploy and Verify Production Authentication & URL Generation",
+            "description": "Trigger a new Vercel deployment and conduct an end-to-end test on the production URL to confirm the OAuth login and the NEXT_PUBLIC_APP_URL are functioning correctly.",
+            "dependencies": [
+              "1.2",
+              "1.3"
+            ],
+            "details": "Trigger a new Vercel deployment. Access 'https://otoraport.vercel.app' and test the full Google login flow. After logging in, verify that features dependent on NEXT_PUBLIC_APP_URL, such as ministry XML endpoint generation, use the correct production base URL.",
+            "status": "in-progress",
+            "testStrategy": "Perform a full user journey: visit the site, log in with Google, generate an XML file, and inspect the file's content for the correct 'https://otoraport.vercel.app' base URL.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-03T16:29:34.375Z"
+          }
+        ],
+        "updatedAt": "2025-10-03T16:29:34.375Z"
+      },
+      {
+        "id": "2",
+        "title": "Implement Missing Authentication Pages",
+        "description": "Create forgot-password, terms of service, and privacy policy pages to complete the authentication flow",
+        "details": "Create /forgot-password page with Supabase password reset integration. Develop /terms and /privacy pages with proper legal content for Polish RODO compliance. Use existing auth page patterns and shadcn/ui components for consistency.",
+        "testStrategy": "Test password reset flow end-to-end, validate legal pages render correctly, ensure proper navigation from signup/signin pages",
+        "priority": "medium",
+        "dependencies": [
+          "1"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "3",
+        "title": "Clean Up Unused Code and Dependencies",
+        "description": "Remove identified duplicate and unused files from src/lib/ to improve maintainability and reduce bundle size",
+        "details": "Remove csv-generator.ts (330 lines), ministry-xml-generator.ts (460 lines), and rate-limit.ts (110 lines) as identified in audit. These are duplicates or unused files that add ~900 lines of unnecessary code. Verify no remaining imports before deletion.",
+        "testStrategy": "Run grep searches for imports of files to be removed, ensure npm run build succeeds after cleanup, verify application functionality remains intact",
+        "priority": "low",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Audit imports and dependencies for files to be removed",
+            "description": "Search codebase for any remaining imports or references to csv-generator.ts, ministry-xml-generator.ts, and rate-limit.ts before deletion",
+            "dependencies": [],
+            "details": "Use grep/ripgrep to search for import statements, require calls, and any references to these files across the entire codebase. Document any remaining dependencies that need to be addressed. Focus on: 'csv-generator', 'ministry-xml-generator', 'rate-limit' import patterns. Check both TypeScript and JavaScript files.",
+            "status": "pending",
+            "testStrategy": "Run comprehensive grep searches for each filename, verify zero results before proceeding to deletion phase",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Replace rate-limit.ts usage in chatbot with security.ts functions",
+            "description": "Update chatbot route to use rate limiting functions from security.ts instead of rate-limit.ts",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Modify /src/app/api/chatbot/route.ts to import generalAPIRateLimit from '@/lib/security' instead of '@/lib/rate-limit'. The security.ts file already contains equivalent rate limiting functionality with checkRateLimit function. Update import statement and function call to use the security.ts implementation.",
+            "status": "pending",
+            "testStrategy": "Verify chatbot API still functions correctly with rate limiting after the change, test rate limit behavior",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Remove duplicate csv-generator.ts file",
+            "description": "Delete the unused csv-generator.ts file that duplicates functionality already present in the smart-csv-parser.ts",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Remove /src/lib/csv-generator.ts (330 lines) as it's a duplicate of functionality already available through the smart-csv-parser.ts and existing CSV endpoints. The current implementation uses smart-csv-parser for parsing and direct CSV generation in API routes.",
+            "status": "pending",
+            "testStrategy": "Confirm no build errors after deletion, verify CSV export functionality still works through existing endpoints",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Remove unused ministry-xml-generator.ts file",
+            "description": "Delete the unused ministry-xml-generator.ts file since the project now uses harvester-xml-generator.ts for ministry compliance",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Remove /src/lib/ministry-xml-generator.ts (460 lines) as it generates Property Data XML which is not used. The current implementation uses harvester-xml-generator.ts which generates the correct Harvester XML format required by the ministry (metadata with CSV URL reference).",
+            "status": "pending",
+            "testStrategy": "Verify ministry XML endpoints still generate correct Harvester XML format, confirm no references to old Property Data XML generation",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Remove rate-limit.ts and verify build success",
+            "description": "Delete the rate-limit.ts file after confirming all usage has been migrated to security.ts, then run build verification",
+            "dependencies": [
+              "3.2"
+            ],
+            "details": "Remove /src/lib/rate-limit.ts (110 lines) after ensuring the chatbot has been updated to use security.ts functions. Run npm run build to verify no compilation errors. Run npm run lint to ensure no lingering import issues. Test critical functionality including chatbot API, authentication flows, and ministry endpoints.",
+            "status": "pending",
+            "testStrategy": "Full build verification with npm run build, lint check with npm run lint, functional testing of rate-limited endpoints including chatbot and auth routes",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "4",
+        "title": "Enhance CSV Parser for Edge Cases",
+        "description": "Improve smart CSV parser to handle quoted fields and malformed data more robustly",
+        "details": "Add support for CSV files with quoted fields containing commas (e.g. \"1 299 000,00 zł\"). Implement better detection of separators (comma vs semicolon). Add validation for malformed rows to provide better error messages to users.",
+        "testStrategy": "Test with various CSV formats including quoted fields, different separators, and malformed data. Verify parser correctly handles Polish numerical formats and currency values",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Enhance CSV separator detection and quoted field parsing",
+            "description": "Improve the parseCSVLine method to better handle CSV files with quoted fields containing commas and more robust separator detection",
+            "dependencies": [],
+            "details": "Modify the parseCSVLine method in smart-csv-parser.ts (lines 714-747) to implement more sophisticated separator detection logic. Currently it uses simple line.includes(';') check. Enhance to analyze the entire file structure, count separators, and detect patterns. Improve quoted field handling to properly parse values like '1 299 000,00 zł' that contain commas within quotes. Add support for different quote styles and escaped characters.",
+            "status": "pending",
+            "testStrategy": "Test with various CSV formats: semicolon vs comma separated, quoted fields with commas, Polish currency formats, and mixed separator files. Verify parser correctly identifies separator and extracts quoted values.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement malformed row detection and validation",
+            "description": "Add comprehensive validation for malformed CSV rows with better error reporting and recovery mechanisms",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Enhance the parseData method (lines 1043-1181) to implement robust row validation. Currently it skips rows with less than 50% of expected columns. Add detailed validation rules: check for rows with wrong column count, detect rows with all empty values, identify rows with invalid data types in critical fields. Implement recovery strategies for partially malformed rows. Add specific error messages for each type of malformation to help users understand and fix their data.",
+            "status": "pending",
+            "testStrategy": "Test with intentionally malformed CSV files: rows with missing columns, extra columns, completely empty rows, and rows with invalid data types. Verify appropriate error messages and recovery behavior.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Add intelligent encoding detection for Polish characters",
+            "description": "Implement automatic encoding detection to handle CSV files with Polish characters in various encodings",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Create encoding detection logic in the upload API route (around line 125 where detectEncodingAndDecode is called). The function exists but needs enhancement. Implement detection for common encodings: UTF-8, UTF-8 BOM, Windows-1250 (CP1250), ISO-8859-2. Use byte order marks and character frequency analysis to detect encoding. Handle conversion errors gracefully and provide fallback mechanisms. Add logging to help debug encoding issues.",
+            "status": "pending",
+            "testStrategy": "Test with CSV files saved in different encodings containing Polish characters (ą, ć, ę, ł, ń, ó, ś, ź, ż). Verify characters are correctly decoded and preserved through the parsing process.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Enhance error messaging and user feedback",
+            "description": "Improve error messages in upload widget and parser to provide actionable feedback for edge cases",
+            "dependencies": [
+              "4.2",
+              "4.3"
+            ],
+            "details": "Update the upload-widget.tsx error handling (lines 153-160) and smart-csv-parser.ts error collection to provide more specific and actionable error messages. Replace generic errors with specific guidance: 'Row X has Y columns but expected Z', 'File appears to use encoding X, try saving as UTF-8', 'Quoted field not properly closed in row X'. Add suggestions for common fixes and links to help documentation. Implement error categorization (critical vs warning vs info).",
+            "status": "pending",
+            "testStrategy": "Test error scenarios with malformed files and verify users receive clear, actionable error messages. Test that warnings don't prevent successful parsing of mostly-valid files.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Add parser configuration options and fallback modes",
+            "description": "Implement configurable parsing options and fallback mechanisms for handling edge cases gracefully",
+            "dependencies": [
+              "4.2",
+              "4.4"
+            ],
+            "details": "Extend the SmartCSVParser class to accept configuration options: strict mode vs lenient mode, custom separator detection, encoding hints, maximum allowed malformed rows percentage. Add fallback parsing modes: if intelligent detection fails, try common configurations (comma vs semicolon, with/without quotes). Implement parser recovery: attempt to parse file with different settings if initial attempt fails. Add option to skip problematic rows and continue processing valid ones.",
+            "status": "pending",
+            "testStrategy": "Test parser with various edge case files using different configuration options. Verify fallback modes activate appropriately and that lenient parsing can recover from minor formatting issues while maintaining data integrity.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "5",
+        "title": "Implement Landing Page Compliance Audit",
+        "description": "Update landing page to remove false claims and align with actual implemented features",
+        "details": "Remove false claims about 1000+ integrations, Salesforce/HubSpot/SAP integrations, direct dane.gov.pl API integration, real-time CRM sync, and customer API. Update with realistic promises: automatic XML 1.13 reports, smart CSV parser, ministry compliance, security, and RODO compliance.",
+        "testStrategy": "Review all landing page claims against implemented features, ensure marketing copy accurately represents current capabilities, test user journey from landing to signup",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Audit and identify false claims in landing page content",
+            "description": "Systematically review the landing page (src/app/page.tsx) to identify specific false claims about non-existent features like 1000+ integrations, Salesforce/HubSpot/SAP connectors, direct dane.gov.pl API integration, real-time CRM sync, and customer API access",
+            "dependencies": [],
+            "details": "Review all text content in src/app/page.tsx, particularly FAQ section lines 855-877 which mention '1000+ gotowych integracji', 'Salesforce, HubSpot, SAP', and 'REST API, webhooks'. Also check PricingSection.tsx for false feature claims like 'API access', 'Analytics', 'Custom domain', and 'White-label branding' that are not implemented. Create a comprehensive list of false claims with line numbers for targeted removal.",
+            "status": "pending",
+            "testStrategy": "Create a checklist of all claims made vs. implemented features by cross-referencing with actual API endpoints and existing components",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Remove false integration claims from FAQ and features sections",
+            "description": "Remove or rewrite misleading content about non-existent integrations and advanced features in the FAQ section and main features areas",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Update src/app/page.tsx lines 855-877 (CRM/ERP integration FAQ), line 230 (API integration claim), line 387 (dane.gov.pl API feature), and line 915 (API footer link). Replace with realistic claims about actual implemented features: XML 1.13 endpoint generation, CSV parsing, ministry compliance endpoints, and basic upload functionality. Remove mentions of Salesforce, HubSpot, SAP, webhooks, and 1000+ integrations.",
+            "status": "pending",
+            "testStrategy": "Verify all integration-related text is removed and replaced with accurate descriptions of implemented ministry compliance features",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Update pricing section to reflect actual feature availability",
+            "description": "Modify PricingSection.tsx to remove features that are not implemented and mark advanced features as 'Coming Soon' for Pro/Enterprise tiers",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Update src/components/PricingSection.tsx to remove or mark as 'Coming Soon': 'API access' (line 47), 'Analytics' (line 32), 'Custom domain' (line 44), 'White-label branding' (line 46), and 'Strony prezentacyjne' (line 30). Keep Basic plan features that are actually implemented: ministry compliance, XML/CSV generation, file upload. Add 'Beta 2026' badges to Pro/Enterprise advanced features.",
+            "status": "pending",
+            "testStrategy": "Ensure pricing section accurately represents current capabilities and clearly marks future features as coming soon",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Replace false claims with accurate feature descriptions",
+            "description": "Rewrite marketing copy to emphasize real implemented features: automatic XML 1.13 reports, smart CSV parser with 58-field detection, ministry compliance endpoints, security features, and RODO compliance",
+            "dependencies": [
+              "5.2"
+            ],
+            "details": "Update hero section, solution section, and features section in src/app/page.tsx to focus on actual strengths: smart CSV parser that auto-detects 58 ministry fields, generates proper Harvester XML with namespace urn:otwarte-dane:harvester:1.13, provides stable ministry endpoints (/data.xml, /data.csv, /data.md5), enterprise-grade security with RLS, and RODO-compliant data handling. Remove any mentions of direct API pushing to dane.gov.pl.",
+            "status": "pending",
+            "testStrategy": "Verify all marketing claims can be demonstrated with actual working features in the application",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Add compliance verification and update metadata",
+            "description": "Review and update page metadata, structured data, and SEO content to align with realistic feature set, and add disclaimers where appropriate",
+            "dependencies": [
+              "5.3",
+              "5.4"
+            ],
+            "details": "Update metadata in src/app/landing/metadata.ts (if exists) or page.tsx metadata to reflect accurate feature descriptions. Remove SEO content about advanced integrations. Add appropriate disclaimers about ministry endpoint setup requiring manual registration with dane.gov.pl. Ensure structured data markup accurately represents the service capabilities without false claims about automated publication or direct API integration.",
+            "status": "pending",
+            "testStrategy": "Validate that all metadata and structured data accurately represents implemented features and includes appropriate disclaimers about manual ministry registration requirements",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "6",
+        "title": "Set Up Production Monitoring and Error Tracking",
+        "description": "Implement comprehensive monitoring, error tracking, and analytics for production deployment",
+        "details": "Integrate Sentry for error tracking (TODOs identified in error boundaries). Set up Vercel Analytics for performance monitoring. Implement rate limiting with Redis for distributed systems. Add health check endpoints for ministry compliance monitoring.",
+        "testStrategy": "Generate test errors to verify Sentry integration, monitor performance metrics in Vercel Analytics, test rate limiting under load, verify health checks respond correctly",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "7",
+        "title": "Implement Email Notification System",
+        "description": "Set up automated email notifications using Resend for upload confirmations and ministry compliance alerts",
+        "details": "Configure Resend API for email delivery. Create email templates for upload confirmation, successful property parsing, and ministry endpoint updates. Implement support email workflow (support@otoraport.pl). Add email preferences in user settings.",
+        "testStrategy": "Test email delivery for all notification types, verify templates render correctly with Polish content, ensure unsubscribe functionality works, test email queue handling",
+        "priority": "medium",
+        "dependencies": [
+          "1",
+          "6"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure Resend API and email service infrastructure",
+            "description": "Set up Resend API integration, configure environment variables, and implement core email sending functionality with proper error handling and validation",
+            "dependencies": [],
+            "details": "Update the existing email-service.ts to use proper environment variable validation. Add RESEND_API_KEY to .env.example and configure proper domain settings. Implement email queue handling and rate limiting for bulk notifications. Test basic email sending functionality and verify Resend webhook setup for delivery tracking.",
+            "status": "pending",
+            "testStrategy": "Test email delivery with real Resend account, verify error handling for invalid API keys, test rate limiting behavior, and validate email template rendering",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create upload confirmation email template and integration",
+            "description": "Implement automated email notifications for successful file uploads, including parsed property count and ministry compliance status",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Modify the existing upload API route to trigger email notifications after successful property parsing. Create a new email template specifically for upload confirmations showing properties count, parsing results, and compliance status. Integrate with the upload endpoint at /api/upload/route.ts to send notifications automatically after database save operations complete.",
+            "status": "pending",
+            "testStrategy": "Test upload workflow with email notifications enabled, verify email content accuracy with different file types, test error scenarios where upload fails",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement ministry compliance alert system",
+            "description": "Create automated email notifications for ministry endpoint updates, compliance status changes, and data synchronization alerts",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Build on the existing sendComplianceNotification function in email-service.ts. Create scheduled notifications for ministry endpoint health checks, data staleness alerts, and compliance status changes. Implement email templates for XML/CSV/MD5 update notifications and endpoint availability monitoring. Add support for daily/weekly digest emails.",
+            "status": "pending",
+            "testStrategy": "Test compliance alert triggering, verify email content for different alert types, test scheduling and frequency controls, mock ministry endpoint scenarios",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Set up support@otoraport.pl email workflow and ticketing",
+            "description": "Configure support email infrastructure, create auto-responder templates, and implement basic ticket routing for customer support",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Configure Resend for support@otoraport.pl domain. Create auto-responder templates for common inquiries. Implement email forwarding to development team and basic categorization of support requests. Set up email templates for support responses and create a simple ticket tracking system using email threads.",
+            "status": "pending",
+            "testStrategy": "Test support email delivery and auto-responses, verify ticket routing works correctly, test email thread tracking and response handling",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Add email preferences management to user dashboard",
+            "description": "Create user interface for managing email notification preferences, unsubscribe functionality, and notification frequency settings",
+            "dependencies": [
+              "7.2",
+              "7.3"
+            ],
+            "details": "Add email preferences section to the existing dashboard page. Create UI components for toggling different notification types (upload confirmations, compliance alerts, trial warnings). Implement database schema changes for storing user email preferences. Add unsubscribe links to all emails and create preference management pages. Update email sending logic to respect user preferences.",
+            "status": "pending",
+            "testStrategy": "Test preference saving and loading, verify unsubscribe functionality works correctly, test email filtering based on user preferences, ensure GDPR compliance",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "8",
+        "title": "Enhance Security Headers and Rate Limiting",
+        "description": "Complete security implementation by adding headers to error responses and improving rate limiting system",
+        "details": "Add security headers (CSP, X-Frame-Options, etc.) to error responses. Implement X-RateLimit-* headers for debugging. Migrate from in-memory rate limiting to Redis for production scalability. Add IP-based and user-based rate limiting tiers.",
+        "testStrategy": "Verify security headers present in all response types, test rate limiting behavior under various load conditions, confirm Redis integration works in distributed environment",
+        "priority": "medium",
+        "dependencies": [
+          "6"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "9",
+        "title": "Optimize Bundle Size and Performance",
+        "description": "Implement lazy loading and code splitting to reduce initial bundle size from 1.5MB",
+        "details": "Implement lazy loading for heavy libraries (openai, xlsx, stripe). Add dynamic imports for dashboard components. Optimize images and implement Next.js Image optimization. Create separate bundles for landing page vs dashboard.",
+        "testStrategy": "Measure bundle size before and after optimizations, run Lighthouse performance audits, test loading times on slow connections, verify lazy loading works correctly",
+        "priority": "medium",
+        "dependencies": [
+          "3"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "10",
+        "title": "Implement Basic Plan Subscription Enforcement",
+        "description": "Add subscription tier enforcement and trial logic for the Basic plan (149 zł/month) ready for soft launch",
+        "details": "Implement trial period logic (14 days), subscription status checking middleware, payment flow with Stripe integration for Basic plan. Add subscription management UI in dashboard. Enforce property limits and feature access based on subscription tier.",
+        "testStrategy": "Test complete signup to payment flow, verify trial expiration handling, ensure proper access control based on subscription status, test Stripe webhook handling for payment events",
+        "priority": "high",
+        "dependencies": [
+          "1",
+          "7"
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2025-10-03T16:29:34.375Z",
+      "taskCount": 10,
+      "completedCount": 0,
+      "tags": [
+        "master"
+      ]
+    }
+  }
+}
