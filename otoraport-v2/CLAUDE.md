@@ -80,42 +80,6 @@ interface CoreMission {
 
 ---
 
-### 🚨 **KRYTYCZNE BŁĘDY (BLOKUJĄCE MINISTERSTWO)**
-
-#### **Błąd #1: NIEWŁAŚCIWY TYP XML** 🔴 CRITICAL
-- **Plik:** `/api/public/[clientId]/data.xml/route.ts`
-- **Problem:** Generuje Property Data XML (z danymi mieszkań)
-- **Powinno być:** Harvester XML (metadata z linkiem do CSV)
-- **Skutek:** Harvester ministerstwa ODRZUCI format
-- **Fix:** Utworzyć `harvester-xml-generator.ts` i zmienić import
-- **Czas:** 30 minut
-- **Priorytet:** HIGHEST
-
-#### **Błąd #2: NIEWŁAŚCIWY MD5** 🔴 CRITICAL
-- **Plik:** `/api/public/[clientId]/data.md5/route.ts`
-- **Problem:** Hashuje Property Data XML zamiast Harvester XML
-- **Skutek:** Walidacja ministerstwa się nie powiedzie
-- **Fix:** Liczyć MD5 z Harvester XML
-- **Czas:** 10 minut
-- **Priorytet:** HIGHEST
-
-#### **Błąd #3: TypeScript TYPES PRZESTARZAŁE** 🟠 HIGH
-- **Plik:** `/src/types/database.ts`
-- **Problem:** Types nie zgadzają się z rzeczywistą bazą SQL
-- **Brakuje:**
-  - `client_id` field w developers (istnieje w SQL linia 58!)
-  - `csv_generation_logs` table (istnieje w SQL!)
-- **Nadmiar:**
-  - `uploaded_files` table (NIE MA w SQL)
-  - `generated_files` table (NIE MA w SQL)
-  - `deployment_logs` table (NIE MA w SQL)
-- **Skutek:** TypeScript płacze mimo że kod działa w runtime
-- **Fix:** `npx supabase gen types typescript --linked > src/types/database.ts`
-- **Czas:** 5 minut
-- **Priorytet:** HIGH
-
----
-
 ### ⚠️ **NIEBLOKUJĄCE DUPLIKATY (CLEANUP)**
 
 **6 plików w src/lib/ do usunięcia** 🟡 LOW PRIORITY:
@@ -1660,388 +1624,46 @@ curl https://otoraport.vercel.app/api/public/dev_test/data.xml
 
 ---
 
----
+# 🎯 PARSER FIX: FILTER ON UPLOAD (02.10.2025)
 
-# 🔄 KRYTYCZNA ZMIANA LOGIKI APLIKACJI (02.10.2025 - FINALNA WERSJA)
+## ✅ ZAIMPLEMENTOWANE - Commit c0cbfb60
 
-## 📊 ANALIZA 4 PLIKÓW TESTOWYCH
+**Problem (FIXED):** ATAL CSV wrzucał 3600 mieszkań zamiast oczekiwanych 2700
+**Root cause:** Parser nie pomijał sprzedanych mieszkań oznaczonych "X" w cenach
+**Rozwiązanie:** Dodano "FILTER ON UPLOAD" w `smart-csv-parser.ts:1071-1116`
 
-### **Test #1: "2025-09-11.csv" (TAMBUD) - WZORCOWY FORMAT MINISTERSTWA**
-- **Rozmiar:** 22 linie (21 mieszkań + header)
-- **Format:** 58 kolumn ministerstwa (separator: `;`)
-- **Kluczowe odkrycie:** "X" w **3 kolumnach**:
-  - **Kolumna 39:** `Cena m2` = **"X"** (wielkie)
-  - **Kolumna 41:** `Cena bazowa` = **"x"** (małe)
-  - **Kolumna 43:** `Cena końcowa` = **"X"** lub **"#VALUE!"** (błąd Excel)
+### 🔧 **Co zostało naprawione:**
 
-**Przykłady:**
-```csv
-# SPRZEDANE (line 2, mieszkanie B2/2):
-B2/2;X;2025-09-11;x;2025-09-11;#VALUE!
-     ↑               ↑              ↑
-  cena/m2      cena bazowa    cena końcowa
+1. **Wykrywanie sprzedanych mieszkań:**
+   - Parser sprawdza kolumny 39, 41, 43 (price_per_m2, total_price, final_price)
+   - Wykrywa markery: "X", "x", "#VALUE!" (Excel error)
+   - Ustawia flagę `isSold = true` jeśli którykolwiek marker znaleziony
 
-# DOSTĘPNE (line 3, mieszkanie B5/2):
-B5/2;11831,88671;2025-09-11;1295000;2025-09-11;1299000
-     ↑                       ↑                  ↑
-   liczba                 liczba            liczba
-```
+2. **Pomijanie sprzedanych podczas upload:**
+   - Wiersz ze sprzedanym mieszkaniem: `continue` (skip entire row)
+   - Tylko mieszkania z cenami liczbowymi trafiają do `results[]`
+   - Log: `🚫 PARSER: Skipping sold property at row X`
 
-### **Test #2: "2025-10-02.xlsx - wzorcowy zakres danych.csv"**
-- **Rozmiar:** 21 linii (20 mieszkań + header)
-- **Format:** Ten sam co #1 (eksport z Excel)
-- **Separator:** `,` (comma)
-- **Status:** ✅ OK
+3. **Korzyści:**
+   - ✅ Baza zawiera TYLKO dostępne mieszkania (clean database)
+   - ✅ CSV endpoint nie musi filtrować (wszystko już available)
+   - ✅ Ministerstwo compliance native (tylko dostępne w XML/CSV)
+   - ✅ Mniejsza baza (2700 vs 6109 rekordów dla ATAL)
+   - ✅ Szybsze queries (brak WHERE status needed)
 
-### **Test #3: "Ceny-ofertowe-mieszkan-dewelopera-inpro_s__a-2025-10-02.csv"**
-- **Rozmiar:** 4 linie (3 mieszkania)
-- **Format:** INPRO z dodatkowymi kolumnami (Id nieruchomości, Powierzchnia, Piętro, Liczba pokoi)
-- **Status:** ✅ OK - Parser toleruje extra kolumny
+### 📊 **Oczekiwane rezultaty testów:**
 
-### **Test #4: "atal - Dane.csv" ⚠️ PROBLEM GŁÓWNY!**
-- **Rozmiar:** 6110 linii (6109 mieszkań!)
-- **Problem:** WSZYSTKIE mieszkania (dostępne + sprzedane + rezerwacje)
-- **Rzeczywistość:**
-  - ~2700 mieszkań dostępnych (ceny = liczby)
-  - ~3400 mieszkań sprzedanych (ceny = "X")
-  - Total: 6100 mieszkań
-- **Co się stało:**
-  - Parser wrzucił ~3600 do bazy (pomijał niektóre z "X"?)
-  - Poprzedni upload: 1300 mieszkań
-  - **Razem w bazie: 4900** (zamiast oczekiwanych 2700!)
+| Plik | Wiersze total | "X" markers | Powinno dodać |
+|------|--------------|-------------|---------------|
+| 2025-09-11.csv | 20 | ~2-3 | ~17-18 ✅ |
+| ATAL - Dane.csv | 6109 | ~3400 | ~2700 ✅ |
+| INPRO.csv | 3 | 0 | 3 ✅ |
 
-**Root cause:** Parser NIE filtruje sprzedanych podczas upload!
+### 🧪 **Jak przetestować:**
+
+1. **Upload ATAL CSV** (6109 rows total)
+2. **Sprawdź logi:** Powinny pokazać `🚫 Skipping sold property` ~3400 razy
+3. **Sprawdź bazę:** Tylko ~2700 properties inserted
+4. **Weryfikuj CSV endpoint:** Wszystkie ceny są liczbami (brak "X")
 
 ---
-
-## ❌ **DLACZEGO "ZAPISZ WSZYSTKO AS-IS" TO ZŁY POMYSŁ**
-
-Jeśli zapiszemy mieszkania sprzedane do bazy:
-
-1. ❌ **Ministerstwo compliance BROKEN** - dostanie mieszkania sprzedane!
-2. ❌ **CSV endpoint musi filtrować** - dodatkowy query overhead
-3. ❌ **Liczby się nie zgadzają** - User oczekuje 2700, ma 6109
-4. ❌ **Baza zaśmiecona** - 57% rekordów to garbage (sprzedane)
-5. ❌ **Dashboard confusion** - User widzi sprzedane mieszkania
-
-**Wniosek:** NIE zapisujemy sprzedanych! Ministerstwo ich nie chce, więc po co je trzymać?
-
----
-
-## ✅ **FINALNA LOGIKA: "FILTER ON UPLOAD"**
-
-### **Zasada:** Zapisuj TYLKO dostępne, pomiń sprzedane podczas parsowania
-
-### **1. Upload - Filtruj podczas parsowania**
-```typescript
-Parser wykrywa "X" lub "x" w kolumnach 39/41/43 (ceny):
-  → Ustaw flag: isSold = true
-  → SKIP ten wiersz (nie dodawaj do results[])
-  → Log: "🚫 Pomijam mieszkanie {nr} - sprzedane"
-
-Tylko mieszkania z cenami liczbowymi:
-  → Dodaj do results[]
-  → Zapisz do bazy (bez pola status, bo wszystko jest available)
-```
-
-**Korzyści:**
-- ✅ Baza zawiera TYLKO dostępne mieszkania (clean)
-- ✅ CSV endpoint nie musi filtrować (wszystko już OK)
-- ✅ Liczby się zgadzają (2700 = 2700)
-- ✅ Ministerstwo compliance 100% native
-- ✅ Mniejsza baza (2700 vs 6109 rekordów)
-- ✅ Szybsze queries (brak WHERE status)
-
-**Wady:**
-- ❌ Brak historii sprzedanych (ale developer może re-upload)
-- ❌ Nie można przywrócić sprzedanego przez UI (trzeba re-upload)
-
-### **2. Multi-Project (2+ inwestycje)**
-```typescript
-Developer ma:
-  - Inwestycja A: 100 dostępnych (plik A.csv ma 150, ale 50 sprzedanych)
-  - Inwestycja B: 50 dostępnych (plik B.csv ma 80, ale 30 sprzedanych)
-
-Flow:
-  Upload #1 (A.csv 150 mieszkań)
-    → Parser filtruje: 100 available, 50 sold (skip)
-    → Zapisz 100 do bazy (project_id = A)
-
-  Upload #2 (B.csv 80 mieszkań)
-    → Parser filtruje: 50 available, 30 sold (skip)
-    → Zapisz 50 do bazy (project_id = B)
-
-CSV Endpoint:
-  → SELECT * FROM properties WHERE developer_id = X
-  → Zwraca 150 mieszkań (A + B połączone, wszystkie available)
-  → BRAK potrzeby filtrowania (baza jest już clean)
-
-XML Endpoint:
-  → Wskazuje na JEDEN CSV (wszystkie inwestycje developera)
-  → Ministerstwo pobiera JEDEN PLIK z 150 mieszkaniami
-```
-
-### **3. CSV Endpoint - Safety filter (defensywny)**
-```typescript
-// Nawet jeśli coś się pomyli w parserze, endpoint ma safety:
-const { data: properties } = await supabase
-  .from('properties')
-  .select('*')
-  .eq('developer_id', developer.id)
-  // .eq('status', 'available')  ← Opcjonalnie, jeśli dodamy pole status
-  .order('created_at', { ascending: false })
-```
-
-### **4. Dashboard - Tylko dostępne**
-```typescript
-Dashboard UI:
-  [Lista mieszkań] - wszystkie z bazy (wszystkie są available)
-
-  Mieszkanie #12A [Dostępne ✓]
-    - Powierzchnia: 50m²
-    - Cena: 500,000 zł
-    - [Usuń] ← Button (hard delete)
-
-  BRAK opcji "Oznacz jako sprzedane"
-  → Zamiast tego: developer robi nowy upload z zaktualizowanym CSV
-  → Stare mieszkania można usunąć przed uploadem lub pozostawić
-```
-```
-
----
-
-## 🔧 CO TRZEBA ZROBIĆ (PRIORITY LIST)
-
-### **🔴 CRITICAL FIX #1: CSV Endpoint - Filtr Status**
-**Plik:** `/src/app/api/public/[clientId]/data.csv/route.ts`
-
-```typescript
-// BYŁO (line ~38):
-const { data: properties, error } = await supabase
-  .from('properties')
-  .select('*')
-  .eq('developer_id', developer.id)
-  .order('created_at', { ascending: false })
-
-// MA BYĆ:
-const { data: properties, error } = await supabase
-  .from('properties')
-  .select('*')
-  .eq('developer_id', developer.id)
-  .eq('status', 'available')  // ← DODAĆ FILTR!
-  .order('created_at', { ascending: false })
-```
-
-**Impact:** Ministerstwo dostaje TYLKO dostępne mieszkania (COMPLIANCE!)
-
----
-
-### **🟠 HIGH PRIORITY #2: Upload Route - Zapisz Status**
-**Plik:** `/src/app/api/upload/route.ts`
-
-**Sprawdzić:**
-```typescript
-// Parser wykrywa status (smart-csv-parser.ts line 1014-1038)
-// CZY route.ts ZAPISUJE to pole do bazy?
-
-// Powinno być (line ~286):
-developer_id: developerId,
-project_id: projectId,
-apartment_number: property.property_number || `apt_${i}`,
-// ... other fields ...
-status: property.status || 'available',  // ← SPRAWDZIĆ CZY TO JEST!
-```
-
-**Jeśli brakuje:** Dodać pole `status` do INSERT statement
-
----
-
-### **🟡 MEDIUM PRIORITY #3: Dashboard UI - Status Management**
-**Nowy komponent:** `/src/components/dashboard/PropertyStatusToggle.tsx`
-
-```typescript
-interface PropertyStatusToggleProps {
-  propertyId: string
-  currentStatus: 'available' | 'sold' | 'reserved'
-  onStatusChange: (newStatus: string) => void
-}
-
-export function PropertyStatusToggle({ propertyId, currentStatus, onStatusChange }: Props) {
-  const handleToggle = async (newStatus: string) => {
-    const response = await fetch(`/api/properties/${propertyId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
-    })
-
-    if (response.ok) {
-      onStatusChange(newStatus)
-      toast.success('Status zaktualizowany')
-    }
-  }
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Badge variant={currentStatus === 'available' ? 'success' : 'secondary'}>
-          {currentStatus === 'available' ? 'Dostępne' :
-           currentStatus === 'sold' ? 'Sprzedane' : 'Zarezerwowane'}
-        </Badge>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => handleToggle('available')}>
-          ✓ Oznacz jako dostępne
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleToggle('sold')}>
-          ✗ Oznacz jako sprzedane
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleToggle('reserved')}>
-          ⏳ Oznacz jako zarezerwowane
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-```
-
----
-
-### **🟡 MEDIUM PRIORITY #4: Properties API - Update Status Endpoint**
-**Plik:** `/src/app/api/properties/[id]/route.ts` (NOWY)
-
-```typescript
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const supabase = await createClient()
-
-    // Auth check
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get developer
-    const { data: developer, error: devError } = await supabase
-      .from('developers')
-      .select('id')
-      .eq('user_id', user.id)
-      .single()
-
-    if (devError || !developer) {
-      return NextResponse.json({ error: 'Developer not found' }, { status: 404 })
-    }
-
-    // Parse body
-    const body = await request.json()
-    const { status } = body
-
-    // Validate status
-    if (!['available', 'sold', 'reserved'].includes(status)) {
-      return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
-    }
-
-    // Update property (RLS verifies ownership)
-    const { error: updateError } = await supabase
-      .from('properties')
-      .update({
-        status,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', params.id)
-      .eq('developer_id', developer.id)
-
-    if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true, status })
-
-  } catch (error: any) {
-    console.error('❌ UPDATE PROPERTY STATUS ERROR:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-}
-```
-
----
-
-## 📝 PLAN DZIAŁANIA (TESTOWALNE KROKI)
-
-### **KROK 1: Verify Database Schema** ⏱️ 5 min
-```sql
--- Sprawdź czy properties table ma kolumnę 'status'
-SELECT column_name, data_type
-FROM information_schema.columns
-WHERE table_name = 'properties'
-AND column_name = 'status';
-
--- Jeśli NIE MA:
-ALTER TABLE properties
-ADD COLUMN status VARCHAR(20) DEFAULT 'available';
-
--- Dodaj constraint:
-ALTER TABLE properties
-ADD CONSTRAINT check_status
-CHECK (status IN ('available', 'sold', 'reserved'));
-
--- Utwórz index (dla performance):
-CREATE INDEX idx_properties_status ON properties(status);
-```
-
-### **KROK 2: Fix CSV Endpoint** ⏱️ 10 min
-- Dodać `.eq('status', 'available')` do query
-- Przetestować: `curl https://otoraport.vercel.app/api/public/dev_test/data.csv`
-- Verify: Tylko mieszkania z status='available'
-
-### **KROK 3: Fix Upload Route** ⏱️ 15 min
-- Sprawdzić czy zapisuje `status` field
-- Jeśli nie: dodać do INSERT
-- Test: Upload ATAL CSV (6109 mieszkań) → sprawdź ile ma status='available'
-
-### **KROK 4: Dashboard UI** ⏱️ 45 min
-- Utworzyć `PropertyStatusToggle` component
-- Dodać do `PropertiesTable`
-- Test: Kliknij "Oznacz jako sprzedane" → verify w bazie
-
-### **KROK 5: API Endpoint** ⏱️ 30 min
-- Utworzyć `/api/properties/[id]/route.ts`
-- Test: `curl -X PUT /api/properties/123 -d '{"status":"sold"}'`
-- Verify: status changed w bazie
-
-### **KROK 6: Integration Test** ⏱️ 15 min
-```bash
-# 1. Upload ATAL CSV (6109 mieszkań)
-# 2. Sprawdź dashboard: ile jest 'available' vs 'sold'
-# 3. Oznacz 5 mieszkań jako 'sold'
-# 4. Pobierz CSV endpoint
-# 5. Verify: CSV ma 6104 mieszkania (6109 - 5)
-```
-
----
-
-## 🎯 NOWA FILOZOFIA: "DATA AS-IS, FILTER ON READ"
-
-### **Principle:**
-```
-WRITE: Store everything AS-IS (all properties, all statuses)
-READ:  Filter dynamically (only available for ministry)
-```
-
-### **Benefits:**
-1. **Audyt trail** - historia wszystkich mieszkań (w tym sprzedanych)
-2. **Flexibility** - developer może przywrócić mieszkanie do sprzedaży
-3. **Multi-project** - automatyczne łączenie inwestycji tego developera
-4. **Compliance** - ministerstwo dostaje TYLKO dostępne (filter on read)
-5. **Simplicity** - nie trzeba usuwać mieszkań, tylko zmienić status
-
----
-
-**Last updated:** 02.10.2025 (Parsing Fix - Status Management)
-**Audyt wykonany przez:** Claude Code (Comprehensive Security & Code Quality Audit)
-**Raporty:** `/RAPORT_AUDYT_KODU.md` + `/RAPORT_CO_DALEJ.md`
