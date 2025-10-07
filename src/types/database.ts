@@ -136,6 +136,8 @@ export type Database = {
           user_id: string | null
           website: string | null
           xml_url: string | null
+          email_notifications_enabled: boolean
+          notification_frequency: 'daily' | 'weekly' | 'never'
         }
         Insert: {
           additional_contact_info?: string | null
@@ -183,6 +185,8 @@ export type Database = {
           user_id?: string | null
           website?: string | null
           xml_url?: string | null
+          email_notifications_enabled?: boolean
+          notification_frequency?: 'daily' | 'weekly' | 'never'
         }
         Update: {
           additional_contact_info?: string | null
@@ -230,8 +234,51 @@ export type Database = {
           user_id?: string | null
           website?: string | null
           xml_url?: string | null
+          email_notifications_enabled?: boolean
+          notification_frequency?: 'daily' | 'weekly' | 'never'
         }
         Relationships: []
+      }
+      notifications: {
+        Row: {
+          id: string
+          developer_id: string
+          type: 'upload_complete' | 'upload_error' | 'ministry_sync' | 'system_announcement'
+          title: string
+          message: string
+          read: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          developer_id: string
+          type: 'upload_complete' | 'upload_error' | 'ministry_sync' | 'system_announcement'
+          title: string
+          message: string
+          read?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          developer_id?: string
+          type?: 'upload_complete' | 'upload_error' | 'ministry_sync' | 'system_announcement'
+          title?: string
+          message?: string
+          read?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
