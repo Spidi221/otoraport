@@ -4,8 +4,6 @@ import { Suspense, lazy, useMemo } from "react";
 import { useAuthSimple as useAuth } from "@/hooks/use-auth-simple";
 import { Header } from "@/components/dashboard/header";
 import { UploadWidget } from "@/components/dashboard/upload-widget";
-import { SubscriptionCard } from "@/components/dashboard/subscription-card";
-import { SubscriptionErrorHandler } from "@/components/dashboard/subscription-error-handler";
 import { LoadingState } from "@/components/ui/loading";
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -35,11 +33,6 @@ export default function HomePage() {
   // Middleware already verified auth - no need to block rendering
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Subscription error handler (uses useSearchParams) */}
-      <Suspense fallback={null}>
-        <SubscriptionErrorHandler />
-      </Suspense>
-
       <Header showUserMenu={!!user} />
       
       <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-6 lg:px-6">
@@ -58,9 +51,6 @@ export default function HomePage() {
 
         {/* Dashboard Grid */}
         <div className="space-y-6">
-          {/* Subscription Management */}
-          <SubscriptionCard />
-
           {/* Upload Widget */}
           <UploadWidget />
 
