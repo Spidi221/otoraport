@@ -5,8 +5,8 @@ import { validateClientId, applySecurityHeaders } from '@/lib/security'
 import { rateLimit, publicRateLimit } from '@/lib/redis-rate-limit'
 import crypto from 'crypto'
 
-// Next.js Route Segment Config - Dynamic with ISR
-export const revalidate = 300 // Revalidate every 5 minutes
+// Next.js Route Segment Config - Always fresh for Ministry compliance
+export const revalidate = 0 // No server-side caching (Art. 19b compliance)
 export const dynamic = 'force-dynamic'
 
 export async function GET(
@@ -70,7 +70,7 @@ export async function GET(
     // Set headers with rate limit info
     const headers = applySecurityHeaders(new Headers({
       'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'public, max-age=300, s-maxage=3600, must-revalidate', // Browser: 5min, CDN: 1h
+      'Cache-Control': 'public, max-age=60, s-maxage=60, must-revalidate', // 1-minute client cache for Ministry compliance
       'X-Generated-At': new Date().toISOString(),
       'X-Hash-Type': 'md5',
       'X-Client-ID': clientId.substring(0, 8) + '****',
