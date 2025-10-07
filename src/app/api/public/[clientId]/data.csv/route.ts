@@ -51,11 +51,12 @@ export async function GET(
       return new NextResponse('Developer not found', { status: 404 })
     }
 
-    // Get all properties for this developer
+    // Get all properties for this developer (exclude sold properties)
     const { data: properties, error: propsError } = await supabase
       .from('properties')
       .select('*')
       .eq('developer_id', developer.id)
+      .neq('status', 'sold') // Filter out sold properties from public exports
       .order('created_at', { ascending: false })
 
     if (propsError) {

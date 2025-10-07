@@ -9,6 +9,7 @@ import { Button } from "../ui/button";
 import { PropertyData, PaginatedResponse, isApiSuccess, PropertyStatus } from "@/types/api";
 import { Search, X, ArrowUpDown, ArrowUp, ArrowDown, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { StatusSelect } from "./status-select";
 
 // SWR fetcher with error handling
 const fetcher = async (url: string) => {
@@ -19,18 +20,6 @@ const fetcher = async (url: string) => {
   return response.json();
 };
 
-const getStatusBadge = (status: PropertyStatus) => {
-  switch (status) {
-    case 'available':
-      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Dostępne</Badge>;
-    case 'reserved':
-      return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Zarezerwowane</Badge>;
-    case 'sold':
-      return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Sprzedane</Badge>;
-    default:
-      return <Badge variant="secondary">{status}</Badge>;
-  }
-};
 
 export function PropertiesTable() {
   const [page, setPage] = useState(1);
@@ -311,7 +300,13 @@ export function PropertiesTable() {
                       </td>
                       <td className="py-3 text-sm">{property.price_per_m2.toLocaleString('pl-PL')} zł</td>
                       <td className="py-3 text-sm font-medium">{property.total_price.toLocaleString('pl-PL')} zł</td>
-                      <td className="py-3">{getStatusBadge(property.status)}</td>
+                      <td className="py-3">
+                        <StatusSelect
+                          currentStatus={property.status}
+                          propertyId={property.id}
+                          onStatusChange={() => mutate()}
+                        />
+                      </td>
                       <td className="py-3">
                         <Button
                           variant="destructive"
