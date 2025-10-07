@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AlertTriangle, HelpCircle, Target, CheckCircle, X, ArrowRight } from 'lucide-react';
-import { InAppHelpSystem, HelpContext, HelpResource } from '@/lib/help-system';
+import { HelpContext } from '@/lib/help-system';
 
 interface ProactiveHelpSystemProps {
   context: HelpContext;
@@ -23,7 +23,7 @@ interface ProactiveHint {
   priority: 'low' | 'medium' | 'high';
 }
 
-export function ProactiveHelpSystem({ context, userId, isVisible }: ProactiveHelpSystemProps) {
+export function ProactiveHelpSystem({ context, isVisible }: ProactiveHelpSystemProps) {
   const [activeHints, setActiveHints] = useState<ProactiveHint[]>([]);
   const [dismissedHints, setDismissedHints] = useState<Set<string>>(new Set());
 
@@ -31,6 +31,7 @@ export function ProactiveHelpSystem({ context, userId, isVisible }: ProactiveHel
     if (isVisible) {
       generateProactiveHints();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [context, isVisible]);
 
   const generateProactiveHints = async () => {

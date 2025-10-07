@@ -73,7 +73,7 @@ export interface MinistryCompliantProperty {
   parking_price?: number | null
 
   // Amenities and features
-  pomieszczenia_przynalezne?: any | null // JSONB
+  pomieszczenia_przynalezne?: Record<string, unknown> | null // JSONB
   winda?: boolean | null
   klimatyzacja?: boolean | null
   ogrzewanie?: string | null // (miejskie, gazowe, elektryczne, etc.)
@@ -99,7 +99,7 @@ export interface MinistryCompliantProperty {
   uuid_ministerstwo?: string | null
 
   // System fields
-  raw_data?: any | null
+  raw_data?: Record<string, unknown> | null
   created_at?: string
   updated_at?: string
 }
@@ -189,7 +189,7 @@ export interface MinistryCompliantProject {
 /**
  * Helper function to map legacy property fields to ministry-compliant fields
  */
-export function mapToMinistryCompliant(property: any): MinistryCompliantProperty {
+export function mapToMinistryCompliant(property: Partial<MinistryCompliantProperty>): MinistryCompliantProperty {
   return {
     ...property,
     // Map legacy price fields to ministry fields

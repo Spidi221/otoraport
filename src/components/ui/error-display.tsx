@@ -10,7 +10,7 @@ export interface ErrorMessage {
   title?: string
   message: string
   code?: string
-  details?: any
+  details?: string | string[] | Record<string, unknown>
   actions?: Array<{
     label: string
     onClick: () => void

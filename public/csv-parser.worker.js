@@ -67,7 +67,7 @@ function parseCSV(file) {
     encoding: 'UTF-8',
 
     // Streaming: process row by row
-    step: function(row, parser) {
+    step: function(row) {
       rowCount++;
 
       if (rowCount === 1) {

@@ -19,7 +19,7 @@ interface EmailPreferences {
  * GET /api/user/email-preferences
  * Get current email preferences
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createClient()
 

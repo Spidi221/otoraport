@@ -12,7 +12,7 @@ Sentry.init({
   environment: process.env.NODE_ENV,
 
   // Context enrichment
-  beforeSend(event, hint) {
+  beforeSend(event) {
     // Add custom context for better debugging
     if (event.request) {
       event.tags = {

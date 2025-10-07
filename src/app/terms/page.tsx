@@ -426,7 +426,7 @@ export default function TermsPage() {
             Użytkownika w ciągu 7 dni od dokonania płatności.
           </p>
           <p className="text-gray-700 mb-2">
-            <strong>3.2.</strong> Faktury dostępne są również w panelu Użytkownika w zakładce "Rozliczenia".
+            <strong>3.2.</strong> Faktury dostępne są również w panelu Użytkownika w zakładce &quot;Rozliczenia&quot;.
           </p>
           <p className="text-gray-700 mt-2">
             <strong>3.3.</strong> Dane na fakturze pobierane są z profilu Użytkownika (NIP, nazwa firmy, adres).
@@ -471,7 +471,7 @@ export default function TermsPage() {
             <li>Subskrypcja pozostaje aktywna do końca opłaconego okresu rozliczeniowego,</li>
             <li>Brak automatycznego odnowienia w kolejnym miesiącu,</li>
             <li>Brak zwrotu za niewykorzystany czas,</li>
-            <li>Po wygaśnięciu Subskrypcji Konto przechodzi w tryb "tylko odczyt" (brak możliwości generowania
+            <li>Po wygaśnięciu Subskrypcji Konto przechodzi w tryb &quot;tylko odczyt&quot; (brak możliwości generowania
               nowych raportów, dane pozostają dostępne przez 30 dni).</li>
           </ul>
           <p className="text-gray-700 mt-2">
@@ -584,7 +584,7 @@ export default function TermsPage() {
         <div className="mb-4">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">3. Wyłączenie gwarancji</h3>
           <p className="text-gray-700 mb-2">
-            <strong>3.1.</strong> Serwis świadczony jest w modelu "AS IS" (tak jak jest), bez jakichkolwiek gwarancji,
+            <strong>3.1.</strong> Serwis świadczony jest w modelu &quot;AS IS&quot; (tak jak jest), bez jakichkolwiek gwarancji,
             wyraźnych lub dorozumianych, z wyjątkiem gwarancji wymaganych bezwzględnie obowiązującymi przepisami prawa.
           </p>
           <p className="text-gray-700 mb-2">
@@ -824,7 +824,7 @@ export default function TermsPage() {
         <div className="bg-white p-4 rounded border border-amber-300 mb-3">
           <p className="text-sm font-semibold text-gray-900 mb-2">DO UZUPEŁNIENIA PRZEZ WŁAŚCICIELA FIRMY:</p>
           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-            <li><strong>[NAZWA FIRMY]</strong> - pełna nazwa prawna (np. "Tech Solutions Sp. z o.o.")</li>
+            <li><strong>[NAZWA FIRMY]</strong> - pełna nazwa prawna (np. &quot;Tech Solutions Sp. z o.o.&quot;)</li>
             <li><strong>[sp. z o.o. / S.A. / inne]</strong> - forma prawna działalności</li>
             <li><strong>[ADRES SIEDZIBY]</strong> - pełny adres (ulica, nr budynku/lokalu, kod pocztowy, miasto)</li>
             <li><strong>[NIP]</strong> - 10-cyfrowy numer NIP (format: 123-456-78-90)</li>

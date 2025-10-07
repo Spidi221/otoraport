@@ -62,9 +62,9 @@ export default function FileUpload({
               return
             }
           }
-          
+
           resolve(null) // No errors
-        } catch (error) {
+        } catch {
           resolve('Nie udało się przeanalizować zawartości pliku')
         }
       }
@@ -83,7 +83,7 @@ export default function FileUpload({
     if (rejectedFiles.length > 0) {
       const rejection = rejectedFiles[0]
       let errorMessage = 'Nieobsługiwany format pliku'
-      
+
       if (rejection.errors[0]?.code === 'file-too-large') {
         errorMessage = `Plik jest za duży. Maksymalny rozmiar: ${Math.round(maxSize / 1024 / 1024)}MB`
       } else if (rejection.errors[0]?.code === 'file-invalid-type') {

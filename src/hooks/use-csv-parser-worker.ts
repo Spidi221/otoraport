@@ -12,12 +12,12 @@ export interface ParseProgress {
 }
 
 export interface ParseResult {
-  data: any[];
+  data: Record<string, unknown>[];
   totalRows: number;
   validRows: number;
   skippedRows: number;
   headers: string[];
-  errors: any[];
+  errors: Array<{ row?: number; message: string; details?: string }>;
 }
 
 export interface ParseError {

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Upload, FileText, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
@@ -33,60 +33,8 @@ export function UploadWidget() {
     }
   };
 
-  // Handle Web Worker parse completion
-  useEffect(() => {
-    if (csvWorker.result && csvWorker.result.data.length > 0) {
-      // Worker finished parsing - now send parsed data to server
-      uploadParsedData(csvWorker.result.data, csvWorker.result.validRows);
-    }
-  }, [csvWorker.result]);
-
-  // Handle Web Worker errors with Sentry logging
-  useEffect(() => {
-    if (csvWorker.error) {
-      setError(csvWorker.error);
-      setUploading(false);
-      setParsingStatus(null);
-
-      // Log to Sentry in production with detailed context
-      if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
-        import('@sentry/nextjs').then((Sentry) => {
-          const errorDetails = csvWorker.errorDetails || {};
-
-          Sentry.captureException(new Error(errorDetails.technicalError || csvWorker.error), {
-            level: 'error',
-            tags: {
-              component: 'upload-widget',
-              error_type: errorDetails.errorType || 'csv_parsing_error',
-              parsing_method: 'web_worker',
-              file_name: errorDetails.fileName || 'unknown'
-            },
-            extra: {
-              userMessage: csvWorker.error,
-              technicalError: errorDetails.technicalError,
-              errorType: errorDetails.errorType,
-              fileName: errorDetails.fileName,
-              stack: errorDetails.stack
-            }
-          });
-
-          console.log('[Sentry] Logged CSV parsing error:', {
-            userMessage: csvWorker.error,
-            errorType: errorDetails.errorType
-          });
-        });
-      }
-    }
-  }, [csvWorker.error, csvWorker.errorDetails]);
-
-  // Update parsing status from worker progress
-  useEffect(() => {
-    if (csvWorker.progress) {
-      setParsingStatus(`Parsing: ${csvWorker.progress.validRows} rows (${Math.round(csvWorker.progress.progress)}%)`);
-    }
-  }, [csvWorker.progress]);
-
-  const uploadParsedData = async (parsedData: any[], validRows: number) => {
+  // HOISTED: Define uploadParsedData before useEffect that references it (fixes TDZ)
+  const uploadParsedData = useCallback(async (parsedData: Record<string, unknown>[], validRows: number) => {
     try {
       setParsingStatus('Uploading to server...');
 
@@ -120,7 +68,60 @@ export function UploadWidget() {
     } finally {
       setUploading(false);
     }
-  };
+  }, [csvWorker]);
+
+  // Handle Web Worker parse completion
+  useEffect(() => {
+    if (csvWorker.result && csvWorker.result.data.length > 0) {
+      // Worker finished parsing - now send parsed data to server
+      uploadParsedData(csvWorker.result.data, csvWorker.result.validRows);
+    }
+  }, [csvWorker.result, uploadParsedData]);
+
+  // Handle Web Worker errors with Sentry logging
+  useEffect(() => {
+    if (csvWorker.error) {
+      setError(csvWorker.error);
+      setUploading(false);
+      setParsingStatus(null);
+
+      // Log to Sentry in production with detailed context
+      if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
+        import('@sentry/nextjs').then((Sentry) => {
+          const errorDetails: any = csvWorker.errorDetails || {};
+
+          Sentry.captureException(new Error(errorDetails.technicalError || csvWorker.error), {
+            level: 'error',
+            tags: {
+              component: 'upload-widget',
+              error_type: errorDetails.errorType || 'csv_parsing_error',
+              parsing_method: 'web_worker',
+              file_name: errorDetails.fileName || 'unknown'
+            },
+            extra: {
+              userMessage: csvWorker.error,
+              technicalError: errorDetails.technicalError,
+              errorType: errorDetails.errorType,
+              fileName: errorDetails.fileName,
+              stack: errorDetails.stack
+            }
+          });
+
+          console.log('[Sentry] Logged CSV parsing error:', {
+            userMessage: csvWorker.error,
+            errorType: errorDetails.errorType
+          });
+        });
+      }
+    }
+  }, [csvWorker.error, csvWorker.errorDetails]);
+
+  // Update parsing status from worker progress
+  useEffect(() => {
+    if (csvWorker.progress) {
+      setParsingStatus(`Parsing: ${csvWorker.progress.validRows} rows (${Math.round(csvWorker.progress.progress)}%)`);
+    }
+  }, [csvWorker.progress]);
 
   const uploadFile = async (file: File) => {
     setUploading(true);

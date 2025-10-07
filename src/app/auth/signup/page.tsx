@@ -61,6 +61,11 @@ function SignUpContent() {
       return
     }
 
+    if (!supabase) {
+      setError('Błąd konfiguracji - brak połączenia z bazą danych')
+      return
+    }
+
     setIsLoading(true)
     setError('')
 
@@ -97,7 +102,7 @@ function SignUpContent() {
           setMessage('Rejestracja udana! Sprawdź email i kliknij link potwierdzający.')
         }
       }
-    } catch (err) {
+    } catch {
       setError('Wystąpił błąd podczas rejestracji')
     } finally {
       setIsLoading(false)
@@ -105,6 +110,11 @@ function SignUpContent() {
   }
 
   const handleGoogleSignUp = async () => {
+    if (!supabase) {
+      setError('Błąd konfiguracji - brak połączenia z bazą danych')
+      return
+    }
+
     setIsLoading(true)
     setError('')
 
@@ -120,7 +130,7 @@ function SignUpContent() {
         setError('Wystąpił błąd podczas rejestracji przez Google')
         setIsLoading(false)
       }
-    } catch (err) {
+    } catch {
       setError('Wystąpił błąd podczas rejestracji przez Google')
       setIsLoading(false)
     }

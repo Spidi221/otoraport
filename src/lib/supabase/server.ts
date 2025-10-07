@@ -14,6 +14,8 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '../supabase'
 
+export type { Database }
+
 export async function createClient() {
   const cookieStore = await cookies()
 
@@ -73,7 +75,7 @@ export function createAdminClient() {
  * Helper: Get authenticated user from request
  * Returns null if not authenticated
  */
-export async function getServerAuth(request?: Request) {
+export async function getServerAuth() {
   const supabase = await createClient()
   const { data: { user }, error } = await supabase.auth.getUser()
 

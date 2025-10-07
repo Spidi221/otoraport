@@ -41,7 +41,7 @@ export function validateEnv(): { success: boolean; errors?: string[] } {
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        errors: error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+        errors: error.errors.map((err: any) => `${err.path.join('.')}: ${err.message}`)
       }
     }
     return { success: false, errors: ['Unknown validation error'] }

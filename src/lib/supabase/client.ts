@@ -42,7 +42,7 @@ export function createClient() {
         update: () => ({ data: null, error: new Error('Supabase not configured') }),
         delete: () => ({ data: null, error: new Error('Supabase not configured') }),
       }),
-    } as any
+    } as ReturnType<typeof createBrowserClient<Database>>
   }
 
   client = createBrowserClient<Database>(
@@ -56,7 +56,7 @@ export function createClient() {
           const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
           return match ? decodeURIComponent(match[2]) : undefined
         },
-        set(name: string, value: string, options: any) {
+        set(name: string, value: string, options: { maxAge?: number; domain?: string; path?: string; sameSite?: string; secure?: boolean }) {
           // Client-side cookie setting
           if (typeof document === 'undefined') return
 
@@ -80,7 +80,7 @@ export function createClient() {
 
           document.cookie = cookie
         },
-        remove(name: string, options: any) {
+        remove(name: string, options: { domain?: string; path?: string }) {
           // Client-side cookie removal
           if (typeof document === 'undefined') return
 

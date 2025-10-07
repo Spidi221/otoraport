@@ -2,6 +2,18 @@
 import { createAdminClient } from './supabase/server'
 import { analyticsService } from './analytics'
 
+/**
+ * Property shape for bulk operations (subset of full property type)
+ */
+interface BulkOperationProperty {
+  id: string
+  property_number?: string
+  price_per_m2: number
+  total_price: number
+  area?: number
+  status: string
+}
+
 export interface BulkOperationJob {
   id: string
   developerId: string
@@ -16,7 +28,7 @@ export interface BulkOperationJob {
   startedAt: string | null
   completedAt: string | null
   estimatedTimeRemaining?: number
-  metadata: any
+  metadata: Record<string, unknown>
 }
 
 export type BulkOperationType = 
@@ -31,13 +43,13 @@ export interface BulkOperationResult {
   itemId: string
   status: 'success' | 'failed' | 'skipped'
   message?: string
-  data?: any
+  data?: unknown
 }
 
 export interface BulkOperationError {
   itemId?: string
   error: string
-  details?: any
+  details?: unknown
 }
 
 export interface BulkPriceUpdate {
@@ -62,6 +74,21 @@ export interface BulkImportOptions {
   skipDuplicates: boolean
   validateData: boolean
   projectId?: string
+}
+
+export interface BulkExportOptions {
+  format: 'csv' | 'xlsx' | 'json' | 'xml'
+  includeProjects?: boolean
+  includeAnalytics?: boolean
+  dateRange?: { from: string; to: string } // Task 21.2: Added to match method usage
+}
+
+interface ExportData {
+  properties: unknown[]
+  exportedAt: string
+  format: string
+  projects?: unknown[]
+  analytics?: unknown
 }
 
 export class BulkOperationsService {
@@ -187,12 +214,7 @@ export class BulkOperationsService {
   /**
    * Start bulk data export operation
    */
-  async bulkExportData(developerId: string, options: {
-    format: 'csv' | 'xlsx' | 'json'
-    includeProjects: boolean
-    includeAnalytics: boolean
-    dateRange?: { from: string, to: string }
-  }): Promise<string> {
+  async bulkExportData(developerId: string, options: BulkExportOptions): Promise<string> {
     const jobId = `bulk_export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
     console.log(`Starting bulk data export for developer ${developerId}`)
@@ -219,7 +241,7 @@ export class BulkOperationsService {
       errors: [],
       startedAt: null,
       completedAt: null,
-      metadata: options
+      metadata: options as unknown as Record<string, unknown> // Task 21: Cast to match metadata type
     }
 
     this.jobs.set(jobId, job)
@@ -315,7 +337,7 @@ export class BulkOperationsService {
   /**
    * Process bulk price update
    */
-  private async processBulkPriceUpdate(jobId: string, properties: any[], update: BulkPriceUpdate) {
+  private async processBulkPriceUpdate(jobId: string, properties: BulkOperationProperty[], update: BulkPriceUpdate) {
     const job = this.jobs.get(jobId)!
     job.status = 'running'
     job.startedAt = new Date().toISOString()
@@ -382,7 +404,7 @@ export class BulkOperationsService {
   /**
    * Process bulk status change
    */
-  private async processBulkStatusChange(jobId: string, properties: any[], change: BulkStatusChange) {
+  private async processBulkStatusChange(jobId: string, properties: BulkOperationProperty[], change: BulkStatusChange) {
     const job = this.jobs.get(jobId)!
     job.status = 'running'
     job.startedAt = new Date().toISOString()
@@ -429,7 +451,7 @@ export class BulkOperationsService {
   /**
    * Process bulk export
    */
-  private async processBulkExport(jobId: string, developerId: string, options: any) {
+  private async processBulkExport(jobId: string, developerId: string, options: BulkExportOptions) {
     const job = this.jobs.get(jobId)!
     job.status = 'running'
     job.startedAt = new Date().toISOString()
@@ -444,7 +466,7 @@ export class BulkOperationsService {
         `)
         .eq('projects.developer_id', developerId)
 
-      const exportData: any = {
+      const exportData: ExportData = {
         properties: properties || [],
         exportedAt: new Date().toISOString(),
         format: options.format
@@ -466,7 +488,7 @@ export class BulkOperationsService {
           exportData.analytics = analytics
           job.processedItems++
           job.successfulItems++
-        } catch (error) {
+        } catch {
           job.errors.push({ error: 'Failed to include analytics data' })
           job.failedItems++
         }
@@ -499,7 +521,7 @@ export class BulkOperationsService {
   /**
    * Process bulk compliance check
    */
-  private async processBulkComplianceCheck(jobId: string, properties: any[]) {
+  private async processBulkComplianceCheck(jobId: string, properties: BulkOperationProperty[]) {
     const job = this.jobs.get(jobId)!
     job.status = 'running'
     job.startedAt = new Date().toISOString()

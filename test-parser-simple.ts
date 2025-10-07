@@ -50,7 +50,6 @@ for (const file of testFiles) {
 
     const status = result.success ? '✅ PASS' : '❌ FAIL'
     const parsed = result.data.length
-    const total = result.totalRows
 
     console.log(`\n${status} ${file.name}`)
     console.log(`  Parse time: ${elapsed}ms`)

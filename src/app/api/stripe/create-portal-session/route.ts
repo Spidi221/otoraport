@@ -3,11 +3,12 @@
  * Creates a Stripe Customer Portal session for subscription management
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
+import { getErrorMessage } from '@/lib/api-schemas'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // 1. Authenticate user
     const supabase = await createClient()
@@ -58,10 +59,10 @@ export async function POST(request: NextRequest) {
       url: session.url,
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('💥 STRIPE PORTAL ERROR:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to create portal session' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }

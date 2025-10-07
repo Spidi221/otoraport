@@ -13,17 +13,6 @@ export type EmailType =
   | 'marketing'
   | 'upload_confirmation'
 
-interface Developer {
-  id: string
-  email: string
-  email_notifications_enabled?: boolean
-  email_weekly_digest?: boolean
-  email_data_staleness_alerts?: boolean
-  email_endpoint_health_alerts?: boolean
-  email_support_updates?: boolean
-  email_marketing?: boolean
-}
-
 /**
  * Check if a developer should receive a specific type of email
  */

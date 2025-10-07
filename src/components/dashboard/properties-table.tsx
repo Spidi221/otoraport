@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import useSWR from "swr";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -52,7 +52,7 @@ export function PropertiesTable() {
     }
   );
 
-  const properties = data?.data || [];
+  const properties = useMemo(() => data?.data || [], [data?.data]);
   const pagination = data?.pagination || { total: 0, page: 1, limit: 20, totalPages: 0 };
   const error = swrError ? 'Wystąpił błąd podczas pobierania danych' : (data && !isApiSuccess(data) ? data.error : null);
 

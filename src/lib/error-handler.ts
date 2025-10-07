@@ -125,8 +125,8 @@ export function createSecureError(
 
   // Handle database errors (sanitize to prevent info leakage)
   if (error && typeof error === 'object' && 'code' in error) {
-    const dbError = error as any
-    
+    const dbError = error as { code: string }
+
     switch (dbError.code) {
       case '23505': // Unique constraint violation
         return { 
@@ -180,7 +180,7 @@ export function validateNIP(nip: string): boolean {
   return cleanNip.length === 10
 }
 
-export function validateRequired(value: any, fieldName?: string): void {
+export function validateRequired(value: unknown, fieldName?: string): void {
   if (!value || (typeof value === 'string' && !value.trim())) {
     throw new ValidationError(
       fieldName ? `Pole ${fieldName} jest wymagane` : SAFE_ERROR_MESSAGES.MISSING_REQUIRED_FIELD,
@@ -189,7 +189,7 @@ export function validateRequired(value: any, fieldName?: string): void {
   }
 }
 
-export function sanitizeErrorForClient(error: any): SecureErrorResponse {
+export function sanitizeErrorForClient(error: unknown): SecureErrorResponse {
   return createSecureError(error)
 }
 

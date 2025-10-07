@@ -300,7 +300,7 @@ export interface SubscriptionLimitsCheck {
 export async function checkSubscriptionLimits(developerId: string): Promise<SubscriptionLimitsCheck> {
   try {
     // Import Supabase dynamically to avoid circular dependencies
-    const { createAdminClient } = await import('@/lib/supabase');
+    const { createAdminClient } = await import('@/lib/supabase/server');
 
     // Get developer with subscription info
     const { data: developer, error: devError } = await createAdminClient()

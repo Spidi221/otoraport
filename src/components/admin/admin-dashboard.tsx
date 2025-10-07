@@ -15,23 +15,82 @@ import {
   TrendingUp,
   Shield,
   Settings,
-  Activity,
-  Download
+  Activity
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { pl } from 'date-fns/locale'
 import { toast } from 'sonner'
+
+interface SystemStats {
+  totalDevelopers?: number;
+  activeDevelopers?: number;
+  totalProperties?: number;
+  totalRevenue?: number;
+  totalProjects?: number;
+  monthlyRevenue?: number;
+  systemHealth?: 'healthy' | 'warning' | 'critical';
+  paidDevelopers?: number;
+}
+
+interface Developer {
+  id: string;
+  company_name?: string;
+  name?: string;
+  nip?: string;
+  email?: string;
+  subscription_status?: string;
+  ministry_approved?: boolean;
+  total_projects?: number;
+  total_properties?: number;
+}
+
+interface LogEntry {
+  id: string;
+  timestamp?: string;
+  action?: string;
+  developer_id?: string;
+  details?: string;
+  level?: 'info' | 'warning' | 'error';
+  message?: string;
+  created_at?: string;
+  user_id?: string;
+  ip_address?: string;
+}
+
+interface ComplianceIssue {
+  developer_name: string;
+  description: string;
+  severity: 'high' | 'medium' | 'low';
+}
+
+interface ComplianceData {
+  compliantDevelopers?: number;
+  compliant_developers?: number;  // Snake case variant
+  totalDevelopers?: number;
+  total_developers?: number;  // Snake case variant
+  non_compliant_developers?: number;
+  pendingApprovals?: number;
+  issues?: ComplianceIssue[];
+}
+
+interface RevenueData {
+  total?: number;
+  totalRevenue?: number;  // Camel case variant
+  monthly?: number;
+  growth?: number;
+  paymentCount?: number;
+}
 
 interface AdminDashboardProps {
   adminEmail: string
 }
 
 export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
-  const [systemStats, setSystemStats] = useState<any>(null)
-  const [developers, setDevelopers] = useState<any[]>([])
-  const [logs, setLogs] = useState<any[]>([])
-  const [compliance, setCompliance] = useState<any>(null)
-  const [revenue, setRevenue] = useState<any>(null)
+  const [systemStats, setSystemStats] = useState<SystemStats | null>(null)
+  const [developers, setDevelopers] = useState<Developer[]>([])
+  const [logs, setLogs] = useState<LogEntry[]>([])
+  const [compliance, setCompliance] = useState<ComplianceData | null>(null)
+  const [revenue, setRevenue] = useState<RevenueData | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
 
@@ -63,8 +122,8 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
       setLogs(logsData.data || [])
       setCompliance(comp.data)
       setRevenue(rev.data)
-    } catch (error) {
-      console.error('Error loading admin data:', error)
+    } catch {
+      console.error('Error loading admin data')
     } finally {
       setLoading(false)
     }
@@ -85,8 +144,8 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
       if (response.ok) {
         loadData()
       }
-    } catch (error) {
-      console.error('Error updating subscription:', error)
+    } catch {
+      console.error('Error updating subscription')
     }
   }
 
@@ -105,8 +164,8 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
       if (response.ok) {
         loadData()
       }
-    } catch (error) {
-      console.error('Error approving ministry:', error)
+    } catch {
+      console.error('Error approving ministry')
     }
   }
 
@@ -123,8 +182,8 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
         toast.success(`Cleanup completed: ${result.data.expiredTrials} trials expired, ${result.data.oldLogs} logs removed`)
         loadData()
       }
-    } catch (error) {
-      console.error('Error performing cleanup:', error)
+    } catch {
+      console.error('Error performing cleanup')
     }
   }
 
@@ -260,8 +319,8 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
                           <p className="font-medium">{dev.company_name || dev.name}</p>
                           <p className="text-sm text-gray-500">{dev.email}</p>
                         </div>
-                        <Badge className={getStatusColor(dev.subscription_status)}>
-                          {dev.subscription_status}
+                        <Badge className={getStatusColor(dev.subscription_status || 'unknown')}>
+                          {dev.subscription_status || 'unknown'}
                         </Badge>
                       </div>
                     ))}
@@ -277,13 +336,13 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
                   <div className="space-y-3">
                     {logs.slice(0, 5).map((log) => (
                       <div key={log.id} className="flex items-start gap-3">
-                        <div className={`px-2 py-1 rounded text-xs font-medium ${getLogColor(log.level)}`}>
-                          {log.level}
+                        <div className={`px-2 py-1 rounded text-xs font-medium ${getLogColor(log.level || 'info')}`}>
+                          {log.level || 'info'}
                         </div>
                         <div className="flex-1">
                           <p className="text-sm">{log.message}</p>
                           <p className="text-xs text-gray-500">
-                            {format(new Date(log.created_at), 'dd.MM HH:mm', { locale: pl })}
+                            {log.created_at ? format(new Date(log.created_at), 'dd.MM HH:mm', { locale: pl }) : ''}
                           </p>
                         </div>
                       </div>
@@ -323,8 +382,8 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
                           </td>
                           <td className="p-2">{dev.email}</td>
                           <td className="p-2">
-                            <Badge className={getStatusColor(dev.subscription_status)}>
-                              {dev.subscription_status}
+                            <Badge className={getStatusColor(dev.subscription_status || 'unknown')}>
+                              {dev.subscription_status || 'unknown'}
                             </Badge>
                           </td>
                           <td className="p-2">
@@ -409,10 +468,10 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {compliance?.issues?.map((issue: any, index: number) => (
+                  {compliance?.issues?.map((issue: ComplianceIssue, index: number) => (
                     <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
                       <AlertTriangle className={`h-5 w-5 ${
-                        issue.severity === 'high' ? 'text-red-500' : 
+                        issue.severity === 'high' ? 'text-red-500' :
                         issue.severity === 'medium' ? 'text-yellow-500' : 'text-blue-500'
                       }`} />
                       <div className="flex-1">
@@ -498,8 +557,8 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
                 <div className="space-y-3">
                   {logs.map((log) => (
                     <div key={log.id} className="flex items-start gap-3 p-3 border rounded-lg">
-                      <div className={`px-2 py-1 rounded text-xs font-medium ${getLogColor(log.level)}`}>
-                        {log.level}
+                      <div className={`px-2 py-1 rounded text-xs font-medium ${getLogColor(log.level || 'info')}`}>
+                        {log.level || 'info'}
                       </div>
                       <div className="flex-1">
                         <p className="font-medium">{log.message}</p>
@@ -509,7 +568,7 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
                           </pre>
                         )}
                         <p className="text-xs text-gray-500 mt-2">
-                          {format(new Date(log.created_at), 'dd.MM.yyyy HH:mm:ss', { locale: pl })}
+                          {log.created_at ? format(new Date(log.created_at), 'dd.MM.yyyy HH:mm:ss', { locale: pl }) : ''}
                           {log.user_id && ` • Użytkownik: ${log.user_id}`}
                           {log.ip_address && ` • IP: ${log.ip_address}`}
                         </p>

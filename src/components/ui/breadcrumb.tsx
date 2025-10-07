@@ -69,7 +69,7 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
 
       if (isEllipsis) {
         return (
-          <li key={\`ellipsis-\${index}\`} className="flex items-center">
+          <li key={`ellipsis-${index}`} className="flex items-center">
             <span
               className="text-sm text-gray-400 dark:text-gray-600 select-none"
               aria-label="Więcej elementów"
@@ -94,7 +94,7 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
       )
 
       return (
-        <li key={\`\${item.label}-\${index}\`} className="flex items-center">
+        <li key={`${item.label}-${index}`} className="flex items-center">
           {item.href && !isLast ? (
             <Link
               href={item.href}
@@ -151,7 +151,7 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
             const isLast = index === itemsToRender.length - 1
 
             return (
-              <React.Fragment key={\`breadcrumb-\${index}\`}>
+              <React.Fragment key={`breadcrumb-${index}`}>
                 {renderItem(item, index, isLast)}
                 {!isLast && (
                   <li

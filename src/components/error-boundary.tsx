@@ -90,13 +90,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
       // Default error UI
       return (
-        <div className=\"min-h-screen flex items-center justify-center p-4 bg-gray-50\">
-          <Card className=\"w-full max-w-lg\">
-            <CardHeader className=\"text-center\">
-              <div className=\"mx-auto mb-4 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center\">
-                <AlertTriangle className=\"w-6 h-6 text-red-600\" />
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+          <Card className="w-full max-w-lg">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
               </div>
-              <CardTitle className=\"text-xl text-red-900\">
+              <CardTitle className="text-xl text-red-900">
                 Ups! Coś poszło nie tak
               </CardTitle>
               <CardDescription>
@@ -104,17 +104,17 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               </CardDescription>
             </CardHeader>
 
-            <CardContent className=\"space-y-4\">
+            <CardContent className="space-y-4">
               {/* Error message for development */}
               {(showDetails || process.env.NODE_ENV === 'development') && error && (
-                <div className=\"p-4 bg-red-50 border border-red-200 rounded-lg\">
-                  <div className=\"flex items-start space-x-2\">
-                    <Bug className=\"w-5 h-5 text-red-500 mt-0.5 flex-shrink-0\" />
-                    <div className=\"space-y-2\">
-                      <p className=\"text-sm font-medium text-red-800\">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-start space-x-2">
+                    <Bug className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-red-800">
                         Szczegóły błędu:
                       </p>
-                      <p className=\"text-sm text-red-700 font-mono bg-red-100 p-2 rounded\">
+                      <p className="text-sm text-red-700 font-mono bg-red-100 p-2 rounded">
                         {error.message}
                       </p>
                     </div>
@@ -123,41 +123,41 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               )}
 
               {/* Action buttons */}
-              <div className=\"flex flex-col sm:flex-row gap-3\">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   onClick={this.handleReset}
-                  className=\"flex-1 flex items-center justify-center gap-2\"
+                  className="flex-1 flex items-center justify-center gap-2"
                 >
-                  <RefreshCw className=\"w-4 h-4\" />
+                  <RefreshCw className="w-4 h-4" />
                   Spróbuj ponownie
                 </Button>
 
                 <Button
-                  variant=\"outline\"
+                  variant="outline"
                   onClick={this.handleReload}
-                  className=\"flex-1 flex items-center justify-center gap-2\"
+                  className="flex-1 flex items-center justify-center gap-2"
                 >
-                  <RefreshCw className=\"w-4 h-4\" />
+                  <RefreshCw className="w-4 h-4" />
                   Odśwież stronę
                 </Button>
 
                 <Button
-                  variant=\"ghost\"
+                  variant="ghost"
                   onClick={this.handleGoHome}
-                  className=\"flex-1 flex items-center justify-center gap-2\"
+                  className="flex-1 flex items-center justify-center gap-2"
                 >
-                  <Home className=\"w-4 h-4\" />
+                  <Home className="w-4 h-4" />
                   Strona główna
                 </Button>
               </div>
 
               {/* Help text */}
-              <div className=\"text-center text-sm text-gray-600\">
+              <div className="text-center text-sm text-gray-600">
                 <p>
                   Jeśli problem się powtarza, skontaktuj się z{' '}
                   <a
-                    href=\"mailto:support@otoraport.pl\"
-                    className=\"text-blue-600 hover:underline\"
+                    href="mailto:support@otoraport.pl"
+                    className="text-blue-600 hover:underline"
                   >
                     support@otoraport.pl
                   </a>
@@ -193,7 +193,7 @@ export function ErrorBoundaryWrapper({
 // Hook for error boundary context
 export function useErrorHandler() {
   return {
-    captureError: (error: Error, context?: any) => {
+    captureError: (error: Error, context?: Record<string, unknown>) => {
       console.error('Manual error capture:', error, context)
 
       // Send to Sentry with context

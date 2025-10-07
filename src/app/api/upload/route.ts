@@ -6,6 +6,16 @@ import { SmartCSVParser } from '@/lib/smart-csv-parser'
 import { validateUploadFile } from '@/lib/security'
 import { rateLimitWithAuth, uploadRateLimit, uploadRateLimitAuthenticated } from '@/lib/redis-rate-limit'
 import { sendUploadConfirmationEmail } from '@/lib/email-service'
+import { ParsedProperty, parseDecimal, parseDate } from '@/lib/api-schemas'
+
+/**
+ * Helper function to get error message from unknown error
+ */
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'string') return error
+  return 'Unknown error occurred'
+}
 
 export async function POST(request: NextRequest) {
   console.log('🚀 UPLOAD API: Starting file upload...')
@@ -151,7 +161,7 @@ export async function POST(request: NextRequest) {
 
         // Save properties to database
         if (smartParseResult.data && smartParseResult.data.length > 0) {
-          await savePropertiesToDatabase(developer.id, smartParseResult.data, file.name, encodingResult.content)
+          await savePropertiesToDatabase(developer.id, smartParseResult.data, file.name)
           savedToDatabase = true
           console.log(`✅ UPLOAD API: Saved ${smartParseResult.data.length} properties to database`)
         }
@@ -173,19 +183,17 @@ export async function POST(request: NextRequest) {
 
         // Save properties to database
         if (smartParseResult.data && smartParseResult.data.length > 0) {
-          // Convert buffer to base64 string for storage (Excel files need special handling)
-          const fileContentForStorage = buffer.toString('base64')
-          await savePropertiesToDatabase(developer.id, smartParseResult.data, file.name, fileContentForStorage)
+          await savePropertiesToDatabase(developer.id, smartParseResult.data, file.name)
           savedToDatabase = true
           console.log(`✅ UPLOAD API: Saved ${smartParseResult.data.length} properties to database`)
         }
       }
-    } catch (parseError) {
+    } catch (parseError: unknown) {
       console.error('❌ UPLOAD API: Parse error:', parseError)
       return NextResponse.json(
         {
           error: 'Failed to parse file',
-          details: parseError instanceof Error ? parseError.message : 'Unknown error'
+          details: getErrorMessage(parseError)
         },
         { status: 400 }
       )
@@ -231,7 +239,7 @@ export async function POST(request: NextRequest) {
 
     return response
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('💥 UPLOAD API: Unexpected error:', error)
     return NextResponse.json(
       { error: 'Upload failed - internal server error' },
@@ -255,7 +263,7 @@ function generateSlug(name: string): string {
     .substring(0, 255) // Limit to schema max length
 }
 
-async function savePropertiesToDatabase(developerId: string, properties: any[], fileName: string, fileContent: string) {
+async function savePropertiesToDatabase(developerId: string, properties: any[], fileName: string) {
   try {
     // CRITICAL FIX: Extract meaningful project name from filename
     const projectName = SmartCSVParser.extractProjectName(fileName)
@@ -264,12 +272,14 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
     console.log(`🔍 DATABASE: Looking for existing project: "${projectName}" (slug: ${projectSlug})`)
 
     // First, get or create a project for this upload
-    let { data: project, error: projectLookupError } = await createAdminClient()
+    const { data: projectData, error: projectLookupError } = await createAdminClient()
       .from('projects')
       .select('id')
       .eq('developer_id', developerId)
       .eq('slug', projectSlug)
       .maybeSingle()
+
+    let project = projectData
 
     if (projectLookupError) {
       console.error('❌ DATABASE: Error looking up project:', projectLookupError.message)
@@ -324,18 +334,6 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
     // Prepare properties for database insert
     // Map parsed properties to database schema
     const propertiesToInsert = properties.map(property => {
-      // Parse numeric values safely
-      const parseDecimal = (value: any): number | null => {
-        if (!value || value === 'X' || value === 'x') return null
-        const parsed = parseFloat(String(value).replace(/[^\d.-]/g, ''))
-        return isNaN(parsed) ? null : parsed
-      }
-
-      const parseDate = (value: any): string | null => {
-        if (!value || value === 'X' || value === 'x') return null
-        return String(value)
-      }
-
       return {
         project_id: project.id,
         developer_id: developerId,
@@ -386,8 +384,8 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
         prospectus_url: property.prospectus_url || null,
 
         // Dodatkowe
-        rooms: property.rooms ? parseInt(property.rooms) : null,
-        floor: property.floor ? parseInt(property.floor) : null,
+        rooms: property.rooms ? parseInt(String(property.rooms)) : null,
+        floor: property.floor ? parseInt(String(property.floor)) : null,
         status: property.status === 'X' || property.status === 'x' ? 'sold' : 'available'
       }
     })
@@ -458,7 +456,7 @@ function detectEncodingAndDecode(arrayBuffer: ArrayBuffer): EncodingDetectionRes
         hasPolishChars
       }
     }
-  } catch (error) {
+  } catch {
     console.log('📝 ENCODING: UTF-8 validation failed, trying Windows-1250...')
   }
 
@@ -490,7 +488,7 @@ function detectEncodingAndDecode(arrayBuffer: ArrayBuffer): EncodingDetectionRes
         confidence,
         hasPolishChars
       }
-    } catch (error) {
+    } catch {
       console.log('📝 ENCODING: Windows-1250 failed, trying ISO-8859-2...')
     }
   }
@@ -509,7 +507,7 @@ function detectEncodingAndDecode(arrayBuffer: ArrayBuffer): EncodingDetectionRes
       confidence,
       hasPolishChars
     }
-  } catch (error) {
+  } catch {
     console.log('⚠️ ENCODING: ISO-8859-2 failed')
   }
 
@@ -527,7 +525,7 @@ function detectEncodingAndDecode(arrayBuffer: ArrayBuffer): EncodingDetectionRes
         confidence: hasPolishChars ? 'medium' : 'low',
         hasPolishChars
       }
-    } catch (error) {
+    } catch {
       console.log('⚠️ ENCODING: Windows-1250 fallback failed')
     }
   }

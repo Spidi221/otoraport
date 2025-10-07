@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
   // Handle email confirmation callback
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({
-      type: type as any,
+      type: type as 'signup' | 'email' | 'recovery' | 'invite' | 'magiclink' | 'email_change',
       token_hash,
     })
 

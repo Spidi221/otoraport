@@ -3,11 +3,12 @@
  * Creates a Stripe Checkout session for Basic Plan subscription (149 zł/month)
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
+import { getErrorMessage } from '@/lib/api-schemas'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // 1. Authenticate user
     const supabase = await createClient()
@@ -127,10 +128,10 @@ export async function POST(request: NextRequest) {
       url: session.url,
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('💥 STRIPE CHECKOUT ERROR:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to create checkout session' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }

@@ -30,6 +30,10 @@ export function SubscriptionCard() {
   async function fetchSubscriptionStatus() {
     try {
       const supabase = createClient()
+      if (!supabase) {
+        setLoading(false)
+        return
+      }
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -86,9 +90,10 @@ export function SubscriptionCard() {
       } else {
         throw new Error('Brak URL do przekierowania')
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Checkout error:', error)
-      toast.error(error.message || 'Nie udało się rozpocząć procesu płatności')
+      const errorMessage = error instanceof Error ? error.message : 'Nie udało się rozpocząć procesu płatności'
+      toast.error(errorMessage)
       setProcessingCheckout(false)
     }
   }
@@ -116,9 +121,10 @@ export function SubscriptionCard() {
       } else {
         throw new Error('Brak URL do przekierowania')
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Portal error:', error)
-      toast.error(error.message || 'Nie udało się otworzyć portalu płatności')
+      const errorMessage = error instanceof Error ? error.message : 'Nie udało się otworzyć portalu płatności'
+      toast.error(errorMessage)
       setProcessingPortal(false)
     }
   }

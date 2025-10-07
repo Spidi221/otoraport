@@ -4,7 +4,7 @@ import { applySecurityHeaders } from '@/lib/security'
 /**
  * Standardized API response types
  */
-export interface ApiSuccessResponse<T = any> {
+export interface ApiSuccessResponse<T = unknown> {
   success: true
   data: T
   message?: string
@@ -12,7 +12,7 @@ export interface ApiSuccessResponse<T = any> {
     page?: number
     limit?: number
     total?: number
-    [key: string]: any
+    [key: string]: unknown
   }
 }
 
@@ -24,7 +24,7 @@ export interface ApiErrorResponse {
   timestamp?: string
 }
 
-export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse
+export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse
 
 /**
  * Standard HTTP status codes for API responses
@@ -193,7 +193,7 @@ export const SuccessResponses = {
 /**
  * Async error handler wrapper for API routes
  */
-export function withErrorHandler<T extends any[], R>(
+export function withErrorHandler<T extends unknown[], R>(
   handler: (...args: T) => Promise<R>
 ) {
   return async (...args: T): Promise<R | NextResponse> => {
@@ -231,7 +231,7 @@ export function withErrorHandler<T extends any[], R>(
  * Validate required fields in request body
  */
 export function validateRequiredFields(
-  body: any,
+  body: Record<string, unknown>,
   requiredFields: string[]
 ): string[] {
   const missingFields: string[] = []
@@ -248,11 +248,11 @@ export function validateRequiredFields(
 /**
  * Parse and validate JSON request body
  */
-export async function parseRequestBody(request: Request): Promise<any> {
+export async function parseRequestBody(request: Request): Promise<unknown> {
   try {
     const body = await request.json()
     return body
-  } catch (error) {
+  } catch {
     throw new Error('Nieprawidłowy format JSON')
   }
 }
@@ -260,7 +260,7 @@ export async function parseRequestBody(request: Request): Promise<any> {
 /**
  * Response time tracker middleware
  */
-export function withResponseTimeTracking<T extends any[], R>(
+export function withResponseTimeTracking<T extends unknown[], R>(
   handler: (...args: T) => Promise<R>,
   endpoint?: string
 ) {

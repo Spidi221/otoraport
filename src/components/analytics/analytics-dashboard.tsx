@@ -9,14 +9,10 @@ import {
   TrendingUp,
   TrendingDown,
   BarChart3,
-  PieChart,
   Target,
   Download,
-  Eye,
   Calendar,
-  MapPin,
-  Users,
-  Award
+  MapPin
 } from 'lucide-react'
 import { PriceAnalytics, MarketTrend, PropertyTypeBreakdown, ProjectPerformance, CompetitorAnalysis } from '@/lib/analytics'
 import { toast } from 'sonner'
@@ -25,7 +21,7 @@ interface AnalyticsDashboardProps {
   developerId: string
 }
 
-export default function AnalyticsDashboard({ developerId }: AnalyticsDashboardProps) {
+export default function AnalyticsDashboard({ }: AnalyticsDashboardProps) {
   const [timeframe, setTimeframe] = useState<'30d' | '90d' | '12m'>('30d')
   const [loading, setLoading] = useState(true)
   const [priceAnalytics, setPriceAnalytics] = useState<PriceAnalytics | null>(null)
@@ -36,6 +32,7 @@ export default function AnalyticsDashboard({ developerId }: AnalyticsDashboardPr
 
   useEffect(() => {
     loadAnalytics()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeframe])
 
   const loadAnalytics = async () => {
@@ -249,7 +246,7 @@ export default function AnalyticsDashboard({ developerId }: AnalyticsDashboardPr
                 <div className="space-y-4">
                   {/* Simple trend visualization */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {marketTrends.slice(-3).map((trend, index) => (
+                    {marketTrends.slice(-3).map((trend) => (
                       <div key={trend.date} className="bg-gray-50 p-4 rounded-lg">
                         <div className="text-sm font-medium text-gray-600 mb-2">{trend.date}</div>
                         <div className="text-xl font-bold">{formatPrice(trend.averagePrice)}</div>

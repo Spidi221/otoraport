@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { findRelevantKnowledge, getFallbackResponse, getGreeting } from '@/lib/chatbot-knowledge';
+import { getGreeting } from '@/lib/chatbot-knowledge';
 import { performSecurityCheck, getSecurityMessage } from '@/lib/chatbot-security';
 import { getAIChatResponse, checkOpenAIHealth } from '@/lib/openai-integration';
 import { generalAPIRateLimit } from '@/lib/security';
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userMessage = body.message.trim();
-    const sessionId = body.sessionId || req.headers.get('x-session-id') || req.ip || 'anonymous';
+    const sessionId = body.sessionId || req.headers.get('x-session-id') || req.headers.get('x-forwarded-for') || 'anonymous';
     
     // Perform security check
     const securityCheck = performSecurityCheck(userMessage, sessionId);

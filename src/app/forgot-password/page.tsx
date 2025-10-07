@@ -26,8 +26,13 @@ export default function ForgotPasswordPage() {
     setError('')
 
     try {
-      const { createBrowserClient } = await import('@/lib/supabase/client')
-      const supabase = createBrowserClient()
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
+      if (!supabase) {
+        setError('Błąd konfiguracji - brak połączenia z bazą danych')
+        return
+      }
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
@@ -41,7 +46,7 @@ export default function ForgotPasswordPage() {
 
       setSuccess(true)
       setIsLoading(false)
-    } catch (err) {
+    } catch {
       setError('Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')
       setIsLoading(false)
     }

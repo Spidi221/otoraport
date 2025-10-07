@@ -432,7 +432,7 @@ export const envValidationSchema = z.object({
 /**
  * Enhanced input sanitization with multiple layers
  */
-export function sanitizeInputAdvanced(input: any): string {
+export function sanitizeInputAdvanced(input: unknown): string {
   if (typeof input !== 'string') {
     return String(input).substring(0, 1000);
   }
@@ -530,7 +530,7 @@ export function logSecurityEvent(event: {
   ip: string;
   userAgent?: string;
   endpoint?: string;
-  details?: any;
+  details?: unknown;
 }): void {
   const timestamp = new Date().toISOString();
   const logEntry = {

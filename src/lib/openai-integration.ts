@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { findRelevantKnowledge, KnowledgeItem } from './chatbot-knowledge';
+import { findRelevantKnowledge } from './chatbot-knowledge';
 
 /**
  * Topic validation - check if question is OTORAPORT related

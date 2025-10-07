@@ -1,0 +1,3 @@
+Starting CodeRabbit review in plain text mode...
+
+[2025-10-06T13:39:15.434Z] ❌ REVIEW ERROR: Review failed: No files found for review

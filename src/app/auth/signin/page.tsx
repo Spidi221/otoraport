@@ -28,6 +28,11 @@ export default function SignInPage() {
       return
     }
 
+    if (!supabase) {
+      setError('Błąd konfiguracji - brak połączenia z bazą danych')
+      return
+    }
+
     setIsLoading(true)
     setError('')
 
@@ -45,7 +50,7 @@ export default function SignInPage() {
       // Success - router.push will trigger middleware which creates profile
       router.push('/dashboard')
       router.refresh()
-    } catch (err) {
+    } catch {
       setError('Wystąpił błąd podczas logowania')
     } finally {
       setIsLoading(false)
@@ -53,6 +58,11 @@ export default function SignInPage() {
   }
 
   const handleGoogleSignIn = async () => {
+    if (!supabase) {
+      setError('Błąd konfiguracji - brak połączenia z bazą danych')
+      return
+    }
+
     setIsLoading(true)
     setError('')
 
@@ -68,7 +78,7 @@ export default function SignInPage() {
         setError('Wystąpił błąd podczas logowania przez Google')
         setIsLoading(false)
       }
-    } catch (err) {
+    } catch {
       setError('Wystąpił błąd podczas logowania przez Google')
       setIsLoading(false)
     }

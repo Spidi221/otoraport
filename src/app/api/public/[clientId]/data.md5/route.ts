@@ -55,7 +55,7 @@ export async function GET(
     // Generate the SAME Harvester XML as data.xml endpoint
     const xmlContent = generateHarvesterXML({
       developer: {
-        name: developer.company_name || developer.name,
+        name: developer.company_name || '',
         client_id: developer.client_id
       },
       csvUrl,

@@ -6,7 +6,7 @@
 export interface ValidationResult {
   isValid: boolean
   errors: string[]
-  sanitized?: any
+  sanitized?: Record<string, unknown>
 }
 
 // Security patterns to detect and block
@@ -262,9 +262,9 @@ export function validatePlan(plan: string): ValidationResult {
   return { isValid: true, errors: [], sanitized: plan.toLowerCase() }
 }
 
-export function validateRegistrationData(data: any): ValidationResult {
+export function validateRegistrationData(data: Record<string, unknown>): ValidationResult {
   const errors: string[] = []
-  const sanitized: any = {}
+  const sanitized: Record<string, unknown> = {}
   
   // Validate email
   const emailResult = validateEmail(data.email)

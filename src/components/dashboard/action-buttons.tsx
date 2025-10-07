@@ -71,6 +71,10 @@ export function ActionButtons() {
     async function loadClientId() {
       try {
         const supabase = createClient();
+        if (!supabase) {
+          setIsLoading(false);
+          return;
+        }
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {

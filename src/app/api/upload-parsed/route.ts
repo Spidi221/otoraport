@@ -6,8 +6,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { SmartCSVParser } from '@/lib/smart-csv-parser'
 import { rateLimitWithAuth, uploadRateLimit, uploadRateLimitAuthenticated } from '@/lib/redis-rate-limit'
+import { UploadParsedRequestSchema, parseDecimal, parseDate } from '@/lib/api-schemas'
 
 export async function POST(request: NextRequest) {
   console.log('🚀 UPLOAD PARSED API: Receiving pre-parsed data from Web Worker...')
@@ -34,16 +34,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Parse request body
+    // Parse and validate request body with Zod
     const body = await request.json()
-    const { properties, validRecords } = body
+    const validationResult = UploadParsedRequestSchema.safeParse(body)
 
-    if (!properties || !Array.isArray(properties)) {
+    if (!validationResult.success) {
+      console.error('❌ UPLOAD PARSED API: Validation failed:', validationResult.error)
       return NextResponse.json(
-        { error: 'Invalid request: properties array required' },
+        { error: 'Invalid request format', details: validationResult.error.message },
         { status: 400 }
       )
     }
+
+    const { properties, validRecords } = validationResult.data
 
     console.log(`✅ UPLOAD PARSED API: Received ${properties.length} pre-parsed properties`)
 
@@ -82,12 +85,14 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 DATABASE: Looking for project: "${projectName}" (slug: ${projectSlug})`)
 
     // Get or create project
-    let { data: project, error: projectLookupError } = await createAdminClient()
+    const { data: projectData, error: projectLookupError } = await createAdminClient()
       .from('projects')
       .select('id')
       .eq('developer_id', developer.id)
       .eq('slug', projectSlug)
       .maybeSingle()
+
+    let project = projectData
 
     if (projectLookupError) {
       console.error('❌ DATABASE: Error looking up project:', projectLookupError.message)
@@ -139,17 +144,6 @@ export async function POST(request: NextRequest) {
 
     // Prepare properties for database insert (map Web Worker parsed data to DB schema)
     const propertiesToInsert = properties.map(property => {
-      const parseDecimal = (value: any): number | null => {
-        if (!value || value === 'X' || value === 'x') return null
-        const parsed = parseFloat(String(value).replace(/[^\d.-]/g, ''))
-        return isNaN(parsed) ? null : parsed
-      }
-
-      const parseDate = (value: any): string | null => {
-        if (!value || value === 'X' || value === 'x') return null
-        return String(value)
-      }
-
       return {
         project_id: project.id,
         developer_id: developer.id,
@@ -196,8 +190,8 @@ export async function POST(request: NextRequest) {
         other_services_price: parseDecimal(property.other_services_price),
         prospectus_url: property.prospectus_url || null,
 
-        rooms: property.rooms ? parseInt(property.rooms) : null,
-        floor: property.floor ? parseInt(property.floor) : null,
+        rooms: property.rooms ? parseInt(String(property.rooms)) : null,
+        floor: property.floor ? parseInt(String(property.floor)) : null,
         status: property.status === 'X' || property.status === 'x' ? 'sold' : 'available'
       }
     })
@@ -237,7 +231,7 @@ export async function POST(request: NextRequest) {
 
     return response
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('💥 UPLOAD PARSED API: Unexpected error:', error)
     return NextResponse.json(
       { error: 'Upload failed - internal server error' },

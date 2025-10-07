@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, ArrowLeft, ArrowRight, CheckCircle, Target } from 'lucide-react';
 import { GuidedTour as TourType, TourStep } from '@/lib/help-system';
 
@@ -29,31 +29,44 @@ export function GuidedTour({ tour, isActive, onComplete, onSkip, userId }: Guide
 
   const overlayRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const handleRequiredActionRef = useRef<(() => void) | null>(null);
+  // Store the exact handler instance attached to prevent memory leaks (Task 19)
+  const attachedActionHandlerRef = useRef<(() => void) | null>(null);
 
   const currentStep = tour.steps[tourState.currentStep];
   const isLastStep = tourState.currentStep === tour.steps.length - 1;
   const isFirstStep = tourState.currentStep === 0;
 
-  useEffect(() => {
-    if (isActive) {
-      setTourState(prev => ({ ...prev, isVisible: true }));
-      startStep(0);
-    } else {
-      setTourState(prev => ({ ...prev, isVisible: false }));
-      cleanupHighlight();
+  const cleanupHighlight = useCallback(() => {
+    if (tourState.highlightedElement) {
+      tourState.highlightedElement.classList.remove('tour-highlight');
+      tourState.highlightedElement.style.position = '';
+      tourState.highlightedElement.style.zIndex = '';
+      tourState.highlightedElement.style.boxShadow = '';
+      tourState.highlightedElement.style.borderRadius = '';
+      // Use the exact handler that was attached (Task 19 - memory leak fix)
+      if (attachedActionHandlerRef.current) {
+        tourState.highlightedElement.removeEventListener('click', attachedActionHandlerRef.current);
+        attachedActionHandlerRef.current = null; // Prevent stale references
+      }
     }
 
-    return () => cleanupHighlight();
-  }, [isActive]);
+    // Remove any existing highlights
+    document.querySelectorAll('.tour-highlight').forEach(el => {
+      (el as HTMLElement).classList.remove('tour-highlight');
+      (el as HTMLElement).style.position = '';
+      (el as HTMLElement).style.zIndex = '';
+      (el as HTMLElement).style.boxShadow = '';
+      (el as HTMLElement).style.borderRadius = '';
+    });
+  }, [tourState.highlightedElement]);
 
-  useEffect(() => {
-    if (tourState.isVisible && currentStep) {
-      highlightElement(currentStep);
-      positionTooltip(currentStep);
-    }
-  }, [tourState.currentStep, tourState.isVisible]);
+  const trackTourEvent = useCallback((event: string, stepIndex: number) => {
+    // In production, send to analytics
+    console.log(`Tour ${tour.id} - ${event} - Step ${stepIndex} - User ${userId}`);
+  }, [tour.id, userId]);
 
-  const startStep = (stepIndex: number) => {
+  const startStep = useCallback((stepIndex: number) => {
     const step = tour.steps[stepIndex];
     if (!step) return;
 
@@ -64,9 +77,51 @@ export function GuidedTour({ tour, isActive, onComplete, onSkip, userId }: Guide
 
     // Track step start
     trackTourEvent('step_started', stepIndex);
-  };
+  }, [tour.steps, trackTourEvent]);
 
-  const highlightElement = (step: TourStep) => {
+  // Hoisted to fix TDZ error - must be defined before completeCurrentStep
+  const completeTour = useCallback(() => {
+    trackTourEvent('tour_completed', tour.steps.length);
+    cleanupHighlight();
+    onComplete();
+  }, [trackTourEvent, tour.steps.length, cleanupHighlight, onComplete]);
+
+  const nextStep = useCallback(() => {
+    if (!isLastStep) {
+      startStep(tourState.currentStep + 1);
+    }
+  }, [isLastStep, startStep, tourState.currentStep]);
+
+  const completeCurrentStep = useCallback(() => {
+    const stepIndex = tourState.currentStep;
+
+    setTourState(prev => ({
+      ...prev,
+      completedSteps: [...prev.completedSteps, stepIndex]
+    }));
+
+    trackTourEvent('step_completed', stepIndex);
+
+    // Auto-advance to next step after action
+    setTimeout(() => {
+      if (isLastStep) {
+        completeTour();
+      } else {
+        nextStep();
+      }
+    }, 500);
+  }, [tourState.currentStep, trackTourEvent, isLastStep, completeTour, nextStep]);
+
+  const handleRequiredAction = useCallback(() => {
+    if (currentStep?.action_required) {
+      completeCurrentStep();
+    }
+  }, [currentStep, completeCurrentStep]);
+
+  // Keep ref updated
+  handleRequiredActionRef.current = handleRequiredAction;
+
+  const highlightElement = useCallback((step: TourStep) => {
     cleanupHighlight();
 
     const element = document.querySelector(step.target_element) as HTMLElement;
@@ -94,33 +149,14 @@ export function GuidedTour({ tour, isActive, onComplete, onSkip, userId }: Guide
       inline: 'center'
     });
 
-    // Add click listener if action required
-    if (step.action_required && step.action_type === 'click') {
-      element.addEventListener('click', handleRequiredAction);
+    // Add click listener if action required (Task 19 - store handler to fix memory leak)
+    if (step.action_required && step.action_type === 'click' && handleRequiredActionRef.current) {
+      attachedActionHandlerRef.current = handleRequiredActionRef.current;
+      element.addEventListener('click', attachedActionHandlerRef.current);
     }
-  };
+  }, [cleanupHighlight]);
 
-  const cleanupHighlight = () => {
-    if (tourState.highlightedElement) {
-      tourState.highlightedElement.classList.remove('tour-highlight');
-      tourState.highlightedElement.style.position = '';
-      tourState.highlightedElement.style.zIndex = '';
-      tourState.highlightedElement.style.boxShadow = '';
-      tourState.highlightedElement.style.borderRadius = '';
-      tourState.highlightedElement.removeEventListener('click', handleRequiredAction);
-    }
-
-    // Remove any existing highlights
-    document.querySelectorAll('.tour-highlight').forEach(el => {
-      (el as HTMLElement).classList.remove('tour-highlight');
-      (el as HTMLElement).style.position = '';
-      (el as HTMLElement).style.zIndex = '';
-      (el as HTMLElement).style.boxShadow = '';
-      (el as HTMLElement).style.borderRadius = '';
-    });
-  };
-
-  const positionTooltip = (step: TourStep) => {
+  const positionTooltip = useCallback((step: TourStep) => {
     if (!tooltipRef.current) return;
 
     const element = document.querySelector(step.target_element) as HTMLElement;
@@ -163,62 +199,38 @@ export function GuidedTour({ tour, isActive, onComplete, onSkip, userId }: Guide
 
     tooltipRef.current.style.top = `${top}px`;
     tooltipRef.current.style.left = `${left}px`;
-  };
+  }, []);
 
-  const handleRequiredAction = () => {
-    if (currentStep?.action_required) {
-      completeCurrentStep();
-    }
-  };
-
-  const completeCurrentStep = () => {
-    const stepIndex = tourState.currentStep;
-
-    setTourState(prev => ({
-      ...prev,
-      completedSteps: [...prev.completedSteps, stepIndex]
-    }));
-
-    trackTourEvent('step_completed', stepIndex);
-
-    // Auto-advance to next step after action
-    setTimeout(() => {
-      if (isLastStep) {
-        completeTour();
-      } else {
-        nextStep();
-      }
-    }, 500);
-  };
-
-  const nextStep = () => {
-    if (!isLastStep) {
-      startStep(tourState.currentStep + 1);
-    }
-  };
-
-  const prevStep = () => {
+  const prevStep = useCallback(() => {
     if (!isFirstStep) {
       startStep(tourState.currentStep - 1);
     }
-  };
+  }, [isFirstStep, startStep, tourState.currentStep]);
 
-  const skipTour = () => {
+  const skipTour = useCallback(() => {
     trackTourEvent('tour_skipped', tourState.currentStep);
     cleanupHighlight();
     onSkip();
-  };
+  }, [trackTourEvent, tourState.currentStep, cleanupHighlight, onSkip]);
 
-  const completeTour = () => {
-    trackTourEvent('tour_completed', tour.steps.length);
-    cleanupHighlight();
-    onComplete();
-  };
+  useEffect(() => {
+    if (isActive) {
+      setTourState(prev => ({ ...prev, isVisible: true }));
+      startStep(0);
+    } else {
+      setTourState(prev => ({ ...prev, isVisible: false }));
+      cleanupHighlight();
+    }
 
-  const trackTourEvent = (event: string, stepIndex: number) => {
-    // In production, send to analytics
-    console.log(`Tour ${tour.id} - ${event} - Step ${stepIndex} - User ${userId}`);
-  };
+    return () => cleanupHighlight();
+  }, [isActive, startStep, cleanupHighlight]);
+
+  useEffect(() => {
+    if (tourState.isVisible && currentStep) {
+      highlightElement(currentStep);
+      positionTooltip(currentStep);
+    }
+  }, [tourState.currentStep, tourState.isVisible, currentStep, highlightElement, positionTooltip]);
 
   if (!tourState.isVisible || !currentStep) {
     return null;
@@ -350,15 +362,15 @@ export function GuidedTour({ tour, isActive, onComplete, onSkip, userId }: Guide
           className="fixed z-[10000] w-0 h-0 pointer-events-none"
           style={{
             top: currentStep.position === 'top' ?
-              `${tooltipRef.current?.getBoundingClientRect().bottom}px` :
+              `${tooltipRef.current?.getBoundingClientRect().bottom ?? 0}px` :
               currentStep.position === 'bottom' ?
-              `${tooltipRef.current?.getBoundingClientRect().top! - 8}px` :
-              `${tooltipRef.current?.getBoundingClientRect().top! + tooltipRef.current?.getBoundingClientRect().height! / 2 - 4}px`,
+              `${(tooltipRef.current?.getBoundingClientRect().top ?? 0) - 8}px` :
+              `${(tooltipRef.current?.getBoundingClientRect().top ?? 0) + (tooltipRef.current?.getBoundingClientRect().height ?? 0) / 2 - 4}px`,
             left: currentStep.position === 'left' ?
-              `${tooltipRef.current?.getBoundingClientRect().right}px` :
+              `${tooltipRef.current?.getBoundingClientRect().right ?? 0}px` :
               currentStep.position === 'right' ?
-              `${tooltipRef.current?.getBoundingClientRect().left! - 8}px` :
-              `${tooltipRef.current?.getBoundingClientRect().left! + tooltipRef.current?.getBoundingClientRect().width! / 2 - 4}px`,
+              `${(tooltipRef.current?.getBoundingClientRect().left ?? 0) - 8}px` :
+              `${(tooltipRef.current?.getBoundingClientRect().left ?? 0) + (tooltipRef.current?.getBoundingClientRect().width ?? 0) / 2 - 4}px`,
             borderLeft: currentStep.position === 'right' ? '8px solid white' : '8px solid transparent',
             borderRight: currentStep.position === 'left' ? '8px solid white' : '8px solid transparent',
             borderTop: currentStep.position === 'bottom' ? '8px solid white' : '8px solid transparent',

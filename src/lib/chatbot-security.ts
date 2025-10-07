@@ -106,10 +106,17 @@ function getSessionData(sessionId: string) {
   return sessionData.get(sessionId)!;
 }
 
+interface SessionData {
+  lastMessage: string;
+  lastMessageTime: number;
+  suspiciousMessages: string[];
+  events: SecurityEvent[];
+}
+
 /**
  * Calculate suspicion score based on message content and patterns
  */
-function calculateSuspicionScore(message: string, sessionData: any): number {
+function calculateSuspicionScore(message: string, sessionData: SessionData): number {
   let score = 0;
   const content = message.toLowerCase().trim();
   
@@ -176,12 +183,12 @@ function calculateSuspicionScore(message: string, sessionData: any): number {
 /**
  * Check rate limiting
  */
-function checkRateLimit(sessionData: any): { exceeded: boolean; waitTime?: number } {
+function checkRateLimit(sessionData: SessionData): { exceeded: boolean; waitTime?: number } {
   const now = Date.now();
   const oneMinuteAgo = now - SECURITY_CONFIG.RATE_LIMIT_WINDOW;
-  
+
   // Count messages in the last minute
-  const recentMessages = sessionData.events.filter((e: SecurityEvent) => 
+  const recentMessages = sessionData.events.filter((e: SecurityEvent) =>
     e.timestamp > oneMinuteAgo
   ).length;
   
@@ -304,7 +311,7 @@ export function getSecurityStats() {
   let totalMessages = 0;
   let blockedSessions = 0;
   let suspiciousMessages = 0;
-  let totalSessions = sessionData.size;
+  const totalSessions = sessionData.size;
   
   sessionData.forEach(session => {
     totalMessages += session.messageCount;

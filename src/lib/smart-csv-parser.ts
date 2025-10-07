@@ -671,7 +671,7 @@ export interface ParsedProperty {
   data_pierwszej_oferty?: string
 
   // Always include raw_data for fallback
-  raw_data: { [key: string]: any }
+  raw_data: Record<string, unknown>
 }
 
 export interface DeveloperInfo {
@@ -1070,7 +1070,7 @@ export class SmartCSVParser {
    * Detect property status for INPRO format
    * INPRO convention: "X" in price field means sold
    */
-  private detectINPROStatus(row: any, rawData: { [key: string]: any }): 'available' | 'sold' | 'reserved' | undefined {
+  private detectINPROStatus(row: unknown, rawData: Record<string, unknown>): 'available' | 'sold' | 'reserved' | undefined {
     // Check explicit status field first
     const statusField = rawData['Status'] || rawData['status'] || rawData['Status dostępności']
     if (statusField) {
@@ -1228,13 +1228,13 @@ export class SmartCSVParser {
                 // Parse numbers, handle Polish number format
                 const numValue = this.parseNumber(value)
                 if (numValue !== null) {
-                  ;(property as any)[fieldName] = numValue
+                  (property as Record<string, unknown>)[fieldName] = numValue
                 }
                 break
 
               default:
                 // String fields
-                ;(property as any)[fieldName] = value
+                (property as Record<string, unknown>)[fieldName] = value
             }
           }
         }
@@ -1321,7 +1321,7 @@ export class SmartCSVParser {
 
           if (value && ['developer_name', 'company_name', 'nip', 'phone', 'email', 'investment_name', 'investment_address', 'investment_city'].includes(fieldName)) {
             if (!(fieldName in developerInfo) || !developerInfo[fieldName as keyof DeveloperInfo]) {
-              ;(developerInfo as any)[fieldName] = value
+              (developerInfo as Record<string, string>)[fieldName] = value
             }
           }
         }

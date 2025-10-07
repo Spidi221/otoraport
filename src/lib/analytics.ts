@@ -1,6 +1,6 @@
 // Advanced analytics service for OTORAPORT
 import { createAdminClient } from './supabase/server'
-import { subDays, format, startOfMonth, endOfMonth } from 'date-fns'
+import { subDays, format } from 'date-fns'
 import { pl } from 'date-fns/locale'
 
 export interface PriceAnalytics {
@@ -210,7 +210,7 @@ export class AnalyticsService {
       }
     })
 
-    const totalCount = properties.length
+    const _totalCount = properties.length
 
     return Array.from(typeMap.entries()).map(([propertyType, data]) => ({
       propertyType,
@@ -219,7 +219,7 @@ export class AnalyticsService {
         ? data.prices.reduce((sum, price) => sum + price, 0) / data.prices.length 
         : 0,
       medianPrice: data.prices.length > 0 ? this.calculateMedian(data.prices) : 0,
-      percentage: (data.count / totalCount) * 100
+      percentage: (data.count / _totalCount) * 100
     }))
   }
 
@@ -240,11 +240,15 @@ export class AnalyticsService {
     }
 
     return projects.map(project => {
-      const properties = (project as any).properties || []
-      const soldProperties = properties.filter((p: any) => p.status === 'sold')
+      interface ProjectWithProperties {
+        properties?: Array<{ status?: string; price_per_m2?: number }>;
+      }
+      const projectData = project as ProjectWithProperties
+      const properties = projectData.properties || []
+      const soldProperties = properties.filter(p => p.status === 'sold')
       const prices = properties
-        .map((p: any) => p.price_per_m2)
-        .filter(Boolean)
+        .map(p => p.price_per_m2)
+        .filter((price): price is number => typeof price === 'number')
 
       const averagePrice = prices.length > 0 
         ? prices.reduce((sum: number, price: number) => sum + price, 0) / prices.length 
@@ -253,7 +257,7 @@ export class AnalyticsService {
       const medianPrice = prices.length > 0 ? this.calculateMedian(prices) : 0
 
       // Mock sales velocity calculation (properties sold per month)
-      const salesVelocity = soldProperties.length * 2.5 // Simplified
+      const _salesVelocity = soldProperties.length * 2.5 // Simplified
 
       return {
         projectId: project.id,
@@ -262,7 +266,7 @@ export class AnalyticsService {
         soldProperties: soldProperties.length,
         averagePrice,
         medianPrice,
-        salesVelocity,
+        salesVelocity: _salesVelocity,
         priceAppreciation: Math.random() * 10 - 5 // Mock data
       }
     })
@@ -375,10 +379,10 @@ export class AnalyticsService {
     }
 
     // Competitive positioning
-    const userCompetitor = competitors.find(c => c.developerId !== 'comp-1' && c.developerId !== 'comp-2' && c.developerId !== 'comp-3')
-    if (userCompetitor) {
-      const position = competitors.findIndex(c => c.developerId === userCompetitor.developerId) + 1
-      insights.push(`🏆 Pozycja ${position} na ${competitors.length} deweloperów w regionie z ${userCompetitor.marketShare.toFixed(1)}% udziału w rynku`)
+    const _userCompetitor = competitors.find(c => c.developerId !== 'comp-1' && c.developerId !== 'comp-2' && c.developerId !== 'comp-3')
+    if (_userCompetitor) {
+      const position = competitors.findIndex(c => c.developerId === _userCompetitor.developerId) + 1
+      insights.push(`🏆 Pozycja ${position} na ${competitors.length} deweloperów w regionie z ${_userCompetitor.marketShare.toFixed(1)}% udziału w rynku`)
     }
 
     return insights

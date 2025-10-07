@@ -212,7 +212,7 @@ function AuthenticatedHeader() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <div className="flex flex-col space-y-1 p-2">
                 <p className="text-sm leading-none">
-                  {developer?.company_name || developer?.name || 'Ładowanie...'}
+                  {developer?.company_name || 'Ładowanie...'}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email || developer?.email || 'Ładowanie...'}
@@ -285,7 +285,7 @@ function AuthenticatedHeader() {
                 </Avatar>
                 <div className="flex flex-col">
                   <p className="text-sm font-medium">
-                    {developer?.company_name || developer?.name || 'Użytkownik'}
+                    {developer?.company_name || 'Użytkownik'}
                   </p>
                   <p className="text-xs text-gray-500">
                     {user?.email || developer?.email || ''}

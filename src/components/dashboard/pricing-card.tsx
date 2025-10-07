@@ -78,12 +78,14 @@ const plans: PricingPlan[] = [
 export function PricingCard() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly')
   const [processing, setProcessing] = useState<string | null>(null)
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<any>(null)
   const router = useRouter()
 
   useEffect(() => {
     async function getUser() {
-      const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
+      const supabase = createClient();
+      if (!supabase) return;
+      const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
     }
     getUser()

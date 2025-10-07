@@ -57,7 +57,7 @@ export async function GET(
     // Generate Harvester XML (metadata pointing to CSV)
     const xmlContent = generateHarvesterXML({
       developer: {
-        name: developer.company_name || developer.name,
+        name: developer.company_name || '',
         client_id: developer.client_id
       },
       csvUrl,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, HelpCircle, MessageCircle, BookOpen, Video, ExternalLink, ChevronRight } from 'lucide-react';
 import { InAppHelpSystem, HelpContext, HelpResource, ChatbotResponse, GuidedTour } from '@/lib/help-system';
 
@@ -20,14 +20,7 @@ export function HelpOverlay({ isOpen, onClose, context, userId }: HelpOverlayPro
   const [availableTour, setAvailableTour] = useState<GuidedTour | null>(null);
   const [isLoadingResources, setIsLoadingResources] = useState(true);
 
-  useEffect(() => {
-    if (isOpen) {
-      loadContextualHelp();
-      checkAvailableTour();
-    }
-  }, [isOpen, context]);
-
-  const loadContextualHelp = async () => {
+  const loadContextualHelp = useCallback(async () => {
     setIsLoadingResources(true);
     try {
       const resources = await InAppHelpSystem.getContextualHelp(context);
@@ -37,16 +30,23 @@ export function HelpOverlay({ isOpen, onClose, context, userId }: HelpOverlayPro
     } finally {
       setIsLoadingResources(false);
     }
-  };
+  }, [context]);
 
-  const checkAvailableTour = async () => {
+  const checkAvailableTour = useCallback(async () => {
     try {
       const tour = await InAppHelpSystem.getGuidedTour(context);
       setAvailableTour(tour);
     } catch (error) {
       console.error('Error checking available tour:', error);
     }
-  };
+  }, [context]);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadContextualHelp();
+      checkAvailableTour();
+    }
+  }, [isOpen, loadContextualHelp, checkAvailableTour]);
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,17 +93,32 @@ export function HelpOverlay({ isOpen, onClose, context, userId }: HelpOverlayPro
     }
   };
 
-  const handleSuggestedActionClick = (action: any) => {
+  interface SuggestedAction {
+    action_type: 'link' | 'video' | 'tour' | 'contact_support';
+    action_data: {
+      url?: string;
+      video_id?: string;
+      tour_id?: string;
+    };
+  }
+
+  const handleSuggestedActionClick = (action: SuggestedAction) => {
     switch (action.action_type) {
       case 'link':
-        window.open(action.action_data.url, '_blank');
+        if (action.action_data.url) {
+          window.open(action.action_data.url, '_blank');
+        }
         break;
       case 'video':
-        window.open(`/help/video/${action.action_data.video_id}`, '_blank');
+        if (action.action_data.video_id) {
+          window.open(`/help/video/${action.action_data.video_id}`, '_blank');
+        }
         break;
       case 'tour':
         // Start guided tour
-        startGuidedTour(action.action_data.tour_id);
+        if (action.action_data.tour_id) {
+          startGuidedTour(action.action_data.tour_id);
+        }
         break;
       case 'contact_support':
         // Open support form

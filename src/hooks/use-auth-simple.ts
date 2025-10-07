@@ -91,6 +91,11 @@ export function useAuthSimple(): AuthState & AuthActions {
         }, 5000)
 
         // Use getUser() instead of getSession() (recommended for SSR)
+        if (!supabase) {
+          console.warn('⚠️ AUTH HOOK: Supabase client not initialized')
+          setLoading(false)
+          return
+        }
         const { data: { user }, error } = await supabase.auth.getUser()
 
         if (error) {
@@ -120,7 +125,7 @@ export function useAuthSimple(): AuthState & AuthActions {
     initializeAuth()
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const subscription = supabase?.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔄 AUTH HOOK: State change:', event, session?.user?.email)
 
@@ -132,16 +137,20 @@ export function useAuthSimple(): AuthState & AuthActions {
           setDeveloper(null)
         }
       }
-    )
+    ).data.subscription
 
     return () => {
-      subscription.unsubscribe()
+      subscription?.unsubscribe()
     }
   }, [supabase])
 
   // Sign in
   const signIn = async (email: string, password: string) => {
     try {
+      if (!supabase) {
+        return { success: false, error: 'Supabase client not initialized' }
+      }
+
       setLoading(true)
       console.log('🔑 AUTH HOOK: Signing in:', email)
 
@@ -183,6 +192,10 @@ export function useAuthSimple(): AuthState & AuthActions {
   // Sign up
   const signUp = async (email: string, password: string, companyName: string) => {
     try {
+      if (!supabase) {
+        return { success: false, error: 'Supabase client not initialized' }
+      }
+
       setLoading(true)
       console.log('📝 AUTH HOOK: Signing up:', email)
 
@@ -215,6 +228,11 @@ export function useAuthSimple(): AuthState & AuthActions {
   // Sign out
   const signOutUser = async () => {
     try {
+      if (!supabase) {
+        console.error('Supabase client not initialized')
+        return
+      }
+
       setLoading(true)
       console.log('🚪 AUTH HOOK: Signing out')
 

@@ -791,7 +791,7 @@ export default function LandingPage() {
                   <div className="mb-4">
                     <p className="font-medium text-gray-900 mb-2">Realne zagrożenia od 11 lipca 2025:</p>
                     <ul className="list-disc pl-6 space-y-1">
-                      <li>Brak codziennego raportowania = automatyczna kara (nie "jeśli złapią")</li>
+                      <li>Brak codziennego raportowania = automatyczna kara (nie &quot;jeśli złapią&quot;)</li>
                       <li>Błędny format XML = kara + nakaz poprawy w 7 dni lub kolejna kara</li>
                       <li>Niedostępność danych dla harvestera = kara za każdy dzień przestoju</li>
                       <li>Niekompletne 58 pól = kara za każde brakujące pole × każdy dzień</li>

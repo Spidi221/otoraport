@@ -60,8 +60,9 @@ export class PerformanceOptimizer {
           // CLS Observer
           new PerformanceObserver((list) => {
             for (const entry of list.getEntries()) {
-              if (!(entry as any).hadRecentInput) {
-                cls += (entry as any).value;
+              const layoutShiftEntry = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number };
+              if (!layoutShiftEntry.hadRecentInput && layoutShiftEntry.value) {
+                cls += layoutShiftEntry.value;
               }
             }
           }).observe({ entryTypes: ['layout-shift'] });
@@ -69,7 +70,10 @@ export class PerformanceOptimizer {
           // FID Observer
           new PerformanceObserver((list) => {
             for (const entry of list.getEntries()) {
-              fid = (entry as any).processingStart - entry.startTime;
+              const fidEntry = entry as PerformanceEntry & { processingStart?: number };
+              if (fidEntry.processingStart) {
+                fid = fidEntry.processingStart - entry.startTime;
+              }
             }
           }).observe({ entryTypes: ['first-input'] });
         }
@@ -278,14 +282,14 @@ export class CacheManager {
             return JSON.parse(cachedData);
           } else {
             // Return stale data immediately, fetch fresh in background
-            this.fetchAndCache(key, fetchFunction, strategy);
+            this.fetchAndCache(key, fetchFunction);
             return JSON.parse(cachedData);
           }
 
         case 'network-first':
           try {
             const freshData = await fetchFunction();
-            this.setCached(key, freshData, strategy);
+            this.setCached(key, freshData);
             return freshData;
           } catch (error) {
             // Network failed, return cached if available
@@ -302,12 +306,12 @@ export class CacheManager {
 
     // No cached data or cache-first with expired data
     const freshData = await fetchFunction();
-    this.setCached(key, freshData, strategy);
+    this.setCached(key, freshData);
     return freshData;
   }
 
   // Set cached data
-  private static setCached<T>(key: string, data: T, strategy: CacheStrategy): void {
+  private static setCached<T>(key: string, data: T): void {
     try {
       localStorage.setItem(`cache_${key}`, JSON.stringify(data));
       localStorage.setItem(`cache_${key}_timestamp`, Date.now().toString());
@@ -319,12 +323,11 @@ export class CacheManager {
   // Fetch and cache in background
   private static async fetchAndCache<T>(
     key: string,
-    fetchFunction: () => Promise<T>,
-    strategy: CacheStrategy
+    fetchFunction: () => Promise<T>
   ): Promise<void> {
     try {
       const freshData = await fetchFunction();
-      this.setCached(key, freshData, strategy);
+      this.setCached(key, freshData);
     } catch (error) {
       console.warn('Background fetch failed:', error);
     }
@@ -450,12 +453,31 @@ export class CDNManager {
   }
 
   private static async purgeCloudflare(paths: string[]): Promise<boolean> {
-    // Implement Cloudflare cache purge
+    // Validate paths parameter (Task 20.3)
+    if (!paths || paths.length === 0) {
+      console.error('purgeCloudflare: paths array is empty or undefined');
+      return false;
+    }
+
+    // TODO: Implement Cloudflare cache purge API call (Task 20.4)
+    // Example: POST to https://api.cloudflare.com/client/v4/zones/{zone_id}/purge_cache
+    // Body: { files: paths } or { purge_everything: true }
+    // Requires: CLOUDFLARE_API_TOKEN and CLOUDFLARE_ZONE_ID in environment
+    console.log('Purging Cloudflare cache for paths:', paths);
     return true;
   }
 
   private static async purgeVercel(paths: string[]): Promise<boolean> {
-    // Implement Vercel cache purge
+    // Validate paths parameter (Task 20.3)
+    if (!paths || paths.length === 0) {
+      console.error('purgeVercel: paths array is empty or undefined');
+      return false;
+    }
+
+    // TODO: Implement Vercel cache purge API call (Task 20.4)
+    // Example: POST to https://api.vercel.com/v1/purge with paths in body
+    // Requires: VERCEL_TOKEN in environment
+    console.log('Purging Vercel cache for paths:', paths);
     return true;
   }
 }

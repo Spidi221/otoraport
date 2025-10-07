@@ -172,7 +172,7 @@ function generateMinistryCSV(developer: Developer, properties: Property[]): stri
   const rows = properties.map((property) => {
     return [
       // Dane dewelopera
-      escapeCSV(developer.company_name || developer.name),
+      escapeCSV(developer.company_name || ''),
       escapeCSV(developer.legal_form || 'Spółka z o.o.'),
       escapeCSV(developer.krs_number || ''),
       escapeCSV(developer.ceidg_number || ''),

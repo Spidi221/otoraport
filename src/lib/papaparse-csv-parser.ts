@@ -309,7 +309,7 @@ export class PapaParseCSVParser {
   /**
    * Detect property status for INPRO format
    */
-  private detectINPROStatus(row: any, rawData: { [key: string]: any }): 'available' | 'sold' | 'reserved' | undefined {
+  private detectINPROStatus(row: unknown, rawData: Record<string, unknown>): 'available' | 'sold' | 'reserved' | undefined {
     const statusField = rawData['Status'] || rawData['status'] || rawData['Status dostępności']
     if (statusField) {
       const statusLower = String(statusField).toLowerCase()
@@ -421,12 +421,12 @@ export class PapaParseCSVParser {
                 }
                 const numValue = this.parseNumber(value)
                 if (numValue !== null) {
-                  ;(property as any)[fieldName] = numValue
+                  (property as Record<string, unknown>)[fieldName] = numValue
                 }
                 break
 
               default:
-                ;(property as any)[fieldName] = value
+                (property as Record<string, unknown>)[fieldName] = value
             }
           }
         }
@@ -485,7 +485,7 @@ export class PapaParseCSVParser {
 
           if (value && ['developer_name', 'company_name', 'nip', 'phone', 'email', 'investment_name', 'investment_address', 'investment_city'].includes(fieldName)) {
             if (!(fieldName in developerInfo) || !developerInfo[fieldName as keyof DeveloperInfo]) {
-              ;(developerInfo as any)[fieldName] = value
+              (developerInfo as Record<string, string>)[fieldName] = value
             }
           }
         }

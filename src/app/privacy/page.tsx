@@ -70,7 +70,7 @@ export default function PrivacyPage() {
             na mocy RODO, można kontaktować się:
           </p>
           <ul className="list-disc list-inside space-y-1 text-gray-700 ml-4">
-            <li>Email: <strong>kontakt@otoraport.pl</strong> (temat: "RODO - pytanie o dane osobowe")</li>
+            <li>Email: <strong>kontakt@otoraport.pl</strong> (temat: &quot;RODO - pytanie o dane osobowe&quot;)</li>
             <li>Pisemnie: na adres siedziby Administratora</li>
             <li>Telefonicznie: <strong>[NUMER TELEFONU]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
           </ul>
@@ -332,7 +332,7 @@ export default function PrivacyPage() {
                 <li>Vercel Analytics (zanonimizowane statystyki ruchu)</li>
               </ul>
               <p className="text-sm text-gray-600 mt-1">
-                Szczegółowe informacje w sekcji VII. "Pliki cookies i technologie śledzące".
+                Szczegółowe informacje w sekcji VII. &quot;Pliki cookies i technologie śledzące&quot;.
               </p>
             </div>
           </div>
@@ -615,7 +615,7 @@ export default function PrivacyPage() {
 
         <p className="text-gray-700 mb-4">
           Zgodnie z RODO (art. 15-22) oraz polską ustawą o ochronie danych osobowych przysługują Ci następujące prawa.
-          Aby skorzystać z praw, napisz do nas na <strong>kontakt@otoraport.pl</strong> (temat: "RODO - wniosek o...").
+          Aby skorzystać z praw, napisz do nas na <strong>kontakt@otoraport.pl</strong> (temat: &quot;RODO - wniosek o...&quot;).
         </p>
 
         <div className="space-y-4">
@@ -650,7 +650,7 @@ export default function PrivacyPage() {
           </div>
 
           <div className="border-l-4 border-red-500 pl-4">
-            <h3 className="font-semibold text-gray-900 mb-1">3. Prawo do usunięcia danych - "prawo do bycia zapomnianym" (art. 17 RODO)</h3>
+            <h3 className="font-semibold text-gray-900 mb-1">3. Prawo do usunięcia danych - &quot;prawo do bycia zapomnianym&quot; (art. 17 RODO)</h3>
             <p className="text-gray-700 text-sm mb-2">
               Możesz żądać usunięcia danych osobowych, gdy:
             </p>
@@ -742,8 +742,8 @@ export default function PrivacyPage() {
               <strong>Jak cofnąć zgodę:</strong>
             </p>
             <ul className="list-disc list-inside text-sm text-gray-700 ml-4 mt-1">
-              <li>Email na kontakt@otoraport.pl (temat: "Cofnięcie zgody"),</li>
-              <li>Link "Wypisz się" w stopce emaili marketingowych,</li>
+              <li>Email na kontakt@otoraport.pl (temat: &quot;Cofnięcie zgody&quot;),</li>
+              <li>Link &quot;Wypisz się&quot; w stopce emaili marketingowych,</li>
               <li>Panel Konta → Ustawienia → Zgody marketingowe.</li>
             </ul>
           </div>
@@ -772,7 +772,7 @@ export default function PrivacyPage() {
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-6">
           <h4 className="font-semibold text-blue-900 mb-2">Jak składać wnioski o realizację praw:</h4>
           <ol className="list-decimal list-inside text-sm text-blue-900 space-y-1">
-            <li>Wyślij email na <strong>kontakt@otoraport.pl</strong> z tematem "RODO - wniosek o [nazwa prawa]",</li>
+            <li>Wyślij email na <strong>kontakt@otoraport.pl</strong> z tematem &quot;RODO - wniosek o [nazwa prawa]&quot;,</li>
             <li>Podaj: imię, nazwisko, adres email powiązany z Kontem, szczegóły wniosku,</li>
             <li>Dołącz kopię dokumentu tożsamości (w celu weryfikacji) - zalecamy zasłonięcie danych wrażliwych (np. numer PESEL),</li>
             <li>Odpowiemy w ciągu <strong>1 miesiąca</strong> (możliwe przedłużenie o 2 miesiące w skomplikowanych przypadkach).</li>
@@ -974,7 +974,7 @@ export default function PrivacyPage() {
           </ul>
           <p className="text-sm text-gray-700 mt-2">
             <strong>Jak zgłosić podejrzenie naruszenia:</strong> Email na <strong>kontakt@otoraport.pl</strong>
-            z tematem "PILNE - Naruszenie bezpieczeństwa".
+            z tematem &quot;PILNE - Naruszenie bezpieczeństwa&quot;.
           </p>
         </div>
       </section>
@@ -1073,7 +1073,7 @@ export default function PrivacyPage() {
         <div className="bg-white p-4 rounded border border-amber-300 mb-3">
           <p className="text-sm font-semibold text-gray-900 mb-2">DO UZUPEŁNIENIA PRZEZ WŁAŚCICIELA FIRMY:</p>
           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-            <li><strong>[NAZWA FIRMY]</strong> - pełna nazwa prawna (np. "Tech Solutions Sp. z o.o.")</li>
+            <li><strong>[NAZWA FIRMY]</strong> - pełna nazwa prawna (np. &quot;Tech Solutions Sp. z o.o.&quot;)</li>
             <li><strong>[sp. z o.o. / S.A. / inne]</strong> - forma prawna działalności</li>
             <li><strong>[ADRES SIEDZIBY]</strong> - pełny adres (ulica, nr budynku/lokalu, kod pocztowy, miasto)</li>
             <li><strong>[NIP]</strong> - 10-cyfrowy numer NIP (format: 123-456-78-90)</li>

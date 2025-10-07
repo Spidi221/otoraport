@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getErrorMessage } from '@/lib/api-schemas'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,10 +56,10 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil((count || 0) / limit)
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ PROPERTIES API: Unexpected error:', error)
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -107,10 +108,10 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ PROPERTIES API: Unexpected error:', error)
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }

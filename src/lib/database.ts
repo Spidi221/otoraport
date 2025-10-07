@@ -199,7 +199,7 @@ export async function createUploadedFile(file: Database['public']['Tables']['upl
   return data
 }
 
-export async function markFileAsProcessed(fileId: string, propertiesCount: number) {
+export async function markFileAsProcessed(fileId: string) {
   const { data, error } = await createAdminClient()
     .from('uploaded_files')
     .update({
@@ -381,11 +381,7 @@ export async function getDeveloperStats(developerId: string) {
 }
 
 // Helper function to create initial data for new developers
-export async function createInitialDeveloperData(
-  developerId: string,
-  developerEmail: string,
-  companyName: string
-) {
+export async function createInitialDeveloperData(developerId: string) {
   try {
     // Create sample project
     const project = await createProject({

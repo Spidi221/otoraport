@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe, handleStripeWebhook } from '@/lib/stripe'
 import Stripe from 'stripe'
+import { getErrorMessage } from '@/lib/api-schemas'
 
 // Edge runtime not needed for webhooks, use Node.js runtime
 export const runtime = 'nodejs'
@@ -43,10 +44,11 @@ export async function POST(request: NextRequest) {
         signature,
         webhookSecret
       )
-    } catch (err: any) {
-      console.error(`❌ WEBHOOK: Signature verification failed: ${err.message}`)
+    } catch (err: unknown) {
+      const errorMessage = getErrorMessage(err)
+      console.error(`❌ WEBHOOK: Signature verification failed: ${errorMessage}`)
       return NextResponse.json(
-        { error: `Webhook signature verification failed: ${err.message}` },
+        { error: `Webhook signature verification failed: ${errorMessage}` },
         { status: 400 }
       )
     }
@@ -71,10 +73,10 @@ export async function POST(request: NextRequest) {
       event_type: event.type
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('💥 WEBHOOK ERROR:', error)
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }

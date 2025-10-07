@@ -126,9 +126,10 @@ for (const testFile of testFiles) {
       console.log(`   ✅ Ministry compliance: OK (no "X" markers in parsed data)`)
     }
 
-  } catch (error: any) {
-    result.errors.push(error.message)
-    console.log(`   ❌ Error: ${error.message}`)
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    result.errors.push(errorMessage)
+    console.log(`   ❌ Error: ${errorMessage}`)
   }
 
   tests.push(result)

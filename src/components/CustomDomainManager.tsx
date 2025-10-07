@@ -291,7 +291,7 @@ export default function CustomDomainManager() {
 
                   <Alert>
                     <AlertDescription>
-                      Skonfiguruj poniższe rekordy DNS u swojego dostawcy domeny, następnie kliknij "Zweryfikuj Domenę".
+                      Skonfiguruj poniższe rekordy DNS u swojego dostawcy domeny, następnie kliknij &quot;Zweryfikuj Domenę&quot;.
                     </AlertDescription>
                   </Alert>
                 </div>
@@ -382,7 +382,7 @@ export default function CustomDomainManager() {
                 2. Znajdź sekcję zarządzania DNS/rekordami<br />
                 3. Dodaj powyższe rekordy<br />
                 4. Poczekaj na propagację DNS (5-30 minut)<br />
-                5. Wróć tutaj i kliknij "Zweryfikuj Domenę"
+                5. Wróć tutaj i kliknij &quot;Zweryfikuj Domenę&quot;
               </AlertDescription>
             </Alert>
           </CardContent>
