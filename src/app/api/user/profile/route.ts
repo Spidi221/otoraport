@@ -1,5 +1,16 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
+
+// Validation schema for profile updates
+const profileUpdateSchema = z.object({
+  company_name: z.string().min(1, 'Nazwa firmy jest wymagana').max(255).optional(),
+  nip: z.string().regex(/^\d{10}$/, 'NIP musi składać się z 10 cyfr').optional(),
+  regon: z.string().regex(/^\d{9}$|^\d{14}$/, 'REGON musi składać się z 9 lub 14 cyfr').optional(),
+  krs_number: z.string().max(50).optional(),
+  phone: z.string().max(50).optional(),
+  website: z.string().url('Nieprawidłowy adres URL').optional().or(z.literal('')),
+})
 
 export async function GET() {
   try {
@@ -80,6 +91,65 @@ export async function GET() {
     })
   } catch (error) {
     console.error('💥 PROFILE API: Unexpected error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Parse and validate request body
+    const body = await request.json()
+    const validatedData = profileUpdateSchema.parse(body)
+
+    console.log('🔄 PROFILE UPDATE: Updating profile for user:', user.email)
+
+    // Update developer profile
+    const { data: updatedProfile, error: updateError } = await supabase
+      .from('developers')
+      .update(validatedData)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (updateError) {
+      console.error('❌ PROFILE UPDATE: Error:', updateError)
+      return NextResponse.json(
+        { success: false, error: updateError.message },
+        { status: 500 }
+      )
+    }
+
+    console.log('✅ PROFILE UPDATE: Successfully updated profile')
+
+    return NextResponse.json({
+      success: true,
+      developer: updatedProfile
+    })
+
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { success: false, error: 'Nieprawidłowe dane', details: error.errors },
+        { status: 400 }
+      )
+    }
+
+    console.error('💥 PROFILE UPDATE: Unexpected error:', error)
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

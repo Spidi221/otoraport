@@ -226,7 +226,7 @@
         "dependencies": [
           "38"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -285,7 +285,8 @@
             "testStrategy": "Generate the Ministry XML and CSV exports after marking several properties as 'sold'. Verify that the sold properties are correctly excluded from the generated files. Confirm that 'available' and 'reserved' properties are still included.",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2025-10-07T17:21:11.166Z"
       },
       {
         "id": "40",
@@ -295,7 +296,7 @@
         "testStrategy": "Test form validation for required fields and formats, verify profile updates persist in database, test client_id regeneration creates new UUID, confirm success/error toast notifications display correctly, validate all API endpoints work properly",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -355,7 +356,8 @@
             "testStrategy": "Test the API endpoints for changing password, deleting account, and updating notification preferences. Verify that the UI correctly calls these endpoints. Confirm that success/error toast notifications are displayed appropriately for every user action on the settings page.",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2025-10-07T17:56:28.521Z"
       },
       {
         "id": "41",
@@ -487,9 +489,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-07T16:24:26.177Z",
+      "lastModified": "2025-10-07T17:56:28.522Z",
       "taskCount": 10,
-      "completedCount": 3,
+      "completedCount": 4,
       "tags": [
         "master"
       ]
