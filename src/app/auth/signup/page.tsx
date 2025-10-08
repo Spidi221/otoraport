@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { OtoraportLogo } from '@/components/icons/otoraport-logo'
 import { createClient } from '@/lib/supabase/client'
+import { trackSignup } from '@/lib/ga4-tracking'
 
 function SignUpContent() {
   const [isLoading, setIsLoading] = useState(false)
@@ -89,6 +90,9 @@ function SignUpContent() {
       }
 
       if (data.user) {
+        // Track successful signup in GA4
+        trackSignup(data.user.id, selectedPlan)
+
         // Check if email confirmation is required
         if (data.session) {
           // Auto-confirmed (development) - redirect to onboarding to select plan

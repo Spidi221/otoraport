@@ -16,6 +16,9 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().min(10, 'Resend API key required'),
   EMAIL_FROM: z.string().email('Invalid sender email'),
 
+  // Analytics (Optional)
+  NEXT_PUBLIC_GA4_MEASUREMENT_ID: z.string().regex(/^G-[A-Z0-9]+$/, 'Invalid GA4 Measurement ID format (should be G-XXXXXXXXXX)').optional(),
+
   // Environment
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 })
@@ -32,6 +35,7 @@ export function validateEnv(): { success: boolean; errors?: string[] } {
       ADMIN_EMAILS: process.env.ADMIN_EMAILS,
       RESEND_API_KEY: process.env.RESEND_API_KEY,
       EMAIL_FROM: process.env.EMAIL_FROM,
+      NEXT_PUBLIC_GA4_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID,
       NODE_ENV: process.env.NODE_ENV,
     }
 
@@ -62,6 +66,7 @@ export function getEnv(): Env {
     ADMIN_EMAILS: process.env.ADMIN_EMAILS!,
     RESEND_API_KEY: process.env.RESEND_API_KEY!,
     EMAIL_FROM: process.env.EMAIL_FROM!,
+    NEXT_PUBLIC_GA4_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID,
     NODE_ENV: process.env.NODE_ENV as 'development' | 'production' | 'test',
   }
 }

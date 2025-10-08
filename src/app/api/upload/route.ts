@@ -300,7 +300,12 @@ export async function POST(request: NextRequest) {
         recordsCount: propertiesCount,
         validRecords: smartParseResult?.validRows || 0,
         savedToDatabase,
-        preview: smartParseResult?.data?.slice(0, 3) || null
+        preview: smartParseResult?.data?.slice(0, 3) || null,
+        // Add tracking metadata for client-side GA4 event
+        trackingData: {
+          fileType: fileExtension as 'csv' | 'xlsx' | 'xls',
+          recordsCount: smartParseResult?.validRows || 0
+        }
       }
     })
 

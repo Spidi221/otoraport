@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { updateGA4Consent } from '@/lib/ga4-tracking'
 
 export function CookieBanner() {
   const [showBanner, setShowBanner] = useState(false)
@@ -32,6 +33,10 @@ export function CookieBanner() {
       timestamp: new Date().toISOString()
     }
     localStorage.setItem('cookie-consent', JSON.stringify(allConsent))
+
+    // Update GA4 consent
+    updateGA4Consent(true)
+
     setShowBanner(false)
     setShowPreferences(false)
   }
@@ -45,6 +50,10 @@ export function CookieBanner() {
       timestamp: new Date().toISOString()
     }
     localStorage.setItem('cookie-consent', JSON.stringify(necessaryConsent))
+
+    // Update GA4 consent - deny analytics
+    updateGA4Consent(false)
+
     setShowBanner(false)
     setShowPreferences(false)
   }
@@ -55,6 +64,10 @@ export function CookieBanner() {
       timestamp: new Date().toISOString()
     }
     localStorage.setItem('cookie-consent', JSON.stringify(consent))
+
+    // Update GA4 consent based on analytics preference
+    updateGA4Consent(preferences.analytics)
+
     setShowBanner(false)
     setShowPreferences(false)
   }

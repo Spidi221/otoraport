@@ -2,19 +2,31 @@
 
 import { Suspense, lazy, useMemo } from "react";
 import { useAuthSimple as useAuth } from "@/hooks/use-auth-simple";
+import { useGA4SubscriptionTracking } from "@/hooks/use-ga4-subscription-tracking";
 import { Header } from "@/components/dashboard/header";
 import { UploadWidget } from "@/components/dashboard/upload-widget";
 import { LoadingState } from "@/components/ui/loading";
 import ScrollToTop from "@/components/ScrollToTop";
+import TrialBanner from "@/components/dashboard/trial-banner";
 
 // Lazy load heavy components that are below the fold
 const ActionButtons = lazy(() => import("@/components/dashboard/action-buttons").then(m => ({ default: m.ActionButtons })));
 const PropertiesTable = lazy(() => import("@/components/dashboard/properties-table").then(m => ({ default: m.PropertiesTable })));
 const ChatWidget = lazy(() => import("@/components/ChatWidget").then(m => ({ default: m.ChatWidget })));
+const StatisticsCards = lazy(() => import("@/components/dashboard/statistics-cards").then(m => ({ default: m.StatisticsCards })));
 
 export default function HomePage() {
   // Use unified auth hook
-  const { user } = useAuth();
+  const { user, developer } = useAuth();
+
+  // Track subscription events in GA4 (trial start, conversion)
+  useGA4SubscriptionTracking({
+    userId: user?.id,
+    subscriptionStatus: developer?.subscription_status,
+    subscriptionPlan: developer?.subscription_plan,
+    trialStatus: (developer as any)?.trial_status,
+    trialEndsAt: (developer as any)?.trial_ends_at,
+  });
 
   // Memoized greeting calculation - avoiding SSR/CSR mismatch
   const greeting = useMemo(() => {
@@ -34,7 +46,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header showUserMenu={!!user} />
-      
+
       <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-6 lg:px-6">
         {/* Welcome Section */}
         <div className="mb-8">
@@ -42,15 +54,29 @@ export default function HomePage() {
             {greeting}
           </h1>
           <p className="text-muted-foreground">
-            {user ? 
+            {user ?
               "Wszystko działa sprawnie. Twoje raporty są aktualne i zgodne z przepisami." :
               "Zaloguj się, aby zarządzać swoimi raportami nieruchomości."
             }
           </p>
         </div>
 
+        {/* Trial Banner - only show for trial users */}
+        {developer && (
+          <TrialBanner
+            subscriptionStatus={developer.subscription_status}
+            trialEndsAt={(developer as any).trial_ends_at || null}
+            trialStatus={(developer as any).trial_status || null}
+          />
+        )}
+
         {/* Dashboard Grid */}
         <div className="space-y-6">
+          {/* Statistics Cards */}
+          <Suspense fallback={<LoadingState message="Ładowanie statystyk..." />}>
+            <StatisticsCards />
+          </Suspense>
+
           {/* Upload Widget */}
           <UploadWidget />
 

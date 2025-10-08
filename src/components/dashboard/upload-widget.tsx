@@ -3,6 +3,7 @@ import { Upload, FileText, CheckCircle, Loader2, AlertCircle } from "lucide-reac
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { useCSVParserWorker } from "@/hooks/use-csv-parser-worker";
+import { trackUploadSuccess } from "@/lib/ga4-tracking";
 
 interface UploadResult {
   fileName: string;
@@ -60,6 +61,16 @@ export function UploadWidget() {
         fileName: 'parsed-data.csv',
         propertiesAdded: validRows
       });
+
+      // Track successful upload in GA4
+      if (data?.data?.trackingData) {
+        trackUploadSuccess(
+          'parsed-data.csv',
+          data.data.trackingData.recordsCount,
+          data.data.trackingData.fileType
+        );
+      }
+
       setParsingStatus(null);
       csvWorker.reset();
     } catch (err) {
@@ -160,10 +171,20 @@ export function UploadWidget() {
       }
 
       // Simplified result: just filename and count
+      const recordsCount = data?.data?.validRecords || data?.data?.recordsCount || 0;
       setUploadResult({
         fileName: file.name,
-        propertiesAdded: data?.data?.validRecords || data?.data?.recordsCount || 0
+        propertiesAdded: recordsCount
       });
+
+      // Track successful upload in GA4
+      if (data?.data?.trackingData) {
+        trackUploadSuccess(
+          file.name,
+          data.data.trackingData.recordsCount,
+          data.data.trackingData.fileType
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Wystąpił nieznany błąd');
     } finally {

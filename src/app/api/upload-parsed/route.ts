@@ -297,7 +297,12 @@ export async function POST(request: NextRequest) {
       data: {
         propertiesAdded: propertiesToInsert.length,
         projectId: projectId,
-        projectName: projectDetails?.name || 'Unknown'
+        projectName: projectDetails?.name || 'Unknown',
+        // Add tracking metadata for client-side GA4 event
+        trackingData: {
+          fileType: 'csv' as const, // Web Worker only handles CSV
+          recordsCount: validRecords
+        }
       }
     })
 

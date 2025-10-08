@@ -326,6 +326,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       } catch (emailError) {
         console.error('Failed to send welcome email:', emailError);
       }
+
+      // Note: GA4 tracking for trial start happens client-side after successful checkout redirect
+      // Server-side webhook tracking would require additional infrastructure (gtag.js is client-side only)
+      console.log(`📊 WEBHOOK: Trial started - client should track in GA4 after redirect`);
     }
   }
 
@@ -413,7 +417,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     // Get current developer state
     const { data: developer } = await createAdminClient()
       .from('developers')
-      .select('trial_status, subscription_status')
+      .select('trial_status, subscription_status, subscription_plan')
       .eq('id', developerId)
       .single();
 
@@ -444,6 +448,10 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
         } catch (emailError) {
           console.error('Failed to send trial conversion email:', emailError);
         }
+
+        // Note: GA4 tracking for trial conversion happens client-side when user logs in and sees active subscription
+        // We log the conversion details here for potential future server-side tracking integration
+        console.log(`📊 WEBHOOK: Trial conversion details - Plan: ${developer?.subscription_plan}, User: ${developerId}`);
       }
     } else if (subscription.status === 'trialing') {
       status = 'trialing';
