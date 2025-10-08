@@ -46,7 +46,8 @@ interface CoreMission {
    - Dlaczego?
    - Co to nam da?
    - Czy kod spełnia wymagania: prosty, czysty, bezpieczny, zgodny z najnowszymi technikami, wolny od błędów i działający?
-6. **CZEKAJ NA ZGODĘ** - Poproś o zgodę na pracę nad kolejnym taskiem
+6. **ZAPISZ MANUAL ACTIONS** - Jeśli coś wymaga ręcznej konfiguracji przez usera (np. Stripe Dashboard, external API keys), zapisz to w sekcji "📋 TODO DLA USERA" w CLAUDE.md
+7. **CZEKAJ NA ZGODĘ** - Poproś o zgodę na pracę nad kolejnym taskiem
 
 ### Quality Standards (zawsze sprawdzaj):
 - ✅ **Prosty** - Minimalna złożoność, czytelny dla innych
@@ -97,6 +98,32 @@ coderabbit review --help
 6. Raportuj do usera
 
 **ZAWSZE uruchamiaj CodeRabbit review przed oznaczeniem taska jako done!**
+
+---
+
+## 📋 TODO DLA USERA - MANUAL ACTIONS REQUIRED
+
+**WAŻNE**: Zapisuj w tej sekcji wszystko co user musi zrobić ręcznie. Przypominaj o tym na końcu sesji!
+
+### Aktualne TODO:
+
+#### ⚠️ Stripe Price Configuration (TASK #53)
+**Utworzyć Stripe Price dla dodatkowych projektów:**
+
+1. Przejdź do [Stripe Products Dashboard](https://dashboard.stripe.com/products)
+2. Stwórz nowy produkt: "Dodatkowy projekt OTORAPORT"
+3. Dodaj cenę:
+   - **Kwota**: 50.00 PLN
+   - **Model rozliczeń**: Recurring (cykliczna)
+   - **Częstotliwość**: Monthly (miesięczna)
+   - **Type**: Per unit (za jednostkę)
+4. Skopiuj `Price ID` (będzie zaczynać się od `price_`)
+5. Dodaj do `.env.local` i `.env.production`:
+   ```bash
+   STRIPE_PRICE_ADDITIONAL_PROJECT_MONTHLY=price_xxxxxxxxxxxxx
+   ```
+
+**Status**: ⏳ Oczekuje - kod gotowy, tylko brakuje Price ID w environment variables
 
 ---
 
