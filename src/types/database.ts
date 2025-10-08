@@ -142,6 +142,7 @@ export type Database = {
           email_notifications_enabled: boolean
           notification_frequency: 'daily' | 'weekly' | 'never'
           is_admin: boolean
+          additional_projects_count: number
         }
         Insert: {
           additional_contact_info?: string | null
@@ -195,6 +196,7 @@ export type Database = {
           email_notifications_enabled?: boolean
           notification_frequency?: 'daily' | 'weekly' | 'never'
           is_admin?: boolean
+          additional_projects_count?: number
         }
         Update: {
           additional_contact_info?: string | null
@@ -248,6 +250,7 @@ export type Database = {
           email_notifications_enabled?: boolean
           notification_frequency?: 'daily' | 'weekly' | 'never'
           is_admin?: boolean
+          additional_projects_count?: number
         }
         Relationships: []
       }

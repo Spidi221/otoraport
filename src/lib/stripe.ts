@@ -453,9 +453,24 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       status = 'cancelled';
     }
 
+    // Sync additional projects count from Stripe subscription items
+    const additionalProjectPriceId = process.env.STRIPE_PRICE_ADDITIONAL_PROJECT_MONTHLY;
+    let additionalProjectsCount = 0;
+
+    if (additionalProjectPriceId) {
+      const additionalProjectItem = subscription.items.data.find(
+        item => item.price.id === additionalProjectPriceId
+      );
+
+      if (additionalProjectItem) {
+        additionalProjectsCount = additionalProjectItem.quantity || 0;
+      }
+    }
+
     const updateData: Record<string, unknown> = {
       subscription_status: status,
       subscription_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+      additional_projects_count: additionalProjectsCount,
       updated_at: new Date().toISOString(),
     };
 
@@ -468,7 +483,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       .update(updateData)
       .eq('id', developerId);
 
-    console.log(`✅ WEBHOOK: subscription.updated - Developer ${developerId}, Status: ${status}, Trial: ${trialStatus || 'no change'}`);
+    console.log(`✅ WEBHOOK: subscription.updated - Developer ${developerId}, Status: ${status}, Additional Projects: ${additionalProjectsCount}, Trial: ${trialStatus || 'no change'}`);
   }
 }
 
@@ -621,6 +636,106 @@ export async function cancelStripeSubscription(
     return { success: true };
   } catch (error) {
     console.error('Error canceling Stripe subscription:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+/**
+ * Add additional project to Pro plan subscription
+ * Creates a new subscription item for +50zł/month
+ */
+export async function addAdditionalProjectToSubscription(
+  subscriptionId: string,
+  additionalProjectsCount: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const stripe = getStripeClient();
+
+    // Get subscription
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+    if (!subscription) {
+      return { success: false, error: 'Subscription not found' };
+    }
+
+    // Find or create subscription item for additional projects
+    const additionalProjectPriceId = process.env.STRIPE_PRICE_ADDITIONAL_PROJECT_MONTHLY;
+
+    if (!additionalProjectPriceId) {
+      console.error('STRIPE_PRICE_ADDITIONAL_PROJECT_MONTHLY not configured');
+      return { success: false, error: 'Additional project pricing not configured' };
+    }
+
+    // Check if item already exists
+    const existingItem = subscription.items.data.find(
+      item => item.price.id === additionalProjectPriceId
+    );
+
+    if (existingItem) {
+      // Update quantity
+      await stripe.subscriptionItems.update(existingItem.id, {
+        quantity: additionalProjectsCount
+      });
+    } else {
+      // Create new subscription item
+      await stripe.subscriptionItems.create({
+        subscription: subscriptionId,
+        price: additionalProjectPriceId,
+        quantity: additionalProjectsCount
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error adding additional project:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+/**
+ * Remove additional project from Pro plan subscription
+ */
+export async function removeAdditionalProjectFromSubscription(
+  subscriptionId: string,
+  additionalProjectsCount: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const stripe = getStripeClient();
+
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const additionalProjectPriceId = process.env.STRIPE_PRICE_ADDITIONAL_PROJECT_MONTHLY;
+
+    if (!additionalProjectPriceId) {
+      return { success: false, error: 'Configuration error' };
+    }
+
+    const existingItem = subscription.items.data.find(
+      item => item.price.id === additionalProjectPriceId
+    );
+
+    if (!existingItem) {
+      return { success: true }; // Nothing to remove
+    }
+
+    if (additionalProjectsCount === 0) {
+      // Delete the item entirely
+      await stripe.subscriptionItems.del(existingItem.id);
+    } else {
+      // Update quantity
+      await stripe.subscriptionItems.update(existingItem.id, {
+        quantity: additionalProjectsCount
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error removing additional project:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
