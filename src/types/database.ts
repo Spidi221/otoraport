@@ -131,6 +131,9 @@ export type Database = {
           subscription_starts_at: string | null
           subscription_status: 'trialing' | 'active' | 'inactive' | 'cancelled' | 'expired' | 'past_due' | null
           trial_ends_at: string | null
+          trial_status: 'active' | 'expired' | 'converted' | 'cancelled'
+          trial_stage: 'day_0' | 'day_7' | 'day_11' | 'day_14_success' | 'day_14_failed' | 'completed' | null
+          last_trial_email_sent: string | null
           current_period_end: string | null
           updated_at: string | null
           user_id: string | null
@@ -138,6 +141,7 @@ export type Database = {
           xml_url: string | null
           email_notifications_enabled: boolean
           notification_frequency: 'daily' | 'weekly' | 'never'
+          is_admin: boolean
         }
         Insert: {
           additional_contact_info?: string | null
@@ -180,6 +184,9 @@ export type Database = {
           subscription_starts_at?: string | null
           subscription_status?: 'trialing' | 'active' | 'inactive' | 'cancelled' | 'expired' | 'past_due' | null
           trial_ends_at?: string | null
+          trial_status?: 'active' | 'expired' | 'converted' | 'cancelled'
+          trial_stage?: 'day_0' | 'day_7' | 'day_11' | 'day_14_success' | 'day_14_failed' | 'completed' | null
+          last_trial_email_sent?: string | null
           current_period_end?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -187,6 +194,7 @@ export type Database = {
           xml_url?: string | null
           email_notifications_enabled?: boolean
           notification_frequency?: 'daily' | 'weekly' | 'never'
+          is_admin?: boolean
         }
         Update: {
           additional_contact_info?: string | null
@@ -229,6 +237,9 @@ export type Database = {
           subscription_starts_at?: string | null
           subscription_status?: 'trialing' | 'active' | 'inactive' | 'cancelled' | 'expired' | 'past_due' | null
           trial_ends_at?: string | null
+          trial_status?: 'active' | 'expired' | 'converted' | 'cancelled'
+          trial_stage?: 'day_0' | 'day_7' | 'day_11' | 'day_14_success' | 'day_14_failed' | 'completed' | null
+          last_trial_email_sent?: string | null
           current_period_end?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -236,6 +247,7 @@ export type Database = {
           xml_url?: string | null
           email_notifications_enabled?: boolean
           notification_frequency?: 'daily' | 'weekly' | 'never'
+          is_admin?: boolean
         }
         Relationships: []
       }
@@ -279,6 +291,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      admin_roles: {
+        Row: {
+          id: string
+          user_id: string
+          role: 'super_admin' | 'admin' | 'support'
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role: 'super_admin' | 'admin' | 'support'
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role?: 'super_admin' | 'admin' | 'support'
+          created_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
+      admin_audit_logs: {
+        Row: {
+          id: string
+          admin_user_id: string
+          action: string
+          target_user_id: string | null
+          details: any | null
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          admin_user_id: string
+          action: string
+          target_user_id?: string | null
+          details?: any | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          admin_user_id?: string
+          action?: string
+          target_user_id?: string | null
+          details?: any | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Relationships: []
       }
       payments: {
         Row: {

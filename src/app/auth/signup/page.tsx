@@ -91,15 +91,15 @@ function SignUpContent() {
       if (data.user) {
         // Check if email confirmation is required
         if (data.session) {
-          // Auto-confirmed (development) - profile will be created by middleware
-          setMessage('Konto zostało utworzone! Przekierowywanie...')
+          // Auto-confirmed (development) - redirect to onboarding to select plan
+          setMessage('Konto zostało utworzone! Przekierowywanie do wyboru planu...')
           setTimeout(() => {
-            router.push('/dashboard')
+            router.push('/onboarding/select-plan')
             router.refresh()
           }, 1000)
         } else {
           // Email confirmation needed (production)
-          setMessage('Rejestracja udana! Sprawdź email i kliknij link potwierdzający.')
+          setMessage('Rejestracja udana! Sprawdź email i kliknij link potwierdzający, a następnie wybierz plan.')
         }
       }
     } catch {

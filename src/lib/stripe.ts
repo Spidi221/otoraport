@@ -241,6 +241,10 @@ export async function handleStripeWebhook(
         await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
         break;
 
+      case 'customer.subscription.trial_will_end':
+        await handleTrialWillEnd(event.data.object as Stripe.Subscription);
+        break;
+
       case 'invoice.payment_failed':
         await handlePaymentFailed(event.data.object as Stripe.Invoice);
         break;
@@ -262,6 +266,8 @@ export async function handleStripeWebhook(
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const developerId = session.metadata?.developer_id;
+  const planType = session.metadata?.plan_type;
+  const isTrial = session.metadata?.trial === 'true';
 
   if (!developerId) {
     console.error('No developer_id in checkout session metadata');
@@ -272,23 +278,59 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   if (session.subscription) {
     const subscription = await getStripeClient().subscriptions.retrieve(session.subscription as string);
 
-    // Activate subscription and set billing period
+    // Determine subscription status (trialing or active)
+    const subscriptionStatus = subscription.status === 'trialing' ? 'trialing' : 'active';
+    const trialStatus = isTrial && subscription.status === 'trialing' ? 'active' : null;
+
+    // Update developer with subscription info
+    const updateData: Record<string, unknown> = {
+      stripe_customer_id: subscription.customer as string,
+      stripe_subscription_id: subscription.id,
+      payment_method_attached: true, // Card was required at checkout
+      subscription_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+      subscription_status: subscriptionStatus,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Set plan type if provided
+    if (planType) {
+      updateData.subscription_plan = planType;
+    }
+
+    // Set trial status if this is a trial
+    if (trialStatus) {
+      updateData.trial_status = trialStatus;
+    }
+
     await createAdminClient()
       .from('developers')
-      .update({
-        subscription_status: 'active',
-        subscription_plan: 'basic',
-        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-        stripe_subscription_id: subscription.id,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', developerId);
 
-    console.log(`✅ WEBHOOK: Activated subscription for developer ${developerId}`);
+    console.log(`✅ WEBHOOK: checkout.session.completed - Developer ${developerId}, Status: ${subscriptionStatus}, Trial: ${isTrial}`);
+
+    // Send welcome email for trial start
+    if (isTrial && subscription.status === 'trialing') {
+      try {
+        const { sendDeveloperWelcomeEmail } = await import('./email-service');
+        const { data: developer } = await createAdminClient()
+          .from('developers')
+          .select('*')
+          .eq('id', developerId)
+          .single();
+
+        if (developer) {
+          await sendDeveloperWelcomeEmail(developer);
+          console.log(`📧 WEBHOOK: Sent welcome email to ${developer.email}`);
+        }
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError);
+      }
+    }
   }
 
-  // Log payment
-  if (session.amount_total) {
+  // Log payment (only if amount was charged)
+  if (session.amount_total && session.amount_total > 0) {
     await createAdminClient()
       .from('payments')
       .insert({
@@ -368,11 +410,41 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const developerId = subscription.metadata.developer_id;
 
   if (developerId) {
+    // Get current developer state
+    const { data: developer } = await createAdminClient()
+      .from('developers')
+      .select('trial_status, subscription_status')
+      .eq('id', developerId)
+      .single();
+
     // Map Stripe status to our subscription_status enum
     let status: 'trialing' | 'active' | 'inactive' | 'cancelled' | 'expired' | 'past_due' = 'inactive';
+    let trialStatus: 'active' | 'expired' | 'converted' | 'cancelled' | null = null;
 
     if (subscription.status === 'active') {
       status = 'active';
+      // Check if this is a trial conversion (from trialing to active)
+      if (developer?.subscription_status === 'trialing' && developer?.trial_status === 'active') {
+        trialStatus = 'converted';
+        console.log(`🎉 WEBHOOK: Trial converted to paid for developer ${developerId}`);
+
+        // Send trial conversion email
+        try {
+          const { data: devData } = await createAdminClient()
+            .from('developers')
+            .select('*')
+            .eq('id', developerId)
+            .single();
+
+          if (devData) {
+            const { sendTrialConvertedEmail } = await import('./email-service');
+            await sendTrialConvertedEmail(devData);
+            console.log(`📧 WEBHOOK: Sent trial converted email to ${devData.email}`);
+          }
+        } catch (emailError) {
+          console.error('Failed to send trial conversion email:', emailError);
+        }
+      }
     } else if (subscription.status === 'trialing') {
       status = 'trialing';
     } else if (subscription.status === 'past_due') {
@@ -381,16 +453,64 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       status = 'cancelled';
     }
 
+    const updateData: Record<string, unknown> = {
+      subscription_status: status,
+      subscription_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    if (trialStatus) {
+      updateData.trial_status = trialStatus;
+    }
+
     await createAdminClient()
       .from('developers')
-      .update({
-        subscription_status: status,
-        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', developerId);
 
-    console.log(`✅ WEBHOOK: Updated subscription status to ${status} for developer ${developerId}`);
+    console.log(`✅ WEBHOOK: subscription.updated - Developer ${developerId}, Status: ${status}, Trial: ${trialStatus || 'no change'}`);
+  }
+}
+
+async function handleTrialWillEnd(subscription: Stripe.Subscription) {
+  const developerId = subscription.metadata.developer_id;
+
+  if (!developerId) {
+    console.error('No developer_id in subscription metadata');
+    return;
+  }
+
+  console.log(`⏰ WEBHOOK: trial_will_end - Developer ${developerId}, Trial ends in ~3 days`);
+
+  try {
+    // Get developer data
+    const { data: developer } = await createAdminClient()
+      .from('developers')
+      .select('*')
+      .eq('id', developerId)
+      .single();
+
+    if (!developer) {
+      console.error(`Developer ${developerId} not found`);
+      return;
+    }
+
+    // Calculate days remaining
+    const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null;
+    const daysLeft = trialEnd
+      ? Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      : 3;
+
+    // Send trial ending reminder email
+    try {
+      const { sendTrialEndingReminderEmail } = await import('./email-service');
+      await sendTrialEndingReminderEmail(developer, daysLeft);
+      console.log(`📧 WEBHOOK: Sent trial ending reminder to ${developer.email} (${daysLeft} days left)`);
+    } catch (emailError) {
+      console.error('Failed to send trial ending reminder email:', emailError);
+    };
+  } catch (error) {
+    console.error('Error handling trial_will_end:', error);
   }
 }
 
@@ -439,7 +559,24 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
         payment_method: 'stripe'
       });
 
-    console.log(`⚠️ WEBHOOK: Payment failed for developer ${developerId}`);
+    console.log(`⚠️ WEBHOOK: invoice.payment_failed - Developer ${developerId}`);
+
+    // Send payment failed email (we'll implement in Subtask 7)
+    try {
+      const { data: developer } = await createAdminClient()
+        .from('developers')
+        .select('*')
+        .eq('id', developerId)
+        .single();
+
+      if (developer) {
+        const { sendPaymentFailedEmail } = await import('./email-service');
+        await sendPaymentFailedEmail(developer);
+        console.log(`📧 WEBHOOK: Sent payment failed email to ${developer.email}`);
+      }
+    } catch (emailError) {
+      console.error('Failed to send payment failed email:', emailError);
+    }
   }
 }
 

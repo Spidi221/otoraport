@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import { applySecurityHeadersToResponse } from '@/lib/security-headers'
 import { checkSubscriptionAccess, getSubscriptionErrorMessage } from '@/lib/subscription-enforcement'
+import { getTrialStatusByUserId } from '@/lib/middleware/trial-middleware'
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
@@ -34,11 +35,43 @@ export async function middleware(req: NextRequest) {
 
     console.log('MIDDLEWARE: User authenticated:', user.email, 'accessing:', pathname)
 
-    // Check subscription access for protected routes (except dashboard itself and settings)
-    const exemptRoutes = ['/dashboard', '/dashboard/settings', '/forgot-password', '/terms', '/privacy']
-    const needsSubscriptionCheck = !exemptRoutes.some(route => pathname === route)
+    // Admin routes bypass subscription/trial check (handled by admin middleware)
+    const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/api/admin')
 
-    if (needsSubscriptionCheck) {
+    // Ministry endpoints are ALWAYS accessible (compliance requirement)
+    const isMinistryEndpoint = pathname.startsWith('/api/public/')
+
+    // Trial expired page is always accessible
+    const isTrialExpiredPage = pathname === '/trial-expired'
+
+    // Check subscription AND trial access for protected routes
+    const exemptRoutes = ['/dashboard', '/dashboard/settings', '/forgot-password', '/terms', '/privacy', '/contact', '/trial-expired']
+    const needsAccessCheck = !exemptRoutes.some(route => pathname === route) && !isAdminRoute && !isMinistryEndpoint
+
+    if (needsAccessCheck) {
+      // First check trial status (more specific than subscription check)
+      const trialStatus = await getTrialStatusByUserId(user.id)
+
+      if (trialStatus && trialStatus.status === 'expired') {
+        console.log(`⏰ MIDDLEWARE: Trial expired for user ${user.email}`)
+
+        // For API routes, return 403 Forbidden
+        if (pathname.startsWith('/api/')) {
+          return NextResponse.json(
+            {
+              error: 'Trial expired',
+              message: 'Twój okres próbny wygasł. Upgrade aby kontynuować.',
+              reason: 'trial_expired'
+            },
+            { status: 403 }
+          )
+        }
+
+        // For pages, redirect to trial-expired page
+        return NextResponse.redirect(new URL('/trial-expired', req.url))
+      }
+
+      // Then check general subscription access
       const subscriptionCheck = await checkSubscriptionAccess(req, user.id)
 
       if (!subscriptionCheck.hasAccess) {
@@ -57,14 +90,21 @@ export async function middleware(req: NextRequest) {
           )
         }
 
-        // For pages, redirect to dashboard with error message
+        // For pages, redirect appropriately
         console.log(`❌ MIDDLEWARE: Subscription check failed for page ${pathname}:`, subscriptionCheck.reason)
+
+        // If trial_expired, go to trial-expired page
+        if (subscriptionCheck.reason === 'trial_expired') {
+          return NextResponse.redirect(new URL('/trial-expired', req.url))
+        }
+
+        // Otherwise, go to dashboard with error
         const url = new URL('/dashboard', req.url)
         url.searchParams.set('subscription_error', subscriptionCheck.reason || 'no_subscription')
         return NextResponse.redirect(url)
       }
 
-      console.log('✅ MIDDLEWARE: Subscription check passed for:', pathname)
+      console.log('✅ MIDDLEWARE: Access check passed for:', pathname)
     }
   }
 
