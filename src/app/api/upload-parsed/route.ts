@@ -48,7 +48,11 @@ export async function POST(request: NextRequest) {
 
     const { properties, validRecords } = validationResult.data
 
-    console.log(`✅ UPLOAD PARSED API: Received ${properties.length} pre-parsed properties`)
+    // Get optional project_id from query params or request body
+    const { searchParams } = new URL(request.url)
+    const requestedProjectId = searchParams.get('project_id') || body.project_id || null
+
+    console.log(`✅ UPLOAD PARSED API: Received ${properties.length} pre-parsed properties${requestedProjectId ? ` for project ${requestedProjectId}` : ''}`)
 
     // Create server client
     const supabase = await createClient()
@@ -78,74 +82,140 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ UPLOAD PARSED API: Developer profile found:', developer.client_id)
 
-    // Extract project name from first property (or use default)
-    const projectName = properties[0]?.project_name || 'Imported Properties'
-    const projectSlug = generateSlug(projectName)
-
-    console.log(`🔍 DATABASE: Looking for project: "${projectName}" (slug: ${projectSlug})`)
-
-    // Get or create project
-    const { data: projectData, error: projectLookupError } = await createAdminClient()
-      .from('projects')
-      .select('id')
-      .eq('developer_id', developer.id)
-      .eq('slug', projectSlug)
-      .maybeSingle()
-
-    let project = projectData
-
-    if (projectLookupError) {
-      console.error('❌ DATABASE: Error looking up project:', projectLookupError.message)
-      return NextResponse.json(
-        { error: 'Failed to lookup project' },
-        { status: 500 }
-      )
-    }
-
-    if (!project) {
-      console.log(`📦 DATABASE: Creating new project: "${projectName}"`)
-
-      const { data: newProject, error: insertError } = await createAdminClient()
+    // If project_id provided, validate it belongs to this developer
+    if (requestedProjectId) {
+      const { data: project, error: projectError } = await supabase
         .from('projects')
-        .insert({
-          developer_id: developer.id,
-          name: projectName,
-          slug: projectSlug,
-          description: `Auto-created from Web Worker parsed CSV upload`
-        })
         .select('id')
+        .eq('id', requestedProjectId)
+        .eq('developer_id', developer.id)
         .single()
 
-      if (insertError || !newProject) {
-        console.error('❌ DATABASE: Project creation failed:', insertError)
+      if (projectError || !project) {
         return NextResponse.json(
-          { error: 'Failed to create project' },
+          { error: 'Projekt nie znaleziony lub nie należy do Ciebie' },
+          { status: 400 }
+        )
+      }
+    }
+
+    let project: { id: string } | null = null
+
+    // If requestedProjectId is explicitly provided, use it (validation already done above)
+    if (requestedProjectId) {
+      console.log(`🔍 DATABASE: Using provided project ID: ${requestedProjectId}`)
+
+      const { data: projectData, error: projectLookupError } = await createAdminClient()
+        .from('projects')
+        .select('id')
+        .eq('id', requestedProjectId)
+        .eq('developer_id', developer.id)
+        .single()
+
+      if (projectLookupError || !projectData) {
+        console.error('❌ DATABASE: Error looking up provided project:', projectLookupError?.message)
+        return NextResponse.json(
+          { error: 'Failed to lookup provided project' },
           { status: 500 }
         )
       }
 
-      project = newProject
-      console.log(`✅ DATABASE: Created project ${project.id}`)
+      project = projectData
+
+      // Delete old properties before inserting new ones (re-upload scenario)
+      if (project?.id) {
+        const { error: deleteError } = await createAdminClient()
+          .from('properties')
+          .delete()
+          .eq('project_id', project.id)
+
+        if (deleteError) {
+          console.error('⚠️ DATABASE: Error deleting old properties:', deleteError.message)
+        } else {
+          console.log(`🗑️ DATABASE: Cleared old properties for project ${project.id}`)
+        }
+      }
     } else {
-      console.log(`♻️ DATABASE: Found existing project (id: ${project.id}), will replace properties`)
+      // FALLBACK: Auto-create project from property data (legacy behavior)
+      const projectName = properties[0]?.project_name || 'Imported Properties'
+      const projectSlug = generateSlug(projectName)
 
-      // Delete old properties before inserting new ones
-      const { error: deleteError } = await createAdminClient()
-        .from('properties')
-        .delete()
-        .eq('project_id', project.id)
+      console.log(`🔍 DATABASE: Auto-creating project from data: "${projectName}" (slug: ${projectSlug})`)
 
-      if (deleteError) {
-        console.error('⚠️ DATABASE: Error deleting old properties:', deleteError.message)
+      // Get or create project
+      const { data: projectData, error: projectLookupError } = await createAdminClient()
+        .from('projects')
+        .select('id')
+        .eq('developer_id', developer.id)
+        .eq('slug', projectSlug)
+        .maybeSingle()
+
+      project = projectData
+
+      if (projectLookupError) {
+        console.error('❌ DATABASE: Error looking up project:', projectLookupError.message)
+        return NextResponse.json(
+          { error: 'Failed to lookup project' },
+          { status: 500 }
+        )
+      }
+
+      if (!project) {
+        console.log(`📦 DATABASE: Creating new project: "${projectName}"`)
+
+        const { data: newProject, error: insertError } = await createAdminClient()
+          .from('projects')
+          .insert({
+            developer_id: developer.id,
+            name: projectName,
+            slug: projectSlug,
+            description: `Auto-created from Web Worker parsed CSV upload`,
+            status: 'active'
+          })
+          .select('id')
+          .single()
+
+        if (insertError || !newProject) {
+          console.error('❌ DATABASE: Project creation failed:', insertError)
+          return NextResponse.json(
+            { error: 'Failed to create project' },
+            { status: 500 }
+          )
+        }
+
+        project = newProject
+        console.log(`✅ DATABASE: Created project ${newProject.id}`)
       } else {
-        console.log(`🗑️ DATABASE: Cleared old properties for project ${project.id}`)
+        console.log(`♻️ DATABASE: Found existing project (id: ${projectData.id}), will replace properties`)
+
+        // Delete old properties before inserting new ones
+        const { error: deleteError } = await createAdminClient()
+          .from('properties')
+          .delete()
+          .eq('project_id', projectData.id)
+
+        if (deleteError) {
+          console.error('⚠️ DATABASE: Error deleting old properties:', deleteError.message)
+        } else {
+          console.log(`🗑️ DATABASE: Cleared old properties for project ${projectData.id}`)
+        }
       }
     }
 
+    // Ensure project exists before proceeding
+    if (!project?.id) {
+      console.error('❌ DATABASE: No valid project ID after lookup/creation')
+      return NextResponse.json(
+        { error: 'Failed to establish project for properties' },
+        { status: 500 }
+      )
+    }
+
     // Prepare properties for database insert (map Web Worker parsed data to DB schema)
+    const projectId = project.id // Store in const for TypeScript
     const propertiesToInsert = properties.map(property => {
       return {
-        project_id: project.id,
+        project_id: projectId,
         developer_id: developer.id,
 
         // Location (required)
@@ -211,7 +281,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`✅ DATABASE: Saved ${propertiesToInsert.length} properties to project ${project.id}`)
+    console.log(`✅ DATABASE: Saved ${propertiesToInsert.length} properties to project ${projectId}`)
+
+    // Get project name for response
+    const { data: projectDetails } = await createAdminClient()
+      .from('projects')
+      .select('name')
+      .eq('id', projectId)
+      .single()
 
     // Build response with rate limit headers
     const response = NextResponse.json({
@@ -219,8 +296,8 @@ export async function POST(request: NextRequest) {
       message: `Parsed and saved ${validRecords} properties`,
       data: {
         propertiesAdded: propertiesToInsert.length,
-        projectId: project.id,
-        projectName: projectName
+        projectId: projectId,
+        projectName: projectDetails?.name || 'Unknown'
       }
     })
 

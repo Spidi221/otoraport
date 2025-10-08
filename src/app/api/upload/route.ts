@@ -5,8 +5,10 @@ import { parseCSVSmart, parseExcelFile } from '@/lib/papaparse-csv-parser'
 import { SmartCSVParser } from '@/lib/smart-csv-parser'
 import { validateUploadFile } from '@/lib/security'
 import { rateLimitWithAuth, uploadRateLimit, uploadRateLimitAuthenticated } from '@/lib/redis-rate-limit'
-import { sendUploadConfirmationEmail } from '@/lib/email-service'
+import { sendUploadConfirmationEmail, sendUploadErrorEmail } from '@/lib/email-service'
 import { ParsedProperty, parseDecimal, parseDate } from '@/lib/api-schemas'
+import { enforcePropertyLimit, logLimitViolation } from '@/lib/middleware/subscription-limits'
+import { canAccessFeature } from '@/lib/middleware/trial-middleware'
 
 /**
  * Helper function to get error message from unknown error
@@ -34,6 +36,10 @@ export async function POST(request: NextRequest) {
     return rateLimitResponse
   }
 
+  // Declare variables outside try block for error handling
+  let developer: any = null
+  let file: File | null = null
+
   try {
     // If rate limiting already checked auth and found a user, reuse it
     if (!user) {
@@ -50,7 +56,7 @@ export async function POST(request: NextRequest) {
     console.log('✅ UPLOAD API: User authenticated:', user.email)
 
     // Get developer profile using user ID from rate limit check
-    const { data: developer, error: profileError } = await supabase
+    const { data: developerData, error: profileError } = await supabase
       .from('developers')
       .select('*')
       .eq('user_id', user.id)
@@ -63,6 +69,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    developer = developerData
 
     if (!developer) {
       console.log('⚠️ UPLOAD API: No developer profile, creating one...')
@@ -102,15 +110,47 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ UPLOAD API: Developer profile found:', developer.client_id)
 
+    // Check trial status - block upload if trial expired
+    const trialCheck = await canAccessFeature(developer.id, 'upload')
+    if (!trialCheck.allowed) {
+      console.log('❌ UPLOAD API: Trial check failed:', trialCheck.reason)
+      return NextResponse.json(
+        {
+          error: 'Trial expired',
+          message: trialCheck.reason || 'Twój okres próbny wygasł. Upgrade aby kontynuować.',
+          upgradeUrl: '/dashboard/settings#subscription'
+        },
+        { status: 403 }
+      )
+    }
+
     // Parse form data
     const formData = await request.formData()
-    const file = formData.get('file') as File
+    file = formData.get('file') as File
+    const requestedProjectId = formData.get('project_id') as string | null
 
     if (!file) {
       return NextResponse.json(
         { error: 'No file provided' },
         { status: 400 }
       )
+    }
+
+    // If project_id provided, validate it belongs to this developer
+    if (requestedProjectId) {
+      const { data: project, error: projectError } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('id', requestedProjectId)
+        .eq('developer_id', developer.id)
+        .single()
+
+      if (projectError || !project) {
+        return NextResponse.json(
+          { error: 'Projekt nie znaleziony lub nie należy do Ciebie' },
+          { status: 400 }
+        )
+      }
     }
 
     console.log('📁 UPLOAD API: File received:', file.name, file.size, 'bytes')
@@ -159,9 +199,25 @@ export async function POST(request: NextRequest) {
         console.log('🔍 UPLOAD API: Sample data:', JSON.stringify(smartParseResult.data[0], null, 2))
         console.log('🗺️ UPLOAD API: Mappings:', JSON.stringify(smartParseResult.mappings, null, 2))
 
-        // Save properties to database
+        // SUBSCRIPTION LIMIT CHECK: Enforce property limits before saving
         if (smartParseResult.data && smartParseResult.data.length > 0) {
-          await savePropertiesToDatabase(developer.id, smartParseResult.data, file.name)
+          const limitCheck = await enforcePropertyLimit(developer.id, smartParseResult.data.length)
+
+          if (!limitCheck.allowed && limitCheck.error) {
+            // Log the violation for analytics
+            await logLimitViolation(developer.id, 'property', {
+              current: limitCheck.error.currentUsage.properties || 0,
+              limit: limitCheck.error.currentUsage.limit || 0,
+              attempted: smartParseResult.data.length,
+              plan: developer.subscription_plan || 'basic'
+            })
+
+            console.log(`⛔ UPLOAD API: Property limit exceeded for developer ${developer.id}`)
+            return NextResponse.json(limitCheck.error, { status: 403 })
+          }
+
+          // Save properties to database
+          await savePropertiesToDatabase(developer.id, smartParseResult.data, file.name, requestedProjectId)
           savedToDatabase = true
           console.log(`✅ UPLOAD API: Saved ${smartParseResult.data.length} properties to database`)
         }
@@ -181,9 +237,25 @@ export async function POST(request: NextRequest) {
         console.log('🔍 UPLOAD API: Sample data:', JSON.stringify(smartParseResult.data[0], null, 2))
         console.log('🗺️ UPLOAD API: Mappings:', JSON.stringify(smartParseResult.mappings, null, 2))
 
-        // Save properties to database
+        // SUBSCRIPTION LIMIT CHECK: Enforce property limits before saving
         if (smartParseResult.data && smartParseResult.data.length > 0) {
-          await savePropertiesToDatabase(developer.id, smartParseResult.data, file.name)
+          const limitCheck = await enforcePropertyLimit(developer.id, smartParseResult.data.length)
+
+          if (!limitCheck.allowed && limitCheck.error) {
+            // Log the violation for analytics
+            await logLimitViolation(developer.id, 'property', {
+              current: limitCheck.error.currentUsage.properties || 0,
+              limit: limitCheck.error.currentUsage.limit || 0,
+              attempted: smartParseResult.data.length,
+              plan: developer.subscription_plan || 'basic'
+            })
+
+            console.log(`⛔ UPLOAD API: Property limit exceeded for developer ${developer.id}`)
+            return NextResponse.json(limitCheck.error, { status: 403 })
+          }
+
+          // Save properties to database
+          await savePropertiesToDatabase(developer.id, smartParseResult.data, file.name, requestedProjectId)
           savedToDatabase = true
           console.log(`✅ UPLOAD API: Saved ${smartParseResult.data.length} properties to database`)
         }
@@ -241,6 +313,21 @@ export async function POST(request: NextRequest) {
 
   } catch (error: unknown) {
     console.error('💥 UPLOAD API: Unexpected error:', error)
+
+    // Try to send error email if we have developer info
+    try {
+      if (developer) {
+        await sendUploadErrorEmail(developer, {
+          fileName: file?.name || 'unknown file',
+          errorMessage: getErrorMessage(error),
+          errorDetails: error instanceof Error ? error.stack : undefined
+        })
+        console.log('✉️ UPLOAD API: Error email sent')
+      }
+    } catch (emailError) {
+      console.error('⚠️ UPLOAD API: Failed to send error email:', emailError)
+    }
+
     return NextResponse.json(
       { error: 'Upload failed - internal server error' },
       { status: 500 }
@@ -263,67 +350,103 @@ function generateSlug(name: string): string {
     .substring(0, 255) // Limit to schema max length
 }
 
-async function savePropertiesToDatabase(developerId: string, properties: any[], fileName: string) {
+async function savePropertiesToDatabase(developerId: string, properties: any[], fileName: string, requestedProjectId: string | null = null) {
   try {
-    // CRITICAL FIX: Extract meaningful project name from filename
-    const projectName = SmartCSVParser.extractProjectName(fileName)
-    const projectSlug = generateSlug(projectName)
+    let project: { id: string } | null = null
 
-    console.log(`🔍 DATABASE: Looking for existing project: "${projectName}" (slug: ${projectSlug})`)
+    // If requestedProjectId is explicitly provided, use it (validation already done in main handler)
+    if (requestedProjectId) {
+      console.log(`🔍 DATABASE: Using provided project ID: ${requestedProjectId}`)
 
-    // First, get or create a project for this upload
-    const { data: projectData, error: projectLookupError } = await createAdminClient()
-      .from('projects')
-      .select('id')
-      .eq('developer_id', developerId)
-      .eq('slug', projectSlug)
-      .maybeSingle()
-
-    let project = projectData
-
-    if (projectLookupError) {
-      console.error('❌ DATABASE: Error looking up project:', projectLookupError.message)
-      throw new Error(`Failed to lookup project: ${projectLookupError.message}`)
-    }
-
-    if (!project) {
-      console.log(`📦 DATABASE: Creating new project: "${projectName}"`)
-
-      const { data: newProject, error: insertError } = await createAdminClient()
+      const { data: projectData, error: projectLookupError } = await createAdminClient()
         .from('projects')
-        .insert({
-          developer_id: developerId,
-          name: projectName,
-          slug: projectSlug,
-          description: `Automatically created from CSV upload: ${fileName}`
-        })
         .select('id')
+        .eq('id', requestedProjectId)
+        .eq('developer_id', developerId)
         .single()
 
-      if (insertError) {
-        console.error('❌ DATABASE: Project insert error:', insertError)
-        throw new Error(`Failed to create project: ${insertError.message}`)
+      if (projectLookupError || !projectData) {
+        console.error('❌ DATABASE: Error looking up provided project:', projectLookupError?.message)
+        throw new Error(`Failed to lookup provided project: ${projectLookupError?.message}`)
       }
 
-      if (!newProject) {
-        throw new Error('Project insert returned no data')
-      }
+      project = projectData
 
-      project = newProject
-      console.log(`✅ DATABASE: Created project ${project.id}`)
+      // Delete old properties before inserting new ones (re-upload scenario)
+      if (project?.id) {
+        const { error: deleteError } = await createAdminClient()
+          .from('properties')
+          .delete()
+          .eq('project_id', project.id)
+
+        if (deleteError) {
+          console.error('⚠️ DATABASE: Error deleting old properties:', deleteError.message)
+        } else {
+          console.log(`🗑️ DATABASE: Cleared old properties for project ${project.id}`)
+        }
+      }
     } else {
-      console.log(`♻️ DATABASE: Found existing project (id: ${project.id}), will replace properties`)
+      // FALLBACK: Auto-create project from filename (legacy behavior)
+      const projectName = SmartCSVParser.extractProjectName(fileName)
+      const projectSlug = generateSlug(projectName)
 
-      // CRITICAL FIX: Delete old properties before inserting new ones (re-upload scenario)
-      const { error: deleteError } = await createAdminClient()
-        .from('properties')
-        .delete()
-        .eq('project_id', project.id)
+      console.log(`🔍 DATABASE: Auto-creating project from filename: "${projectName}" (slug: ${projectSlug})`)
 
-      if (deleteError) {
-        console.error('⚠️ DATABASE: Error deleting old properties:', deleteError.message)
+      // First, get or create a project for this upload
+      const { data: projectData, error: projectLookupError } = await createAdminClient()
+        .from('projects')
+        .select('id')
+        .eq('developer_id', developerId)
+        .eq('slug', projectSlug)
+        .maybeSingle()
+
+      project = projectData
+
+      if (projectLookupError) {
+        console.error('❌ DATABASE: Error looking up project:', projectLookupError.message)
+        throw new Error(`Failed to lookup project: ${projectLookupError.message}`)
+      }
+
+      if (!project) {
+        console.log(`📦 DATABASE: Creating new project: "${projectName}"`)
+
+        const { data: newProject, error: insertError } = await createAdminClient()
+          .from('projects')
+          .insert({
+            developer_id: developerId,
+            name: projectName,
+            slug: projectSlug,
+            description: `Automatically created from CSV upload: ${fileName}`,
+            status: 'active'
+          })
+          .select('id')
+          .single()
+
+        if (insertError) {
+          console.error('❌ DATABASE: Project insert error:', insertError)
+          throw new Error(`Failed to create project: ${insertError.message}`)
+        }
+
+        if (!newProject) {
+          throw new Error('Project insert returned no data')
+        }
+
+        project = newProject
+        console.log(`✅ DATABASE: Created project ${newProject.id}`)
       } else {
-        console.log(`🗑️ DATABASE: Cleared old properties for project ${project.id}`)
+        console.log(`♻️ DATABASE: Found existing project (id: ${projectData.id}), will replace properties`)
+
+        // Delete old properties before inserting new ones (re-upload scenario)
+        const { error: deleteError } = await createAdminClient()
+          .from('properties')
+          .delete()
+          .eq('project_id', projectData.id)
+
+        if (deleteError) {
+          console.error('⚠️ DATABASE: Error deleting old properties:', deleteError.message)
+        } else {
+          console.log(`🗑️ DATABASE: Cleared old properties for project ${projectData.id}`)
+        }
       }
     }
 
@@ -333,9 +456,10 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
 
     // Prepare properties for database insert
     // Map parsed properties to database schema
+    const projectId = project.id // Store in const for TypeScript
     const propertiesToInsert = properties.map(property => {
       return {
-        project_id: project.id,
+        project_id: projectId,
         developer_id: developerId,
 
         // Lokalizacja (wymagane: wojewodztwo, powiat, gmina)
@@ -402,7 +526,7 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
       throw new Error(`Database insert failed: ${insertError.message}`)
     }
 
-    console.log(`✅ DATABASE: Saved ${propertiesToInsert.length} properties to project ${project.id}`)
+    console.log(`✅ DATABASE: Saved ${propertiesToInsert.length} properties to project ${projectId}`)
 
   } catch (error) {
     console.error('❌ DATABASE: Error saving properties:', error)
