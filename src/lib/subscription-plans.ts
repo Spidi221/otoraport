@@ -2,7 +2,7 @@
  * FAZA 1: Nowy system planów subskrypcji
  * - Basic: 20 mieszkań, 1 projekt, 149zł/miesiąc
  * - Pro: unlimited mieszkania, 2 projekty, 249zł/miesiąc + 50zł za dodatkowy projekt
- * - Enterprise: unlimited wszystko, 399zł/miesiąc + custom domains
+ * - Enterprise: unlimited wszystko, 499zł/miesiąc + custom domains
  */
 
 export type SubscriptionPlanType = 'basic' | 'pro' | 'enterprise';
@@ -32,12 +32,13 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanType, SubscriptionPlan> 
     propertiesLimit: 20,
     projectsLimit: 1,
     features: [
-      'Do 20 mieszkań',
       '1 inwestycja',
-      'Automatyczne XML/MD5',
-      'Codzienne raportowanie',
-      'Email support',
-      'Dashboard podstawowy'
+      'Maksymalnie 20 mieszkań',
+      'Automatyczne raporty XML/CSV/MD5',
+      'Publiczne endpointy dla dane.gov.pl',
+      'Codzienne automatyczne aktualizacje',
+      'Email support (odpowiedź do 24h)',
+      'Historia zmian cen'
     ],
     limitations: [
       'Maksymalnie 20 mieszkań',
@@ -55,14 +56,15 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanType, SubscriptionPlan> 
     projectsLimit: 2,
     additionalProjectFee: 5000, // +50zł za projekt
     features: [
-      'Unlimited mieszkania',
-      '2 inwestycje bazowo',
-      '+50zł za każdą dodatkową inwestycję',
-      'Priority support',
-      'Zaawansowane analytics',
-      'Export danych',
-      'Strona z cenami (opcjonalnie)',
-      'Historia cen'
+      '2 inwestycje w cenie bazowej',
+      '+50 zł/msc za każdą dodatkową',
+      'Unlimited liczba mieszkań',
+      'Wszystko z planu Basic',
+      'Subdomena nazwa.otoraport.pl',
+      'Strona z cenami dla klientów',
+      'Priority email support',
+      'Zaawansowane analytics i raporty',
+      'Historia cen z wykresami'
     ],
     limitations: [
       'Dodatkowe projekty: +50zł/miesiąc każdy'
@@ -75,19 +77,20 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanType, SubscriptionPlan> 
     id: 'enterprise',
     name: 'Enterprise',
     displayName: 'Plan Enterprise',
-    price: 39900, // 399zł
+    price: 49900, // 499zł
     propertiesLimit: null, // unlimited
     projectsLimit: null, // unlimited
     features: [
-      'Unlimited wszystko',
-      'Custom subdomena z cenami',
+      'Unlimited inwestycje i mieszkania',
+      'Wszystko z planu Pro',
+      'Custom domena (ceny.twojafirma.pl)',
+      'Własne SSL certificate',
+      'White-label branding',
       'Dedicated account manager',
-      'SLA 99.9%',
-      'Custom integrations',
-      'API access',
-      'White-label opcje',
-      'Priorytetowy support',
-      'Custom raportowanie'
+      'API access dla integracji',
+      'SLA 99.9% uptime z kompensacją',
+      'Priorytetowy support (odpowiedź do 2h)',
+      'Custom raportowanie i eksporty'
     ],
     color: 'purple',
     icon: '⭐'
@@ -108,6 +111,30 @@ export function calculateMonthlyCost(
   }
 
   return totalCost;
+}
+
+// Funkcja dedykowana do obliczania kosztu Pro plan (dla UI components)
+export function calculateProPlanCost(additionalProjects: number = 0): {
+  basePrice: number;
+  additionalFee: number;
+  totalPrice: number;
+  breakdown: string;
+} {
+  const proPlan = SUBSCRIPTION_PLANS.pro;
+  const basePrice = proPlan.price;
+  const additionalFee = additionalProjects * (proPlan.additionalProjectFee || 0);
+  const totalPrice = basePrice + additionalFee;
+
+  const breakdown = additionalProjects > 0
+    ? `${formatPrice(basePrice)} (bazowy) + ${additionalProjects} × ${formatPrice(proPlan.additionalProjectFee || 0)} = ${formatPrice(totalPrice)}`
+    : formatPrice(basePrice);
+
+  return {
+    basePrice,
+    additionalFee,
+    totalPrice,
+    breakdown
+  };
 }
 
 // Funkcja do formatowania ceny w polskiej walucie

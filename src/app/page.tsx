@@ -93,6 +93,7 @@ export default function LandingPage() {
               Spełnij wymogi <strong>ustawy z 21 maja 2025 roku</strong> o codziennym raportowaniu cen mieszkań.{" "}
               <span className="font-semibold text-gray-900">Jedno przesyłanie miesięcznie</span> - system automatycznie generuje
               pliki XML w formacie 1.13 gotowe do rejestracji na <strong>portalu dane.gov.pl</strong>.
+              Plany od <strong className="text-blue-600">149 zł/msc</strong> - wybierz odpowiedni dla skali Twojego biznesu.
             </p>
             
             {/* Urgency - Real regulatory consequences */}
@@ -727,11 +728,29 @@ export default function LandingPage() {
                 Ile kosztuje OTORAPORT i czy warto?
               </h3>
               <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
-                <p className="text-gray-600 leading-relaxed" itemProp="text">
-                  Plan Basic kosztuje <strong>149 zł/miesiąc</strong>, Pro <strong>249 zł/miesiąc</strong>, Enterprise <strong>399 zł/miesiąc</strong>. 
-                  Przy wymaganiu codziennego raportowania i skomplikowanych formatach XML, OTORAPORT 
-                  oszczędza <strong>setki godzin pracy rocznie</strong> na każdego dewelopera.
-                </p>
+                <div className="text-gray-600 leading-relaxed" itemProp="text">
+                  <p className="mb-4">
+                    <strong>Przejrzyste plany dopasowane do skali Twojego biznesu:</strong>
+                  </p>
+                  <ul className="space-y-2 mb-4">
+                    <li className="flex items-start">
+                      <span className="font-semibold text-gray-900 mr-2">Basic (149 zł/msc):</span>
+                      1 inwestycja, do 20 mieszkań - idealny start dla małych deweloperów
+                    </li>
+                    <li className="flex items-start">
+                      <span className="font-semibold text-gray-900 mr-2">Pro (249 zł/msc):</span>
+                      2 inwestycje bazowo + 50 zł/msc za każdą dodatkową, unlimited mieszkań, subdomena nazwa.otoraport.pl
+                    </li>
+                    <li className="flex items-start">
+                      <span className="font-semibold text-gray-900 mr-2">Enterprise (499 zł/msc):</span>
+                      Unlimited wszystko, custom domena ceny.twojafirma.pl, dedicated manager, SLA 99.9%
+                    </li>
+                  </ul>
+                  <p className="font-medium text-blue-700">
+                    Płatność roczna = 20% taniej! Przy wymaganiu codziennego raportowania i skomplikowanych formatach XML,
+                    OTORAPORT oszczędza <strong>setki godzin pracy rocznie</strong> na każdego dewelopera.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -808,7 +827,23 @@ export default function LandingPage() {
               </h3>
               <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
                 <div className="text-gray-600 leading-relaxed" itemProp="text">
-                  <p className="font-semibold text-gray-900 mb-3">Tak – zarządzamy portfolio 100+ inwestycji tak samo łatwo jak jedną. Unlimited w planach Professional (249 zł) i Enterprise (399 zł).</p>
+                  <p className="font-semibold text-gray-900 mb-3">
+                    Tak – elastyczne plany dopasowane do Twojego portfolio:
+                  </p>
+                  <div className="space-y-3 mb-4">
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="font-medium text-gray-900 mb-1">📦 Basic: 1 inwestycja</p>
+                      <p className="text-sm">Idealny do testów lub małych deweloperów z jednym projektem</p>
+                    </div>
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <p className="font-medium text-gray-900 mb-1">🚀 Pro: 2 inwestycje + elastyczne rozszerzenie</p>
+                      <p className="text-sm">2 projekty w cenie bazowej 249 zł/msc, każdy następny tylko +50 zł/msc. Skaluj według potrzeb!</p>
+                    </div>
+                    <div className="bg-purple-50 p-3 rounded-lg">
+                      <p className="font-medium text-gray-900 mb-1">⭐ Enterprise: Unlimited inwestycje</p>
+                      <p className="text-sm">Bez limitów - zarządzaj setkami projektów z jednego dashboardu</p>
+                    </div>
+                  </div>
                   <div className="space-y-3">
                     <div>
                       <p className="font-medium text-gray-900">🏗️ Centralne dowodzenie z jednego dashboardu:</p>
@@ -816,10 +851,7 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">🔄 Inteligentna automatyzacja:</p>
-                      <p>System auto-rozpoznaje inwestycje po kodzie pocztowym, oddzielne raporty XML dla każdej lokalizacji, historia zmian dla każdego mieszkania</p>
-                    </div>
-                    <div className="bg-blue-50 p-3 rounded-lg mt-4">
-                      <p className="font-medium text-blue-800">💡 Przykład: Deweloper z 5 inwestycjami oszczędza 20h tygodniowo na ręcznym raportowaniu, eliminując ryzyko pomyłek między projektami.</p>
+                      <p>System auto-rozpoznaje inwestycje po kodzie pocztowym, oddzielne raporty XML dla każdej lokalizacji, historia zmian dla każdego mieszkania z wykresami trendów</p>
                     </div>
                   </div>
                 </div>
