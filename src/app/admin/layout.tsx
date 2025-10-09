@@ -86,6 +86,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               Dashboard
             </a>
             <a
+              href="/admin/analytics"
+              className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              Analytics
+            </a>
+            <a
               href="/admin/users"
               className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
             >
