@@ -6,10 +6,14 @@ import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 import { PropertyData, PaginatedResponse, isApiSuccess, PropertyStatus } from "@/types/api";
-import { Search, X, ArrowUpDown, ArrowUp, ArrowDown, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, X, ArrowUpDown, ArrowUp, ArrowDown, Trash2, ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { StatusSelect } from "./status-select";
+import { BulkActions } from "./bulk-actions";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { PriceHistoryChart } from "./price-history-chart";
 
 // SWR fetcher with error handling
 const fetcher = async (url: string) => {
@@ -28,6 +32,7 @@ export function PropertiesTable() {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // SWR for data fetching with caching
   const { data, error: swrError, isLoading, mutate } = useSWR<PaginatedResponse<PropertyData>>(
@@ -111,6 +116,26 @@ export function PropertiesTable() {
     return filtered;
   }, [searchQuery, sortColumn, sortDirection, properties]);
 
+  // Selection handlers
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(filteredProperties.map(p => p.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedIds(prev => [...prev, id]);
+    } else {
+      setSelectedIds(prev => prev.filter(i => i !== id));
+    }
+  };
+
+  const isAllSelected = filteredProperties.length > 0 && selectedIds.length === filteredProperties.length;
+  const isSomeSelected = selectedIds.length > 0 && selectedIds.length < filteredProperties.length;
+
   // Delete handler for individual property
   const handleDelete = async (id: string, propertyNumber: string) => {
     if (!confirm(`Czy na pewno chcesz usunąć mieszkanie ${propertyNumber}?`)) {
@@ -171,10 +196,28 @@ export function PropertiesTable() {
         </div>
       </CardHeader>
       <CardContent>
+        {/* Bulk Actions Toolbar */}
+        <BulkActions
+          selectedIds={selectedIds}
+          onClearSelection={() => setSelectedIds([])}
+          onSuccess={() => {
+            mutate();
+            setSelectedIds([]);
+          }}
+        />
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b text-left">
+                <th className="pb-3 font-medium text-sm w-10">
+                  <Checkbox
+                    checked={isAllSelected}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Zaznacz wszystkie"
+                    className={isSomeSelected ? 'data-[state=checked]:bg-blue-600' : ''}
+                  />
+                </th>
                 <th className="pb-3 font-medium text-sm">
                   <button
                     onClick={() => handleSort('property_number')}
@@ -220,6 +263,7 @@ export function PropertiesTable() {
                     {getSortIcon('status')}
                   </button>
                 </th>
+                <th className="pb-3 font-medium text-sm">Historia cen</th>
                 <th className="pb-3 font-medium text-sm">Akcje</th>
               </tr>
             </thead>
@@ -227,6 +271,9 @@ export function PropertiesTable() {
               {isLoading ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <tr key={`skeleton-${i}`} className="border-b">
+                    <td className="py-3">
+                      <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
+                    </td>
                     <td className="py-3">
                       <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
                     </td>
@@ -243,13 +290,16 @@ export function PropertiesTable() {
                       <div className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>
                     </td>
                     <td className="py-3">
+                      <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+                    </td>
+                    <td className="py-3">
                       <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
                     </td>
                   </tr>
                 ))
               ) : error ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center">
+                  <td colSpan={8} className="py-8 text-center">
                     <div className="text-red-600">
                       <p className="font-medium">Wystąpił błąd</p>
                       <p className="text-sm text-muted-foreground mt-1">{error}</p>
@@ -264,7 +314,7 @@ export function PropertiesTable() {
                 </tr>
               ) : filteredProperties.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center">
+                  <td colSpan={8} className="py-8 text-center">
                     <div className="text-gray-500">
                       {searchQuery ? (
                         <>
@@ -287,11 +337,19 @@ export function PropertiesTable() {
               ) : (
                 filteredProperties.map((property) => {
                   const isDeleting = deletingId === property.id;
+                  const isSelected = selectedIds.includes(property.id);
                   return (
                     <tr
                       key={property.id}
-                      className="border-b last:border-b-0 hover:bg-gray-50 transition-colors"
+                      className={`border-b last:border-b-0 hover:bg-gray-50 transition-colors ${isSelected ? 'bg-blue-50' : ''}`}
                     >
+                      <td className="py-3">
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) => handleSelectOne(property.id, checked as boolean)}
+                          aria-label={`Zaznacz ${property.property_number}`}
+                        />
+                      </td>
                       <td className="py-3 font-mono text-sm">{property.property_number}</td>
                       <td className="py-3 text-sm">
                         {property.area !== null && property.area !== undefined && property.area > 0
@@ -306,6 +364,29 @@ export function PropertiesTable() {
                           propertyId={property.id}
                           onStatusChange={() => mutate()}
                         />
+                      </td>
+                      <td className="py-3">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                            >
+                              <TrendingUp className="w-4 h-4 mr-1" />
+                              Historia
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl">
+                            <DialogHeader>
+                              <DialogTitle>
+                                Historia cen - Mieszkanie {property.property_number}
+                              </DialogTitle>
+                            </DialogHeader>
+                            <div className="mt-4">
+                              <PriceHistoryChart propertyId={property.id} />
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </td>
                       <td className="py-3">
                         <Button

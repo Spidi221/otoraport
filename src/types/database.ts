@@ -399,6 +399,66 @@ export type Database = {
           },
         ]
       }
+      price_history: {
+        Row: {
+          id: string
+          property_id: string
+          developer_id: string
+          old_base_price: number | null
+          new_base_price: number | null
+          old_final_price: number | null
+          new_final_price: number | null
+          old_price_per_m2: number | null
+          new_price_per_m2: number | null
+          change_reason: string | null
+          changed_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          property_id: string
+          developer_id: string
+          old_base_price?: number | null
+          new_base_price?: number | null
+          old_final_price?: number | null
+          new_final_price?: number | null
+          old_price_per_m2?: number | null
+          new_price_per_m2?: number | null
+          change_reason?: string | null
+          changed_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          property_id?: string
+          developer_id?: string
+          old_base_price?: number | null
+          new_base_price?: number | null
+          old_final_price?: number | null
+          new_final_price?: number | null
+          old_price_per_m2?: number | null
+          new_price_per_m2?: number | null
+          change_reason?: string | null
+          changed_at?: string
+          created_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_history_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_history_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           banner_url: string | null
