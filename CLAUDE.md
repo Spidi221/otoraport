@@ -192,6 +192,45 @@ coderabbit review --help
 
 **Uwaga**: Middleware ma graceful degradation - jeśli wildcard domain nie jest skonfigurowany, ustawienia subdomen będą widoczne ale strony publiczne nie będą dostępne do czasu konfiguracji DNS.
 
+#### 🔐 Vercel API Token Setup (TASK #62)
+**Skonfigurować Vercel API Token dla automatycznego dodawania custom domains:**
+
+1. **Stwórz Vercel API Token:**
+   - Przejdź do [Vercel Account Settings → Tokens](https://vercel.com/account/tokens)
+   - Kliknij "Create Token"
+   - Nazwa: `OTORAPORT Custom Domains`
+   - Scope: Wybierz **tylko** uprawnienie "Add & manage domains"
+   - Expiration: Full Access (lub według preferencji)
+   - Skopiuj wygenerowany token (tylko raz widoczny!)
+
+2. **Pobierz Project ID i Team ID:**
+   ```bash
+   # Project ID
+   vercel project ls
+   # Znajdź projekt "otoraport-v2" i skopiuj ID
+
+   # Team ID (jeśli używasz Vercel Team)
+   vercel teams ls
+   # Skopiuj Team ID lub ustaw null jeśli personal account
+   ```
+
+3. **Dodaj do environment variables:**
+   ```bash
+   # W .env.local i .env.production
+   VERCEL_API_TOKEN=your_vercel_token_here
+   VERCEL_PROJECT_ID=prj_xxxxxxxxxxxxx
+   VERCEL_TEAM_ID=team_xxxxxxxxxxxxx  # lub null jeśli personal account
+   ```
+
+4. **Restart aplikacji** aby załadować nowe environment variables
+
+**Status**: ⏳ Oczekuje - kod gotowy, tylko brakuje Vercel API credentials
+
+**Co to nam daje**:
+- Automatyczne dodawanie custom domains do Vercel (bez ręcznej konfiguracji w dashboard)
+- Automatyczne wystawianie certyfikatów SSL przez Vercel
+- Enterprise users mogą używać własnych domen (np. `nieruchomosci.mojafirma.pl`)
+
 ---
 
 ## Task Master AI Instructions
