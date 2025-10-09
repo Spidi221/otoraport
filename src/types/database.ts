@@ -143,6 +143,17 @@ export type Database = {
           notification_frequency: 'daily' | 'weekly' | 'never'
           is_admin: boolean
           additional_projects_count: number
+          subdomain: string | null
+          branding_logo_url: string | null
+          branding_primary_color: string | null
+          branding_secondary_color: string | null
+          custom_domain: string | null
+          custom_domain_verified: boolean
+          custom_domain_verification_token: string | null
+          custom_domain_added_to_vercel: boolean
+          custom_domain_dns_configured: boolean
+          custom_domain_registered_at: string | null
+          custom_domain_verified_at: string | null
         }
         Insert: {
           additional_contact_info?: string | null
@@ -197,6 +208,17 @@ export type Database = {
           notification_frequency?: 'daily' | 'weekly' | 'never'
           is_admin?: boolean
           additional_projects_count?: number
+          subdomain?: string | null
+          branding_logo_url?: string | null
+          branding_primary_color?: string | null
+          branding_secondary_color?: string | null
+          custom_domain?: string | null
+          custom_domain_verified?: boolean
+          custom_domain_verification_token?: string | null
+          custom_domain_added_to_vercel?: boolean
+          custom_domain_dns_configured?: boolean
+          custom_domain_registered_at?: string | null
+          custom_domain_verified_at?: string | null
         }
         Update: {
           additional_contact_info?: string | null
@@ -251,6 +273,17 @@ export type Database = {
           notification_frequency?: 'daily' | 'weekly' | 'never'
           is_admin?: boolean
           additional_projects_count?: number
+          subdomain?: string | null
+          branding_logo_url?: string | null
+          branding_primary_color?: string | null
+          branding_secondary_color?: string | null
+          custom_domain?: string | null
+          custom_domain_verified?: boolean
+          custom_domain_verification_token?: string | null
+          custom_domain_added_to_vercel?: boolean
+          custom_domain_dns_configured?: boolean
+          custom_domain_registered_at?: string | null
+          custom_domain_verified_at?: string | null
         }
         Relationships: []
       }
