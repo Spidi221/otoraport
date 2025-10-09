@@ -4,6 +4,7 @@ import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { PostHogProvider } from './providers';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -63,9 +64,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ErrorBoundary>
-          {children}
-        </ErrorBoundary>
+        <PostHogProvider>
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
+        </PostHogProvider>
         <Analytics />
         <SpeedInsights />
       </body>

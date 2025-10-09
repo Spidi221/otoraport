@@ -1,7 +1,7 @@
 /**
- * GA4 Subscription Tracking Hook
+ * GA4 & PostHog Subscription Tracking Hook
  *
- * Monitors developer subscription state and tracks events in GA4 when:
+ * Monitors developer subscription state and tracks events in GA4 and PostHog when:
  * - User starts a trial
  * - Trial converts to paid subscription
  *
@@ -10,6 +10,11 @@
 
 import { useEffect, useRef } from 'react';
 import { trackSubscriptionStart, trackSubscriptionConvert } from '@/lib/ga4-tracking';
+import {
+  trackTrialStart,
+  trackSubscriptionStart as trackSubscriptionStartPostHog,
+  trackPaymentSuccess,
+} from '@/lib/analytics-events';
 
 interface SubscriptionTrackingProps {
   userId?: string;
@@ -56,9 +61,12 @@ export function useGA4SubscriptionTracking({
 
       // Only track if trial is actually active (not expired)
       if (daysRemaining > 0) {
+        // Track in GA4
         trackSubscriptionStart(userId, subscriptionPlan, daysRemaining);
+        // Track in PostHog
+        trackTrialStart(userId);
         trackedEventsRef.current.add(eventKey);
-        console.log('[GA4 Subscription Tracking] Trial start tracked:', subscriptionPlan, daysRemaining, 'days');
+        console.log('[Subscription Tracking] Trial start tracked:', subscriptionPlan, daysRemaining, 'days');
       }
     }
 
@@ -66,9 +74,13 @@ export function useGA4SubscriptionTracking({
     if (subscriptionStatus === 'active' && trialStatus === 'converted') {
       const planPrice = PLAN_PRICES[subscriptionPlan] || 0;
 
+      // Track in GA4
       trackSubscriptionConvert(userId, subscriptionPlan, planPrice);
+      // Track in PostHog
+      trackSubscriptionStartPostHog(userId, subscriptionPlan);
+      trackPaymentSuccess(userId, planPrice, subscriptionPlan);
       trackedEventsRef.current.add(eventKey);
-      console.log('[GA4 Subscription Tracking] Trial conversion tracked:', subscriptionPlan, planPrice, 'PLN');
+      console.log('[Subscription Tracking] Trial conversion tracked:', subscriptionPlan, planPrice, 'PLN');
     }
   }, [userId, subscriptionStatus, subscriptionPlan, trialStatus, trialEndsAt]);
 }

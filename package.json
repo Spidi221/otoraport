@@ -38,6 +38,7 @@
     "next": "15.5.4",
     "openai": "^6.0.0",
     "papaparse": "^5.5.3",
+    "posthog-js": "^1.273.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "resend": "^6.1.2",

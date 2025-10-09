@@ -3,6 +3,32 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { updateGA4Consent } from '@/lib/ga4-tracking'
+import posthog from 'posthog-js'
+
+/**
+ * Update PostHog consent based on analytics preference
+ */
+function updatePostHogConsent(analyticsEnabled: boolean): void {
+  if (typeof window === 'undefined') return
+
+  try {
+    // Check if PostHog is initialized
+    if (!posthog.__loaded) {
+      console.log('[CookieBanner] PostHog not initialized yet')
+      return
+    }
+
+    if (analyticsEnabled) {
+      posthog.opt_in_capturing()
+      console.log('[CookieBanner] PostHog opted in')
+    } else {
+      posthog.opt_out_capturing()
+      console.log('[CookieBanner] PostHog opted out')
+    }
+  } catch (error) {
+    console.error('[CookieBanner] Error updating PostHog consent:', error)
+  }
+}
 
 export function CookieBanner() {
   const [showBanner, setShowBanner] = useState(false)
@@ -37,6 +63,9 @@ export function CookieBanner() {
     // Update GA4 consent
     updateGA4Consent(true)
 
+    // Update PostHog consent
+    updatePostHogConsent(true)
+
     setShowBanner(false)
     setShowPreferences(false)
   }
@@ -54,6 +83,9 @@ export function CookieBanner() {
     // Update GA4 consent - deny analytics
     updateGA4Consent(false)
 
+    // Update PostHog consent - deny analytics
+    updatePostHogConsent(false)
+
     setShowBanner(false)
     setShowPreferences(false)
   }
@@ -67,6 +99,9 @@ export function CookieBanner() {
 
     // Update GA4 consent based on analytics preference
     updateGA4Consent(preferences.analytics)
+
+    // Update PostHog consent based on analytics preference
+    updatePostHogConsent(preferences.analytics)
 
     setShowBanner(false)
     setShowPreferences(false)
@@ -202,10 +237,10 @@ export function CookieBanner() {
                     <h4 className="font-medium text-gray-900">Cookies analityczne</h4>
                   </div>
                   <p className="text-gray-600 text-sm">
-                    Google Analytics, statystyki użytkowania, optymalizacja wydajności.
+                    Google Analytics, PostHog, statystyki użytkowania, optymalizacja wydajności.
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    _ga, _gid, _gat_gtag - anonimowe statystyki ruchu
+                    _ga, _gid, _gat_gtag, ph_* - anonimowe statystyki ruchu
                   </p>
                 </div>
                 <div className="ml-4">

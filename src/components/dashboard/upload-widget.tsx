@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { useCSVParserWorker } from "@/hooks/use-csv-parser-worker";
 import { trackUploadSuccess } from "@/lib/ga4-tracking";
+import { trackFileUpload } from "@/lib/analytics-events";
 
 interface UploadResult {
   fileName: string;
@@ -62,13 +63,14 @@ export function UploadWidget() {
         propertiesAdded: validRows
       });
 
-      // Track successful upload in GA4
+      // Track successful upload in GA4 and PostHog
       if (data?.data?.trackingData) {
         trackUploadSuccess(
           'parsed-data.csv',
           data.data.trackingData.recordsCount,
           data.data.trackingData.fileType
         );
+        trackFileUpload('parsed-data.csv', data.data.trackingData.recordsCount);
       }
 
       setParsingStatus(null);
@@ -177,13 +179,14 @@ export function UploadWidget() {
         propertiesAdded: recordsCount
       });
 
-      // Track successful upload in GA4
+      // Track successful upload in GA4 and PostHog
       if (data?.data?.trackingData) {
         trackUploadSuccess(
           file.name,
           data.data.trackingData.recordsCount,
           data.data.trackingData.fileType
         );
+        trackFileUpload(file.name, data.data.trackingData.recordsCount);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Wystąpił nieznany błąd');
