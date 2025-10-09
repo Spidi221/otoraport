@@ -7,6 +7,28 @@ import { getTrialStatusByUserId } from '@/lib/middleware/trial-middleware'
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
+  const host = req.headers.get('host') || ''
+
+  // ============================================================================
+  // SUBDOMAIN ROUTING (for public property pages)
+  // ============================================================================
+  // Extract subdomain from host (e.g., "firma.otoraport.pl" -> "firma")
+  const subdomain = host.split('.')[0]
+  const isSubdomain = host.includes('.otoraport.pl') && subdomain !== 'www' && subdomain !== 'app' && subdomain !== host
+
+  // If it's a subdomain request and not an API/auth route, handle subdomain routing
+  if (isSubdomain && !pathname.startsWith('/api') && !pathname.startsWith('/auth') && !pathname.startsWith('/_next')) {
+    console.log(`🌐 SUBDOMAIN ROUTING: ${subdomain}.otoraport.pl -> ${pathname}`)
+
+    // Rewrite to public property page with subdomain as parameter
+    // This will be handled by app/[subdomain]/page.tsx
+    const url = req.nextUrl.clone()
+    url.pathname = `/public/${subdomain}${pathname}`
+
+    console.log(`🌐 REWRITE TO: ${url.pathname}`)
+
+    return NextResponse.rewrite(url)
+  }
 
   // Allow public routes without auth
   const publicRoutes = [
@@ -15,6 +37,7 @@ export async function middleware(req: NextRequest) {
     '/auth/signup',
     '/auth/callback',
     '/api/public',
+    '/public', // Public property pages with subdomain routing
     '/pricing',
     '/about'
   ]
