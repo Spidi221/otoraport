@@ -1,0 +1,31 @@
+# Task ID: 58
+# Title: Implement Bulk Delete with Cache Invalidation
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Add bulk delete functionality for properties with proper cache invalidation for ministry endpoints
+# Details:
+Create POST /api/properties/bulk-delete endpoint accepting { propertyIds: string[] }, implement transactional delete (all or nothing), add cache revalidation for XML/CSV/MD5 endpoints after delete operations, build 'Delete Selected' button in Properties Table with confirmation modal showing preview of deletion count
+
+# Test Strategy:
+Test bulk delete with 1-100 properties, verify transaction atomicity (all deleted or none), confirm cache invalidation updates XML/CSV/MD5 endpoints, test confirmation modal displays correct count, validate success toast notifications
+
+# Subtasks:
+## 1. Develop Bulk Delete API Endpoint with Transactional Logic [done]
+### Dependencies: None
+### Description: Implement the POST /api/properties/bulk-delete endpoint to accept an array of property IDs and perform a transactional (all-or-nothing) delete operation.
+### Details:
+Create a new API endpoint that accepts a payload like { propertyIds: string[] }. Ensure the deletion is performed within a database transaction so that either all specified properties are deleted or none are, maintaining data integrity. Handle validation, permissions, and error responses according to API best practices.
+
+## 2. Implement Cache Invalidation for Ministry Endpoints After Bulk Delete [done]
+### Dependencies: 58.1
+### Description: Ensure that after a successful bulk delete, caches for XML, CSV, and MD5 endpoints related to properties are invalidated or revalidated.
+### Details:
+Integrate cache invalidation logic into the bulk delete endpoint so that, upon successful deletion, any cached data for ministry endpoints (XML, CSV, MD5) is cleared or refreshed. This ensures that subsequent requests reflect the updated property data.
+
+## 3. Build UI Integration: 'Delete Selected' Button with Confirmation Modal [done]
+### Dependencies: 58.1, 58.2
+### Description: Add a 'Delete Selected' button to the Properties Table UI, including a confirmation modal that previews the number of properties to be deleted.
+### Details:
+Update the frontend to allow users to select multiple properties and trigger the bulk delete operation. Implement a confirmation modal that displays the count of properties to be deleted and requires user confirmation before proceeding. Ensure the UI handles success and error states gracefully.
+

@@ -1,0 +1,65 @@
+# Task ID: 47
+# Title: Update Subscription Plans Configuration in Code
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Update src/lib/subscription-plans.ts to match new PRD pricing: Basic (14900 grosze, 20 properties, 1 project), Pro (unlimited properties, 2 projects, 5000 grosze additional project fee), Enterprise (unlimited everything).
+# Details:
+Update the SUBSCRIPTION_PLANS configuration object in src/lib/subscription-plans.ts to match the new PRD specifications:
+
+1. **Basic Plan Updates**: Already correctly configured at 14900 grosze (149zł), 20 properties limit, 1 project limit
+
+2. **Pro Plan Updates**: Change price from 24900 to match PRD (verify exact amount), ensure propertiesLimit is null (unlimited), projectsLimit is 2, additionalProjectFee is 5000 grosze (50zł)
+
+3. **Enterprise Plan Updates**: Ensure propertiesLimit and projectsLimit are both null (unlimited)
+
+4. **Update Features Arrays**: Review and update the features arrays for each plan to accurately reflect current capabilities and remove any outdated features
+
+5. **Add calculateProPlanCost Function**: Implement a dedicated function specifically for calculating Pro plan costs including base price plus additional project fees, making it easier for UI components to display dynamic pricing
+
+6. **Verify Existing Functions**: Review calculateMonthlyCost, calculateBilling, and other utility functions to ensure they work correctly with the updated plan configuration
+
+7. **Update Comments**: Ensure the header comment block reflects the correct pricing (149zł, 249zł, 399zł)
+
+8. **Test Integration**: Verify that existing components using this configuration (PricingSection, dashboard components) will work correctly with the updates
+
+# Test Strategy:
+Verify all plan prices match PRD specifications (Basic: 149zł, Pro: 249zł with 50zł additional projects, Enterprise: 399zł). Test calculateProPlanCost function returns correct totals for various additional project counts. Confirm existing calculateMonthlyCost and calculateBilling functions work with updated configuration. Check that features arrays are accurate and complete. Validate TypeScript compilation passes. Test that pricing components render correctly with new configuration.
+
+# Subtasks:
+## 1. Verify Basic Plan Configuration [done]
+### Dependencies: None
+### Description: Check that the Basic plan in src/lib/subscription-plans.ts matches the PRD: 14900 grosze, 20 properties, 1 project.
+### Details:
+Review the SUBSCRIPTION_PLANS object for the Basic plan. Confirm price, propertiesLimit, and projectsLimit are set to 14900, 20, and 1 respectively. No changes expected if already correct.
+
+## 2. Update Pro Plan Configuration [done]
+### Dependencies: 47.1
+### Description: Update the Pro plan to match PRD: correct price, unlimited properties, 2 projects, 5000 grosze additional project fee.
+### Details:
+Set Pro plan price to PRD value (verify if 24900 grosze), propertiesLimit to null, projectsLimit to 2, and additionalProjectFee to 5000. Double-check all fields for accuracy.
+
+## 3. Verify Enterprise Plan Configuration [done]
+### Dependencies: 47.2
+### Description: Ensure Enterprise plan has unlimited properties and projects (both limits set to null).
+### Details:
+Check that propertiesLimit and projectsLimit for Enterprise are null. Confirm other fields align with PRD.
+
+## 4. Update Features Arrays for All Plans [done]
+### Dependencies: 47.3
+### Description: Review and update the features arrays for each plan to reflect current capabilities and remove outdated features.
+### Details:
+Compare features arrays in the configuration with PRD and product documentation. Add, remove, or update features as needed for Basic, Pro, and Enterprise.
+
+## 5. Implement calculateProPlanCost Function [done]
+### Dependencies: 47.4
+### Description: Add a function to calculate Pro plan cost, including base price and additional project fees.
+### Details:
+Create calculateProPlanCost in src/lib/subscription-plans.ts. The function should accept the number of projects and return the correct total cost based on base price and additionalProjectFee.
+
+## 6. Integration and Regression Testing [done]
+### Dependencies: 47.5
+### Description: Test all dependent components and utilities to ensure correct integration with the updated subscription plans configuration.
+### Details:
+Run and expand integration tests for PricingSection, dashboard, and billing utilities. Verify that all plan logic, pricing calculations, and UI displays are correct and no regressions are introduced.
+

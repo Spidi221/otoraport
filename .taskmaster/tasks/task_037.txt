@@ -1,0 +1,43 @@
+# Task ID: 37
+# Title: Fix XML Auto-Refresh for Ministry Compliance
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Update XML and MD5 endpoints to disable caching and ensure daily date updates for Ministry Art. 19b compliance requirements
+# Details:
+Modify src/app/api/public/[clientId]/data.xml/route.ts: change 'export const revalidate = 300' to 'export const revalidate = 0', update Cache-Control header from 'max-age=300' to 'max-age=60'. Apply same changes to src/app/api/public/[clientId]/data.md5/route.ts. This ensures XML returns current date in YYYY-MM-DD format for ministry compliance while maintaining 1-minute client cache.
+
+# Test Strategy:
+Test XML endpoint returns current date on each request, verify MD5 checksum matches fresh XML content, confirm multiple requests within 1 minute return cached response, verify requests after 1 minute return fresh content with new date
+
+# Subtasks:
+## 1. Update Caching Configuration for XML Endpoint [done]
+### Dependencies: None
+### Description: Modify the data.xml route to disable server-side caching and set the client-side cache duration to 60 seconds for ministry compliance.
+### Details:
+In 'src/app/api/public/[clientId]/data.xml/route.ts', change 'export const revalidate = 300' to 'export const revalidate = 0' and update the Cache-Control header from 'max-age=300' to 'max-age=60'.
+
+## 2. Update Caching Configuration for MD5 Endpoint [done]
+### Dependencies: None
+### Description: Apply the same caching modifications to the data.md5 route, disabling server-side caching and setting the client-side cache to 60 seconds to maintain consistency with the XML endpoint.
+### Details:
+In 'src/app/api/public/[clientId]/data.md5/route.ts', change 'export const revalidate = 300' to 'export const revalidate = 0' and update the Cache-Control header from 'max-age=300' to 'max-age=60'.
+
+## 3. Verify Server-Side Refresh and Current Date [done]
+### Dependencies: 37.1
+### Description: Test the data.xml endpoint to confirm that server-side caching is disabled and that it returns the current date in YYYY-MM-DD format on new server requests after the client cache expires.
+### Details:
+Use a tool like curl to make a request to the data.xml endpoint. Wait for more than 60 seconds and make another request. Verify the server is hit again (e.g., no X-Vercel-Cache: HIT) and the <data_aggiornamento> tag contains the current date.
+
+## 4. Validate 60-Second Client-Side Caching Behavior [done]
+### Dependencies: 37.1, 37.2
+### Description: Confirm that both the XML and MD5 endpoints are correctly cached by the client for 60 seconds as specified by the updated 'Cache-Control: max-age=60' header.
+### Details:
+Using a browser's network tab or curl, make a request to data.xml. Immediately make a second request within the 60-second window. Verify the second response is served from a cache. Repeat the process for the data.md5 endpoint.
+
+## 5. Perform MD5 Integrity Check [done]
+### Dependencies: 37.3, 37.4
+### Description: Verify that the checksum from the data.md5 endpoint correctly corresponds to the content of a freshly generated data.xml file, ensuring data integrity for compliance.
+### Details:
+After ensuring the cache has expired (>60s), fetch the content from the data.xml endpoint. Calculate its MD5 checksum. Then, fetch the value from the data.md5 endpoint. Verify that the calculated checksum matches the fetched checksum.
+

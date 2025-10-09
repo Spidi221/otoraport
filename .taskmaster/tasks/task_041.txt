@@ -1,0 +1,43 @@
+# Task ID: 41
+# Title: Create Notifications System and Page
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Implement a comprehensive notifications system with database table, API endpoints, and /notifications page UI
+# Details:
+Create notifications table in Supabase with columns: id, developer_id, type (upload_complete, upload_error, ministry_sync, system_announcement), title, message, read (boolean), created_at. Implement RLS policies for developer-only access. Create API endpoints: GET /api/notifications (list with pagination), PATCH /api/notifications/[id] (mark as read), DELETE /api/notifications/[id] (delete). Build /notifications page showing list sorted by newest first, with mark as read/unread buttons, delete functionality, and empty state. Add unread count badge in header that updates real-time. Use existing Radix UI components for consistent styling.
+
+# Test Strategy:
+Test notifications page renders correctly, verify mark as read/unread functionality, confirm delete operations work, test unread count badge updates correctly, validate RLS policies prevent unauthorized access, test empty state display
+
+# Subtasks:
+## 1. Design and Implement Notifications Table with RLS Policies in Supabase [done]
+### Dependencies: None
+### Description: Create the notifications table in Supabase with all required columns and implement Row Level Security (RLS) policies to ensure only the owning developer can access their notifications.
+### Details:
+Define the table with columns: id, developer_id, type (enum: upload_complete, upload_error, ministry_sync, system_announcement), title, message, read (boolean), created_at. Add appropriate indexes for efficient querying. Write RLS policies restricting access to notifications where developer_id matches the authenticated user.
+
+## 2. Develop API Endpoints for Notifications CRUD Operations [done]
+### Dependencies: 41.1
+### Description: Implement REST API endpoints for listing, updating, and deleting notifications, supporting pagination and developer-only access.
+### Details:
+Create GET /api/notifications (with pagination), PATCH /api/notifications/[id] (mark as read/unread), and DELETE /api/notifications/[id] (delete notification). Ensure endpoints enforce authentication and RLS, and return appropriate error messages for unauthorized access.
+
+## 3. Implement Real-Time Unread Count Badge in Header [done]
+### Dependencies: 41.2
+### Description: Add a real-time unread notifications count badge to the application header, updating automatically as notifications are read or received.
+### Details:
+Use Supabase real-time subscriptions to listen for changes in the notifications table for the current developer. Update the unread count badge in the header UI using existing Radix UI components for styling consistency.
+
+## 4. Build /notifications Page UI with List, Actions, and Empty State [done]
+### Dependencies: 41.2
+### Description: Create the /notifications page displaying notifications sorted by newest first, with mark as read/unread and delete actions, and an empty state when there are no notifications.
+### Details:
+Fetch notifications from the API, display them in a list using Radix UI components, and implement buttons for marking as read/unread and deleting. Show a styled empty state when the list is empty. Ensure accessibility and responsive design.
+
+## 5. End-to-End Testing and Validation of Notifications System [done]
+### Dependencies: 41.3, 41.4
+### Description: Perform comprehensive end-to-end testing of the notifications system, covering database, API, UI, and real-time features.
+### Details:
+Test the full workflow: notification creation, listing, marking as read/unread, deletion, real-time updates, RLS enforcement, and UI consistency. Validate error handling and edge cases, such as unauthorized access and empty states.
+

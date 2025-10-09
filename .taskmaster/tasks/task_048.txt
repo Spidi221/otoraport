@@ -1,0 +1,74 @@
+# Task ID: 48
+# Title: Enforce Subscription Limits in Upload & Properties APIs
+# Status: done
+# Dependencies: 47
+# Priority: high
+# Description: Create middleware enforcePropertyLimit() and enforceProjectLimit() to check subscription limits before allowing uploads and property creation.
+# Details:
+Create middleware functions that check subscription limits before allowing uploads and property creation:
+
+1. **Create src/lib/subscription-limits-middleware.ts**:
+   - enforcePropertyLimit(developerId: string, newPropertiesCount: number): checks if adding properties would exceed plan limits
+   - enforceProjectLimit(developerId: string): checks if creating projects would exceed plan limits
+   - Use existing canAddProperty() and canAddProject() functions from subscription-plans.ts
+   - Return helpful error messages with current usage and upgrade links
+
+2. **Update POST /api/upload route** (src/app/api/upload/route.ts:281):
+   - Add property limit check before savePropertiesToDatabase()
+   - Check total properties count that would result after upload
+   - Return 403 with usage details and upgrade link if limit exceeded
+
+3. **Update POST /api/properties route** (create new endpoint):
+   - Add property limit check before creating individual properties
+   - Use enforcePropertyLimit() middleware
+   - Return 403 with helpful error message if limit exceeded
+
+4. **Error Response Format**:
+   ```json
+   {
+     "error": "Property limit exceeded",
+     "currentUsage": { "properties": 18, "limit": 20 },
+     "message": "You have reached your plan limit of 20 properties. Upgrade to Pro for unlimited properties.",
+     "upgradeUrl": "/dashboard/settings#subscription"
+   }
+   ```
+
+5. **Integration Points**:
+   - Use existing checkSubscriptionLimits() from subscription-plans.ts:300
+   - Integrate with existing rate limiting in upload route
+   - Maintain backward compatibility with existing upload flow
+
+# Test Strategy:
+Test property limit enforcement: 1) Create developer with Basic plan (20 property limit), 2) Upload CSV with 21 properties and verify 403 response with helpful message, 3) Upload 19 properties successfully, then try to upload 2 more and verify rejection, 4) Upgrade to Pro plan and verify unlimited properties work, 5) Test project limit enforcement similarly. Verify error messages include current usage, plan limits, and upgrade links. Test that existing functionality continues to work for users within limits.
+
+# Subtasks:
+## 1. Implement Property and Project Limit Middleware [done]
+### Dependencies: None
+### Description: Develop enforcePropertyLimit() and enforceProjectLimit() middleware functions to check subscription limits before allowing uploads and property creation.
+### Details:
+Create src/lib/subscription-limits-middleware.ts. Implement enforcePropertyLimit(developerId, newPropertiesCount) and enforceProjectLimit(developerId) using canAddProperty() and canAddProject() from subscription-plans.ts. Ensure middleware returns detailed error messages with current usage and upgrade links.
+
+## 2. Integrate Property Limit Middleware with Upload API [done]
+### Dependencies: 48.1
+### Description: Update POST /api/upload route to enforce property limits before saving uploaded properties to the database.
+### Details:
+Modify src/app/api/upload/route.ts to call enforcePropertyLimit() before savePropertiesToDatabase(). Calculate total properties after upload and return 403 with usage details and upgrade link if limit exceeded. Integrate with existing rate limiting logic.
+
+## 3. Integrate Property Limit Middleware with Properties API [done]
+### Dependencies: 48.1
+### Description: Add property limit enforcement to the POST /api/properties endpoint for individual property creation.
+### Details:
+Create or update the POST /api/properties route to use enforcePropertyLimit() middleware before property creation. Return 403 with helpful error message if limit exceeded.
+
+## 4. Standardize Error Response Formatting for Limit Enforcement [done]
+### Dependencies: 48.1, 48.2, 48.3
+### Description: Define and implement a consistent error response format for subscription limit violations across all affected endpoints.
+### Details:
+Ensure all limit enforcement errors use the specified JSON format, including error, currentUsage, message, and upgradeUrl fields. Refactor endpoints to use this format for all relevant error cases.
+
+## 5. End-to-End Testing of Subscription Limit Enforcement [done]
+### Dependencies: 48.1, 48.2, 48.3, 48.4
+### Description: Perform comprehensive end-to-end tests for all subscription plans and edge cases to ensure correct enforcement and error handling.
+### Details:
+Test scenarios: Basic plan (20 property limit), Pro plan (unlimited properties, 2 projects), Enterprise (unlimited). Validate middleware, API integration, error responses, and backward compatibility. Cover upgrades and downgrades.
+

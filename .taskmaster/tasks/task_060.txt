@@ -1,0 +1,71 @@
+# Task ID: 60
+# Title: Build Admin Analytics Dashboard with Revenue and User KPIs
+# Status: done
+# Dependencies: 57
+# Priority: medium
+# Description: Create the /admin/analytics page featuring MRR/ARR revenue charts, user growth visualizations, and KPI cards (total users, MRR, churn rate, trial conversion), and implement the supporting GET /api/admin/analytics endpoint.
+# Details:
+1. **API Endpoint Implementation:**
+   - Design and implement GET /api/admin/analytics to aggregate and return analytics data: monthly recurring revenue (MRR), annual recurring revenue (ARR), total users, churn rate, trial conversion rate, and user growth over time.
+   - Query and aggregate data from subscriptions, users, and trials tables, ensuring efficient SQL queries and proper access control (admin-only, using requireAdmin middleware from Task 57).
+   - Structure the API response for easy consumption by the frontend (e.g., { mrr, arr, totalUsers, churnRate, trialConversion, userGrowth: [{month, count}], revenueGrowth: [{month, mrr, arr}] }).
+   - Ensure sensitive data is not exposed and all calculations (e.g., churn rate, trial conversion) follow SaaS best practices.
+
+2. **Frontend Dashboard Page (/admin/analytics):**
+   - Use a modern React UI library (e.g., MUI, Tremor, or Ant Design) for rapid development and consistent styling[1][2][5][8].
+   - Build a responsive grid layout with KPI cards at the top (total users, MRR, churn rate, trial conversion), using loading skeletons and error states.
+   - Implement interactive charts for MRR/ARR revenue and user growth using a charting library (e.g., Tremor, Nivo, or Recharts)[2][3][5].
+   - Fetch analytics data from the new API endpoint with SWR or React Query for caching and revalidation.
+   - Ensure the page is protected by admin authentication and RBAC (leveraging requireAdmin middleware).
+   - Follow accessibility and responsive design best practices.
+
+3. **Best Practices & Considerations:**
+   - Use server-side aggregation for performance and security.
+   - Memoize expensive calculations and cache results where appropriate.
+   - Document API schema and frontend data contracts.
+   - Add unit and integration tests for both backend and frontend components.
+   - Prepare for future extensibility (e.g., additional KPIs, export functionality).
+
+**References:**
+- Use Tremor or MUI for KPI cards and charts for rapid, visually appealing dashboards[1][2][5][8].
+- See [freeCodeCamp][2] and [YouTube][3] tutorials for full-stack analytics dashboard patterns.
+
+# Test Strategy:
+1. **API Testing:**
+   - Call GET /api/admin/analytics as an admin and verify the response includes accurate MRR, ARR, total users, churn rate, trial conversion, and time-series data.
+   - Attempt access as a non-admin and confirm a 403 response.
+   - Validate calculations against known database values (e.g., compare MRR/ARR to Stripe or billing data).
+
+2. **Frontend Testing:**
+   - Visit /admin/analytics as an admin and verify all KPI cards and charts render with correct, up-to-date data.
+   - Test loading and error states by simulating slow or failed API responses.
+   - Confirm responsive layout on mobile and desktop.
+   - Check accessibility (keyboard navigation, ARIA labels).
+
+3. **Integration Testing:**
+   - Change underlying data (e.g., add/cancel subscriptions, new users) and verify dashboard updates accordingly.
+   - Test cache invalidation and data refresh.
+
+4. **Security Testing:**
+   - Ensure only admins can access the page and API endpoint.
+   - Attempt unauthorized access and confirm proper error handling.
+
+# Subtasks:
+## 1. Design and Implement GET /api/admin/analytics Endpoint [done]
+### Dependencies: 60.57
+### Description: Create a secure, admin-only API endpoint that aggregates and returns analytics data for MRR, ARR, total users, churn rate, trial conversion, and user/revenue growth over time.
+### Details:
+Design efficient SQL queries to aggregate data from subscriptions, users, and trials tables. Implement proper access control using requireAdmin middleware. Structure the API response for easy frontend consumption, ensuring sensitive data is protected and calculations follow SaaS best practices. Document the API schema and data contracts.
+
+## 2. Build Responsive /admin/analytics Dashboard Page [done]
+### Dependencies: 60.1
+### Description: Develop a modern, accessible React dashboard page displaying KPI cards and interactive charts for revenue and user growth metrics.
+### Details:
+Use a React UI library (e.g., MUI, Tremor, Ant Design) for consistent styling. Implement a responsive grid layout with KPI cards (total users, MRR, churn rate, trial conversion) at the top. Add loading skeletons and error states. Integrate interactive charts (MRR/ARR, user growth) using a charting library (e.g., Tremor, Nivo, Recharts). Fetch data from the new API using SWR or React Query. Protect the page with admin authentication and RBAC. Follow accessibility and responsive design best practices.
+
+## 3. Ensure Performance, Security, and Extensibility [done]
+### Dependencies: 60.1, 60.2
+### Description: Optimize dashboard performance, enforce security, document components, and prepare for future feature expansion.
+### Details:
+Use server-side aggregation for performance and security. Memoize expensive calculations and implement caching where appropriate. Document API and frontend data contracts. Add unit and integration tests for both backend and frontend. Design the dashboard layout and data flow to support future KPIs and export functionality. Review and refine based on dashboard design best practices for hierarchy, clarity, and user experience[1][2][3].
+

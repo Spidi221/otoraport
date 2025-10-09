@@ -1,0 +1,97 @@
+# Task ID: 50
+# Title: Implement Card-Required Signup Flow
+# Status: done
+# Dependencies: 49
+# Priority: high
+# Description: Create onboarding pages with Stripe Checkout integration requiring card collection for 14-day trial with automatic subscription conversion.
+# Details:
+Implement comprehensive card-required signup flow with trial period support:
+
+**1. Create Onboarding Pages:**
+- Create /onboarding/select-plan page with pricing plans display using existing SUBSCRIPTION_PLANS configuration
+- Create /onboarding/payment page with Stripe Checkout integration
+- Use existing UI components from PricingSection and subscription system
+
+**2. Database Schema Updates:**
+- Add trial_status enum column to developers table: ('active', 'expired', 'converted', 'cancelled')
+- Ensure trial_ends_at timestamp exists (already in schema)
+- Add subscription tracking columns: current_period_end, subscription_status with enum ('trialing', 'active', 'inactive', 'cancelled', 'expired', 'past_due')
+- Update RLS policies to handle trial users
+
+**3. Enhanced Stripe Checkout Configuration:**
+- Modify existing /api/stripe/create-checkout-session/route.ts to support trial_period_days: 14
+- Add payment_method_collection: 'always' to ensure card is collected upfront
+- Configure automatic subscription start after trial ends
+- Add trial-specific metadata to sessions and subscriptions
+
+**4. Webhook Handlers for Trial Events:**
+- Extend existing /api/stripe/webhook/route.ts and handleStripeWebhook function
+- Handle customer.subscription.trial_will_end event (3 days before trial ends)
+- Handle customer.subscription.updated for trial to active conversion
+- Handle invoice.payment_failed for failed trial conversions
+- Update developers table with trial_status and subscription_status changes
+
+**5. Signup Flow Integration:**
+- Redirect new signups to /onboarding/select-plan instead of dashboard
+- Update authentication flow in auth callback to check if onboarding is complete
+- Set trial_status='active' and trial_ends_at=NOW() + INTERVAL '14 days' for new registrations
+- Ensure existing subscription middleware works with trial users
+
+**6. Trial User Experience:**
+- Update existing dashboard to show trial countdown banner
+- Allow full feature access during trial period
+- Implement trial-expired page with upgrade prompts
+- Send trial reminder emails using existing email system
+
+# Test Strategy:
+Test complete signup flow: 1) Create new account and verify redirect to /onboarding/select-plan, 2) Select plan and verify Stripe Checkout requires card with trial_period_days=14, 3) Complete checkout and verify trial_status='active' and trial_ends_at is 14 days from now, 4) Test webhook handling for trial events using Stripe CLI, 5) Verify dashboard shows trial banner with correct countdown, 6) Test trial expiration by manually updating trial_ends_at to past date, 7) Verify automatic subscription activation after trial ends, 8) Test failed payment handling during trial conversion, 9) Ensure existing subscription limits work correctly for trial users, 10) Test email notifications for trial events
+
+# Subtasks:
+## 1. Develop Onboarding Pages for Plan Selection and Payment [done]
+### Dependencies: None
+### Description: Create onboarding pages for selecting a subscription plan and entering payment details using Stripe Checkout.
+### Details:
+Implement /onboarding/select-plan to display pricing plans using SUBSCRIPTION_PLANS and PricingSection components. Build /onboarding/payment with Stripe Checkout integration, leveraging existing UI components for consistency.
+
+## 2. Update Database Schema for Trial and Subscription Tracking [done]
+### Dependencies: None
+### Description: Modify the developers table to support trial status, subscription status, and relevant timestamps for trial management.
+### Details:
+Add trial_status enum column, ensure trial_ends_at exists, add current_period_end and subscription_status columns. Update RLS policies to support trial users and subscription lifecycle.
+
+## 3. Integrate Stripe Checkout with Trial and Card Collection Requirements [done]
+### Dependencies: 50.1, 50.2
+### Description: Configure Stripe Checkout to require card collection for a 14-day trial and automatic subscription conversion.
+### Details:
+Update /api/stripe/create-checkout-session/route.ts to set trial_period_days=14, payment_method_collection='always', and add trial metadata. Ensure automatic subscription activation post-trial.
+
+## 4. Extend Webhook Handlers for Trial and Subscription Events [done]
+### Dependencies: 50.2, 50.3
+### Description: Enhance webhook logic to handle trial expiration, conversion, and payment failures, updating user records accordingly.
+### Details:
+Update /api/stripe/webhook/route.ts and handleStripeWebhook to process customer.subscription.trial_will_end, customer.subscription.updated, and invoice.payment_failed events. Sync trial_status and subscription_status in the database.
+
+## 5. Integrate Signup Flow with Onboarding and Trial Logic [done]
+### Dependencies: 50.1, 50.2, 50.3, 50.4
+### Description: Redirect new users to onboarding, set trial status, and ensure authentication and subscription middleware support trial users.
+### Details:
+Update signup and authentication flows to redirect to /onboarding/select-plan, set trial_status='active' and trial_ends_at, and verify middleware compatibility with trial accounts.
+
+## 6. Enhance Trial User Experience in Dashboard and Onboarding [done]
+### Dependencies: 50.5
+### Description: Provide trial countdown, full feature access, trial-expired page, and upgrade prompts for trial users.
+### Details:
+Update dashboard to show trial countdown banner, allow feature access during trial, implement trial-expired page, and display upgrade prompts when trial ends.
+
+## 7. Implement Email Notification Triggers for Trial Lifecycle [done]
+### Dependencies: 50.4, 50.5
+### Description: Configure email system to send trial reminders, conversion, and re-engagement emails at key trial stages.
+### Details:
+Use existing email infrastructure to send trial reminder emails (e.g., 3 days before trial ends), conversion success, and failed conversion notifications. Ensure unsubscribe functionality is present.
+
+## 8. Perform End-to-End Testing of Card-Required Signup Flow [done]
+### Dependencies: 50.1, 50.2, 50.3, 50.4, 50.5, 50.6, 50.7
+### Description: Test the complete signup, trial, and subscription conversion flow to ensure reliability and correct state transitions.
+### Details:
+Create test accounts, complete onboarding, verify Stripe Checkout, trial status, webhook handling, dashboard experience, and email notifications. Test edge cases and error handling throughout the flow.
+

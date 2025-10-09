@@ -17,9 +17,10 @@
             "description": "Develop a bash script that uses `find` commands to locate all files matching the specified patterns for deletion. The script should output a comprehensive list of these files to a temporary file (e.g., `files_to_remove.txt`) for review and for use in the final git commit message, without performing any deletion.",
             "dependencies": [],
             "details": "The script should use patterns like `check_*.sql`, `test-*.ts`, `* 2.md`, `opencode*.json`, `ceny-mieszkan-*.csv`, etc., as specified in the parent task. It should search the project root directory and be configured to avoid traversing into essential directories like `src/` or `.taskmaster/`. The output file will serve as a manifest for the cleanup operation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run the script and manually review the generated `files_to_remove.txt` to ensure it correctly identifies only the intended files for deletion and does not list any essential project files like `package.json` or files within `src/`.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:43.779Z"
           },
           {
             "id": 2,
@@ -29,9 +30,10 @@
               "36.1"
             ],
             "details": "The script will use `rm` commands with patterns identified in the previous step, such as `check_*.sql`, `enable_rls_*.sql`, `fix_*.sql`, `FINAL_SETUP_*.sql`, `KROK_*.sql`, `supabase_trigger_*.sql`, `test-*.{ts,js,mjs,xlsx,csv}`, `check-*.js`, `verify-*.md`, `opencode*.json`, and `claude_desktop_config*.json`. The script should be designed to be run from the project root.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "On a separate test branch, run the script and verify using `ls -a` and `git status` that the targeted files have been removed and no other files were affected.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:44.690Z"
           },
           {
             "id": 3,
@@ -41,9 +43,10 @@
               "36.1"
             ],
             "details": "The script will use `rm` commands with patterns like `* 2.{md,sql,json}`, `EXCEL-*.md`, `INPRO-*.md`, `MINISTRY_XML_*.md`, and `ceny-mieszkan-*.csv`. It should also include commands to remove any specified backup folders using `rm -rf`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "On a separate test branch, run the script and confirm that only the specified duplicate files, reports, CSVs, and backup folders are deleted. Check that essential files remain untouched.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:47.518Z"
           },
           {
             "id": 4,
@@ -54,9 +57,10 @@
               "36.3"
             ],
             "details": "Sequentially execute the removal scripts from subtasks 2 and 3. After execution, run `npm run build` to ensure the project compiles without TypeScript errors. Start the application locally to confirm it runs without runtime errors, ensuring no critical files were accidentally deleted.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "The `npm run build` command must complete successfully. The application must start, and the main pages must render correctly in a browser without console errors. A `git status` should show only deletions of the targeted files.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:48.415Z"
           },
           {
             "id": 5,
@@ -66,12 +70,13 @@
               "36.4"
             ],
             "details": "Use `git add -u` to stage all the deletions. Construct a commit message that clearly states the purpose of the cleanup (e.g., 'chore: Clean up project root from development artifacts'). Append the contents of the `files_to_remove.txt` file (generated in subtask 1) to the commit message body to provide a precise record of the changes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review the git commit history using `git log -1 --stat` to confirm the commit message is accurate and contains the full list of removed files. Verify that the remote repository reflects the changes correctly after pushing.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:49.336Z"
           }
         ],
-        "updatedAt": "2025-10-07T16:03:50.351Z"
+        "updatedAt": "2025-10-09T17:32:49.336Z"
       },
       {
         "id": "37",
@@ -89,9 +94,10 @@
             "description": "Modify the data.xml route to disable server-side caching and set the client-side cache duration to 60 seconds for ministry compliance.",
             "dependencies": [],
             "details": "In 'src/app/api/public/[clientId]/data.xml/route.ts', change 'export const revalidate = 300' to 'export const revalidate = 0' and update the Cache-Control header from 'max-age=300' to 'max-age=60'.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Code review to confirm the revalidate and Cache-Control values are correctly updated in the specified file.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:50.282Z"
           },
           {
             "id": 2,
@@ -99,9 +105,10 @@
             "description": "Apply the same caching modifications to the data.md5 route, disabling server-side caching and setting the client-side cache to 60 seconds to maintain consistency with the XML endpoint.",
             "dependencies": [],
             "details": "In 'src/app/api/public/[clientId]/data.md5/route.ts', change 'export const revalidate = 300' to 'export const revalidate = 0' and update the Cache-Control header from 'max-age=300' to 'max-age=60'.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Code review to confirm the revalidate and Cache-Control values are correctly updated in the specified file.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:51.183Z"
           },
           {
             "id": 3,
@@ -111,9 +118,10 @@
               "37.1"
             ],
             "details": "Use a tool like curl to make a request to the data.xml endpoint. Wait for more than 60 seconds and make another request. Verify the server is hit again (e.g., no X-Vercel-Cache: HIT) and the <data_aggiornamento> tag contains the current date.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Execute two requests to the XML endpoint spaced more than 60 seconds apart. The test passes if the date in the second response is current and the response is not a cache hit.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:52.097Z"
           },
           {
             "id": 4,
@@ -124,9 +132,10 @@
               "37.2"
             ],
             "details": "Using a browser's network tab or curl, make a request to data.xml. Immediately make a second request within the 60-second window. Verify the second response is served from a cache. Repeat the process for the data.md5 endpoint.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "The test is successful if subsequent requests within 60 seconds are served from a cache (e.g., browser cache or CDN HIT) and do not trigger a new server-side execution.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:53.006Z"
           },
           {
             "id": 5,
@@ -137,12 +146,13 @@
               "37.4"
             ],
             "details": "After ensuring the cache has expired (>60s), fetch the content from the data.xml endpoint. Calculate its MD5 checksum. Then, fetch the value from the data.md5 endpoint. Verify that the calculated checksum matches the fetched checksum.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "The test passes if the locally calculated MD5 hash of the XML content exactly matches the string returned by the MD5 endpoint for non-cached responses.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:53.906Z"
           }
         ],
-        "updatedAt": "2025-10-07T16:07:38.630Z"
+        "updatedAt": "2025-10-09T17:32:53.906Z"
       },
       {
         "id": "38",
@@ -160,9 +170,10 @@
             "description": "Identify the exact import statements and JSX element usages for SubscriptionCard and SubscriptionErrorHandler within the src/app/dashboard/page.tsx file.",
             "dependencies": [],
             "details": "Open src/app/dashboard/page.tsx and find the lines corresponding to `import SubscriptionCard...`, `import SubscriptionErrorHandler...`, `<SubscriptionCard />`, and `<SubscriptionErrorHandler />`. Document the line numbers for removal in the subsequent steps.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Confirm that the identified lines are the only references to SubscriptionCard and SubscriptionErrorHandler in the file.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:54.806Z"
           },
           {
             "id": 2,
@@ -172,9 +183,10 @@
               "38.1"
             ],
             "details": "Edit src/app/dashboard/page.tsx and remove the two lines that import the SubscriptionCard and SubscriptionErrorHandler components. Save the file.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review the file changes to ensure only the specified import statements have been deleted.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:55.746Z"
           },
           {
             "id": 3,
@@ -184,9 +196,10 @@
               "38.1"
             ],
             "details": "In src/app/dashboard/page.tsx, locate and remove the <SubscriptionErrorHandler /> and <SubscriptionCard /> tags from the component's render method. Ensure the remaining components (UploadWidget, ActionButtons, PropertiesTable) are still present and the layout is syntactically correct.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Visually inspect the JSX code to confirm the components have been removed and the remaining layout structure is valid.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:56.669Z"
           },
           {
             "id": 4,
@@ -197,9 +210,10 @@
               "38.3"
             ],
             "details": "Execute the command for type-checking and building the project (e.g., `npm run build` or `tsc`). The process must complete without any new errors related to the dashboard page or missing components.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Confirm that the build command finishes with a success status (exit code 0) and no TypeScript errors are logged in the console.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:57.601Z"
           },
           {
             "id": 5,
@@ -209,12 +223,13 @@
               "38.4"
             ],
             "details": "Start the development server. Open the application in a browser and go to the dashboard page. Check that the SubscriptionCard and SubscriptionErrorHandler are no longer visible. Confirm that UploadWidget, ActionButtons, and PropertiesTable are displayed correctly. Open the browser's developer console and ensure no new runtime errors or warnings are present.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "The dashboard UI renders with the simplified layout. The browser's console shows no errors upon page load or interaction.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:58.532Z"
           }
         ],
-        "updatedAt": "2025-10-07T16:24:26.176Z"
+        "updatedAt": "2025-10-09T17:32:58.532Z"
       },
       {
         "id": "39",
@@ -309,9 +324,10 @@
             "description": "Implement the backend API routes required to fetch and update user profile information, which will serve as the data layer for the settings page.",
             "dependencies": [],
             "details": "Create the API route `GET /api/user/profile` to retrieve the current user's data, including company name, NIP, REGON, email, phone, and client_id. Create the API route `PATCH /api/user/profile` to update the user's profile information, ensuring server-side validation of the incoming data.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify that GET /api/user/profile returns the correct user data. Test PATCH /api/user/profile with valid and invalid data to ensure updates are successful and validation errors are returned correctly.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:32:59.469Z"
           },
           {
             "id": 2,
@@ -321,9 +337,10 @@
               "40.1"
             ],
             "details": "In `src/app/dashboard/settings/page.tsx`, create a form using Radix UI components for company name, NIP, REGON, email, and phone. Implement client-side validation using a Zod schema. Connect the form to the GET and PATCH API endpoints to fetch initial data and submit updates. Implement loading and disabled states during form submission.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test form validation for all fields (required, format). Verify that submitting the form successfully calls the PATCH API and updates the UI. Confirm that data from the GET API correctly populates the form on initial load.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:00.392Z"
           },
           {
             "id": 3,
@@ -333,9 +350,10 @@
               "40.1"
             ],
             "details": "Implement the `POST /api/user/regenerate-client-id` endpoint to generate a new UUID for the user's client_id. In the UI, display the read-only client_id fetched from the profile API. Add a 'Regenerate' button that triggers a Radix UI confirmation dialog before calling the API. Display the static ministry endpoint URLs with 'Copy to Clipboard' buttons.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify the client_id is displayed correctly. Test the 'Regenerate' button, confirm the dialog appears, and a new UUID is generated and persisted upon confirmation. Test the 'Copy' buttons to ensure they copy the correct URLs to the clipboard.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:01.286Z"
           },
           {
             "id": 4,
@@ -343,9 +361,10 @@
             "description": "Construct the user interface for the 'Notification Preferences' and 'Account Actions' sections using Radix UI components for user interaction.",
             "dependencies": [],
             "details": "In the 'Notification Preferences' section, add a Radix UI Switch for enabling/disabling email notifications and a Radix UI Select for choosing frequency (daily/weekly). In the 'Account Actions' section, add buttons for 'Change Password' and 'Delete Account', with each button configured to trigger a respective Radix UI confirmation dialog. This subtask focuses on UI structure and component implementation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Confirm all UI components (Switch, Select, Buttons, Dialogs) render correctly. Verify that interacting with the components (e.g., opening a dialog) works as expected.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:02.202Z"
           },
           {
             "id": 5,
@@ -357,12 +376,13 @@
               "40.4"
             ],
             "details": "Create API endpoints to handle changing passwords and deleting user accounts. Implement the backend logic to update notification preferences in the database. Connect the UI components from subtask 4 to these new endpoints. Implement success and error toast notifications for all actions on the page (profile update, ID regeneration, password change, etc.) to provide clear user feedback.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test the API endpoints for changing password, deleting account, and updating notification preferences. Verify that the UI correctly calls these endpoints. Confirm that success/error toast notifications are displayed appropriately for every user action on the settings page.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:03.122Z"
           }
         ],
-        "updatedAt": "2025-10-07T18:00:23.861Z"
+        "updatedAt": "2025-10-09T17:33:03.122Z"
       },
       {
         "id": "41",
@@ -521,9 +541,10 @@
             "description": "Create a responsive grid layout for the dashboard statistics cards, displaying 2x2 on mobile and 4x1 on desktop.",
             "dependencies": [],
             "details": "Implement a grid layout using CSS grid or a UI library (e.g., Tailwind, MUI) to ensure the cards display as 2x2 on mobile and 4x1 on desktop. The layout should be visually consistent with the dashboard's design system.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Resize the dashboard on different devices and verify the cards rearrange correctly (2x2 on mobile, 4x1 on desktop).",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:34:06.501Z"
           },
           {
             "id": 7,
@@ -533,9 +554,10 @@
               6
             ],
             "details": "Create a card component that accepts props for icon, value, label, and trend direction. Use Lucide React for icons and display a trend arrow (up/down) with color coding. Ensure accessibility and consistent styling.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Render the component with sample data and verify correct display of icon, value, label, and trend indicator.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:34:07.436Z"
           },
           {
             "id": 8,
@@ -543,9 +565,10 @@
             "description": "Develop a backend API endpoint that returns aggregated statistics: total properties, available properties, sold properties (this month), and average price per m².",
             "dependencies": [],
             "details": "Implement GET /api/dashboard/stats to query the properties table, aggregate the required metrics, and return them in a JSON response. Use date-fns for date filtering (e.g., sold properties this month). Handle errors and edge cases.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Call the endpoint with test data and verify the response structure and accuracy of aggregated values.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:34:08.361Z"
           },
           {
             "id": 9,
@@ -556,9 +579,10 @@
               8
             ],
             "details": "Use React hooks (e.g., useEffect, useState) or a data-fetching library (e.g., SWR, React Query) to fetch data from /api/dashboard/stats. Show skeleton loaders during fetch and display error messages if the request fails.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Simulate loading and error states; verify skeletons and error messages appear as expected.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:34:09.300Z"
           },
           {
             "id": 10,
@@ -568,12 +592,13 @@
               9
             ],
             "details": "Modify the dashboard page/component to render the statistics cards grid at the top, directly above the UploadWidget. Ensure layout consistency and spacing.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Open the dashboard and confirm the statistics cards appear above the UploadWidget, with correct spacing and order.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:34:10.258Z"
           }
         ],
-        "updatedAt": "2025-10-08T07:45:30.158Z"
+        "updatedAt": "2025-10-09T17:34:10.258Z"
       },
       {
         "id": "43",
@@ -1112,9 +1137,10 @@
             "description": "Create onboarding pages for selecting a subscription plan and entering payment details using Stripe Checkout.",
             "dependencies": [],
             "details": "Implement /onboarding/select-plan to display pricing plans using SUBSCRIPTION_PLANS and PricingSection components. Build /onboarding/payment with Stripe Checkout integration, leveraging existing UI components for consistency.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify navigation between onboarding pages, correct plan display, and Stripe Checkout launch with required parameters.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:08.608Z"
           },
           {
             "id": 2,
@@ -1122,9 +1148,10 @@
             "description": "Modify the developers table to support trial status, subscription status, and relevant timestamps for trial management.",
             "dependencies": [],
             "details": "Add trial_status enum column, ensure trial_ends_at exists, add current_period_end and subscription_status columns. Update RLS policies to support trial users and subscription lifecycle.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run migration scripts, check schema changes, and validate RLS policy enforcement for trial and subscription states.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:09.512Z"
           },
           {
             "id": 3,
@@ -1135,9 +1162,10 @@
               2
             ],
             "details": "Update /api/stripe/create-checkout-session/route.ts to set trial_period_days=14, payment_method_collection='always', and add trial metadata. Ensure automatic subscription activation post-trial.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create checkout sessions, verify card collection is enforced, and confirm trial metadata is present in Stripe Dashboard.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:10.440Z"
           },
           {
             "id": 4,
@@ -1148,9 +1176,10 @@
               3
             ],
             "details": "Update /api/stripe/webhook/route.ts and handleStripeWebhook to process customer.subscription.trial_will_end, customer.subscription.updated, and invoice.payment_failed events. Sync trial_status and subscription_status in the database.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Simulate Stripe webhook events and verify correct updates to developer records and system state.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:11.347Z"
           },
           {
             "id": 5,
@@ -1163,9 +1192,10 @@
               4
             ],
             "details": "Update signup and authentication flows to redirect to /onboarding/select-plan, set trial_status='active' and trial_ends_at, and verify middleware compatibility with trial accounts.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Register new users, confirm onboarding redirect, and validate trial status and middleware behavior.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:12.248Z"
           },
           {
             "id": 6,
@@ -1175,9 +1205,10 @@
               5
             ],
             "details": "Update dashboard to show trial countdown banner, allow feature access during trial, implement trial-expired page, and display upgrade prompts when trial ends.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Log in as trial user, verify countdown, access features, and test trial-expired flow and upgrade prompts.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:13.193Z"
           },
           {
             "id": 7,
@@ -1188,9 +1219,10 @@
               5
             ],
             "details": "Use existing email infrastructure to send trial reminder emails (e.g., 3 days before trial ends), conversion success, and failed conversion notifications. Ensure unsubscribe functionality is present.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Trigger trial stage changes and verify correct email templates are sent to users at each stage.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:14.088Z"
           },
           {
             "id": 8,
@@ -1206,15 +1238,16 @@
               7
             ],
             "details": "Create test accounts, complete onboarding, verify Stripe Checkout, trial status, webhook handling, dashboard experience, and email notifications. Test edge cases and error handling throughout the flow.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run manual and automated tests covering all signup, trial, and subscription scenarios, including webhook and email triggers.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:14.987Z"
           }
         ],
         "complexity": 8,
         "recommendedSubtasks": 8,
         "expansionPrompt": "Break down the signup flow into: (1) onboarding pages, (2) database schema updates, (3) Stripe Checkout integration, (4) webhook event handling, (5) signup flow integration, (6) trial user experience updates, (7) email notification triggers, (8) end-to-end testing.",
-        "updatedAt": "2025-10-08T15:37:58.316Z"
+        "updatedAt": "2025-10-09T17:33:14.987Z"
       },
       {
         "id": "51",
@@ -1235,9 +1268,10 @@
             "description": "Create and implement 5 distinct trial email templates in email-service.ts, ensuring each template is personalized with developer usage data and trial stage context.",
             "dependencies": [],
             "details": "Design and code Day 0, Day 7, Day 11, Day 14 Success, and Day 14 Failed email templates. Use the existing sendDeveloperWelcomeEmail as a base for Day 0, and ensure each template includes personalized content such as property count, upload activity, compliance status, and plan recommendations. Integrate unsubscribe links and ensure transactional emails (Day 0) always send regardless of preferences.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Send test emails for each template using mock developer data. Verify personalization, correct template selection, and unsubscribe link functionality. Confirm transactional email bypasses opt-out.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:15.906Z"
           },
           {
             "id": 2,
@@ -1247,9 +1281,10 @@
               1
             ],
             "details": "Develop /api/cron/trial-checker route with CRON_SECRET authentication. Query developers with active trials, determine current trial stage from trial_ends_at and last_trial_email_sent, and send the correct email template. Update trial_stage and last_trial_email_sent after successful sends. Integrate error handling, retry logic, and logging using logEmailFailure.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Simulate cron job execution with various developer trial states. Confirm correct emails are sent, trial_stage and last_trial_email_sent are updated, and errors are logged and retried as needed.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:16.806Z"
           },
           {
             "id": 3,
@@ -1259,15 +1294,16 @@
               1
             ],
             "details": "Add trial_stage enum and last_trial_email_sent timestamp to developers table. Ensure trial_ends_at and trial_status columns exist. Integrate email_notifications_enabled and notification_frequency checks into the automation logic, and implement trial-specific opt-out tracking. Ensure all schema changes are backward compatible and documented.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run database migrations and verify schema updates. Test opt-out and preference logic by toggling settings and confirming correct email delivery behavior for all trial stages.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:17.707Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement trial email automation.",
-        "updatedAt": "2025-10-08T15:53:55.570Z"
+        "updatedAt": "2025-10-09T17:33:17.707Z"
       },
       {
         "id": "52",
@@ -1288,9 +1324,10 @@
             "description": "Review and update the existing projects table, ensure status enum values, verify RLS policies, confirm foreign keys, and add necessary indexes for performance.",
             "dependencies": [],
             "details": "Check that the projects table includes a status enum with 'active', 'inactive', and 'archived'. Verify that Row Level Security (RLS) policies restrict CRUD operations to the owning developer. Confirm the properties.project_id foreign key is present. Add indexes on projects.developer_id and projects.status to optimize queries. Use Supabase migration scripts and test with the Supabase CLI.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run Supabase migrations, inspect schema, and attempt CRUD operations as different users to confirm RLS. Use EXPLAIN ANALYZE to verify index usage.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:18.605Z"
           },
           {
             "id": 2,
@@ -1300,9 +1337,10 @@
               1
             ],
             "details": "Create src/app/api/projects/route.ts with GET (list active projects for authenticated developer) and POST (create project with subscription limit validation). Integrate canAddProject() and enforceProjectLimit() from subscription-plans.ts. Use authentication and validation patterns from properties API. Ensure TypeScript types match the database schema and return project info for frontend use.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write integration tests for GET and POST endpoints: verify correct filtering, project creation, and error handling for subscription limits. Confirm API responses match expected types.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:19.556Z"
           },
           {
             "id": 3,
@@ -1312,15 +1350,16 @@
               2
             ],
             "details": "Modify src/app/api/upload/route.ts and src/app/api/upload-parsed/route.ts to assign project_id to properties during upload. Use the existing project fetching and assignment logic. Ensure that project limit checks are enforced during uploads, and display appropriate error messages for violations. Prepare API responses to include project information for future UI integration.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test property uploads with and without project assignment, verify correct project_id linkage, and confirm enforcement of subscription project limits. Check error handling and API response structure.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:20.460Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement projects (inwestycje) system.",
-        "updatedAt": "2025-10-08T17:47:51.003Z"
+        "updatedAt": "2025-10-09T17:33:20.460Z"
       },
       {
         "id": "53",
@@ -1342,9 +1381,10 @@
             "description": "Modify the developers table and RLS policies to support tracking and querying additional projects for Pro plan billing.",
             "dependencies": [],
             "details": "Add an additional_projects_count integer column (default 0) to the developers table. Update Row-Level Security (RLS) policies to ensure queries and updates involving additional projects are secure and accurate. Create a migration script to apply these schema changes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run migration and verify the column exists with default value. Test RLS by querying as different users to ensure correct access.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:21.363Z"
           },
           {
             "id": 2,
@@ -1354,9 +1394,10 @@
               1
             ],
             "details": "Create a new Stripe Price object (50zł/month) for the additional project add-on and store its price ID securely. Update backend logic to add or modify subscription items for additional projects, ensuring the correct price and metadata are used. Integrate with Stripe's API to manage line items and handle subscription updates.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create a test subscription, add additional projects, and verify Stripe invoices reflect correct charges and metadata.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:22.258Z"
           },
           {
             "id": 3,
@@ -1366,15 +1407,16 @@
               2
             ],
             "details": "Implement POST /api/projects/add-additional endpoint to validate Pro plan, increment additional_projects_count, and update Stripe subscription. Modify calculateMonthlyCost() and related functions to include additional projects fee. Update dashboard and subscription cards to display breakdown of base and additional project charges.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test endpoint with various scenarios (valid/invalid Pro plan, project limits). Verify UI and cost calculations update correctly after adding projects.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:23.170Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement additional projects billing for pro plan.",
-        "updatedAt": "2025-10-08T20:29:56.839Z"
+        "updatedAt": "2025-10-09T17:33:23.170Z"
       },
       {
         "id": "54",
@@ -1392,9 +1434,10 @@
             "description": "Set up a new Google Analytics 4 property for the otoraport-v2.vercel.app domain, including data stream configuration and enhanced measurement settings.",
             "dependencies": [],
             "details": "Access the Google Analytics Admin panel, create a new property named for OTORAPORT, select the appropriate time zone and currency, and configure a web data stream for the domain. Enable enhanced measurement features for automatic tracking of pageviews and common events. Generate and record the GA4 Measurement ID for later integration.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify property creation in GA4 dashboard, confirm data stream is active, and ensure Measurement ID is generated and accessible.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:24.116Z"
           },
           {
             "id": 2,
@@ -1404,9 +1447,10 @@
               1
             ],
             "details": "Insert the GA4 gtag script into the src/app/layout.tsx head section using the Next.js Script component. Reference the GA4 Measurement ID from environment variables (NEXT_PUBLIC_GA4_MEASUREMENT_ID), and update env-validation.ts for schema validation. Implement consent management logic to ensure GDPR compliance before activating tracking.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Check that the GA4 script loads on all pages, verify pageview events appear in GA4 real-time reports, and test consent controls for GDPR compliance.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:25.028Z"
           },
           {
             "id": 3,
@@ -1416,15 +1460,16 @@
               2
             ],
             "details": "Create src/lib/ga4-tracking.ts with functions for events like trackSignup(), trackUploadSuccess(), trackSubscriptionStart(), and trackSubscriptionConvert(). Integrate these calls into relevant components and API routes. In GA4, set up conversion goals for signup, upload, subscription start, and trial conversion, and configure custom dimensions and audiences for user segmentation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Trigger each custom event and verify appearance in GA4 events report; confirm conversion goals and audience segments are correctly configured and reporting.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:25.980Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement google analytics 4 integration.",
-        "updatedAt": "2025-10-08T21:24:11.704Z"
+        "updatedAt": "2025-10-09T17:33:25.980Z"
       },
       {
         "id": "55",
@@ -1442,9 +1487,10 @@
             "description": "Install the posthog-js package, set up environment variables, and configure PostHog initialization alongside existing Vercel Analytics.",
             "dependencies": [],
             "details": "Run `npm install posthog-js`. Add NEXT_PUBLIC_POSTHOG_KEY and NEXT_PUBLIC_POSTHOG_HOST to your env-validation.ts schema and .env files. Update getEnv() to include PostHog config. Ensure Vercel Analytics is enabled and configured per project requirements. Verify both analytics providers are initialized correctly and do not conflict.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Check that both PostHog and Vercel Analytics scripts load without errors. Confirm environment variables are present and correct. Validate initial analytics events are sent to both platforms.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:26.886Z"
           },
           {
             "id": 2,
@@ -1454,9 +1500,10 @@
               1
             ],
             "details": "Create src/app/providers.tsx and initialize PostHog client with EU hosting and privacy-first settings. Export PostHogProvider and usePostHog hook. Import PostHogProvider in src/app/layout.tsx and wrap children, ensuring Vercel Analytics and SpeedInsights remain. Integrate with CookieBanner.tsx to load PostHog only after user consent for GDPR compliance.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify PostHogProvider loads only after consent. Confirm no analytics events are sent before consent. Check that pageview and custom events are tracked after consent and appear in PostHog dashboard.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:27.790Z"
           },
           {
             "id": 3,
@@ -1466,15 +1513,16 @@
               2
             ],
             "details": "Create src/lib/analytics-events.ts with functions for signup, login, upload, trial start, subscription, and payment success. Add event tracking to /api/auth/callback, /api/upload, and /api/stripe/webhook. Set up conversion funnels and cohort analysis in PostHog dashboard. Track UTM parameters for marketing attribution and create custom events for business metrics.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Trigger each event manually and verify appearance in PostHog live events. Confirm funnel steps and cohort analysis work as expected. Test UTM parameter tracking by visiting with different campaign links.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:28.718Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement vercel analytics and posthog integration.",
-        "updatedAt": "2025-10-09T06:19:40.662Z"
+        "updatedAt": "2025-10-09T17:33:28.718Z"
       },
       {
         "id": "56",
@@ -1494,9 +1542,10 @@
             "description": "Create the price_history table, set up row-level security (RLS) policies, and implement a PostgreSQL trigger function to automatically track price changes.",
             "dependencies": [],
             "details": "Define the price_history table with all required columns and foreign key constraints. Add indexes on property_id, developer_id, and changed_at. Implement RLS policies so developers can only access their own records. Write the track_price_change() trigger function to insert a new price_history record whenever relevant price fields change in the properties table, capturing old/new values, change_reason, and changed_at.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run migrations and verify table structure, RLS enforcement, and trigger behavior by updating property prices and confirming correct history records are created.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:29.617Z"
           },
           {
             "id": 2,
@@ -1506,9 +1555,10 @@
               1
             ],
             "details": "Implement GET /api/properties/[id]/price-history using existing API patterns. Support pagination (default 50 records) and date range filtering via query parameters. Ensure results are sorted by changed_at DESC. Enforce RLS and handle errors gracefully. Use the established database connection utilities.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test endpoint with various parameters, verify correct data, pagination, filtering, and RLS enforcement. Check error responses for invalid or unauthorized requests.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:30.509Z"
           },
           {
             "id": 3,
@@ -1518,15 +1568,16 @@
               2
             ],
             "details": "Install recharts and types. Build PriceHistoryChart in src/components/dashboard/price-history-chart.tsx to display base_price, final_price, and price_per_m2 over time with tooltips and responsive design. Add a new tab to the property detail page using @radix-ui/react-tabs, fetch data with SWR, and handle loading/error states. Format prices in Polish złoty.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Render the chart with mock and real data, verify correct lines, tooltips, and formatting. Test integration in the property detail page, including tab switching and data loading.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:31.448Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement price history tracking.",
-        "updatedAt": "2025-10-09T06:53:42.630Z"
+        "updatedAt": "2025-10-09T17:33:31.448Z"
       },
       {
         "id": "57",
@@ -1597,9 +1648,10 @@
             "description": "Implement the POST /api/properties/bulk-delete endpoint to accept an array of property IDs and perform a transactional (all-or-nothing) delete operation.",
             "dependencies": [],
             "details": "Create a new API endpoint that accepts a payload like { propertyIds: string[] }. Ensure the deletion is performed within a database transaction so that either all specified properties are deleted or none are, maintaining data integrity. Handle validation, permissions, and error responses according to API best practices.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Send requests with various property ID arrays (including invalid IDs) and verify that either all specified properties are deleted or none are, with appropriate error handling.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:32.413Z"
           },
           {
             "id": 2,
@@ -1609,9 +1661,10 @@
               1
             ],
             "details": "Integrate cache invalidation logic into the bulk delete endpoint so that, upon successful deletion, any cached data for ministry endpoints (XML, CSV, MD5) is cleared or refreshed. This ensures that subsequent requests reflect the updated property data.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "After performing a bulk delete, verify that the XML, CSV, and MD5 endpoints return updated data and do not serve stale cache.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:33.350Z"
           },
           {
             "id": 3,
@@ -1622,15 +1675,16 @@
               2
             ],
             "details": "Update the frontend to allow users to select multiple properties and trigger the bulk delete operation. Implement a confirmation modal that displays the count of properties to be deleted and requires user confirmation before proceeding. Ensure the UI handles success and error states gracefully.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Select multiple properties in the UI, trigger the delete action, confirm the modal displays the correct count, and verify that the UI updates appropriately after deletion.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:34.295Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement bulk delete with cache invalidation.",
-        "updatedAt": "2025-10-09T06:37:44.967Z"
+        "updatedAt": "2025-10-09T17:33:34.295Z"
       },
       {
         "id": "59",
@@ -1648,9 +1702,10 @@
             "description": "GA4 integration already completed with full tracking, consent mode, and event functions in src/lib/ga4-tracking.ts",
             "dependencies": [],
             "details": "Task #54 fully implemented GA4 with:\n- Script injection in src/app/layout.tsx with NEXT_PUBLIC_GA4_MEASUREMENT_ID\n- GDPR-compliant consent mode (analytics_storage: denied by default)\n- Custom event tracking functions (trackSignup, trackUploadSuccess, trackSubscriptionStart, trackSubscriptionConvert)\n- User properties and conversion tracking\n- Cookie consent integration",
-            "status": "completed",
+            "status": "cancelled",
             "testStrategy": "GA4 implementation verified - tracking active, events firing, consent respected",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:35:24.173Z"
           },
           {
             "id": 2,
@@ -1658,9 +1713,10 @@
             "description": "Vercel Analytics already installed and configured in the application layout for Core Web Vitals monitoring",
             "dependencies": [],
             "details": "Vercel Analytics implemented:\n- @vercel/analytics@1.5.0 installed in package.json\n- <Analytics /> component active in src/app/layout.tsx\n- @vercel/speed-insights also configured for performance monitoring\n- No additional configuration needed - works automatically with Vercel deployment",
-            "status": "completed",
+            "status": "cancelled",
             "testStrategy": "Vercel Analytics active - Core Web Vitals reporting to Vercel dashboard",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:35:25.087Z"
           },
           {
             "id": 3,
@@ -1668,14 +1724,16 @@
             "description": "PostHog integration already completed with full event tracking, funnels, and GDPR compliance in src/app/providers.tsx",
             "dependencies": [],
             "details": "Task #55 fully implemented PostHog with:\n- posthog-js@1.273.1 installed and initialized in PostHogProvider\n- EU hosting for GDPR compliance (https://eu.i.posthog.com)\n- Event tracking functions in src/lib/analytics-events.ts\n- Custom events: user_signup, file_upload, subscription_start, trial_start, payment_success\n- Cookie consent integration with opt-in/opt-out functionality\n- User identification and property tracking",
-            "status": "completed",
+            "status": "cancelled",
             "testStrategy": "PostHog implementation verified - events tracking, funnels working, consent respected",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:35:26.038Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement analytics integration (ga4, vercel analytics, posthog)."
+        "expansionPrompt": "Break down this task with a focus on implement analytics integration (ga4, vercel analytics, posthog).",
+        "updatedAt": "2025-10-09T17:35:48.185Z"
       },
       {
         "id": "60",
@@ -1697,9 +1755,10 @@
               57
             ],
             "details": "Design efficient SQL queries to aggregate data from subscriptions, users, and trials tables. Implement proper access control using requireAdmin middleware. Structure the API response for easy frontend consumption, ensuring sensitive data is protected and calculations follow SaaS best practices. Document the API schema and data contracts.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Call the endpoint as an admin and verify response accuracy. Attempt access as a non-admin and confirm 403. Validate calculations against known database states. Write unit and integration tests for the endpoint.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:35.198Z"
           },
           {
             "id": 2,
@@ -1709,9 +1768,10 @@
               1
             ],
             "details": "Use a React UI library (e.g., MUI, Tremor, Ant Design) for consistent styling. Implement a responsive grid layout with KPI cards (total users, MRR, churn rate, trial conversion) at the top. Add loading skeletons and error states. Integrate interactive charts (MRR/ARR, user growth) using a charting library (e.g., Tremor, Nivo, Recharts). Fetch data from the new API using SWR or React Query. Protect the page with admin authentication and RBAC. Follow accessibility and responsive design best practices.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test page responsiveness across devices. Verify KPI cards and charts render correctly with mock and live data. Check admin access controls. Validate loading and error states. Conduct accessibility audits.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:36.097Z"
           },
           {
             "id": 3,
@@ -1722,15 +1782,16 @@
               2
             ],
             "details": "Use server-side aggregation for performance and security. Memoize expensive calculations and implement caching where appropriate. Document API and frontend data contracts. Add unit and integration tests for both backend and frontend. Design the dashboard layout and data flow to support future KPIs and export functionality. Review and refine based on dashboard design best practices for hierarchy, clarity, and user experience[1][2][3].",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Profile API and frontend performance under load. Verify caching and memoization work as expected. Review documentation for completeness. Test adding a new KPI or export feature to confirm extensibility.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:37.008Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on build admin analytics dashboard with revenue and user kpis.",
-        "updatedAt": "2025-10-09T08:17:54.611Z"
+        "updatedAt": "2025-10-09T17:33:37.008Z"
       },
       {
         "id": "61",
@@ -1750,9 +1811,10 @@
             "description": "Modify the developers table to support subdomains and custom branding, ensuring data integrity and access control.",
             "dependencies": [],
             "details": "Add a unique, nullable VARCHAR column 'subdomain' to the developers table. Enforce uniqueness at the database level. Extend the table with 'branding_logo_url' and 'branding_colors' columns. Update Row-Level Security (RLS) policies so only the owning developer can modify their subdomain and branding fields. Use atomic transactions for subdomain assignment to prevent race conditions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify schema changes via migration. Attempt to assign duplicate subdomains and confirm rejection. Test RLS by attempting unauthorized updates. Check branding fields for correct storage and retrieval.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:37.941Z"
           },
           {
             "id": 2,
@@ -1762,9 +1824,10 @@
               1
             ],
             "details": "Develop a POST /api/subdomain/check endpoint that validates subdomain format (alphanumeric, 3-32 chars, no reserved words), checks uniqueness, and returns availability. Ensure server-side validation to prevent race conditions. Integrate this checker into the onboarding and settings UI for Pro plan users, providing real-time feedback. Restrict subdomain features to Pro users via feature flags.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test API with valid, invalid, and taken subdomains. Simulate concurrent requests to ensure atomicity. Verify UI provides real-time feedback and restricts access to Pro users.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:38.866Z"
           },
           {
             "id": 3,
@@ -1775,15 +1838,16 @@
               2
             ],
             "details": "Update Vercel project to add *.otoraport.pl as a wildcard domain. Configure Next.js middleware to extract subdomain from the host header and inject it into the request context. Create a public route (e.g., /[subdomain]) that fetches and displays the developer's public properties, applying SSR/ISR for SEO. Dynamically apply branding (logo, colors) using CSS variables or theming. Ensure pages are mobile-responsive, SEO-friendly, and protected against XSS/injection.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify wildcard routing for various subdomains. Test public property pages for correct data, branding, and responsiveness. Check SEO tags and sitemap updates. Perform security testing for XSS and injection vulnerabilities.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:39.791Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement subdomain system for pro plan.",
-        "updatedAt": "2025-10-09T08:28:09.643Z"
+        "updatedAt": "2025-10-09T17:33:39.791Z"
       },
       {
         "id": "62",
@@ -1803,9 +1867,10 @@
             "description": "Develop the backend and frontend logic for Enterprise users to register custom domains, generate DNS TXT tokens, and validate domain ownership via DNS TXT record lookup.",
             "dependencies": [],
             "details": "Create a UI for domain entry with RFC 1035 validation. On submission, generate a unique DNS TXT token (e.g., _otoraport-verification.example.com) and display setup instructions. Implement an API endpoint to check for the TXT record using a DNS lookup library, marking the domain as verified upon successful detection. Ensure all operations are authenticated and scoped to the developer's account.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Submit valid and invalid domains, verify correct token generation, and test DNS TXT record detection using both local and public DNS resolvers. Attempt verification before and after DNS propagation to ensure correct status handling.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:40.724Z"
           },
           {
             "id": 2,
@@ -1815,9 +1880,10 @@
               1
             ],
             "details": "After domain verification, use Vercel's Domains API to add the domain to the appropriate environment, handling apex and subdomain cases. Implement a DNS propagation checker that periodically polls for required DNS records (A/CNAME) and updates the user on propagation status. Optionally, integrate with third-party DNS propagation APIs for global checks.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test adding both apex and subdomains to Vercel, simulate API errors (e.g., domain in use), and verify error handling. For the propagation checker, update DNS records and confirm status updates reflect actual propagation across multiple DNS servers.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:41.639Z"
           },
           {
             "id": 3,
@@ -1828,15 +1894,16 @@
               2
             ],
             "details": "Build a dedicated setup page guiding users through domain entry, TXT record setup, verification, and DNS record updates for Vercel. Include troubleshooting tips for common DNS issues and propagation delays. Update developer documentation to reflect supported domain formats, flow steps, and error handling.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review the setup page for clarity and completeness. Have users follow the instructions and report any confusion or missing steps. Validate that documentation covers all supported scenarios and troubleshooting cases.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:33:42.561Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement custom domains for enterprise plan.",
-        "updatedAt": "2025-10-09T09:17:40.440Z"
+        "updatedAt": "2025-10-09T17:33:42.561Z"
       },
       {
         "id": "63",
@@ -2248,9 +2315,10 @@
             "description": "Integrate Redis as an in-memory cache for ministry endpoints serving XML, CSV, and MD5 responses using a centralized middleware.",
             "dependencies": [],
             "details": "Create a middleware (e.g., middlewares/redis.js) that intercepts requests to ministry endpoints, checks for cached responses in Redis using keys based on endpoint and parameters, and serves cached data if available. Use the node-redis client, set a TTL of 60 seconds for cached entries, and ensure robust error handling. Monitor cache hit/miss rates for tuning and use environment variables for Redis configuration.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Repeatedly hit ministry endpoints and verify cache hits/misses using Redis CLI or logs. Confirm cache expires after 60 seconds and updates on data change.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:30:39.933Z"
           },
           {
             "id": 2,
@@ -2260,9 +2328,10 @@
               1
             ],
             "details": "Set up ISR in Next.js by specifying a revalidate interval of 3600 seconds (1 hour) for public pages. Ensure that page data is re-fetched and rebuilt in the background after the interval. Document the ISR strategy for maintainers and verify that updates to backend data are reflected after revalidation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Update backend data and confirm public pages reflect changes after the revalidation interval without requiring a full redeploy.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:30:42.190Z"
           },
           {
             "id": 3,
@@ -2273,15 +2342,16 @@
               2
             ],
             "details": "Audit queries for endpoints using Redis caching and ISR. Add indexes to frequently filtered columns and foreign keys, refactor queries for efficient joins and minimal data transfer, and use query analysis tools (e.g., PostgreSQL's EXPLAIN ANALYZE) to identify bottlenecks. Monitor database performance and document optimization strategies.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run query analysis before and after optimization, verify improved query times, and ensure no regressions in endpoint performance.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:30:45.280Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on performance optimization and caching implementation.",
-        "updatedAt": "2025-10-09T16:44:54.086Z"
+        "updatedAt": "2025-10-09T17:30:45.280Z"
       },
       {
         "id": "71",
@@ -2289,7 +2359,7 @@
         "description": "Update all domain references, email addresses, branding assets, documentation, and deployment configurations to reflect the new brand raportowaniecenmieszkan.pl throughout the entire codebase and supporting systems.",
         "details": "1. **Domain and URL Updates:**\n   - Search and replace all instances of 'otoraport.pl' with 'raportowaniecenmieszkan.pl' in code, configuration files, environment variables, documentation, and deployment scripts.\n   - Update all hardcoded URLs, API endpoints, and callback URLs to use the new domain.\n   - Register and configure the new domain with DNS providers and hosting platforms (e.g., Vercel), ensuring SSL certificates are updated and active.\n   - Implement 301 redirects from old URLs to new URLs to preserve SEO and user experience[3][7].\n\n2. **Email Address and System References:**\n   - Update all system-generated email addresses (e.g., noreply@otoraport.pl → noreply@raportowaniecenmieszkan.pl) in notification templates, authentication flows, and contact forms.\n   - Change email sender domains in transactional email services (e.g., SendGrid, Mailgun) and update SPF/DKIM records for deliverability.\n\n3. **Branding and Visual Assets:**\n   - Replace all logos, favicons, and brand imagery with new assets reflecting the updated brand identity.\n   - Update color palettes, typography, and design tokens in the codebase and style guides.\n   - Revise marketing collateral, email signatures, and social media profile images as needed[1][2][4].\n\n4. **Documentation and Help Center:**\n   - Update all internal and external documentation, including README files, API docs, onboarding guides, and help center articles, to reference the new brand and domain.\n   - Revise screenshots and instructional videos to reflect new branding.\n\n5. **Deployment and Configuration:**\n   - Update deployment pipelines, environment variables, and CI/CD scripts to use the new domain.\n   - Ensure all integrations (e.g., Stripe, ministry endpoints, analytics) reference the correct domain and branding.\n   - Review and update custom domain/subdomain logic to support the new brand, coordinating with related tasks for Pro and Enterprise plans.\n\n6. **Communication and Announcement:**\n   - Prepare a rebranding announcement for users, partners, and stakeholders via email, blog post, and social media.\n   - Create an FAQ page addressing the rebrand, transition timeline, and impact on users[1][4].\n\n7. **Quality Assurance:**\n   - Conduct a thorough audit using automated tools (e.g., grep, regex search, link checkers) and manual review to ensure no references to the old brand remain.\n   - Establish a review and approval process for all changes before deployment.\n\n**Best Practices:**\n- Use automated scripts for bulk search-and-replace operations to minimize manual errors.\n- Maintain a backup and rollback plan in case of unforeseen issues during deployment.\n- Communicate changes proactively to minimize user confusion and support requests.\n- Coordinate with legal and administrative teams to ensure compliance with business registrations and trademarks[1][3][6].",
         "testStrategy": "1. Perform a full-text search across the codebase, documentation, and configuration files to confirm all instances of 'otoraport.pl' have been replaced.\n2. Deploy to a staging environment and verify:\n   - All URLs, endpoints, and email addresses use the new domain.\n   - Branding assets (logos, colors, typography) are updated throughout the UI and emails.\n   - Documentation and help center content reflect the new brand.\n   - All redirects from old URLs function correctly (301 status, correct destination).\n   - Transactional and notification emails are sent from the new domain and pass SPF/DKIM checks.\n   - Integrations (Stripe, ministry endpoints, analytics) operate correctly with the new domain.\n3. Use link checkers and automated tests to identify any broken links or missed references.\n4. Review deployment logs and CI/CD output for errors related to domain or branding changes.\n5. Solicit feedback from internal stakeholders and a pilot group of users to confirm the rebrand is complete and consistent.\n6. Monitor analytics and support channels for issues post-launch.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "61",
           "62",
@@ -2303,9 +2373,10 @@
             "description": "Conduct a comprehensive audit to identify every instance of 'otoraport.pl' and related branding across code, documentation, infrastructure, and marketing materials.",
             "dependencies": [],
             "details": "Use automated tools (e.g., grep, regex search) and manual review to catalog all domain references, email addresses, visual assets, documentation, deployment scripts, and third-party integrations that reference the old brand. Document findings in a shared inventory for tracking.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify completeness by cross-referencing audit results with all code repositories, documentation folders, and asset libraries. Spot-check random files and assets to ensure no references are missed.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:30:48.450Z"
           },
           {
             "id": 2,
@@ -2315,9 +2386,10 @@
               1
             ],
             "details": "Perform bulk search-and-replace operations in code and configuration files. Update hardcoded URLs, API endpoints, callback URLs, and environment variables. Register the new domain, configure DNS and SSL certificates, and implement 301 redirects from old URLs to new ones. Update deployment pipelines and CI/CD scripts to use the new domain.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Deploy to a staging environment and verify all URLs, endpoints, and redirects function correctly. Use automated link checkers and manual testing to confirm no broken links or references remain.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:30:51.452Z"
           },
           {
             "id": 3,
@@ -2327,9 +2399,10 @@
               1
             ],
             "details": "Replace all instances of old email addresses (e.g., noreply@otoraport.pl) with new ones in notification templates, authentication flows, and contact forms. Update sender domains in services like SendGrid or Mailgun, and revise SPF/DKIM records for deliverability. Test email flows to ensure correct sender information.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Send test emails from all system flows and verify correct sender addresses and domain authentication (SPF/DKIM). Check email deliverability and spam scores.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:30:54.578Z"
           },
           {
             "id": 4,
@@ -2339,9 +2412,10 @@
               1
             ],
             "details": "Replace all visual assets in the codebase, documentation, and marketing collateral with new versions reflecting the updated brand. Update style guides, design tokens, and UI components. Revise email signatures, social media profile images, and marketing materials as needed.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Visually inspect all user-facing pages, emails, and collateral to confirm new branding is consistently applied. Use automated screenshot comparison tools where possible.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:30:57.789Z"
           },
           {
             "id": 5,
@@ -2353,19 +2427,20 @@
               4
             ],
             "details": "Edit README files, API docs, onboarding guides, and help center content to reflect the new brand. Update screenshots and instructional videos. Prepare and distribute rebranding announcements and an FAQ for users, partners, and stakeholders.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review all documentation and help center articles for accuracy and completeness. Confirm that all screenshots and videos display the new branding. Validate that communication materials are distributed to all intended audiences.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T17:31:01.109Z"
           }
         ],
-        "updatedAt": "2025-10-09T17:24:19.545Z"
+        "updatedAt": "2025-10-09T17:31:01.109Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-09T17:24:19.546Z",
+      "lastModified": "2025-10-09T17:35:48.186Z",
       "taskCount": 36,
-      "completedCount": 34,
+      "completedCount": 35,
       "tags": [
         "master"
       ]

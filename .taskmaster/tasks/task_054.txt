@@ -1,0 +1,75 @@
+# Task ID: 54
+# Title: Implement Google Analytics 4 Integration
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Set up comprehensive GA4 tracking with property creation, script integration, automatic pageview tracking, custom event tracking for key user actions, and conversion goal configuration.
+# Details:
+Implement comprehensive Google Analytics 4 integration for OTORAPORT to track user behavior and business metrics:
+
+**1. GA4 Property Setup:**
+- Create new GA4 property in Google Analytics console for otoraport-v2.vercel.app domain
+- Configure data streams for web tracking
+- Set up enhanced ecommerce tracking for subscription events
+- Generate GA4 Measurement ID (format: G-XXXXXXXXXX)
+
+**2. Environment Configuration:**
+- Add NEXT_PUBLIC_GA4_MEASUREMENT_ID to environment variables and env-validation.ts schema
+- Update src/lib/env-validation.ts to include GA4 configuration validation
+- Add GA4 environment variable to deployment documentation
+
+**3. GA4 Script Integration in Layout:**
+- Add GA4 gtag script to src/app/layout.tsx head section using Next.js Script component
+- Implement gtag configuration with measurement ID from environment variables
+- Enable automatic pageview tracking with enhanced measurement
+- Add consent management configuration for GDPR compliance
+
+**4. Custom Event Tracking Implementation:**
+- Create src/lib/ga4-tracking.ts utility with functions for custom event tracking
+- Implement trackSignup() event for user registration completion
+- Implement trackUploadSuccess() event for successful property data uploads
+- Implement trackSubscriptionStart() event for trial/subscription activation
+- Implement trackSubscriptionConvert() event for trial-to-paid conversions
+- Add user property tracking for subscription plan and trial status
+
+**5. Event Integration in Existing Components:**
+- Add trackSignup() call to successful registration in auth/signup/page.tsx
+- Add trackUploadSuccess() call to successful uploads in upload API routes
+- Add trackSubscriptionStart() call to trial activation in subscription system
+- Add trackSubscriptionConvert() call to successful trial conversions
+- Integrate with existing error tracking to avoid duplicate analytics calls
+
+**6. Conversion Goals Configuration:**
+- Set up conversion goals in GA4: signup completion, first upload, subscription start, trial conversion
+- Configure enhanced ecommerce tracking for subscription revenue
+- Set up custom dimensions for user segment tracking (plan type, trial status)
+- Configure audience definitions for retargeting campaigns
+
+**7. Privacy Compliance:**
+- Update existing CookieBanner component to include GA4 consent controls
+- Implement analytics opt-out functionality in dashboard settings
+- Add GA4 tracking disclosure to privacy policy page
+- Ensure GDPR compliance with consent-based tracking activation
+
+# Test Strategy:
+Test GA4 implementation comprehensively: 1) Verify GA4 script loads correctly on all pages without console errors, 2) Test automatic pageview tracking appears in GA4 real-time reports, 3) Manually trigger signup flow and verify trackSignup() event appears in GA4 events report, 4) Test file upload and verify trackUploadSuccess() custom event tracking, 5) Verify subscription events fire correctly during trial signup process, 6) Test analytics opt-out functionality in dashboard settings, 7) Validate enhanced ecommerce tracking shows subscription revenue data, 8) Confirm conversion goals track properly in GA4 conversions report, 9) Test cookie consent banner integration with GA4 activation, 10) Verify all tracking respects user privacy preferences and GDPR requirements
+
+# Subtasks:
+## 1. Create and Configure GA4 Property for OTORAPORT [done]
+### Dependencies: None
+### Description: Set up a new Google Analytics 4 property for the otoraport-v2.vercel.app domain, including data stream configuration and enhanced measurement settings.
+### Details:
+Access the Google Analytics Admin panel, create a new property named for OTORAPORT, select the appropriate time zone and currency, and configure a web data stream for the domain. Enable enhanced measurement features for automatic tracking of pageviews and common events. Generate and record the GA4 Measurement ID for later integration.
+
+## 2. Integrate GA4 Tracking Script and Environment Variables [done]
+### Dependencies: 54.1
+### Description: Add the GA4 gtag script to the Next.js layout, configure environment variables, and enable automatic pageview tracking with GDPR consent management.
+### Details:
+Insert the GA4 gtag script into the src/app/layout.tsx head section using the Next.js Script component. Reference the GA4 Measurement ID from environment variables (NEXT_PUBLIC_GA4_MEASUREMENT_ID), and update env-validation.ts for schema validation. Implement consent management logic to ensure GDPR compliance before activating tracking.
+
+## 3. Implement Custom Event Tracking and Conversion Goals [done]
+### Dependencies: 54.2
+### Description: Develop utility functions for custom event tracking, integrate them into key user flows, and configure conversion goals and audience segments in GA4.
+### Details:
+Create src/lib/ga4-tracking.ts with functions for events like trackSignup(), trackUploadSuccess(), trackSubscriptionStart(), and trackSubscriptionConvert(). Integrate these calls into relevant components and API routes. In GA4, set up conversion goals for signup, upload, subscription start, and trial conversion, and configure custom dimensions and audiences for user segmentation.
+

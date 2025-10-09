@@ -1,0 +1,65 @@
+# Task ID: 53
+# Title: Implement Additional Projects Billing for Pro Plan
+# Status: done
+# Dependencies: 47, 48, 52
+# Priority: medium
+# Description: Create Stripe infrastructure for billing additional projects in Pro plan with 50zł/month per project pricing and database tracking.
+# Details:
+Implement comprehensive additional projects billing system for Pro plan subscribers:
+
+**1. Database Schema Updates:**
+- Add additional_projects_count column to developers table (integer, default 0)
+- Update RLS policies to include additional projects count in queries
+- Create migration script for schema update
+
+**2. Update calculateMonthlyCost() Function (src/lib/subscription-plans.ts:98-111):**
+- Modify to accept additional_projects_count parameter from database
+- Enhance Pro plan billing logic to include additional projects fee (5000 grosze = 50zł per project)
+- Update calculateBilling() function to display breakdown with additional projects
+
+**3. Create Stripe Price for Additional Project:**
+- Create new Stripe Price object for additional project add-on (50zł/month)
+- Add metadata to identify as 'additional_project' price type
+- Store price ID in environment variables or configuration
+
+**4. Create POST /api/projects/add-additional Endpoint:**
+- Validate user has Pro plan subscription
+- Check current additional_projects_count in developers table
+- Create new Stripe subscription item for additional project
+- Update developers.additional_projects_count in database
+- Return updated billing information and next invoice preview
+
+**5. Enhanced Stripe Subscription Management:**
+- Update createStripeSubscription() in src/lib/stripe.ts to handle line items
+- Implement subscription modification with multiple line items (base plan + additional projects)
+- Add webhook handlers for subscription.updated events to sync additional_projects_count
+- Update handleSubscriptionUpdated() to process line items changes
+
+**6. Integration with Existing Systems:**
+- Update canAddProject() function to check additional_projects_count from database
+- Modify project limit enforcement in upload APIs to include additional projects
+- Update billing calculations in dashboard to show additional projects breakdown
+- Enhance subscription cards to display additional projects pricing
+
+# Test Strategy:
+Test additional projects billing system comprehensively: 1) Create Pro plan developer and verify additional_projects_count defaults to 0, 2) Test POST /api/projects/add-additional creates Stripe subscription item and increments count, 3) Verify calculateMonthlyCost() correctly adds 50zł per additional project for Pro plan, 4) Test webhook handling updates additional_projects_count when subscription changes, 5) Confirm project limits enforcement includes additional projects in calculations, 6) Test subscription modification preserves existing payment method and billing cycle, 7) Verify billing breakdown displays base plan + additional projects separately in dashboard
+
+# Subtasks:
+## 1. Update Database Schema and RLS Policies for Additional Projects [done]
+### Dependencies: None
+### Description: Modify the developers table and RLS policies to support tracking and querying additional projects for Pro plan billing.
+### Details:
+Add an additional_projects_count integer column (default 0) to the developers table. Update Row-Level Security (RLS) policies to ensure queries and updates involving additional projects are secure and accurate. Create a migration script to apply these schema changes.
+
+## 2. Implement Stripe Price and Subscription Logic for Additional Projects [done]
+### Dependencies: 53.1
+### Description: Create Stripe Price object for additional projects, update backend logic to handle subscription items, and ensure correct billing integration.
+### Details:
+Create a new Stripe Price object (50zł/month) for the additional project add-on and store its price ID securely. Update backend logic to add or modify subscription items for additional projects, ensuring the correct price and metadata are used. Integrate with Stripe's API to manage line items and handle subscription updates.
+
+## 3. Develop API Endpoint and Billing Calculation Updates [done]
+### Dependencies: 53.2
+### Description: Build API endpoint for adding additional projects, update cost calculation functions, and ensure dashboard/UI reflects new billing structure.
+### Details:
+Implement POST /api/projects/add-additional endpoint to validate Pro plan, increment additional_projects_count, and update Stripe subscription. Modify calculateMonthlyCost() and related functions to include additional projects fee. Update dashboard and subscription cards to display breakdown of base and additional project charges.
+

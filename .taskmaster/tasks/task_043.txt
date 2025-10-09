@@ -1,0 +1,43 @@
+# Task ID: 43
+# Title: Implement Email Notification System
+# Status: done
+# Dependencies: 41
+# Priority: low
+# Description: Set up automated email notifications for important events using Resend API with React Email templates
+# Details:
+Create email notification system using existing Resend dependency and @react-email/render. Build email templates: upload completed (with summary), upload failed (with error details), weekly report (every Monday with stats). Implement notification triggers in upload API routes and create weekly cron job using Vercel Cron API routes. Create email templates directory with React Email components ensuring mobile-responsive design. Add opt-out functionality in settings page. Log failed emails for debugging. Use environment variables for Resend API key configuration.
+
+# Test Strategy:
+Test emails send successfully via Resend, verify templates are mobile-responsive, confirm users can opt-out in settings, test weekly report generation and sending, validate failed email logging works correctly
+
+# Subtasks:
+## 1. Set Up Resend API Integration and Environment Variables [done]
+### Dependencies: None
+### Description: Integrate the Resend API for sending emails and securely configure API keys using environment variables.
+### Details:
+Install and configure the Resend API client in the backend. Store the API key in environment variables and ensure it is accessed securely in code. Validate the connection by sending a test email.
+
+## 2. Develop Mobile-Responsive React Email Templates [done]
+### Dependencies: 43.1
+### Description: Create reusable, mobile-friendly email templates for upload completed, upload failed, and weekly report notifications using @react-email/render.
+### Details:
+Set up a directory for React Email components. Implement three templates: upload completed (with summary), upload failed (with error details), and weekly report (with stats). Ensure all templates are mobile-responsive and visually consistent.
+
+## 3. Implement Notification Triggers in API and Weekly Cron Job [done]
+### Dependencies: 43.1, 43.2
+### Description: Add logic to trigger email notifications in upload API routes and schedule weekly report emails using Vercel Cron API routes.
+### Details:
+Modify upload API routes to trigger the appropriate email template on success or failure. Set up a Vercel Cron job to send weekly reports every Monday. Ensure correct data is passed to templates.
+
+## 4. Add Opt-Out Functionality to User Settings [done]
+### Dependencies: 43.1
+### Description: Enable users to opt out of email notifications via a settings page toggle.
+### Details:
+Update the settings page UI to include an opt-out toggle. Store user preferences in the database and ensure notification triggers respect this setting before sending emails.
+
+## 5. Log Failed Email Attempts for Debugging [done]
+### Dependencies: 43.1, 43.3
+### Description: Implement logging for failed email sends to aid in debugging and monitoring.
+### Details:
+Capture errors from the Resend API when sending emails. Log relevant details (timestamp, user, error message) to a persistent store or monitoring service for later review.
+

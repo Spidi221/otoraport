@@ -1,0 +1,73 @@
+# Task ID: 42
+# Title: Add Dashboard Statistics Cards
+# Status: done
+# Dependencies: 39
+# Priority: low
+# Description: Create overview statistics cards displaying key metrics on the dashboard top section
+# Details:
+Create statistics cards component showing: total properties, available properties, sold properties (this month), average price per m². Design 4-card grid layout (2x2 on mobile, 4x1 on desktop) with icons from Lucide React, values, labels, and trend indicators (↑/↓ compared to last month). Create API endpoint GET /api/dashboard/stats returning aggregated statistics from properties table. Position cards above UploadWidget in dashboard layout. Include loading skeleton states and error handling. Use date-fns for date calculations and filtering.
+
+# Test Strategy:
+Verify stats cards render above upload widget, test data refreshes on page load, confirm loading skeleton displays during fetch, validate error states handled gracefully, test responsive layout on mobile and desktop
+
+# Subtasks:
+## 1. Create Statistics API Endpoint [done]
+### Dependencies: None
+### Description: Implement GET /api/dashboard/stats endpoint that aggregates property statistics from the database
+### Details:
+Create route at src/app/api/dashboard/stats/route.ts that queries the properties table to calculate: total properties count, available properties count (status = 'available'), sold properties count for current month (status = 'sold' + date filtering), and average price per m2. Use date-fns for current month filtering with proper timezone handling. Include previous month calculations for trend comparison. Implement proper error handling, authentication via Supabase auth, and RLS policy enforcement. Return JSON response with statistics and trend indicators.
+
+## 2. Create Statistics Cards Component [done]
+### Dependencies: None
+### Description: Build reusable StatsCard component and StatisticsCards container component for displaying dashboard metrics
+### Details:
+Create components/dashboard/statistics-cards.tsx with individual StatsCard component using existing Card UI components from src/components/ui/card.tsx. Include props for title, value, icon (from lucide-react), trend direction and percentage. Create StatisticsCards container component that fetches data from /api/dashboard/stats endpoint using SWR for caching. Implement responsive grid layout (2x2 on mobile, 4x1 on desktop) using CSS Grid and Tailwind classes. Add loading skeleton states using existing LoadingState pattern and error handling with proper error display.
+
+## 3. Add Icons and Trend Indicators [done]
+### Dependencies: 42.2
+### Description: Implement icon selection and trend indicator logic for each statistics card
+### Details:
+Add lucide-react icons to StatsCard component: Building2 for total properties, Home for available properties, HandCoins for sold properties, Calculator for average price per m2. Implement trend indicator with up/down arrows (ChevronUp, ChevronDown) and percentage change display. Add conditional styling for positive (green) and negative (red) trends. Ensure icons are accessible with proper aria-labels and maintain consistent sizing across all cards.
+
+## 4. Integrate Statistics Cards into Dashboard Layout [done]
+### Dependencies: 42.2
+### Description: Add StatisticsCards component to dashboard page above the UploadWidget component
+### Details:
+Edit src/app/dashboard/page.tsx to import and add StatisticsCards component in the dashboard grid section, positioned before the UploadWidget component. Ensure proper spacing using existing space-y-6 pattern. Add Suspense wrapper with appropriate loading fallback to match existing lazy-loaded components pattern. Maintain existing dashboard structure and styling consistency.
+
+## 5. Add Data Fetching and Error Handling [done]
+### Dependencies: 42.1, 42.2
+### Description: Implement SWR-based data fetching with proper error handling and loading states
+### Details:
+Add SWR hook in StatisticsCards component to fetch data from /api/dashboard/stats with automatic revalidation on page focus. Implement error boundary integration and fallback states for network errors. Add retry logic and loading skeletons that match existing component patterns. Use existing error display components and ensure consistent error messaging. Include data refresh on property updates using SWR mutate functionality.
+
+## 6. Design Responsive 4-Card Grid Layout for Statistics Cards [done]
+### Dependencies: None
+### Description: Create a responsive grid layout for the dashboard statistics cards, displaying 2x2 on mobile and 4x1 on desktop.
+### Details:
+Implement a grid layout using CSS grid or a UI library (e.g., Tailwind, MUI) to ensure the cards display as 2x2 on mobile and 4x1 on desktop. The layout should be visually consistent with the dashboard's design system.
+
+## 7. Implement Statistics Cards Component with Icons and Trend Indicators [done]
+### Dependencies: 42.6
+### Description: Develop a reusable statistics card component displaying an icon, value, label, and trend indicator (↑/↓) using Lucide React icons.
+### Details:
+Create a card component that accepts props for icon, value, label, and trend direction. Use Lucide React for icons and display a trend arrow (up/down) with color coding. Ensure accessibility and consistent styling.
+
+## 8. Create API Endpoint GET /api/dashboard/stats for Aggregated Metrics [done]
+### Dependencies: None
+### Description: Develop a backend API endpoint that returns aggregated statistics: total properties, available properties, sold properties (this month), and average price per m².
+### Details:
+Implement GET /api/dashboard/stats to query the properties table, aggregate the required metrics, and return them in a JSON response. Use date-fns for date filtering (e.g., sold properties this month). Handle errors and edge cases.
+
+## 9. Integrate Statistics Cards with API Data, Loading Skeletons, and Error Handling [done]
+### Dependencies: 42.7, 42.8
+### Description: Fetch statistics from the API, display loading skeletons while fetching, and handle error states in the statistics cards.
+### Details:
+Use React hooks (e.g., useEffect, useState) or a data-fetching library (e.g., SWR, React Query) to fetch data from /api/dashboard/stats. Show skeleton loaders during fetch and display error messages if the request fails.
+
+## 10. Position Statistics Cards Above UploadWidget in Dashboard Layout [done]
+### Dependencies: 42.9
+### Description: Update the dashboard layout to place the statistics cards grid above the UploadWidget component.
+### Details:
+Modify the dashboard page/component to render the statistics cards grid at the top, directly above the UploadWidget. Ensure layout consistency and spacing.
+

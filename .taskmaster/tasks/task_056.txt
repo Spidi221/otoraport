@@ -1,0 +1,68 @@
+# Task ID: 56
+# Title: Implement Price History Tracking
+# Status: done
+# Dependencies: 39
+# Priority: medium
+# Description: Create comprehensive price history tracking system with database table, RLS policies, automatic trigger tracking, API endpoint, and Recharts visualization component.
+# Details:
+Implement complete price history tracking system for OTORAPORT allowing developers to track property price changes over time:
+
+**1. Database Schema (Supabase Migration):**
+- Create price_history table with columns: id (uuid), property_id (uuid), developer_id (uuid), old_base_price (numeric), new_base_price (numeric), old_final_price (numeric), new_final_price (numeric), old_price_per_m2 (numeric), new_price_per_m2 (numeric), change_reason (text), changed_at (timestamp), created_by (uuid)
+- Add RLS policies: developers can only view/insert their own price history records
+- Create foreign key constraints to properties and developers tables
+- Add indexes on property_id, developer_id, and changed_at for optimal query performance
+
+**2. Database Trigger Creation:**
+- Create track_price_change() PostgreSQL function that automatically inserts price_history record when properties table is updated
+- Trigger should only fire when base_price, final_price, or price_per_m2 columns change
+- Function should capture old and new values and set changed_at to current timestamp
+- Include change_reason parameter support from existing update_property_price() function (line 592-601 in database.ts)
+
+**3. API Endpoint Development:**
+- Create GET /api/properties/[id]/price-history endpoint following existing API patterns in src/app/api/properties/[id]/route.ts
+- Implement pagination support with default limit of 50 records
+- Add filtering by date range (from/to query parameters)
+- Include proper error handling and RLS enforcement
+- Return price changes sorted by changed_at DESC (newest first)
+- Use existing database connection patterns from src/lib/supabase/server.ts
+
+**4. PriceHistoryChart Component:**
+- Install recharts package: npm install recharts @types/recharts
+- Create src/components/dashboard/price-history-chart.tsx using Recharts LineChart
+- Display price changes over time with multiple lines (base_price, final_price, price_per_m2)
+- Include hover tooltips showing exact values and change dates
+- Add responsive design following existing component patterns in src/components/dashboard/
+- Include loading states and error handling with existing UI components
+- Format prices using Polish złoty formatting
+
+**5. Property Detail Page Integration:**
+- Enhance existing property detail functionality to include price history tab
+- Use existing @radix-ui/react-tabs from package.json for tab navigation
+- Create new tab alongside existing property information
+- Integrate PriceHistoryChart component within tab content
+- Add data fetching hook using SWR pattern from existing components
+- Follow existing UI patterns from src/components/dashboard/ directory
+
+# Test Strategy:
+Test price history system comprehensively: 1) Create price_history table and verify RLS policies allow only developer's own records, 2) Test track_price_change() trigger by updating property prices via existing API and confirming history records are automatically created, 3) Verify GET /api/properties/[id]/price-history endpoint returns proper pagination and filtering, 4) Test PriceHistoryChart component renders correctly with sample data and handles empty states, 5) Confirm price history tab integration works in property detail view with proper loading and error states, 6) Validate trigger only fires when price fields actually change (not on other property updates), 7) Test foreign key constraints prevent orphaned records when properties are deleted
+
+# Subtasks:
+## 1. Design and Implement Price History Database Schema with RLS and Triggers [done]
+### Dependencies: None
+### Description: Create the price_history table, set up row-level security (RLS) policies, and implement a PostgreSQL trigger function to automatically track price changes.
+### Details:
+Define the price_history table with all required columns and foreign key constraints. Add indexes on property_id, developer_id, and changed_at. Implement RLS policies so developers can only access their own records. Write the track_price_change() trigger function to insert a new price_history record whenever relevant price fields change in the properties table, capturing old/new values, change_reason, and changed_at.
+
+## 2. Develop Price History API Endpoint with Pagination and Filtering [done]
+### Dependencies: 56.1
+### Description: Create a REST API endpoint to fetch price history for a property, supporting pagination, date filtering, and proper error handling.
+### Details:
+Implement GET /api/properties/[id]/price-history using existing API patterns. Support pagination (default 50 records) and date range filtering via query parameters. Ensure results are sorted by changed_at DESC. Enforce RLS and handle errors gracefully. Use the established database connection utilities.
+
+## 3. Build and Integrate Price History Visualization Component [done]
+### Dependencies: 56.2
+### Description: Create a Recharts-based PriceHistoryChart component and integrate it into the property detail page with tab navigation and data fetching.
+### Details:
+Install recharts and types. Build PriceHistoryChart in src/components/dashboard/price-history-chart.tsx to display base_price, final_price, and price_per_m2 over time with tooltips and responsive design. Add a new tab to the property detail page using @radix-ui/react-tabs, fetch data with SWR, and handle loading/error states. Format prices in Polish złoty.
+

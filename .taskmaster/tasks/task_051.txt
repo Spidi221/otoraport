@@ -1,0 +1,79 @@
+# Task ID: 51
+# Title: Implement Trial Email Automation
+# Status: done
+# Dependencies: 49, 50
+# Priority: high
+# Description: Create comprehensive trial email automation system with 5 Resend templates and Vercel Cron jobs for trial stage checking and personalized notifications with unsubscribe functionality.
+# Details:
+Implement complete trial email automation system for OTORAPORT based on existing email infrastructure:
+
+**1. Create Trial Email Templates in email-service.ts:**
+- Day 0: Welcome email (use existing sendDeveloperWelcomeEmail as base, enhance with trial-specific content)
+- Day 7: Midway check-in with usage stats and tips
+- Day 11: Warning email with upgrade urgency and feature benefits
+- Day 14 Success: Congratulations on conversion with next steps
+- Day 14 Failed: Re-engagement email with special offer and retention messaging
+
+**2. Database Schema Enhancements:**
+- Add trial_stage enum to developers table: ('day_0', 'day_7', 'day_11', 'day_14_success', 'day_14_failed', 'completed')
+- Add last_trial_email_sent timestamp to track email timing
+- Ensure trial_ends_at and trial_status columns exist (already in schema)
+
+**3. Create Vercel Cron Job API Routes:**
+- Create /api/cron/trial-checker route (daily at 9:00 AM UTC)
+- Query developers with trial_status='active' and check trial_ends_at dates
+- Determine appropriate email stage based on days remaining
+- Send personalized emails with developer's usage statistics
+- Update trial_stage and last_trial_email_sent after successful sends
+- Add CRON_SECRET authentication like existing weekly-reports cron
+
+**4. Email Personalization Features:**
+- Include developer's current property count and upload activity
+- Show ministry compliance status and XML endpoint availability
+- Add usage tips and feature highlights based on trial progress
+- Include subscription plan recommendations with pricing
+
+**5. Unsubscribe System Integration:**
+- Use existing email_notifications_enabled and notification_frequency columns
+- Add unsubscribe links to all trial emails using existing /api/unsubscribe endpoint
+- Respect user preferences while ensuring transactional emails (Day 0) always send
+- Add trial-specific opt-out tracking
+
+**6. Update vercel.json Configuration:**
+- Add new cron job entry for trial checker alongside existing weekly-reports
+- Configure optimal timing (daily 9:00 AM UTC) for business hours delivery
+
+**7. Error Handling and Logging:**
+- Implement comprehensive error logging for failed email sends
+- Add retry logic for temporary failures
+- Track email delivery success rates for trial campaigns
+- Use existing logEmailFailure function for consistency
+
+**8. Integration with Existing Systems:**
+- Leverage existing Resend configuration and EMAIL_FROM settings
+- Use existing email preference checking system
+- Integrate with current developer database structure
+- Maintain consistency with existing email template styling and branding
+
+# Test Strategy:
+Test trial email automation system comprehensively: 1) Create test developer account and verify Day 0 welcome email sends immediately with trial-specific content, 2) Manually adjust trial_ends_at dates to trigger Day 7, Day 11, and Day 14 emails and verify correct templates send, 3) Test successful subscription conversion triggers Day 14 Success email, 4) Test trial expiry without conversion triggers Day 14 Failed email, 5) Verify cron job authentication works with CRON_SECRET, 6) Test unsubscribe functionality respects email preferences while allowing critical transactional emails, 7) Validate personalized data appears correctly (property counts, usage stats, ministry compliance status), 8) Test email delivery failure handling and retry logic, 9) Verify trial_stage and last_trial_email_sent columns update correctly after each email send, 10) Test timing accuracy with various trial_ends_at scenarios to ensure emails send at appropriate intervals.
+
+# Subtasks:
+## 1. Develop and Integrate Trial Email Templates with Personalization [done]
+### Dependencies: None
+### Description: Create and implement 5 distinct trial email templates in email-service.ts, ensuring each template is personalized with developer usage data and trial stage context.
+### Details:
+Design and code Day 0, Day 7, Day 11, Day 14 Success, and Day 14 Failed email templates. Use the existing sendDeveloperWelcomeEmail as a base for Day 0, and ensure each template includes personalized content such as property count, upload activity, compliance status, and plan recommendations. Integrate unsubscribe links and ensure transactional emails (Day 0) always send regardless of preferences.
+
+## 2. Implement Vercel Cron Job for Automated Trial Stage Email Delivery [done]
+### Dependencies: 51.1
+### Description: Create a secure Vercel cron job API route to automate daily trial stage checks and trigger appropriate email sends based on developer trial status and timing.
+### Details:
+Develop /api/cron/trial-checker route with CRON_SECRET authentication. Query developers with active trials, determine current trial stage from trial_ends_at and last_trial_email_sent, and send the correct email template. Update trial_stage and last_trial_email_sent after successful sends. Integrate error handling, retry logic, and logging using logEmailFailure.
+
+## 3. Enhance Database Schema and Email Preference Handling for Trial Automation [done]
+### Dependencies: 51.1
+### Description: Update the developers table schema and ensure robust handling of email preferences and unsubscribe logic for trial automation.
+### Details:
+Add trial_stage enum and last_trial_email_sent timestamp to developers table. Ensure trial_ends_at and trial_status columns exist. Integrate email_notifications_enabled and notification_frequency checks into the automation logic, and implement trial-specific opt-out tracking. Ensure all schema changes are backward compatible and documented.
+

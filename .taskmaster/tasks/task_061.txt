@@ -1,0 +1,82 @@
+# Task ID: 61
+# Title: Implement Subdomain System for Pro Plan
+# Status: done
+# Dependencies: 52
+# Priority: medium
+# Description: Add subdomain support for Pro plan developers, including database schema changes, subdomain availability checks, Vercel wildcard configuration, public property pages, and custom branding.
+# Details:
+1. **Database Schema Update:**
+   - Add a `subdomain` (VARCHAR, unique, nullable) column to the `developers` table via a migration. Enforce uniqueness at the database level and update RLS policies to ensure only the owning developer can modify their subdomain.
+   
+2. **Subdomain Availability Checker:**
+   - Implement an API endpoint (e.g., `POST /api/subdomain/check`) that validates subdomain format (alphanumeric, 3-32 chars, no reserved words), checks for uniqueness, and returns availability status. Use server-side validation to prevent race conditions.
+   - Integrate this checker into the onboarding and settings UI for Pro plan users, providing real-time feedback.
+
+3. **Vercel Wildcard Domain Configuration:**
+   - Update Vercel project settings to add a wildcard domain: `*.otoraport.pl`.
+   - Ensure Next.js rewrites and middleware correctly route requests based on the subdomain (e.g., `subdomain.otoraport.pl`). Use Next.js middleware to extract the subdomain from the host header and inject it into the request context.
+   - Update environment variables and deployment documentation to reflect the new domain setup.
+
+4. **Public Developer Property Pages:**
+   - Create a public route (e.g., `/[subdomain]`) that displays the developer's properties, using SSR/ISR for performance and SEO. Fetch properties based on the developer's subdomain, enforcing only public/active listings are shown.
+   - Design the page to be mobile-responsive and SEO-friendly, including Open Graph tags and sitemap updates.
+
+5. **Custom Branding (Logo, Colors):**
+   - Extend the `developers` table to include `branding_logo_url` and `branding_colors` (JSON or text) columns.
+   - Update the onboarding/settings UI to allow Pro users to upload a logo (with image validation and CDN storage) and select primary/secondary colors (with color picker UI).
+   - On public property pages, dynamically apply the developer's branding (logo in header, colors for primary UI elements) using CSS variables or a theming system.
+
+**Best Practices:**
+- Use atomic transactions for subdomain assignment to prevent race conditions.
+- Validate subdomain DNS compatibility (no underscores, etc.).
+- Ensure all public pages are protected against XSS and injection attacks.
+- Use feature flags to restrict subdomain features to Pro plan users only.
+- Write comprehensive unit and integration tests for subdomain logic and public page rendering.
+
+# Test Strategy:
+1. **Database:**
+   - Verify the `subdomain` column exists, is unique, and RLS policies are enforced.
+   - Attempt to assign duplicate subdomains and confirm rejection.
+
+2. **API:**
+   - Test subdomain availability endpoint with valid, invalid, and taken subdomains.
+   - Simulate concurrent requests to ensure no duplicates are assigned.
+
+3. **Vercel/Wildcard:**
+   - Deploy to staging and verify that requests to `subdomain.otoraport.pl` route to the correct developer's public page.
+   - Confirm rewrites/middleware extract subdomain correctly in all environments.
+
+4. **Public Pages:**
+   - Access public property pages via subdomain and confirm correct properties and branding are displayed.
+   - Test SEO tags and mobile responsiveness.
+   - Ensure only public/active properties are shown.
+
+5. **Branding:**
+   - Upload various logo formats and select colors; verify branding is applied on public pages.
+   - Test fallback behavior when branding is missing.
+
+6. **Security:**
+   - Attempt XSS and injection attacks on subdomain and branding fields; verify sanitization.
+
+7. **Feature Restriction:**
+   - Confirm only Pro plan users can set subdomains and branding; downgrade to Basic and verify feature is disabled.
+
+# Subtasks:
+## 1. Update Database Schema and RLS Policies for Subdomain and Branding [done]
+### Dependencies: None
+### Description: Modify the developers table to support subdomains and custom branding, ensuring data integrity and access control.
+### Details:
+Add a unique, nullable VARCHAR column 'subdomain' to the developers table. Enforce uniqueness at the database level. Extend the table with 'branding_logo_url' and 'branding_colors' columns. Update Row-Level Security (RLS) policies so only the owning developer can modify their subdomain and branding fields. Use atomic transactions for subdomain assignment to prevent race conditions.
+
+## 2. Implement Subdomain Availability API and Integrate with Pro UI [done]
+### Dependencies: 61.1
+### Description: Create an API endpoint for subdomain validation and integrate it into onboarding/settings for Pro users.
+### Details:
+Develop a POST /api/subdomain/check endpoint that validates subdomain format (alphanumeric, 3-32 chars, no reserved words), checks uniqueness, and returns availability. Ensure server-side validation to prevent race conditions. Integrate this checker into the onboarding and settings UI for Pro plan users, providing real-time feedback. Restrict subdomain features to Pro users via feature flags.
+
+## 3. Configure Vercel Wildcard Domains and Public Property Pages with Custom Branding [done]
+### Dependencies: 61.1, 61.2
+### Description: Set up wildcard domain routing and build public property pages that reflect developer branding.
+### Details:
+Update Vercel project to add *.otoraport.pl as a wildcard domain. Configure Next.js middleware to extract subdomain from the host header and inject it into the request context. Create a public route (e.g., /[subdomain]) that fetches and displays the developer's public properties, applying SSR/ISR for SEO. Dynamically apply branding (logo, colors) using CSS variables or theming. Ensure pages are mobile-responsive, SEO-friendly, and protected against XSS/injection.
+

@@ -1,0 +1,68 @@
+# Task ID: 52
+# Title: Implement Projects (Inwestycje) System
+# Status: done
+# Dependencies: 47, 48
+# Priority: high
+# Description: Create comprehensive projects management system with database table, RLS policies, API endpoints, project assignment in upload flow, and subscription-based project limits enforcement.
+# Details:
+Implement complete projects system for OTORAPORT allowing developers to organize properties into investment projects:
+
+**1. Database Schema (Supabase Migration):**
+- The projects table already exists in database schema (confirmed in src/types/database.ts:330-400)
+- Ensure projects table has status enum with 'active', 'inactive', 'archived' values
+- Verify RLS policies exist: developers can only CRUD their own projects
+- Confirm properties.project_id foreign key exists (already in schema at line 430, 471, 512)
+- Create database indexes: projects.developer_id, projects.status for performance
+
+**2. Create API Endpoints:**
+- Create src/app/api/projects/route.ts: GET (list all active projects for authenticated developer), POST (create new project with subscription limit validation)
+- Add project validation using existing patterns from properties API routes
+- Integrate with existing subscription-plans.ts functions: canAddProject(), enforceProjectLimit()
+- Use existing authentication patterns from src/app/api/properties/route.ts
+- Return proper TypeScript types matching database schema
+
+**3. Update Upload Flow Integration:**
+- Modify src/app/api/upload/route.ts and src/app/api/upload-parsed/route.ts
+- Add project_id assignment logic to properties during upload
+- Use existing project fetching pattern (already implemented around line 145-165)
+- Ensure existing project_id assignment in propertiesToInsert mapping works correctly
+
+**4. Enforce Subscription Limits:**
+- Use existing subscription-plans.ts: canAddProject() function handles Basic=1, Pro=2, Enterprise=unlimited
+- Implement project limit checks in POST /api/projects before creation
+- Display appropriate error messages for limit violations using existing patterns
+- Integrate with existing subscription enforcement middleware patterns
+
+**5. Project Management UI Integration:**
+- Prepare for future dashboard project selector in upload widget
+- Ensure API responses include project information for frontend consumption
+- Follow existing API response patterns from properties endpoints
+
+**Technology Integration:**
+- Use existing Supabase client patterns from src/lib/supabase/server.ts
+- Follow existing RLS policy patterns from other tables
+- Integrate with subscription-plans.ts system for limit enforcement
+- Use existing TypeScript types from src/types/database.ts
+
+# Test Strategy:
+Test projects system comprehensively: 1) Test POST /api/projects creates new project and verifies subscription limits (Basic plan allows 1 project, Pro allows 2, Enterprise unlimited), 2) Test GET /api/projects returns only developer's active projects with proper filtering, 3) Verify RLS policies prevent unauthorized access to other developers' projects, 4) Test upload flow assigns properties to correct project_id, 5) Validate subscription limit enforcement blocks project creation when limits exceeded, 6) Test project status filtering works correctly, 7) Verify database indexes improve query performance, 8) Test API error handling returns appropriate HTTP status codes and messages
+
+# Subtasks:
+## 1. Audit and Finalize Projects Database Schema and RLS Policies [done]
+### Dependencies: None
+### Description: Review and update the existing projects table, ensure status enum values, verify RLS policies, confirm foreign keys, and add necessary indexes for performance.
+### Details:
+Check that the projects table includes a status enum with 'active', 'inactive', and 'archived'. Verify that Row Level Security (RLS) policies restrict CRUD operations to the owning developer. Confirm the properties.project_id foreign key is present. Add indexes on projects.developer_id and projects.status to optimize queries. Use Supabase migration scripts and test with the Supabase CLI.
+
+## 2. Implement and Test Projects API Endpoints with Subscription Enforcement [done]
+### Dependencies: 52.1
+### Description: Develop GET and POST endpoints for projects, integrate subscription plan checks, and ensure proper authentication and validation.
+### Details:
+Create src/app/api/projects/route.ts with GET (list active projects for authenticated developer) and POST (create project with subscription limit validation). Integrate canAddProject() and enforceProjectLimit() from subscription-plans.ts. Use authentication and validation patterns from properties API. Ensure TypeScript types match the database schema and return project info for frontend use.
+
+## 3. Integrate Project Assignment in Upload Flow and Enforce Project Limits [done]
+### Dependencies: 52.2
+### Description: Update upload API routes to support project assignment, ensure properties are linked to projects, and enforce subscription-based project limits during uploads.
+### Details:
+Modify src/app/api/upload/route.ts and src/app/api/upload-parsed/route.ts to assign project_id to properties during upload. Use the existing project fetching and assignment logic. Ensure that project limit checks are enforced during uploads, and display appropriate error messages for violations. Prepare API responses to include project information for future UI integration.
+

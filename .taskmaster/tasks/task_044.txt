@@ -1,0 +1,11 @@
+# Task ID: 44
+# Title: Database Schema Updates for New Features
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Create and run database migrations for property status, notifications table, and email preferences
+# Details:
+Create Supabase migrations for: 1) Add status column to properties table with enum type (available, sold, reserved) and default 'available', 2) Create notifications table with proper indexes and RLS policies, 3) Add email_notifications_enabled and notification_frequency columns to developers table. Create proper indexes for performance: properties.status, notifications.developer_id+read+created_at. Implement RLS policies ensuring developers can only access their own data. Update TypeScript types to reflect schema changes. Test migrations in development before applying to production.
+
+# Test Strategy:
+Test migrations apply successfully without data loss, verify RLS policies work correctly, confirm indexes improve query performance, validate TypeScript types match database schema, test rollback procedures if needed

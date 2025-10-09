@@ -1,0 +1,73 @@
+# Task ID: 69
+# Title: Implement Public System Status Page with Real-Time Health Monitoring and Incident History
+# Status: done
+# Dependencies: 50
+# Priority: medium
+# Description: Develop a public, unauthenticated /status page displaying real-time health of ministry endpoints, database metrics, Stripe API status, historical uptime (30 days), and incident history.
+# Details:
+1. **Requirements & Planning:**
+   - Identify all critical systems to monitor: ministry endpoints (XML/CSV/MD5 uptime), database (latency, connection pool), Stripe API, and any other essential services.
+   - Define clear status indicators (e.g., operational, degraded, outage) and ensure consistent color-coding and iconography for quick recognition[3][4][6].
+
+2. **Health Check Implementation:**
+   - Build backend health check endpoints for each monitored service:
+     - For ministry endpoints, implement periodic HTTP(S) checks for XML/CSV/MD5 endpoints, capturing response time and status.
+     - For the database, measure query latency and connection pool stats (e.g., via a lightweight SELECT 1 and pool metrics).
+     - For Stripe, use their API status endpoint or perform a lightweight API call to verify connectivity and latency.
+   - Store health check results in a dedicated database table with timestamped entries for historical analysis.
+   - Schedule health checks using a background job (e.g., cron, serverless function, or queue worker) at a configurable interval (e.g., every 1-5 minutes).
+
+3. **Incident & Uptime Tracking:**
+   - Design an incident logging system: allow for manual or automated creation of incident records with timestamps, affected components, status, and resolution notes.
+   - Track uptime per component and aggregate for a 30-day rolling window. Calculate uptime percentages and store daily summaries for efficient chart rendering.
+
+4. **Frontend /status Page:**
+   - Build a public, unauthenticated /status route using the main frontend framework (e.g., Next.js/React).
+   - Display current status for each monitored component with clear, non-technical language[2][3][4].
+   - Render a historical uptime chart (last 30 days) using a charting library (e.g., Recharts, Chart.js, or similar), with tooltips and color-coded bars.
+   - List recent incidents with timestamps, affected systems, and resolution details for transparency.
+   - Ensure the page is mobile-friendly, accessible (WCAG 2.1 AA), and matches organization branding.
+
+5. **Best Practices & Resilience:**
+   - Host the status page independently from core infrastructure to ensure availability during outages[2][3].
+   - Automate status updates where possible, but allow for manual incident creation and updates.
+   - Document incident response procedures and ensure clear, human-readable updates are posted promptly during incidents[1][2][4].
+   - Regularly review and update monitored components and thresholds.
+
+6. **Security & Privacy:**
+   - Do not expose sensitive internal metrics or stack traces; only display high-level health and incident summaries.
+   - Ensure no authentication is required for public access, but restrict incident creation/editing to authorized staff.
+
+7. **Extensibility:**
+   - Architect the system to allow easy addition of new monitored services or metrics in the future.
+   - Consider integration with external monitoring tools (e.g., UptimeRobot, StatusGator) for enhanced reliability if needed.
+
+
+# Test Strategy:
+1. Simulate outages and degraded performance for each monitored service (ministry endpoints, database, Stripe API) and verify that the /status page updates in real time with correct status indicators and clear, non-technical messaging.
+2. Confirm that the historical uptime chart accurately reflects simulated downtime and displays correct percentages for the last 30 days.
+3. Create and resolve incidents (both manually and via automated triggers) and verify that incident history is displayed chronologically with all required details.
+4. Test the /status page on multiple devices and browsers for responsiveness, accessibility (using tools like axe or Lighthouse), and branding consistency.
+5. Confirm that no sensitive information is leaked and that only authorized users can create or edit incidents.
+6. Perform load testing to ensure the status page remains available and performant during simulated high-traffic scenarios (e.g., major incident).
+7. Review logs and database entries to ensure health checks and incident records are stored and updated as expected.
+
+# Subtasks:
+## 1. Implement Real-Time Health Check Backend for All Monitored Services [done]
+### Dependencies: None
+### Description: Develop backend health check endpoints and scheduled jobs to monitor ministry endpoints, database metrics, and Stripe API status in real time.
+### Details:
+Create periodic health check routines for each service (HTTP(S) checks for ministry endpoints, database latency/pool checks, Stripe API connectivity). Store results in a dedicated database table with timestamps for historical analysis. Schedule checks using cron or background workers at configurable intervals.
+
+## 2. Design and Build Public /status Page Frontend with Uptime and Incident History [done]
+### Dependencies: 69.1
+### Description: Develop a public, unauthenticated /status page that displays current system health, historical uptime (30 days), and incident history with clear indicators and branding.
+### Details:
+Use a frontend framework (e.g., Next.js/React) to render real-time status for each component, historical uptime charts, and incident logs. Ensure clear color-coded indicators, non-technical messaging, mobile responsiveness, accessibility (WCAG 2.1 AA), and organization branding. Integrate with backend health check and incident data.
+
+## 3. Implement Incident Logging and Uptime Aggregation System [done]
+### Dependencies: 69.1
+### Description: Create systems for manual/automated incident logging and aggregate uptime calculations for each monitored component over a 30-day rolling window.
+### Details:
+Design a database schema for incident records (timestamps, affected components, status, resolution notes). Implement logic to calculate and store daily uptime summaries for efficient chart rendering. Allow authorized staff to create/edit incidents while keeping public access read-only.
+

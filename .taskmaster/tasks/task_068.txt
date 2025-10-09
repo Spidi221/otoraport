@@ -1,0 +1,51 @@
+# Task ID: 68
+# Title: Implement Audit Logging System with API and Dashboard Integration
+# Status: done
+# Dependencies: 50
+# Priority: medium
+# Description: Design and implement a robust audit logging system, including database schema, event capture, API endpoint, user dashboard, and admin cross-user log view.
+# Details:
+1. **Database Schema**: Create an `audit_logs` table with columns: `id` (UUID, PK), `user_id` (FK), `action` (VARCHAR), `resource_type` (VARCHAR), `changes` (JSONB), `ip_address` (INET), `user_agent` (TEXT), and `timestamp` (TIMESTAMP, default NOW). Ensure append-only structure for immutability and consider indexing on `user_id`, `action`, and `timestamp` for efficient querying[1][2][3].
+
+2. **Event Capture**: Integrate audit logging into backend services to record key actions: login, upload, delete, and subscription changes. Use middleware or service hooks to intercept these events and write structured records to the audit_logs table. For actions involving data changes, serialize pre- and post-change states in the `changes` field as JSON[1][3].
+
+3. **API Endpoint**: Implement `GET /api/user/audit-logs` to return paginated, filtered audit log entries for the authenticated user. Support query parameters for date range, action type, and resource filtering. Ensure proper access control so users only see their own logs, while admins can query all logs.
+
+4. **User Dashboard Page**: Create `/dashboard/activity` page displaying the user's audit log entries in a sortable, filterable table. Include columns for action, resource, timestamp, IP, and user agent. Provide search and export (CSV/JSON) options.
+
+5. **Admin Panel Cross-User View**: Extend the admin panel to allow privileged users to view, filter, and search audit logs across all users. Implement advanced filtering (by user, action, resource, date) and export capabilities. Ensure strict access control and audit admin access to logs.
+
+6. **Security & Retention**: Enforce append-only writes at the database level (e.g., via RLS or triggers) and implement retention policies (e.g., auto-archive logs older than N months). Ensure sensitive data in logs is handled per compliance requirements[2][6][7].
+
+7. **Best Practices**: Use standardized JSON schema for log entries to ensure consistency and future extensibility[3]. Separate audit log storage from operational tables if performance impact is observed[2].
+
+**Tech Stack Recommendations**: PostgreSQL (with JSONB for changes), RESTful API (Next.js/Express), React (MUI DataGrid or similar for dashboard), RBAC for access control.
+
+# Test Strategy:
+1. Verify audit_logs table schema and append-only constraints; attempt unauthorized modification and confirm rejection.
+2. Trigger each key action (login, upload, delete, subscription change) and confirm audit log entry is created with correct metadata.
+3. Test GET /api/user/audit-logs endpoint for authenticated users and admins; verify filtering, pagination, and access control.
+4. Manually review /dashboard/activity page for correct display, filtering, and export functionality.
+5. Test admin panel cross-user log view for advanced filtering and export; confirm only authorized admins can access.
+6. Simulate log retention policy and confirm archival/deletion of old records.
+7. Perform security review to ensure no sensitive data leakage and audit log integrity.
+
+# Subtasks:
+## 1. Design and Implement Audit Log Database Schema and Event Capture [done]
+### Dependencies: None
+### Description: Create the audit_logs table and integrate event capture into backend services to record key user actions.
+### Details:
+Define the audit_logs table with columns for id (UUID), user_id (FK), action, resource_type, changes (JSONB), ip_address, user_agent, and timestamp. Ensure append-only structure for immutability and index key columns for efficient querying. Integrate middleware or service hooks to capture events such as login, upload, delete, and subscription changes, serializing pre- and post-change states in the changes field.
+
+## 2. Develop API Endpoint for Audit Log Retrieval with Access Control [done]
+### Dependencies: 68.1
+### Description: Implement a RESTful API endpoint to return paginated, filtered audit log entries for users and admins, enforcing strict access control.
+### Details:
+Create GET /api/user/audit-logs endpoint supporting query parameters for date range, action type, and resource filtering. Ensure users only see their own logs, while admins can query all logs. Apply RBAC for access management and validate filtering and pagination logic.
+
+## 3. Implement User Dashboard and Admin Panel for Audit Log Visualization [done]
+### Dependencies: 68.2
+### Description: Build dashboard pages for users and admins to view, filter, search, and export audit logs, with advanced filtering and export capabilities for admins.
+### Details:
+Create /dashboard/activity page for users to view their audit logs in a sortable, filterable table with columns for action, resource, timestamp, IP, and user agent. Add search and export (CSV/JSON) options. Extend admin panel to allow cross-user log viewing with advanced filtering and export, ensuring strict access control and logging of admin access.
+

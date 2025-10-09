@@ -1,0 +1,43 @@
+# Task ID: 38
+# Title: Remove Unused Dashboard Components
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Simplify dashboard layout by removing SubscriptionCard and SubscriptionErrorHandler components that are not needed for v2
+# Details:
+Edit src/app/dashboard/page.tsx: remove import statements for SubscriptionCard and SubscriptionErrorHandler, remove <SubscriptionErrorHandler /> and <SubscriptionCard /> components from JSX. Keep only UploadWidget, ActionButtons, and PropertiesTable components in the dashboard layout. Ensure TypeScript compilation passes and no runtime errors occur.
+
+# Test Strategy:
+Verify dashboard renders with simplified layout containing only UploadWidget, ActionButtons, and PropertiesTable. Confirm no TypeScript errors during compilation and no runtime errors in browser console
+
+# Subtasks:
+## 1. Locate Unused Component Code in Dashboard File [done]
+### Dependencies: None
+### Description: Identify the exact import statements and JSX element usages for SubscriptionCard and SubscriptionErrorHandler within the src/app/dashboard/page.tsx file.
+### Details:
+Open src/app/dashboard/page.tsx and find the lines corresponding to `import SubscriptionCard...`, `import SubscriptionErrorHandler...`, `<SubscriptionCard />`, and `<SubscriptionErrorHandler />`. Document the line numbers for removal in the subsequent steps.
+
+## 2. Remove Unused Import Statements [done]
+### Dependencies: 38.1
+### Description: Delete the import statements for SubscriptionCard and SubscriptionErrorHandler from the top of src/app/dashboard/page.tsx.
+### Details:
+Edit src/app/dashboard/page.tsx and remove the two lines that import the SubscriptionCard and SubscriptionErrorHandler components. Save the file.
+
+## 3. Remove Unused JSX Components from Layout [done]
+### Dependencies: 38.1
+### Description: Delete the <SubscriptionCard /> and <SubscriptionErrorHandler /> component elements from the JSX returned by the Dashboard page component.
+### Details:
+In src/app/dashboard/page.tsx, locate and remove the <SubscriptionErrorHandler /> and <SubscriptionCard /> tags from the component's render method. Ensure the remaining components (UploadWidget, ActionButtons, PropertiesTable) are still present and the layout is syntactically correct.
+
+## 4. Verify TypeScript Compilation Success [done]
+### Dependencies: 38.2, 38.3
+### Description: Run the project's build process to confirm that the code changes do not introduce any TypeScript compilation errors.
+### Details:
+Execute the command for type-checking and building the project (e.g., `npm run build` or `tsc`). The process must complete without any new errors related to the dashboard page or missing components.
+
+## 5. Perform Runtime and Visual Validation [done]
+### Dependencies: 38.4
+### Description: Run the application, navigate to the dashboard, and verify the simplified layout renders correctly without any client-side errors.
+### Details:
+Start the development server. Open the application in a browser and go to the dashboard page. Check that the SubscriptionCard and SubscriptionErrorHandler are no longer visible. Confirm that UploadWidget, ActionButtons, and PropertiesTable are displayed correctly. Open the browser's developer console and ensure no new runtime errors or warnings are present.
+

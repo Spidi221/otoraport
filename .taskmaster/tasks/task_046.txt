@@ -1,0 +1,84 @@
+# Task ID: 46
+# Title: Update Landing Page with New Pricing Plans and Features
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Update the main landing page to reflect the new subscription plans (Basic 149zł, Pro 249zł, Enterprise 399zł) with corrected features including subdomain support, custom domains, and a pricing calculator for Pro plan.
+# Details:
+This task involves comprehensive updates to the landing page (src/app/page.tsx) and pricing section (src/components/PricingSection.tsx) to align with the new subscription model:
+
+**Pricing Plan Updates:**
+- Basic: 149zł/month, 1 investment, max 20 properties
+- Pro: 249zł/month, 2 investments + 50zł per additional, unlimited properties, includes subdomains
+- Enterprise: 399zł/month, unlimited everything, includes custom domains
+
+**Feature Updates Required:**
+1. Update PricingSection.tsx with correct pricing (Basic 149zł, Pro 249zł, Enterprise 399zł)
+2. Correct plan features - Basic (1 investment, 20 properties), Pro (2+ investments, unlimited properties, subdomains), Enterprise (unlimited everything, custom domains)
+3. Add pricing calculator component for Pro plan showing additional investment costs (50zł each)
+4. Update landing page hero section to mention new pricing structure
+5. Update FAQ section with current pricing information
+6. Add price history features mention in plan descriptions
+7. Ensure all pricing references throughout the page are consistent
+
+**Implementation Details:**
+- Modify plans array in PricingSection.tsx with correct monthly/annual pricing
+- Update feature lists to accurately reflect plan capabilities
+- Create new PricingCalculator component for Pro plan additional investment cost calculation
+- Update landing page text to reference correct pricing tiers
+- Ensure responsive design maintains quality across all devices
+- Update structured data/metadata if pricing is referenced
+
+**Technical Considerations:**
+- Use existing Radix UI components for consistency
+- Maintain current responsive design patterns
+- Ensure pricing calculator follows existing design system
+- Update TypeScript interfaces if new pricing structure requires it
+- Test across different viewport sizes
+
+# Test Strategy:
+Verify pricing displays correctly across all screen sizes, test pricing calculator functionality (Pro plan additional investment calculations), confirm all plan features are accurately represented, validate FAQ section contains updated pricing, ensure structured data reflects correct pricing, test annual/monthly toggle works with new prices, verify CTA buttons link to correct signup flows with pricing parameters, test responsive design on mobile/tablet/desktop, confirm no old pricing information remains on the page, validate landing page loads quickly with new content.
+
+# Subtasks:
+## 1. Update PricingSection.tsx with New Pricing Plans [done]
+### Dependencies: None
+### Description: Modify the PricingSection.tsx component to reflect the updated subscription plans and pricing tiers.
+### Details:
+Edit the plans array in src/components/PricingSection.tsx to set Basic at 149zł/month, Pro at 249zł/month (plus 50zł per additional investment), and Enterprise at 399zł/month. Ensure monthly and annual pricing options are accurate and update any related metadata.
+
+## 2. Correct Feature Lists for All Plans [done]
+### Dependencies: 46.1
+### Description: Update the feature descriptions for Basic, Pro, and Enterprise plans to match the new specifications.
+### Details:
+Adjust the feature lists in PricingSection.tsx so Basic shows 1 investment and 20 properties, Pro shows 2 investments plus unlimited properties and subdomain support, and Enterprise shows unlimited investments/properties and custom domain support. Ensure all feature bullets are clear and accurate.
+
+## 3. Create Pricing Calculator Component for Pro Plan [done]
+### Dependencies: 46.1, 46.2
+### Description: Develop a new component to calculate additional investment costs for the Pro plan.
+### Details:
+Implement a PricingCalculator component in src/components that allows users to input the number of additional investments for the Pro plan and dynamically displays the total monthly cost (base 249zł + 50zł per extra investment). Integrate with existing design system and Radix UI components.
+
+## 4. Update Landing Page Hero Section Text [done]
+### Dependencies: 46.1, 46.2
+### Description: Revise the hero section of the landing page to mention the new pricing structure and plan highlights.
+### Details:
+Edit src/app/page.tsx to update the hero section headline and supporting text, referencing the new pricing tiers and key features. Ensure messaging is clear and matches the updated plans.
+
+## 5. Update FAQ Section with Current Pricing Information [done]
+### Dependencies: 46.1, 46.2
+### Description: Revise the FAQ section to include accurate details about the new pricing plans and features.
+### Details:
+Update the FAQ entries in src/app/page.tsx or relevant FAQ component to reflect the new pricing, plan limits, and calculator functionality. Ensure answers are clear and up-to-date.
+
+## 6. Add Price History Feature Mention in Plan Descriptions [done]
+### Dependencies: 46.2
+### Description: Include references to price history features in the plan descriptions where applicable.
+### Details:
+Edit the plan descriptions in PricingSection.tsx and any relevant landing page sections to mention price history features for applicable plans. Ensure the wording is consistent and highlights the feature appropriately.
+
+## 7. Perform Consistency Checks and Responsive Design Validation [done]
+### Dependencies: 46.1, 46.2, 46.3, 46.4, 46.5, 46.6
+### Description: Ensure all pricing references are consistent across the landing page and validate responsive design.
+### Details:
+Review the entire landing page to confirm all pricing and feature references are updated and consistent. Test the page across multiple devices and viewport sizes to ensure the design remains responsive and visually correct.
+

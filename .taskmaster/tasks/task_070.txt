@@ -1,0 +1,49 @@
+# Task ID: 70
+# Title: Performance Optimization and Caching Implementation
+# Status: done
+# Dependencies: 52, 54, 61, 66, 68
+# Priority: medium
+# Description: Implement Redis caching for ministry endpoints, enable ISR for public pages, optimize database queries, add Next.js image optimization, and achieve high Lighthouse scores.
+# Details:
+1. **Redis Caching for Ministry Endpoints**: Integrate Redis as an in-memory cache for ministry endpoints serving XML, CSV, and MD5 responses. Use a centralized middleware (e.g., in `middlewares/redis.js`) to handle cache reads/writes, with cache keys based on endpoint and parameters. Set a TTL (Time To Live) of 60 seconds for these responses. Use the `node-redis` client, ensure robust error handling, and monitor cache hit/miss rates for tuning[1][2][4][7].
+
+2. **Incremental Static Regeneration (ISR) for Public Pages**: For all public-facing Next.js pages, implement ISR with a `revalidate` interval of 3600 seconds (1 hour). Ensure that page data is re-fetched and rebuilt in the background after the interval, providing users with up-to-date content while maintaining fast load times.
+
+3. **Database Query Optimization**: Audit all queries related to ministry endpoints and public pages. Add appropriate indexes (e.g., on frequently filtered columns, foreign keys) and refactor queries for efficient joins and minimal data transfer. Use query analysis tools (such as PostgreSQL's `EXPLAIN ANALYZE`) to identify bottlenecks and verify improvements.
+
+4. **Next.js Image Optimization**: Refactor all image usage in public and dashboard pages to use the Next.js `<Image>` component. Configure image domains, enable AVIF/WebP formats, and set appropriate sizes and priorities for above-the-fold images. Leverage built-in lazy loading and responsive sizing for best performance.
+
+5. **Lighthouse Audit and Remediation**: Run Lighthouse audits on key public and dashboard pages. Address all issues to achieve at least Performance 90+, Accessibility 95+, Best Practices 90+, and SEO 95+. This may involve optimizing asset delivery, reducing unused JavaScript/CSS, improving ARIA/alt attributes, and ensuring semantic HTML.
+
+**Best Practices**:
+- Use environment variables for Redis connection configuration.
+- Ensure cache invalidation on relevant data updates.
+- Monitor Redis and database performance in production.
+- Document caching and ISR strategies for future maintainers.
+
+# Test Strategy:
+1. For Redis caching, hit ministry endpoints repeatedly and verify cache hits/misses using Redis CLI or logs; confirm cache expires after 60s and updates on data change.
+2. For ISR, update backend data and confirm public pages reflect changes after revalidation interval (3600s) without full redeploy.
+3. Use database query logs and `EXPLAIN ANALYZE` to confirm indexes are used and query times are reduced; test endpoints under load.
+4. Run Lighthouse audits on public and dashboard pages, iteratively fix issues, and confirm target scores are met.
+5. Manually and automatically test image loading, responsiveness, and format negotiation on various devices and network conditions.
+
+# Subtasks:
+## 1. Implement Redis Caching Middleware for Ministry Endpoints [done]
+### Dependencies: None
+### Description: Integrate Redis as an in-memory cache for ministry endpoints serving XML, CSV, and MD5 responses using a centralized middleware.
+### Details:
+Create a middleware (e.g., middlewares/redis.js) that intercepts requests to ministry endpoints, checks for cached responses in Redis using keys based on endpoint and parameters, and serves cached data if available. Use the node-redis client, set a TTL of 60 seconds for cached entries, and ensure robust error handling. Monitor cache hit/miss rates for tuning and use environment variables for Redis configuration.
+
+## 2. Enable Incremental Static Regeneration (ISR) for Public Pages [done]
+### Dependencies: 70.1
+### Description: Configure ISR for all public-facing Next.js pages to ensure up-to-date content and fast load times.
+### Details:
+Set up ISR in Next.js by specifying a revalidate interval of 3600 seconds (1 hour) for public pages. Ensure that page data is re-fetched and rebuilt in the background after the interval. Document the ISR strategy for maintainers and verify that updates to backend data are reflected after revalidation.
+
+## 3. Audit and Optimize Database Queries for Cached and ISR Endpoints [done]
+### Dependencies: 70.1, 70.2
+### Description: Review and optimize all database queries related to ministry endpoints and public pages for performance.
+### Details:
+Audit queries for endpoints using Redis caching and ISR. Add indexes to frequently filtered columns and foreign keys, refactor queries for efficient joins and minimal data transfer, and use query analysis tools (e.g., PostgreSQL's EXPLAIN ANALYZE) to identify bottlenecks. Monitor database performance and document optimization strategies.
+

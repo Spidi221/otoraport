@@ -1,0 +1,43 @@
+# Task ID: 40
+# Title: Enhance Settings Page with Complete User Management
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Expand the existing settings page to include profile management, API configuration, notification preferences, and account actions
+# Details:
+Enhance src/app/dashboard/settings/page.tsx with four sections: 1) Profile Settings - company name, NIP, REGON, email, phone with form validation, 2) API Configuration - display client_id (read-only), regenerate client_id button with confirmation dialog, ministry endpoint URLs with copy buttons, 3) Notification Preferences - email notifications toggle, frequency selection (daily/weekly), 4) Account Actions - change password, delete account with confirmation. Create API endpoints: GET /api/user/profile, PATCH /api/user/profile, POST /api/user/regenerate-client-id. Use Radix UI components for forms, dialogs, and switches. Implement form validation with Zod schemas.
+
+# Test Strategy:
+Test form validation for required fields and formats, verify profile updates persist in database, test client_id regeneration creates new UUID, confirm success/error toast notifications display correctly, validate all API endpoints work properly
+
+# Subtasks:
+## 1. Create API Endpoints for User Profile Management [done]
+### Dependencies: None
+### Description: Implement the backend API routes required to fetch and update user profile information, which will serve as the data layer for the settings page.
+### Details:
+Create the API route `GET /api/user/profile` to retrieve the current user's data, including company name, NIP, REGON, email, phone, and client_id. Create the API route `PATCH /api/user/profile` to update the user's profile information, ensuring server-side validation of the incoming data.
+
+## 2. Implement Profile Settings Form UI [done]
+### Dependencies: 40.1
+### Description: Build the 'Profile Settings' section on the settings page, allowing users to view and edit their profile information with client-side validation.
+### Details:
+In `src/app/dashboard/settings/page.tsx`, create a form using Radix UI components for company name, NIP, REGON, email, and phone. Implement client-side validation using a Zod schema. Connect the form to the GET and PATCH API endpoints to fetch initial data and submit updates. Implement loading and disabled states during form submission.
+
+## 3. Develop API Configuration Section with Client ID Regeneration [done]
+### Dependencies: 40.1
+### Description: Create the 'API Configuration' section, including the backend logic and UI for displaying API details and regenerating the client ID.
+### Details:
+Implement the `POST /api/user/regenerate-client-id` endpoint to generate a new UUID for the user's client_id. In the UI, display the read-only client_id fetched from the profile API. Add a 'Regenerate' button that triggers a Radix UI confirmation dialog before calling the API. Display the static ministry endpoint URLs with 'Copy to Clipboard' buttons.
+
+## 4. Build UI for Notification Preferences and Account Actions [done]
+### Dependencies: None
+### Description: Construct the user interface for the 'Notification Preferences' and 'Account Actions' sections using Radix UI components for user interaction.
+### Details:
+In the 'Notification Preferences' section, add a Radix UI Switch for enabling/disabling email notifications and a Radix UI Select for choosing frequency (daily/weekly). In the 'Account Actions' section, add buttons for 'Change Password' and 'Delete Account', with each button configured to trigger a respective Radix UI confirmation dialog. This subtask focuses on UI structure and component implementation.
+
+## 5. Implement Backend for Account Actions and Final Integration [done]
+### Dependencies: 40.2, 40.3, 40.4
+### Description: Create the necessary API endpoints for account actions and notification preferences, and integrate all four sections into a cohesive settings page with user feedback.
+### Details:
+Create API endpoints to handle changing passwords and deleting user accounts. Implement the backend logic to update notification preferences in the database. Connect the UI components from subtask 4 to these new endpoints. Implement success and error toast notifications for all actions on the page (profile update, ID regeneration, password change, etc.) to provide clear user feedback.
+

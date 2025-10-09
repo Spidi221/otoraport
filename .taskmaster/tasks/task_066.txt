@@ -1,0 +1,65 @@
+# Task ID: 66
+# Title: Implement Multi-Step Onboarding Wizard Component
+# Status: done
+# Dependencies: 50
+# Priority: medium
+# Description: Develop a multi-step onboarding wizard with steps for welcome/company info, logo upload, CSV upload with inline help, data verification preview, and endpoint testing, including skip and state persistence features.
+# Details:
+Implement a React-based multi-step onboarding wizard using a robust stepper component (such as MUI Stepper, CoreUI Stepper, or a custom solution) to provide a clear, accessible, and responsive user experience[4][6][7].
+
+**Step Structure:**
+- Step 1: Welcome screen with company info form and logo upload (support drag-and-drop, preview, and validation for image type/size).
+- Step 2: CSV upload with inline contextual help (display sample CSV, validation errors, and tips for formatting).
+- Step 3: Data verification step showing a preview table of parsed CSV data, highlighting errors or warnings.
+- Step 4: Test endpoints step displaying dynamically generated XML/CSV/MD5 URLs for the user to test, with copy-to-clipboard and status indicators.
+
+**Features:**
+- Allow users to skip steps where appropriate (e.g., skip logo upload or CSV upload), with clear UI affordances.
+- Persist onboarding state in localStorage or sessionStorage to allow users to resume if they leave and return[2].
+- Save progress to the backend at each step (where applicable) to ensure data integrity and support multi-device onboarding.
+- Provide clear navigation (next, back, skip, finish), progress indicators, and validation feedback at each step.
+- Use a centralized schema (e.g., Zod or Yup) for form validation and type safety across steps[2].
+- Ensure accessibility (keyboard navigation, ARIA labels) and responsive design.
+- Integrate with existing authentication/session context to associate onboarding data with the correct user.
+
+**Technical Considerations:**
+- Use modular React components for each step, managed by a parent wizard controller.
+- Leverage existing UI libraries (e.g., shadcn/ui, MUI, or CoreUI) for stepper and form controls where possible[4][6][5].
+- For file uploads, use a secure upload endpoint and show upload progress.
+- For endpoint testing, fetch and display live status (e.g., HTTP 200/404) for each URL.
+- Ensure onboarding can be resumed after authentication or page reload, using both frontend and backend state.
+
+**Documentation:**
+- Document the onboarding flow, component structure, and state management approach for maintainability.
+
+# Test Strategy:
+1. Manually test the onboarding wizard end-to-end: complete each step, skip optional steps, and verify correct navigation and data persistence.
+2. Refresh or close/reopen the browser mid-onboarding and confirm state is restored from storage.
+3. Upload various logo files (valid/invalid types, large/small sizes) and verify validation and preview.
+4. Upload valid and invalid CSV files; verify inline help, error messages, and preview accuracy.
+5. On the verification step, confirm that data is displayed as expected and errors are highlighted.
+6. On the endpoint test step, verify that all URLs are generated correctly, copy-to-clipboard works, and live status is displayed.
+7. Confirm that onboarding data is saved to the backend at each step and associated with the correct user.
+8. Test accessibility: navigate the wizard using keyboard only and verify ARIA compliance.
+9. Test on multiple devices and screen sizes for responsive behavior.
+10. Write automated tests for step navigation, validation, and state persistence.
+
+# Subtasks:
+## 1. Design and Implement Modular Step Components for Onboarding Wizard [done]
+### Dependencies: None
+### Description: Create individual React components for each onboarding step: welcome/company info with logo upload, CSV upload with inline help, data verification preview, and endpoint testing.
+### Details:
+Develop modular React components for each step, ensuring each supports required features (e.g., drag-and-drop logo upload with preview and validation, CSV upload with sample and inline help, preview table with error highlighting, endpoint testing with live status and copy-to-clipboard). Use a centralized validation schema (Zod or Yup) for form validation and type safety. Ensure accessibility and responsive design for all components.
+
+## 2. Implement Wizard Controller with Navigation, State Persistence, and Skip Logic [done]
+### Dependencies: 66.1
+### Description: Build the parent wizard controller to manage step navigation, progress indicators, skip functionality, and state persistence using localStorage/sessionStorage and backend sync.
+### Details:
+Integrate a robust stepper component (e.g., MUI Stepper, CoreUI Stepper, or custom) to manage step transitions, progress display, and navigation controls (next, back, skip, finish). Implement logic to allow skipping optional steps and persist onboarding state in localStorage/sessionStorage. Sync progress to the backend at each step for multi-device support. Ensure onboarding can be resumed after authentication or page reload.
+
+## 3. Document Onboarding Wizard Flow, Component Structure, and State Management [done]
+### Dependencies: 66.1, 66.2
+### Description: Create comprehensive documentation covering the onboarding flow, component architecture, validation schema, and state management approach.
+### Details:
+Write detailed documentation explaining the onboarding wizard's step structure, component hierarchy, validation strategy, navigation logic, state persistence mechanisms, and backend integration. Include code samples, usage instructions, and accessibility considerations for maintainability.
+

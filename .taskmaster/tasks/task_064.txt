@@ -1,0 +1,75 @@
+# Task ID: 64
+# Title: Build Admin Panel - Property Management
+# Status: done
+# Dependencies: 39, 57
+# Priority: medium
+# Description: Develop the /admin/properties page for administrators, featuring cross-developer property search, advanced filters, bulk actions (approve, reject, delete), and CSV export functionality.
+# Details:
+1. **Page Structure & Access Control:**
+   - Implement the /admin/properties route, restricting access to admin users only using existing authentication and role-based access control patterns.
+   - Use a responsive, user-friendly UI framework (e.g., Radix UI, Material UI) to ensure intuitive navigation and accessibility across devices[4][2].
+
+2. **Property Search & Filtering:**
+   - Integrate a search bar supporting queries across all developers' properties (by address, property ID, or developer name).
+   - Add advanced filters: developer (dropdown, multi-select), status (using enums from Task 39), price range (min/max), and location (city, region, or geospatial input).
+   - Ensure filters are debounced and server-driven for scalability with large datasets.
+
+3. **Properties Table:**
+   - Display properties in a paginated, sortable table with columns: Property ID, Developer, Status (with StatusBadge from Task 39), Price, Location, and Actions.
+   - Support multi-row selection with checkboxes for bulk actions.
+
+4. **Bulk Actions:**
+   - Implement toolbar for bulk approve, reject, and delete actions.
+   - Use confirmation dialogs for destructive actions (reject, delete) and optimistic UI updates with error handling.
+   - Integrate with existing PATCH /api/properties/bulk endpoint for status updates (from Task 39); create new endpoints if needed for approve/reject/delete.
+
+5. **CSV Export:**
+   - Add export button to download filtered property data as CSV.
+   - Ensure exported data respects current filters and includes all visible columns.
+   - Use streaming or background job for large exports to avoid blocking UI.
+
+6. **Performance & Security:**
+   - Use server-side pagination and filtering to handle large property datasets efficiently.
+   - Enforce strict RLS policies to prevent unauthorized data access, even for admin users.
+   - Log all bulk actions for auditability.
+
+7. **UI/UX Best Practices:**
+   - Provide loading and empty states, error feedback, and accessible keyboard navigation.
+   - Ensure all actions are undoable where feasible (e.g., soft delete with restore option).
+   - Follow consistent design patterns with the rest of the admin dashboard.
+
+8. **Documentation:**
+   - Document API endpoints, UI components, and usage instructions for future maintainers.
+
+**Technologies:** Next.js/React, TypeScript, Radix UI or Material UI, Supabase/Postgres (with RLS), CSV export libraries (e.g., papaparse), and existing API infrastructure.
+
+# Test Strategy:
+1. Verify only admin users can access /admin/properties and all data is visible across developers.
+2. Test property search and each filter (developer, status, price, location) for accuracy and performance with large datasets.
+3. Confirm properties table displays correct data, supports sorting, pagination, and multi-row selection.
+4. Execute bulk approve, reject, and delete actions; verify database updates, UI feedback, and error handling for partial failures.
+5. Test CSV export with various filters and large result sets; ensure exported data matches visible table data.
+6. Validate RLS policies prevent unauthorized access, even via direct API calls.
+7. Check audit logs for all bulk actions.
+8. Test accessibility (keyboard navigation, ARIA labels), responsive design, and loading/error/empty states.
+9. Review documentation for completeness and clarity.
+
+# Subtasks:
+## 1. Implement Page Structure, Access Control, and Properties Table [done]
+### Dependencies: None
+### Description: Set up the /admin/properties route with admin-only access, and build the main properties table with pagination, sorting, and multi-row selection.
+### Details:
+Use Next.js routing and existing authentication/role-based access control to restrict the page to admin users. Integrate a UI framework (Radix UI or Material UI) for responsive layout. Create a paginated, sortable table displaying Property ID, Developer, Status (with StatusBadge), Price, Location, and Actions. Support multi-row selection with checkboxes for bulk actions. Ensure loading, empty, and error states are handled.
+
+## 2. Develop Property Search, Advanced Filters, and Bulk Actions [done]
+### Dependencies: 64.1
+### Description: Add cross-developer property search, advanced filtering (developer, status, price, location), and implement bulk approve, reject, and delete actions with confirmation dialogs.
+### Details:
+Integrate a debounced search bar and server-driven filters for developer (multi-select), status (enum), price range, and location. Connect filters to backend for scalability. Implement bulk action toolbar for approve, reject, and delete, using confirmation dialogs for destructive actions. Integrate with PATCH /api/properties/bulk and create new endpoints if needed. Provide optimistic UI updates and error handling.
+
+## 3. Implement CSV Export, Performance, Security, and Documentation [done]
+### Dependencies: 64.2
+### Description: Enable CSV export of filtered property data, enforce server-side pagination and RLS, and document API endpoints and UI components.
+### Details:
+Add an export button to download filtered property data as CSV, ensuring all visible columns are included and large exports use streaming or background jobs. Enforce server-side pagination/filtering and strict RLS policies for security. Log all bulk actions. Document API endpoints, UI components, and usage instructions for maintainers.
+

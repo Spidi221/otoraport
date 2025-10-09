@@ -1,0 +1,83 @@
+# Task ID: 65
+# Title: Build Admin Panel - Subscription Management Page with Revenue Dashboard and Manual Controls
+# Status: done
+# Dependencies: 57
+# Priority: medium
+# Description: Develop the /admin/subscriptions page featuring MRR/ARR revenue charts, a failed payments list, manual refund functionality via Stripe API, and manual upgrade/downgrade controls for admin users.
+# Details:
+1. **Page Structure & Access:**
+   - Implement /admin/subscriptions route, accessible only to users with admin privileges (reuse or extend existing role-based access control middleware).
+   - Use a responsive layout with a sidebar for navigation and a main content area for subscription management features, following established admin panel UI/UX best practices[10][3].
+
+2. **Revenue Dashboard (MRR/ARR Charts):**
+   - Integrate a charting library (e.g., Chart.js or Recharts) to visualize Monthly Recurring Revenue (MRR) and Annual Recurring Revenue (ARR) trends over time.
+   - Fetch and aggregate subscription payment data from your backend (ensure endpoints provide time-series revenue data, grouped by month/year).
+   - Display key metrics (current MRR, ARR, active subscriptions count) as summary cards above the charts for quick insights[9][4].
+
+3. **Failed Payments List:**
+   - Display a paginated, filterable table of failed payment attempts, including customer name, subscription plan, failure reason, and timestamp.
+   - Fetch failed payment data from your backend, which should be synced with Stripe's payment_intent and invoice events (ensure webhook handling is robust).
+   - Provide search and filter options (by customer, date range, plan, status) for efficient admin workflows[3][1].
+
+4. **Manual Refund Button (Stripe API):**
+   - Add a 'Refund' action button to each eligible payment row (successful payments only, not failed ones).
+   - On click, open a confirmation modal; upon confirmation, call a secure backend endpoint that uses the Stripe API to create a refund for the selected payment (use idempotency keys and proper error handling as per Stripe best practices).
+   - Log all manual refund actions with admin user ID and timestamp for audit purposes.
+
+5. **Manual Upgrade/Downgrade Options:**
+   - For each active subscription, provide admin controls to change the user's plan (upgrade/downgrade) or adjust limits.
+   - On action, open a modal to select the new plan and confirm; trigger backend logic to update the subscription in Stripe and your database, ensuring proration and billing adjustments are handled correctly.
+   - Display current plan, limits, and next billing date for context.
+
+6. **Security & Audit:**
+   - Ensure all admin actions (refunds, plan changes) are logged with user, action, and timestamp.
+   - Validate all inputs and enforce strict backend authorization for all sensitive operations.
+
+7. **Testing & Error Handling:**
+   - Implement loading, error, and empty states for all data tables and charts.
+   - Use optimistic UI updates where appropriate, but always confirm backend success before finalizing state changes.
+
+8. **Documentation:**
+   - Document all new endpoints, admin workflows, and Stripe integration details for future maintainers.
+
+**Tech Stack Recommendations:**
+- Use React (with TypeScript) for UI, Next.js routing, and Tailwind CSS for styling.
+- Use Stripe Node.js SDK for backend payment/refund operations.
+- Chart.js or Recharts for data visualization.
+- Ensure all sensitive operations are performed server-side and exposed via secure API endpoints.
+
+**References:**
+- Stripe Admin Refunds: https://stripe.com/docs/refunds
+- Admin Panel Design: [10][9]
+- Subscription Management Patterns: [3][6][7]
+
+# Test Strategy:
+1. Verify only admin users can access /admin/subscriptions; non-admins are redirected or shown an error.
+2. Confirm MRR/ARR charts display accurate, up-to-date data by cross-checking with Stripe dashboard and backend reports.
+3. Test failed payments list: simulate failed payments in Stripe, ensure they appear with correct details and filters work as expected.
+4. Test manual refund: trigger refund from admin panel, verify refund is processed in Stripe, status updates in UI, and audit log entry is created.
+5. Test manual upgrade/downgrade: change a user's plan from admin panel, verify changes in Stripe, database, and UI; ensure proration and billing adjustments are correct.
+6. Attempt all sensitive actions as a non-admin and confirm access is denied.
+7. Simulate backend/API errors for each action (refund, upgrade, downgrade) and verify user-friendly error messages and no data corruption.
+8. Review audit logs for all admin actions and confirm completeness and accuracy.
+9. Test on multiple devices and browsers for responsive layout and usability.
+
+# Subtasks:
+## 1. Implement Revenue Dashboard with MRR/ARR Charts and Summary Metrics [done]
+### Dependencies: None
+### Description: Develop the revenue dashboard section of the /admin/subscriptions page, featuring interactive charts for Monthly Recurring Revenue (MRR) and Annual Recurring Revenue (ARR), plus summary cards for key metrics.
+### Details:
+Integrate a charting library (e.g., Chart.js or Recharts) to visualize MRR/ARR trends. Fetch and aggregate subscription payment data from the backend, ensuring endpoints provide time-series revenue data grouped by month/year. Display summary cards for current MRR, ARR, and active subscriptions count above the charts. Ensure responsive layout and admin-only access.
+
+## 2. Build Failed Payments List with Manual Refund Controls [done]
+### Dependencies: 65.1
+### Description: Create a paginated, filterable table of failed payment attempts and add manual refund functionality for eligible payments using the Stripe API.
+### Details:
+Fetch failed payment data from the backend, synced with Stripe payment_intent and invoice events. Display customer name, plan, failure reason, and timestamp. Add search and filter options (customer, date range, plan, status). For successful payments, add a 'Refund' button that opens a confirmation modal and triggers a secure backend endpoint to create a Stripe refund. Log all manual refund actions with admin user ID and timestamp.
+
+## 3. Implement Manual Upgrade/Downgrade Controls for Subscriptions [done]
+### Dependencies: 65.2
+### Description: Add admin controls to upgrade or downgrade user subscription plans and adjust limits, ensuring correct proration and billing updates via Stripe and the backend.
+### Details:
+For each active subscription, provide controls to change the user's plan or limits. On action, open a modal to select the new plan and confirm. Trigger backend logic to update the subscription in Stripe and the database, handling proration and billing adjustments. Display current plan, limits, and next billing date for context. Log all actions for audit purposes.
+

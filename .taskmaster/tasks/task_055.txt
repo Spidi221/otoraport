@@ -1,0 +1,65 @@
+# Task ID: 55
+# Title: Implement Vercel Analytics and PostHog Integration
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Install posthog-js package and integrate with existing Vercel Analytics to track key user events and configure marketing funnels for signup, upload, and payment conversion tracking.
+# Details:
+Implement comprehensive analytics integration building on existing Vercel Analytics setup:
+
+**1. PostHog Installation and Configuration:**
+- Install posthog-js package: `npm install posthog-js`
+- Add environment variables to env-validation.ts schema: NEXT_PUBLIC_POSTHOG_KEY and NEXT_PUBLIC_POSTHOG_HOST
+- Update getEnv() function to include PostHog configuration
+
+**2. Create PostHog Provider (src/app/providers.tsx):**
+- Create new providers.tsx file since it doesn't exist yet
+- Initialize PostHog client with proper configuration (EU hosting, privacy settings)
+- Export PostHogProvider component and usePostHog hook
+- Configure automatic pageview tracking disabled (manual control)
+
+**3. Update Root Layout Integration:**
+- Import PostHogProvider in src/app/layout.tsx (existing file has Vercel Analytics already)
+- Wrap children with PostHogProvider while keeping existing Analytics and SpeedInsights components
+- Ensure PostHog loads after user consent for GDPR compliance
+
+**4. Event Tracking Implementation:**
+- Create src/lib/analytics-events.ts with typed event tracking functions
+- Implement key events: trackSignup(), trackLogin(), trackFileUpload(), trackSubscriptionStart(), trackTrialStart(), trackPaymentSuccess()
+- Add event tracking to existing API routes: /api/auth/callback, /api/upload, /api/stripe/webhook
+- Use existing React hooks pattern from codebase (similar to use-auth-simple.ts)
+
+**5. Marketing Funnels Configuration:**
+- Set up conversion funnels in PostHog dashboard: Signup → Upload → Trial → Paid
+- Configure cohort analysis for trial-to-paid conversion tracking
+- Create custom events for key business metrics: property_uploaded, subscription_activated, trial_converted
+- Add UTM parameter tracking for marketing attribution
+
+**6. Privacy and Compliance:**
+- Integrate with existing CookieBanner.tsx component for analytics consent
+- Respect user privacy preferences stored in localStorage
+- Configure PostHog with privacy-first settings (no automatic geolocation, IP anonymization)
+- Update privacy policy page to include PostHog data processing disclosure
+
+# Test Strategy:
+Test analytics implementation comprehensively: 1) Verify PostHog provider loads correctly without console errors and respects cookie consent settings, 2) Test event tracking by manually triggering signup flow and confirming events appear in PostHog live events, 3) Verify file upload tracking sends property_uploaded event with correct metadata, 4) Test subscription events fire correctly during Stripe webhook processing, 5) Confirm Vercel Analytics continues working alongside PostHog without conflicts, 6) Test funnel tracking shows complete user journey from signup to payment, 7) Verify privacy compliance by testing with analytics cookies disabled and confirming no PostHog data is sent, 8) Test UTM parameter capture and attribution tracking for marketing campaigns
+
+# Subtasks:
+## 1. Install and Configure PostHog with Vercel Analytics [done]
+### Dependencies: None
+### Description: Install the posthog-js package, set up environment variables, and configure PostHog initialization alongside existing Vercel Analytics.
+### Details:
+Run `npm install posthog-js`. Add NEXT_PUBLIC_POSTHOG_KEY and NEXT_PUBLIC_POSTHOG_HOST to your env-validation.ts schema and .env files. Update getEnv() to include PostHog config. Ensure Vercel Analytics is enabled and configured per project requirements. Verify both analytics providers are initialized correctly and do not conflict.
+
+## 2. Implement PostHog Provider and Integrate with App Layout [done]
+### Dependencies: 55.1
+### Description: Create a PostHogProvider component, configure privacy settings, and wrap the app layout to enable event tracking while respecting user consent.
+### Details:
+Create src/app/providers.tsx and initialize PostHog client with EU hosting and privacy-first settings. Export PostHogProvider and usePostHog hook. Import PostHogProvider in src/app/layout.tsx and wrap children, ensuring Vercel Analytics and SpeedInsights remain. Integrate with CookieBanner.tsx to load PostHog only after user consent for GDPR compliance.
+
+## 3. Implement Key Event Tracking and Marketing Funnel Configuration [done]
+### Dependencies: 55.2
+### Description: Create typed event tracking functions, add event hooks to API routes, and configure marketing funnels and attribution in PostHog dashboard.
+### Details:
+Create src/lib/analytics-events.ts with functions for signup, login, upload, trial start, subscription, and payment success. Add event tracking to /api/auth/callback, /api/upload, and /api/stripe/webhook. Set up conversion funnels and cohort analysis in PostHog dashboard. Track UTM parameters for marketing attribution and create custom events for business metrics.
+

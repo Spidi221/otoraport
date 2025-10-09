@@ -1,0 +1,90 @@
+# Task ID: 71
+# Title: Comprehensive Rebrand from otoraport.pl to raportowaniecenmieszkan.pl Across Codebase and Infrastructure
+# Status: done
+# Dependencies: 61, 62, 67
+# Priority: medium
+# Description: Update all domain references, email addresses, branding assets, documentation, and deployment configurations to reflect the new brand raportowaniecenmieszkan.pl throughout the entire codebase and supporting systems.
+# Details:
+1. **Domain and URL Updates:**
+   - Search and replace all instances of 'otoraport.pl' with 'raportowaniecenmieszkan.pl' in code, configuration files, environment variables, documentation, and deployment scripts.
+   - Update all hardcoded URLs, API endpoints, and callback URLs to use the new domain.
+   - Register and configure the new domain with DNS providers and hosting platforms (e.g., Vercel), ensuring SSL certificates are updated and active.
+   - Implement 301 redirects from old URLs to new URLs to preserve SEO and user experience[3][7].
+
+2. **Email Address and System References:**
+   - Update all system-generated email addresses (e.g., noreply@otoraport.pl → noreply@raportowaniecenmieszkan.pl) in notification templates, authentication flows, and contact forms.
+   - Change email sender domains in transactional email services (e.g., SendGrid, Mailgun) and update SPF/DKIM records for deliverability.
+
+3. **Branding and Visual Assets:**
+   - Replace all logos, favicons, and brand imagery with new assets reflecting the updated brand identity.
+   - Update color palettes, typography, and design tokens in the codebase and style guides.
+   - Revise marketing collateral, email signatures, and social media profile images as needed[1][2][4].
+
+4. **Documentation and Help Center:**
+   - Update all internal and external documentation, including README files, API docs, onboarding guides, and help center articles, to reference the new brand and domain.
+   - Revise screenshots and instructional videos to reflect new branding.
+
+5. **Deployment and Configuration:**
+   - Update deployment pipelines, environment variables, and CI/CD scripts to use the new domain.
+   - Ensure all integrations (e.g., Stripe, ministry endpoints, analytics) reference the correct domain and branding.
+   - Review and update custom domain/subdomain logic to support the new brand, coordinating with related tasks for Pro and Enterprise plans.
+
+6. **Communication and Announcement:**
+   - Prepare a rebranding announcement for users, partners, and stakeholders via email, blog post, and social media.
+   - Create an FAQ page addressing the rebrand, transition timeline, and impact on users[1][4].
+
+7. **Quality Assurance:**
+   - Conduct a thorough audit using automated tools (e.g., grep, regex search, link checkers) and manual review to ensure no references to the old brand remain.
+   - Establish a review and approval process for all changes before deployment.
+
+**Best Practices:**
+- Use automated scripts for bulk search-and-replace operations to minimize manual errors.
+- Maintain a backup and rollback plan in case of unforeseen issues during deployment.
+- Communicate changes proactively to minimize user confusion and support requests.
+- Coordinate with legal and administrative teams to ensure compliance with business registrations and trademarks[1][3][6].
+
+# Test Strategy:
+1. Perform a full-text search across the codebase, documentation, and configuration files to confirm all instances of 'otoraport.pl' have been replaced.
+2. Deploy to a staging environment and verify:
+   - All URLs, endpoints, and email addresses use the new domain.
+   - Branding assets (logos, colors, typography) are updated throughout the UI and emails.
+   - Documentation and help center content reflect the new brand.
+   - All redirects from old URLs function correctly (301 status, correct destination).
+   - Transactional and notification emails are sent from the new domain and pass SPF/DKIM checks.
+   - Integrations (Stripe, ministry endpoints, analytics) operate correctly with the new domain.
+3. Use link checkers and automated tests to identify any broken links or missed references.
+4. Review deployment logs and CI/CD output for errors related to domain or branding changes.
+5. Solicit feedback from internal stakeholders and a pilot group of users to confirm the rebrand is complete and consistent.
+6. Monitor analytics and support channels for issues post-launch.
+
+# Subtasks:
+## 1. Audit and Inventory All Brand References and Assets [done]
+### Dependencies: None
+### Description: Conduct a comprehensive audit to identify every instance of 'otoraport.pl' and related branding across code, documentation, infrastructure, and marketing materials.
+### Details:
+Use automated tools (e.g., grep, regex search) and manual review to catalog all domain references, email addresses, visual assets, documentation, deployment scripts, and third-party integrations that reference the old brand. Document findings in a shared inventory for tracking.
+
+## 2. Update Codebase, Configuration, and Infrastructure for New Domain [done]
+### Dependencies: 71.1
+### Description: Replace all instances of 'otoraport.pl' with 'raportowaniecenmieszkan.pl' in code, configuration files, environment variables, and deployment scripts. Register and configure the new domain, update DNS, SSL, and set up 301 redirects.
+### Details:
+Perform bulk search-and-replace operations in code and configuration files. Update hardcoded URLs, API endpoints, callback URLs, and environment variables. Register the new domain, configure DNS and SSL certificates, and implement 301 redirects from old URLs to new ones. Update deployment pipelines and CI/CD scripts to use the new domain.
+
+## 3. Update Email Addresses, Sender Domains, and System References [done]
+### Dependencies: 71.1
+### Description: Change all system-generated email addresses and sender domains to use the new brand. Update transactional email services and authentication flows accordingly.
+### Details:
+Replace all instances of old email addresses (e.g., noreply@otoraport.pl) with new ones in notification templates, authentication flows, and contact forms. Update sender domains in services like SendGrid or Mailgun, and revise SPF/DKIM records for deliverability. Test email flows to ensure correct sender information.
+
+## 4. Replace Branding Assets and Update Visual Identity [done]
+### Dependencies: 71.1
+### Description: Swap out all logos, favicons, and brand imagery for new assets. Update color palettes, typography, and design tokens in the codebase and style guides.
+### Details:
+Replace all visual assets in the codebase, documentation, and marketing collateral with new versions reflecting the updated brand. Update style guides, design tokens, and UI components. Revise email signatures, social media profile images, and marketing materials as needed.
+
+## 5. Revise Documentation, Help Center, and Communication Materials [done]
+### Dependencies: 71.2, 71.3, 71.4
+### Description: Update all internal and external documentation, help center articles, onboarding guides, and communication templates to reference the new brand and domain.
+### Details:
+Edit README files, API docs, onboarding guides, and help center content to reflect the new brand. Update screenshots and instructional videos. Prepare and distribute rebranding announcements and an FAQ for users, partners, and stakeholders.
+

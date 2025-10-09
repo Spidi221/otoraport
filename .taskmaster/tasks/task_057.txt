@@ -1,0 +1,31 @@
+# Task ID: 57
+# Title: Build Admin Panel with User Management
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Create comprehensive admin panel for managing users, subscriptions, and system oversight
+# Details:
+Create admin_roles table with RBAC permissions, implement requireAdmin() middleware checking user admin status, build /admin/dashboard protected route with admin layout, create /admin/users page listing all users with search/filter/pagination, implement GET /api/admin/users endpoint, add chudziszewski221@gmail.com as super_admin, display user data: email, subscription plan, properties count, created_at, status
+
+# Test Strategy:
+Test admin access control (non-admins get 403), verify admin user list with search and filtering, test pagination functionality, validate RBAC permissions system, ensure super_admin has full access
+
+# Subtasks:
+## 1. Design and Implement RBAC System for Admin Panel [done]
+### Dependencies: None
+### Description: Create an admin_roles table and set up role-based access control (RBAC) to manage user permissions within the admin panel.
+### Details:
+Define clear admin roles and responsibilities based on organizational needs. Implement the admin_roles table to store roles and permissions. Use a roles and permissions matrix to map out access levels. Ensure the principle of least privilege is enforced so users only have necessary permissions. Document all roles and permissions for audit and future maintenance.
+
+## 2. Develop Admin Middleware and Protected Routes [done]
+### Dependencies: 57.1
+### Description: Implement requireAdmin() middleware to check user admin status and protect admin routes such as /admin/dashboard and /admin/users.
+### Details:
+Create middleware that validates user admin status before granting access to protected admin routes. Integrate this middleware with /admin/dashboard and /admin/users endpoints. Ensure that non-admin users receive a 403 Forbidden response when attempting to access these routes. Add chudziszewski221@gmail.com as super_admin with full access.
+
+## 3. Build User Management Interface and API Endpoints [done]
+### Dependencies: 57.2
+### Description: Create the /admin/users page with user listing, search, filter, and pagination. Implement GET /api/admin/users endpoint to serve user data.
+### Details:
+Develop a user management UI that lists all users with search, filter, and pagination features. Display user data including email, subscription plan, properties count, created_at, and status. Build the GET /api/admin/users endpoint to provide this data securely. Ensure the interface is intuitive and supports efficient user management.
+

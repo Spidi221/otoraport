@@ -1,0 +1,91 @@
+# Task ID: 62
+# Title: Implement Custom Domains for Enterprise Plan
+# Status: done
+# Dependencies: 61
+# Priority: medium
+# Description: Enable Enterprise plan users to configure custom domains for their OTORAPORT sites, including DNS TXT record validation, Vercel domain API integration, setup instructions, and DNS propagation checking.
+# Details:
+1. **Database Schema Update:**
+   - Add a `custom_domain` (VARCHAR, unique, nullable) column to the `developers` table via a migration. Enforce uniqueness and update RLS policies so only the owning developer can modify their custom domain.
+
+2. **Custom Domain Registration Flow:**
+   - Build a UI flow for Enterprise users to enter and request a custom domain (e.g., `www.example.com`).
+   - Validate domain format (RFC 1035 compliance, no reserved words, 3-64 chars).
+   - On submission, generate a DNS TXT record (e.g., `_otoraport-verification.example.com` with a random token) and instruct the user to add it to their DNS provider.
+
+3. **DNS TXT Record Validation:**
+   - Implement an API endpoint (`POST /api/custom-domain/verify`) that checks for the presence and correctness of the TXT record using a DNS lookup library (e.g., `dns.promises` in Node.js or a third-party API).
+   - On successful verification, mark the domain as verified in the database.
+
+4. **Vercel Domain API Integration:**
+   - Integrate with Vercel's Domains API to programmatically add the verified custom domain to the correct Vercel environment. Handle errors such as domain already in use, verification failures, or API rate limits.
+   - Support both apex domains (A record) and subdomains (CNAME record) as per Vercel's requirements[1].
+
+5. **Setup Instructions Page:**
+   - Create a dedicated setup page that guides users through the process: entering the domain, adding the TXT record, verifying, and updating DNS records (A/CNAME) for Vercel. Include troubleshooting tips for common DNS issues (e.g., propagation delays, misconfigured records).
+
+6. **DNS Propagation Checker:**
+   - Implement a DNS propagation checker that periodically polls for the required DNS records and displays status updates to the user. Use a low TTL recommendation for faster propagation[2].
+   - Optionally, integrate with third-party DNS propagation APIs for more robust global checking.
+
+7. **Security & Best Practices:**
+   - Ensure all domain operations are authenticated and scoped to the developer's account.
+   - Log all domain verification attempts and API interactions for auditability.
+   - Provide clear error messages and actionable feedback throughout the flow.
+
+8. **Documentation:**
+   - Update developer documentation with step-by-step instructions, supported domain formats, and troubleshooting guidance.
+
+**Technologies & Patterns:**
+- Use Supabase migrations for schema changes.
+- Use Vercel Domains API for domain management.
+- Use Node.js DNS libraries or third-party APIs for DNS lookups.
+- Follow best practices for DNS record validation and secure domain assignment.
+
+# Test Strategy:
+1. **Database:**
+   - Verify the `custom_domain` column exists, is unique, and RLS policies are enforced.
+   - Attempt to assign duplicate custom domains and confirm rejection.
+
+2. **UI & Flow:**
+   - Test the setup instructions page for clarity and completeness.
+   - Simulate user entry of a valid domain and verify correct TXT record generation and instructions.
+
+3. **DNS Validation:**
+   - Add the TXT record to a test domain and verify the API correctly detects and validates it.
+   - Test with missing, incorrect, and delayed TXT records to ensure robust error handling.
+
+4. **Vercel Integration:**
+   - Add a verified domain via the API and confirm it appears in the Vercel dashboard and routes traffic correctly.
+   - Test apex and subdomain flows, including DNS record requirements (A/CNAME).
+
+5. **DNS Propagation Checker:**
+   - Simulate DNS propagation delays and verify the checker updates status accurately.
+   - Test with various DNS providers for compatibility.
+
+6. **Security:**
+   - Attempt unauthorized domain assignments and verify access controls.
+   - Review audit logs for completeness.
+
+7. **Documentation:**
+   - Review documentation for accuracy and completeness with a test user.
+
+# Subtasks:
+## 1. Implement Custom Domain Registration and DNS TXT Validation Flow [done]
+### Dependencies: None
+### Description: Develop the backend and frontend logic for Enterprise users to register custom domains, generate DNS TXT tokens, and validate domain ownership via DNS TXT record lookup.
+### Details:
+Create a UI for domain entry with RFC 1035 validation. On submission, generate a unique DNS TXT token (e.g., _otoraport-verification.example.com) and display setup instructions. Implement an API endpoint to check for the TXT record using a DNS lookup library, marking the domain as verified upon successful detection. Ensure all operations are authenticated and scoped to the developer's account.
+
+## 2. Integrate Vercel Domain API and DNS Propagation Checker [done]
+### Dependencies: 62.1
+### Description: Integrate with Vercel's Domains API to add verified custom domains and implement a DNS propagation checker to monitor DNS record status.
+### Details:
+After domain verification, use Vercel's Domains API to add the domain to the appropriate environment, handling apex and subdomain cases. Implement a DNS propagation checker that periodically polls for required DNS records (A/CNAME) and updates the user on propagation status. Optionally, integrate with third-party DNS propagation APIs for global checks.
+
+## 3. Develop Setup Instructions Page and Update Documentation [done]
+### Dependencies: 62.1, 62.2
+### Description: Create a comprehensive setup instructions page for users and update developer documentation with step-by-step guidance and troubleshooting.
+### Details:
+Build a dedicated setup page guiding users through domain entry, TXT record setup, verification, and DNS record updates for Vercel. Include troubleshooting tips for common DNS issues and propagation delays. Update developer documentation to reflect supported domain formats, flow steps, and error handling.
+

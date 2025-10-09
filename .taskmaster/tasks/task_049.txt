@@ -1,0 +1,93 @@
+# Task ID: 49
+# Title: Implement 14-Day Trial System
+# Status: done
+# Dependencies: 47
+# Priority: high
+# Description: Add trial management system with database columns, middleware enforcement, trial-expired page, and dashboard countdown banner.
+# Details:
+Implement comprehensive 14-day trial system for new developers:
+
+**1. Database Schema Updates (add to existing migration)**:
+- Add `trial_status` enum column to developers table: ('active', 'expired', 'converted', 'cancelled')
+- Ensure `trial_ends_at` timestamp column exists (already in database schema)
+- Update RLS policies to include trial status checks
+- Set default trial_status='active' and trial_ends_at=NOW() + INTERVAL '14 days' for new registrations
+
+**2. Create Trial Status Middleware**:
+- Create `src/lib/trial-middleware.ts` with `checkTrialStatus(developerId: string)` function
+- Check if trial_ends_at < NOW() and trial_status='active', then update to 'expired'
+- Return trial status and days remaining for UI display
+- Integrate with existing subscription-enforcement.ts to block expired trials
+
+**3. Create Trial Expired Page**:
+- Create `src/app/trial-expired/page.tsx` with upgrade CTA
+- Include pricing cards from PricingSection component
+- Add "Your 14-day trial has expired" messaging
+- Integrate with Stripe checkout for plan selection
+- Use existing subscription-plans.ts configuration
+
+**4. Dashboard Trial Banner**:
+- Create `src/components/dashboard/trial-banner.tsx` component
+- Show countdown: "X days left in your trial"
+- Display only when subscription_status='trialing' and trial not expired
+- Position above StatisticsCards in dashboard layout
+- Include "Upgrade Now" button linking to pricing
+
+**5. Integration Points**:
+- Update signup flow to set trial_ends_at automatically
+- Modify middleware.ts to redirect expired trials to /trial-expired
+- Update upload and properties APIs to check trial status using existing subscription enforcement
+- Ensure ministry endpoints remain accessible during trial period
+
+**Technical Requirements**:
+- Use existing Supabase admin client patterns from lib/supabase/server.ts
+- Follow existing TypeScript patterns and database types
+- Integrate with existing subscription-plans.ts and subscription-enforcement.ts
+- Use existing UI components (Button, Card, Alert) for consistency
+
+# Test Strategy:
+Test trial system functionality: 1) Create new developer account and verify trial_ends_at is set to 14 days from now, 2) Manually update trial_ends_at to past date and verify /trial-expired redirect works, 3) Test trial banner shows correct days remaining for active trials, 4) Verify trial banner hidden for paid subscriptions, 5) Test upload functionality blocked for expired trials with helpful error message, 6) Confirm ministry endpoints remain accessible during active trial, 7) Test upgrade flow from trial-expired page to Stripe checkout, 8) Verify trial_status updates correctly when subscription becomes active
+
+# Subtasks:
+## 1. Update Database Schema and RLS Policies for Trial Management [done]
+### Dependencies: None
+### Description: Add trial_status enum column to developers table, ensure trial_ends_at exists, and update Row Level Security (RLS) policies to enforce trial logic.
+### Details:
+Modify the existing migration to add a trial_status column with values ('active', 'expired', 'converted', 'cancelled'). Ensure trial_ends_at timestamp is present. Update RLS policies to restrict access based on trial status. Set defaults for new registrations: trial_status='active', trial_ends_at=NOW() + INTERVAL '14 days'.
+
+## 2. Implement Trial Status Middleware for Enforcement and UI [done]
+### Dependencies: 49.1
+### Description: Create middleware to check trial status, update expired trials, and provide trial info for UI and enforcement.
+### Details:
+Develop src/lib/trial-middleware.ts with checkTrialStatus(developerId: string). On each request, check if trial_ends_at < NOW() and trial_status='active', then update to 'expired'. Return trial status and days remaining for UI. Integrate with subscription-enforcement.ts to block expired trials.
+
+## 3. Create Trial Expired Page with Upgrade Flow [done]
+### Dependencies: 49.2
+### Description: Develop a dedicated page for expired trials, including upgrade CTA, pricing, and Stripe checkout integration.
+### Details:
+Build src/app/trial-expired/page.tsx with messaging ('Your 14-day trial has expired'), PricingSection cards, and Stripe checkout integration using subscription-plans.ts. Ensure upgrade flow is seamless and UI matches existing components.
+
+## 4. Develop Dashboard Trial Countdown Banner Component [done]
+### Dependencies: 49.2
+### Description: Add a banner to the dashboard showing days left in trial and upgrade option, visible only for active trials.
+### Details:
+Create src/components/dashboard/trial-banner.tsx to display countdown ('X days left in your trial') above StatisticsCards. Show only when subscription_status='trialing' and trial not expired. Include 'Upgrade Now' button linking to pricing.
+
+## 5. Integrate Trial Logic into Signup Flow [done]
+### Dependencies: 49.1, 49.2
+### Description: Ensure trial columns are set on registration and expired trials are redirected appropriately.
+### Details:
+Update signup flow to set trial_ends_at and trial_status for new developers. Modify middleware.ts to redirect expired trials to /trial-expired. Ensure ministry endpoints remain accessible during trial.
+
+## 6. Enforce Trial Status in APIs and Middleware [done]
+### Dependencies: 49.2, 49.5
+### Description: Update upload and properties APIs to check trial status and enforce restrictions using subscription enforcement.
+### Details:
+Modify relevant API endpoints to call trial status middleware and block actions for expired trials. Ensure consistency with subscription-enforcement.ts and maintain access for allowed endpoints during trial.
+
+## 7. Comprehensive Testing of Trial System Functionality [done]
+### Dependencies: 49.1, 49.2, 49.3, 49.4, 49.5, 49.6
+### Description: Design and execute tests covering all trial states, UI flows, middleware, and integration points.
+### Details:
+Develop test cases for: new registration, trial countdown, trial expiration, upgrade flow, API enforcement, and edge cases. Use both automated and manual testing to validate system robustness.
+

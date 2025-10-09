@@ -1,0 +1,43 @@
+# Task ID: 36
+# Title: Repository File Cleanup
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Clean up project root directory by removing development artifacts, test files, SQL migration files, and documentation duplicates while preserving essential project files
+# Details:
+Remove SQL files (check_*.sql, enable_rls_*.sql, fix_*.sql, FINAL_SETUP_*.sql, KROK_*.sql, supabase_trigger_*.sql), test files (test-*.ts, test-*.js, test-*.mjs, test-*.xlsx, test-*.csv, check-*.js, verify-*.md), documentation duplicates (files ending with ' 2.md', ' 2.sql', ' 2.json'), old reports (EXCEL-*.md, INPRO-*.md, MINISTRY_XML_*.md, etc.), IDE configs (opencode*.json, claude_desktop_config*.json), CSV exports (ceny-mieszkan-*.csv), and backup folders. Keep essential files: .taskmaster/, .coderabbit-analysis/, src/, package.json, next.config.ts, tsconfig.json, CLAUDE.md, README.md, .env* files. Use bash commands to remove files systematically and create git commit with list of removed files.
+
+# Test Strategy:
+Verify root directory contains only essential files, confirm no test/debug files remain in root, ensure application still builds and runs correctly after cleanup, create git commit documenting removed files
+
+# Subtasks:
+## 1. Create a Script to Identify and List Unwanted Files [done]
+### Dependencies: None
+### Description: Develop a bash script that uses `find` commands to locate all files matching the specified patterns for deletion. The script should output a comprehensive list of these files to a temporary file (e.g., `files_to_remove.txt`) for review and for use in the final git commit message, without performing any deletion.
+### Details:
+The script should use patterns like `check_*.sql`, `test-*.ts`, `* 2.md`, `opencode*.json`, `ceny-mieszkan-*.csv`, etc., as specified in the parent task. It should search the project root directory and be configured to avoid traversing into essential directories like `src/` or `.taskmaster/`. The output file will serve as a manifest for the cleanup operation.
+
+## 2. Script the Removal of Development and Test Artifacts [done]
+### Dependencies: 36.1
+### Description: Create a bash script that removes specific development and testing artifacts from the project root. This includes temporary SQL files, various test files, and IDE-specific configuration files.
+### Details:
+The script will use `rm` commands with patterns identified in the previous step, such as `check_*.sql`, `enable_rls_*.sql`, `fix_*.sql`, `FINAL_SETUP_*.sql`, `KROK_*.sql`, `supabase_trigger_*.sql`, `test-*.{ts,js,mjs,xlsx,csv}`, `check-*.js`, `verify-*.md`, `opencode*.json`, and `claude_desktop_config*.json`. The script should be designed to be run from the project root.
+
+## 3. Script the Removal of Duplicates, Reports, and Data Exports [done]
+### Dependencies: 36.1
+### Description: Create a bash script to clean up outdated and redundant files, specifically documentation duplicates, old markdown reports, temporary CSV data exports, and specified backup folders.
+### Details:
+The script will use `rm` commands with patterns like `* 2.{md,sql,json}`, `EXCEL-*.md`, `INPRO-*.md`, `MINISTRY_XML_*.md`, and `ceny-mieszkan-*.csv`. It should also include commands to remove any specified backup folders using `rm -rf`.
+
+## 4. Execute Cleanup and Perform Project Integrity Verification [done]
+### Dependencies: 36.2, 36.3
+### Description: Run the created cleanup scripts to remove all identified files. After the cleanup, verify that the application remains functional by running the build process and starting the development server.
+### Details:
+Sequentially execute the removal scripts from subtasks 2 and 3. After execution, run `npm run build` to ensure the project compiles without TypeScript errors. Start the application locally to confirm it runs without runtime errors, ensuring no critical files were accidentally deleted.
+
+## 5. Create Final Git Commit with a Detailed List of Removed Files [done]
+### Dependencies: 36.4
+### Description: Stage all the file deletions and create a single, well-documented git commit. The commit message must include a comprehensive list of all files that were removed during the cleanup process.
+### Details:
+Use `git add -u` to stage all the deletions. Construct a commit message that clearly states the purpose of the cleanup (e.g., 'chore: Clean up project root from development artifacts'). Append the contents of the `files_to_remove.txt` file (generated in subtask 1) to the commit message body to provide a precise record of the changes.
+
