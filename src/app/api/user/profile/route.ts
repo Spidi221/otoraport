@@ -60,7 +60,8 @@ export async function GET() {
     const { data: clientIdData } = await supabase.rpc('generate_client_id')
     const client_id = clientIdData || `dev_${Math.random().toString(36).substring(2, 15)}`
 
-    // Create developer profile
+    // Create developer profile with trial
+    // Note: trigger_set_trial_on_signup will automatically set trial_ends_at and trial_status
     const { data: newDeveloper, error: createError } = await supabase
       .from('developers')
       .insert({
@@ -69,8 +70,8 @@ export async function GET() {
         email: user.email!,
         company_name: user.user_metadata?.company_name || 'Moja Firma',
         nip: '0000000000', // Default - user can update later
-        subscription_plan: 'trial',
-        subscription_status: 'active',
+        subscription_plan: 'basic', // Default plan (can be changed later)
+        subscription_status: 'trialing', // Start with trial
       })
       .select()
       .single()

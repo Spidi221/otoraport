@@ -1,0 +1,213 @@
+{
+	"meta": {
+		"generatedAt": "2025-10-08T12:50:17.994Z",
+		"tasksAnalyzed": 25,
+		"totalTasks": 35,
+		"analysisCount": 25,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 46,
+			"taskTitle": "Update Landing Page with New Pricing Plans and Features",
+			"complexityScore": 6,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down the landing page update into: (1) PricingSection.tsx updates, (2) feature list corrections, (3) pricing calculator component creation, (4) hero section text update, (5) FAQ section update, (6) price history feature mention, (7) consistency checks and responsive design validation.",
+			"reasoning": "This task involves multiple UI updates, a new pricing calculator component, and consistency checks across the landing page. While the changes are mostly isolated to the frontend and leverage existing components and design systems, the need for accuracy, responsive design, and thorough testing across all references increases complexity. The task is not algorithmically complex but requires careful coordination and validation, especially for the new calculator and ensuring all pricing references are updated."
+		},
+		{
+			"taskId": 47,
+			"taskTitle": "Update Subscription Plans Configuration in Code",
+			"complexityScore": 5,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Decompose the configuration update into: (1) Basic plan verification, (2) Pro plan updates (price, limits, additional fee), (3) Enterprise plan verification, (4) features array updates, (5) calculateProPlanCost function implementation, (6) integration and regression testing.",
+			"reasoning": "This is a backend configuration and utility function update, mostly involving changes to a single module and related functions. The main complexity comes from ensuring all dependent functions and components work with the new configuration, and that pricing logic is correct and testable. The task is straightforward but requires careful regression testing to avoid breaking existing billing or plan logic."
+		},
+		{
+			"taskId": 48,
+			"taskTitle": "Enforce Subscription Limits in Upload & Properties APIs",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Split the enforcement into: (1) middleware implementation for property/project limits, (2) integration with upload API, (3) integration with properties API, (4) error response formatting, (5) end-to-end testing for all plan scenarios.",
+			"reasoning": "This task introduces new middleware and modifies critical API endpoints, requiring careful handling of business logic, error messaging, and integration with existing rate limiting and subscription logic. Ensuring backward compatibility and robust error handling adds to the complexity, as does the need for comprehensive testing across all plan types and edge cases."
+		},
+		{
+			"taskId": 49,
+			"taskTitle": "Implement 14-Day Trial System",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Expand the trial system into: (1) database schema/migration, (2) trial status middleware, (3) trial expired page, (4) dashboard trial banner, (5) signup flow integration, (6) API/middleware integration, (7) comprehensive testing.",
+			"reasoning": "Implementing a trial system touches database schema, middleware, UI, and multiple integration points (signup, dashboard, APIs). It requires careful handling of state transitions, RLS policies, and user experience for both active and expired trials. The need for robust enforcement, seamless upgrade flows, and integration with payment systems increases both technical and testing complexity."
+		},
+		{
+			"taskId": 50,
+			"taskTitle": "Implement Card-Required Signup Flow",
+			"complexityScore": 8,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Break down the signup flow into: (1) onboarding pages, (2) database schema updates, (3) Stripe Checkout integration, (4) webhook event handling, (5) signup flow integration, (6) trial user experience updates, (7) email notification triggers, (8) end-to-end testing.",
+			"reasoning": "This task requires orchestrating frontend onboarding, backend schema changes, payment provider integration (Stripe), webhook event handling, and seamless user experience for trial and paid users. The complexity is high due to the number of moving parts, external dependencies, and the need for robust error handling and state management across the signup and trial lifecycle."
+		},
+		{
+			"taskId": 51,
+			"taskTitle": "Implement Trial Email Automation",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement trial email automation.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 52,
+			"taskTitle": "Implement Projects (Inwestycje) System",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement projects (inwestycje) system.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 53,
+			"taskTitle": "Implement Additional Projects Billing for Pro Plan",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement additional projects billing for pro plan.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 54,
+			"taskTitle": "Implement Google Analytics 4 Integration",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement google analytics 4 integration.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 55,
+			"taskTitle": "Implement Vercel Analytics and PostHog Integration",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement vercel analytics and posthog integration.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 56,
+			"taskTitle": "Implement Price History Tracking",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement price history tracking.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 57,
+			"taskTitle": "Build Admin Panel with User Management",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on build admin panel with user management.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 58,
+			"taskTitle": "Implement Bulk Delete with Cache Invalidation",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement bulk delete with cache invalidation.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 59,
+			"taskTitle": "Implement Analytics Integration (GA4, Vercel Analytics, PostHog)",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement analytics integration (ga4, vercel analytics, posthog).",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 60,
+			"taskTitle": "Build Admin Analytics Dashboard with Revenue and User KPIs",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on build admin analytics dashboard with revenue and user kpis.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 61,
+			"taskTitle": "Implement Subdomain System for Pro Plan",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement subdomain system for pro plan.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 62,
+			"taskTitle": "Implement Custom Domains for Enterprise Plan",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement custom domains for enterprise plan.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 63,
+			"taskTitle": "Implement Advanced Analytics Dashboard for Enterprise",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement advanced analytics dashboard for enterprise.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 64,
+			"taskTitle": "Build Admin Panel - Property Management",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on build admin panel - property management.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 65,
+			"taskTitle": "Build Admin Panel - Subscription Management Page with Revenue Dashboard and Manual Controls",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on build admin panel - subscription management page with revenue dashboard and manual controls.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 66,
+			"taskTitle": "Implement Multi-Step Onboarding Wizard Component",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement multi-step onboarding wizard component.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 67,
+			"taskTitle": "Build Comprehensive Help Center and Documentation System",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on build comprehensive help center and documentation system.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 68,
+			"taskTitle": "Implement Audit Logging System with API and Dashboard Integration",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement audit logging system with api and dashboard integration.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 69,
+			"taskTitle": "Implement Public System Status Page with Real-Time Health Monitoring and Incident History",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on implement public system status page with real-time health monitoring and incident history.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 70,
+			"taskTitle": "Performance Optimization and Caching Implementation",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on performance optimization and caching implementation.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		}
+	]
+}

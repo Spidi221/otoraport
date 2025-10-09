@@ -20,8 +20,7 @@
 			}
 		},
 		"supabase": {
-			"type": "http",
-			"url": "https://mcp.supabase.com/mcp?features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cfunctions%2Cdevelopment%2Cbranching%2Cstorage"
+			"url": "https://mcp.supabase.com/mcp"
 		}
 	}
 }

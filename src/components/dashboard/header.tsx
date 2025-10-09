@@ -14,6 +14,7 @@ import {
 import { OtoraportLogo } from "../icons/otoraport-logo";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth-simple";
+import { useNotifications } from "@/hooks/use-notifications";
 import { useState } from "react";
 
 interface HeaderProps {
@@ -96,6 +97,7 @@ export function PublicHeader() {
 // Header for authenticated pages (with session)
 function AuthenticatedHeader() {
   const { user, developer, signOut, isAdmin } = useAuth();
+  const { unreadCount } = useNotifications();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = () => {
@@ -115,12 +117,14 @@ function AuthenticatedHeader() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
-                <Badge
-                  variant="destructive"
-                  className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
-                >
-                  2
-                </Badge>
+                {unreadCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
+                  >
+                    {unreadCount}
+                  </Badge>
+                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-80" align="end">
@@ -329,12 +333,14 @@ function AuthenticatedHeader() {
                     <Button variant="ghost" className="w-full justify-start relative">
                       <Bell className="mr-3 h-4 w-4" />
                       Powiadomienia
-                      <Badge
-                        variant="destructive"
-                        className="ml-auto h-5 min-w-[20px] rounded-full px-1 text-xs"
-                      >
-                        2
-                      </Badge>
+                      {unreadCount > 0 && (
+                        <Badge
+                          variant="destructive"
+                          className="ml-auto h-5 min-w-[20px] rounded-full px-1 text-xs"
+                        >
+                          {unreadCount}
+                        </Badge>
+                      )}
                     </Button>
                   </Link>
                 </div>

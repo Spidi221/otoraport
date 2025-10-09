@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/weekly-reports",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/trial-checker",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}

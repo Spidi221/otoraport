@@ -36,6 +36,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_notifications_updated_at ON public.notifications;
 CREATE TRIGGER update_notifications_updated_at
   BEFORE UPDATE ON public.notifications
   FOR EACH ROW
@@ -45,6 +46,7 @@ CREATE TRIGGER update_notifications_updated_at
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies: Developers can only access their own notifications
+DROP POLICY IF EXISTS "Developers can view own notifications" ON public.notifications;
 CREATE POLICY "Developers can view own notifications"
   ON public.notifications
   FOR SELECT
@@ -54,6 +56,7 @@ CREATE POLICY "Developers can view own notifications"
     )
   );
 
+DROP POLICY IF EXISTS "Developers can update own notifications" ON public.notifications;
 CREATE POLICY "Developers can update own notifications"
   ON public.notifications
   FOR UPDATE
@@ -63,6 +66,7 @@ CREATE POLICY "Developers can update own notifications"
     )
   );
 
+DROP POLICY IF EXISTS "Developers can delete own notifications" ON public.notifications;
 CREATE POLICY "Developers can delete own notifications"
   ON public.notifications
   FOR DELETE
@@ -72,6 +76,7 @@ CREATE POLICY "Developers can delete own notifications"
     )
   );
 
+DROP POLICY IF EXISTS "System can insert notifications" ON public.notifications;
 CREATE POLICY "System can insert notifications"
   ON public.notifications
   FOR INSERT

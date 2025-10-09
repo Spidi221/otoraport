@@ -1,0 +1,959 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 36,
+        "title": "Repository File Cleanup",
+        "description": "Clean up project root directory by removing development artifacts, test files, SQL migration files, and documentation duplicates while preserving essential project files",
+        "details": "Remove SQL files (check_*.sql, enable_rls_*.sql, fix_*.sql, FINAL_SETUP_*.sql, KROK_*.sql, supabase_trigger_*.sql), test files (test-*.ts, test-*.js, test-*.mjs, test-*.xlsx, test-*.csv, check-*.js, verify-*.md), documentation duplicates (files ending with ' 2.md', ' 2.sql', ' 2.json'), old reports (EXCEL-*.md, INPRO-*.md, MINISTRY_XML_*.md, etc.), IDE configs (opencode*.json, claude_desktop_config*.json), CSV exports (ceny-mieszkan-*.csv), and backup folders. Keep essential files: .taskmaster/, .coderabbit-analysis/, src/, package.json, next.config.ts, tsconfig.json, CLAUDE.md, README.md, .env* files. Use bash commands to remove files systematically and create git commit with list of removed files.",
+        "testStrategy": "Verify root directory contains only essential files, confirm no test/debug files remain in root, ensure application still builds and runs correctly after cleanup, create git commit documenting removed files",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create a Script to Identify and List Unwanted Files",
+            "description": "Develop a bash script that uses `find` commands to locate all files matching the specified patterns for deletion. The script should output a comprehensive list of these files to a temporary file (e.g., `files_to_remove.txt`) for review and for use in the final git commit message, without performing any deletion.",
+            "dependencies": [],
+            "details": "The script should use patterns like `check_*.sql`, `test-*.ts`, `* 2.md`, `opencode*.json`, `ceny-mieszkan-*.csv`, etc., as specified in the parent task. It should search the project root directory and be configured to avoid traversing into essential directories like `src/` or `.taskmaster/`. The output file will serve as a manifest for the cleanup operation.",
+            "status": "pending",
+            "testStrategy": "Run the script and manually review the generated `files_to_remove.txt` to ensure it correctly identifies only the intended files for deletion and does not list any essential project files like `package.json` or files within `src/`.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Script the Removal of Development and Test Artifacts",
+            "description": "Create a bash script that removes specific development and testing artifacts from the project root. This includes temporary SQL files, various test files, and IDE-specific configuration files.",
+            "dependencies": [
+              "36.1"
+            ],
+            "details": "The script will use `rm` commands with patterns identified in the previous step, such as `check_*.sql`, `enable_rls_*.sql`, `fix_*.sql`, `FINAL_SETUP_*.sql`, `KROK_*.sql`, `supabase_trigger_*.sql`, `test-*.{ts,js,mjs,xlsx,csv}`, `check-*.js`, `verify-*.md`, `opencode*.json`, and `claude_desktop_config*.json`. The script should be designed to be run from the project root.",
+            "status": "pending",
+            "testStrategy": "On a separate test branch, run the script and verify using `ls -a` and `git status` that the targeted files have been removed and no other files were affected.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Script the Removal of Duplicates, Reports, and Data Exports",
+            "description": "Create a bash script to clean up outdated and redundant files, specifically documentation duplicates, old markdown reports, temporary CSV data exports, and specified backup folders.",
+            "dependencies": [
+              "36.1"
+            ],
+            "details": "The script will use `rm` commands with patterns like `* 2.{md,sql,json}`, `EXCEL-*.md`, `INPRO-*.md`, `MINISTRY_XML_*.md`, and `ceny-mieszkan-*.csv`. It should also include commands to remove any specified backup folders using `rm -rf`.",
+            "status": "pending",
+            "testStrategy": "On a separate test branch, run the script and confirm that only the specified duplicate files, reports, CSVs, and backup folders are deleted. Check that essential files remain untouched.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Execute Cleanup and Perform Project Integrity Verification",
+            "description": "Run the created cleanup scripts to remove all identified files. After the cleanup, verify that the application remains functional by running the build process and starting the development server.",
+            "dependencies": [
+              "36.2",
+              "36.3"
+            ],
+            "details": "Sequentially execute the removal scripts from subtasks 2 and 3. After execution, run `npm run build` to ensure the project compiles without TypeScript errors. Start the application locally to confirm it runs without runtime errors, ensuring no critical files were accidentally deleted.",
+            "status": "pending",
+            "testStrategy": "The `npm run build` command must complete successfully. The application must start, and the main pages must render correctly in a browser without console errors. A `git status` should show only deletions of the targeted files.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Create Final Git Commit with a Detailed List of Removed Files",
+            "description": "Stage all the file deletions and create a single, well-documented git commit. The commit message must include a comprehensive list of all files that were removed during the cleanup process.",
+            "dependencies": [
+              "36.4"
+            ],
+            "details": "Use `git add -u` to stage all the deletions. Construct a commit message that clearly states the purpose of the cleanup (e.g., 'chore: Clean up project root from development artifacts'). Append the contents of the `files_to_remove.txt` file (generated in subtask 1) to the commit message body to provide a precise record of the changes.",
+            "status": "pending",
+            "testStrategy": "Review the git commit history using `git log -1 --stat` to confirm the commit message is accurate and contains the full list of removed files. Verify that the remote repository reflects the changes correctly after pushing.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-07T16:03:50.351Z"
+      },
+      {
+        "id": 37,
+        "title": "Fix XML Auto-Refresh for Ministry Compliance",
+        "description": "Update XML and MD5 endpoints to disable caching and ensure daily date updates for Ministry Art. 19b compliance requirements",
+        "details": "Modify src/app/api/public/[clientId]/data.xml/route.ts: change 'export const revalidate = 300' to 'export const revalidate = 0', update Cache-Control header from 'max-age=300' to 'max-age=60'. Apply same changes to src/app/api/public/[clientId]/data.md5/route.ts. This ensures XML returns current date in YYYY-MM-DD format for ministry compliance while maintaining 1-minute client cache.",
+        "testStrategy": "Test XML endpoint returns current date on each request, verify MD5 checksum matches fresh XML content, confirm multiple requests within 1 minute return cached response, verify requests after 1 minute return fresh content with new date",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update Caching Configuration for XML Endpoint",
+            "description": "Modify the data.xml route to disable server-side caching and set the client-side cache duration to 60 seconds for ministry compliance.",
+            "dependencies": [],
+            "details": "In 'src/app/api/public/[clientId]/data.xml/route.ts', change 'export const revalidate = 300' to 'export const revalidate = 0' and update the Cache-Control header from 'max-age=300' to 'max-age=60'.",
+            "status": "pending",
+            "testStrategy": "Code review to confirm the revalidate and Cache-Control values are correctly updated in the specified file.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Update Caching Configuration for MD5 Endpoint",
+            "description": "Apply the same caching modifications to the data.md5 route, disabling server-side caching and setting the client-side cache to 60 seconds to maintain consistency with the XML endpoint.",
+            "dependencies": [],
+            "details": "In 'src/app/api/public/[clientId]/data.md5/route.ts', change 'export const revalidate = 300' to 'export const revalidate = 0' and update the Cache-Control header from 'max-age=300' to 'max-age=60'.",
+            "status": "pending",
+            "testStrategy": "Code review to confirm the revalidate and Cache-Control values are correctly updated in the specified file.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Verify Server-Side Refresh and Current Date",
+            "description": "Test the data.xml endpoint to confirm that server-side caching is disabled and that it returns the current date in YYYY-MM-DD format on new server requests after the client cache expires.",
+            "dependencies": [
+              "37.1"
+            ],
+            "details": "Use a tool like curl to make a request to the data.xml endpoint. Wait for more than 60 seconds and make another request. Verify the server is hit again (e.g., no X-Vercel-Cache: HIT) and the <data_aggiornamento> tag contains the current date.",
+            "status": "pending",
+            "testStrategy": "Execute two requests to the XML endpoint spaced more than 60 seconds apart. The test passes if the date in the second response is current and the response is not a cache hit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Validate 60-Second Client-Side Caching Behavior",
+            "description": "Confirm that both the XML and MD5 endpoints are correctly cached by the client for 60 seconds as specified by the updated 'Cache-Control: max-age=60' header.",
+            "dependencies": [
+              "37.1",
+              "37.2"
+            ],
+            "details": "Using a browser's network tab or curl, make a request to data.xml. Immediately make a second request within the 60-second window. Verify the second response is served from a cache. Repeat the process for the data.md5 endpoint.",
+            "status": "pending",
+            "testStrategy": "The test is successful if subsequent requests within 60 seconds are served from a cache (e.g., browser cache or CDN HIT) and do not trigger a new server-side execution.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Perform MD5 Integrity Check",
+            "description": "Verify that the checksum from the data.md5 endpoint correctly corresponds to the content of a freshly generated data.xml file, ensuring data integrity for compliance.",
+            "dependencies": [
+              "37.3",
+              "37.4"
+            ],
+            "details": "After ensuring the cache has expired (>60s), fetch the content from the data.xml endpoint. Calculate its MD5 checksum. Then, fetch the value from the data.md5 endpoint. Verify that the calculated checksum matches the fetched checksum.",
+            "status": "pending",
+            "testStrategy": "The test passes if the locally calculated MD5 hash of the XML content exactly matches the string returned by the MD5 endpoint for non-cached responses.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-07T16:07:38.630Z"
+      },
+      {
+        "id": 38,
+        "title": "Remove Unused Dashboard Components",
+        "description": "Simplify dashboard layout by removing SubscriptionCard and SubscriptionErrorHandler components that are not needed for v2",
+        "details": "Edit src/app/dashboard/page.tsx: remove import statements for SubscriptionCard and SubscriptionErrorHandler, remove <SubscriptionErrorHandler /> and <SubscriptionCard /> components from JSX. Keep only UploadWidget, ActionButtons, and PropertiesTable components in the dashboard layout. Ensure TypeScript compilation passes and no runtime errors occur.",
+        "testStrategy": "Verify dashboard renders with simplified layout containing only UploadWidget, ActionButtons, and PropertiesTable. Confirm no TypeScript errors during compilation and no runtime errors in browser console",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Locate Unused Component Code in Dashboard File",
+            "description": "Identify the exact import statements and JSX element usages for SubscriptionCard and SubscriptionErrorHandler within the src/app/dashboard/page.tsx file.",
+            "dependencies": [],
+            "details": "Open src/app/dashboard/page.tsx and find the lines corresponding to `import SubscriptionCard...`, `import SubscriptionErrorHandler...`, `<SubscriptionCard />`, and `<SubscriptionErrorHandler />`. Document the line numbers for removal in the subsequent steps.",
+            "status": "pending",
+            "testStrategy": "Confirm that the identified lines are the only references to SubscriptionCard and SubscriptionErrorHandler in the file.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Remove Unused Import Statements",
+            "description": "Delete the import statements for SubscriptionCard and SubscriptionErrorHandler from the top of src/app/dashboard/page.tsx.",
+            "dependencies": [
+              "38.1"
+            ],
+            "details": "Edit src/app/dashboard/page.tsx and remove the two lines that import the SubscriptionCard and SubscriptionErrorHandler components. Save the file.",
+            "status": "pending",
+            "testStrategy": "Review the file changes to ensure only the specified import statements have been deleted.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Remove Unused JSX Components from Layout",
+            "description": "Delete the <SubscriptionCard /> and <SubscriptionErrorHandler /> component elements from the JSX returned by the Dashboard page component.",
+            "dependencies": [
+              "38.1"
+            ],
+            "details": "In src/app/dashboard/page.tsx, locate and remove the <SubscriptionErrorHandler /> and <SubscriptionCard /> tags from the component's render method. Ensure the remaining components (UploadWidget, ActionButtons, PropertiesTable) are still present and the layout is syntactically correct.",
+            "status": "pending",
+            "testStrategy": "Visually inspect the JSX code to confirm the components have been removed and the remaining layout structure is valid.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Verify TypeScript Compilation Success",
+            "description": "Run the project's build process to confirm that the code changes do not introduce any TypeScript compilation errors.",
+            "dependencies": [
+              "38.2",
+              "38.3"
+            ],
+            "details": "Execute the command for type-checking and building the project (e.g., `npm run build` or `tsc`). The process must complete without any new errors related to the dashboard page or missing components.",
+            "status": "pending",
+            "testStrategy": "Confirm that the build command finishes with a success status (exit code 0) and no TypeScript errors are logged in the console.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Perform Runtime and Visual Validation",
+            "description": "Run the application, navigate to the dashboard, and verify the simplified layout renders correctly without any client-side errors.",
+            "dependencies": [
+              "38.4"
+            ],
+            "details": "Start the development server. Open the application in a browser and go to the dashboard page. Check that the SubscriptionCard and SubscriptionErrorHandler are no longer visible. Confirm that UploadWidget, ActionButtons, and PropertiesTable are displayed correctly. Open the browser's developer console and ensure no new runtime errors or warnings are present.",
+            "status": "pending",
+            "testStrategy": "The dashboard UI renders with the simplified layout. The browser's console shows no errors upon page load or interaction.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-07T16:24:26.176Z"
+      },
+      {
+        "id": 39,
+        "title": "Implement Property Status Management System",
+        "description": "Add property status management functionality allowing developers to mark properties as sold/unavailable with UI controls and API endpoints",
+        "details": "Create database enum for property status (available, sold, reserved). Add status column to properties table with RLS policies. Create API endpoints: PATCH /api/properties/[id] for single property updates and PATCH /api/properties/bulk for bulk updates. Build UI components: StatusBadge (green=available, red=sold, yellow=reserved), StatusSelect dropdown using Radix UI Select, BulkActions toolbar using Radix UI Toolbar. Add 'Mark as Sold' buttons in PropertiesTable, implement bulk selection with checkboxes. Filter sold properties from Ministry XML/CSV exports. Include loading states, error handling with toast notifications using Sonner.",
+        "testStrategy": "Test status changes persist in database, verify sold properties excluded from ministry endpoints, test bulk update functionality with multiple selected properties, confirm loading states and error handling work correctly, validate RLS policies prevent unauthorized updates",
+        "priority": "high",
+        "dependencies": [
+          "38"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Database Schema Update for Property Status",
+            "description": "Modify the database to support property statuses by creating a new enum type and adding a status column to the properties table, including necessary security policies.",
+            "dependencies": [],
+            "details": "Create a new `property_status` enum type in the database with values: 'available', 'sold', 'reserved'. Add a 'status' column to the 'properties' table, using the new enum type and setting a default value of 'available'. Implement Row-Level Security (RLS) policies to ensure only the property's owner (developer) can update the status.\n<info added on 2025-10-07T19:48:55.108Z>\nI'll analyze the codebase to understand the current implementation and provide an accurate update.**COMPLETED: Migration created in supabase/migrations/20251008_000002_add_property_status_enum.sql. Status column exists in database as TEXT (not enum due to Supabase connection issues during push). Functionality working correctly: API has Zod validation enum ['available', 'sold', 'reserved'], CSV export filters sold properties (.neq('status', 'sold')), UI components StatusBadge and StatusSelect functional. Enum type will be added later when Supabase connection is stable. RLS policies implemented.**\n</info added on 2025-10-07T19:48:55.108Z>",
+            "status": "done",
+            "testStrategy": "Verify the 'status' column exists in the 'properties' table with the correct enum type and default value. Test RLS policies by attempting to update a property's status with an unauthorized user account, expecting failure.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-07T19:49:10.281Z"
+          },
+          {
+            "id": 2,
+            "title": "Create API Endpoints for Status Updates",
+            "description": "Develop API routes for updating the status of single and multiple properties, ensuring proper authorization and input validation.",
+            "dependencies": [
+              "39.1"
+            ],
+            "details": "Implement a `PATCH /api/properties/[id]` endpoint to update the status of a single property. Implement a `PATCH /api/properties/bulk` endpoint that accepts an array of property IDs and a new status to update them in a single transaction. Ensure both endpoints validate user authorization against RLS policies and handle input correctly.",
+            "status": "done",
+            "testStrategy": "Test the PATCH /api/properties/[id] endpoint by updating a single property's status and verifying the change in the database. Test the PATCH /api/properties/bulk endpoint with multiple property IDs and confirm all are updated correctly. Test for proper error handling with invalid input.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-07T19:53:39.184Z"
+          },
+          {
+            "id": 3,
+            "title": "Build Reusable Status UI Components",
+            "description": "Create the fundamental, reusable UI components for displaying and interacting with property statuses using Radix UI.",
+            "dependencies": [],
+            "details": "Build a `StatusBadge` component that displays a colored badge based on the property status (green for 'available', red for 'sold', yellow for 'reserved'). Create a `StatusSelect` dropdown component using Radix UI Select for choosing a status. Develop a `BulkActions` toolbar component using Radix UI Toolbar to house actions for selected properties.",
+            "status": "done",
+            "testStrategy": "Visually verify the StatusBadge component displays the correct color for each status. Test the StatusSelect dropdown renders all status options. Use Storybook or a similar tool to test components in isolation.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-07T19:55:40.028Z"
+          },
+          {
+            "id": 4,
+            "title": "Integrate Status Management into Properties Table",
+            "description": "Enhance the properties table with status selection, bulk actions, and user feedback mechanisms like loading states and notifications.",
+            "dependencies": [
+              "39.2",
+              "39.3"
+            ],
+            "details": "Modify the `PropertiesTable` to include a checkbox for each row to enable bulk selection. Integrate the `BulkActions` toolbar, which appears when properties are selected. Add the `StatusSelect` dropdown or a 'Mark as Sold' button to each row for individual updates. Implement loading states for API calls and use Sonner for toast notifications on success or error.",
+            "status": "done",
+            "testStrategy": "Confirm that selecting properties via checkboxes reveals the BulkActions toolbar. Test bulk update functionality from the UI. Test individual status updates. Verify that loading states are shown during API calls and that success/error toast notifications appear correctly.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-07T20:05:47.557Z"
+          },
+          {
+            "id": 5,
+            "title": "Filter Exports Based on Property Status",
+            "description": "Exclude sold properties from ministry-facing XML and CSV data exports to ensure compliance and data accuracy.",
+            "dependencies": [
+              "39.1"
+            ],
+            "details": "Modify the logic for generating the Ministry XML and any related CSV exports. Update the database queries or data filtering process to exclude properties with a 'sold' status. Ensure that only properties marked as 'available' or 'reserved' are included in the final export files.",
+            "status": "done",
+            "testStrategy": "Generate the Ministry XML and CSV exports after marking several properties as 'sold'. Verify that the sold properties are correctly excluded from the generated files. Confirm that 'available' and 'reserved' properties are still included.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-07T20:08:11.361Z"
+          }
+        ],
+        "updatedAt": "2025-10-07T20:08:11.361Z"
+      },
+      {
+        "id": 40,
+        "title": "Enhance Settings Page with Complete User Management",
+        "description": "Expand the existing settings page to include profile management, API configuration, notification preferences, and account actions",
+        "details": "Enhance src/app/dashboard/settings/page.tsx with four sections: 1) Profile Settings - company name, NIP, REGON, email, phone with form validation, 2) API Configuration - display client_id (read-only), regenerate client_id button with confirmation dialog, ministry endpoint URLs with copy buttons, 3) Notification Preferences - email notifications toggle, frequency selection (daily/weekly), 4) Account Actions - change password, delete account with confirmation. Create API endpoints: GET /api/user/profile, PATCH /api/user/profile, POST /api/user/regenerate-client-id. Use Radix UI components for forms, dialogs, and switches. Implement form validation with Zod schemas.",
+        "testStrategy": "Test form validation for required fields and formats, verify profile updates persist in database, test client_id regeneration creates new UUID, confirm success/error toast notifications display correctly, validate all API endpoints work properly",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create API Endpoints for User Profile Management",
+            "description": "Implement the backend API routes required to fetch and update user profile information, which will serve as the data layer for the settings page.",
+            "dependencies": [],
+            "details": "Create the API route `GET /api/user/profile` to retrieve the current user's data, including company name, NIP, REGON, email, phone, and client_id. Create the API route `PATCH /api/user/profile` to update the user's profile information, ensuring server-side validation of the incoming data.",
+            "status": "pending",
+            "testStrategy": "Verify that GET /api/user/profile returns the correct user data. Test PATCH /api/user/profile with valid and invalid data to ensure updates are successful and validation errors are returned correctly.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Profile Settings Form UI",
+            "description": "Build the 'Profile Settings' section on the settings page, allowing users to view and edit their profile information with client-side validation.",
+            "dependencies": [
+              "40.1"
+            ],
+            "details": "In `src/app/dashboard/settings/page.tsx`, create a form using Radix UI components for company name, NIP, REGON, email, and phone. Implement client-side validation using a Zod schema. Connect the form to the GET and PATCH API endpoints to fetch initial data and submit updates. Implement loading and disabled states during form submission.",
+            "status": "pending",
+            "testStrategy": "Test form validation for all fields (required, format). Verify that submitting the form successfully calls the PATCH API and updates the UI. Confirm that data from the GET API correctly populates the form on initial load.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Develop API Configuration Section with Client ID Regeneration",
+            "description": "Create the 'API Configuration' section, including the backend logic and UI for displaying API details and regenerating the client ID.",
+            "dependencies": [
+              "40.1"
+            ],
+            "details": "Implement the `POST /api/user/regenerate-client-id` endpoint to generate a new UUID for the user's client_id. In the UI, display the read-only client_id fetched from the profile API. Add a 'Regenerate' button that triggers a Radix UI confirmation dialog before calling the API. Display the static ministry endpoint URLs with 'Copy to Clipboard' buttons.",
+            "status": "pending",
+            "testStrategy": "Verify the client_id is displayed correctly. Test the 'Regenerate' button, confirm the dialog appears, and a new UUID is generated and persisted upon confirmation. Test the 'Copy' buttons to ensure they copy the correct URLs to the clipboard.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Build UI for Notification Preferences and Account Actions",
+            "description": "Construct the user interface for the 'Notification Preferences' and 'Account Actions' sections using Radix UI components for user interaction.",
+            "dependencies": [],
+            "details": "In the 'Notification Preferences' section, add a Radix UI Switch for enabling/disabling email notifications and a Radix UI Select for choosing frequency (daily/weekly). In the 'Account Actions' section, add buttons for 'Change Password' and 'Delete Account', with each button configured to trigger a respective Radix UI confirmation dialog. This subtask focuses on UI structure and component implementation.",
+            "status": "pending",
+            "testStrategy": "Confirm all UI components (Switch, Select, Buttons, Dialogs) render correctly. Verify that interacting with the components (e.g., opening a dialog) works as expected.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Implement Backend for Account Actions and Final Integration",
+            "description": "Create the necessary API endpoints for account actions and notification preferences, and integrate all four sections into a cohesive settings page with user feedback.",
+            "dependencies": [
+              "40.2",
+              "40.3",
+              "40.4"
+            ],
+            "details": "Create API endpoints to handle changing passwords and deleting user accounts. Implement the backend logic to update notification preferences in the database. Connect the UI components from subtask 4 to these new endpoints. Implement success and error toast notifications for all actions on the page (profile update, ID regeneration, password change, etc.) to provide clear user feedback.",
+            "status": "pending",
+            "testStrategy": "Test the API endpoints for changing password, deleting account, and updating notification preferences. Verify that the UI correctly calls these endpoints. Confirm that success/error toast notifications are displayed appropriately for every user action on the settings page.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-07T18:00:23.861Z"
+      },
+      {
+        "id": 41,
+        "title": "Create Notifications System and Page",
+        "description": "Implement a comprehensive notifications system with database table, API endpoints, and /notifications page UI",
+        "details": "Create notifications table in Supabase with columns: id, developer_id, type (upload_complete, upload_error, ministry_sync, system_announcement), title, message, read (boolean), created_at. Implement RLS policies for developer-only access. Create API endpoints: GET /api/notifications (list with pagination), PATCH /api/notifications/[id] (mark as read), DELETE /api/notifications/[id] (delete). Build /notifications page showing list sorted by newest first, with mark as read/unread buttons, delete functionality, and empty state. Add unread count badge in header that updates real-time. Use existing Radix UI components for consistent styling.",
+        "testStrategy": "Test notifications page renders correctly, verify mark as read/unread functionality, confirm delete operations work, test unread count badge updates correctly, validate RLS policies prevent unauthorized access, test empty state display",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design and Implement Notifications Table with RLS Policies in Supabase",
+            "description": "Create the notifications table in Supabase with all required columns and implement Row Level Security (RLS) policies to ensure only the owning developer can access their notifications.",
+            "dependencies": [],
+            "details": "Define the table with columns: id, developer_id, type (enum: upload_complete, upload_error, ministry_sync, system_announcement), title, message, read (boolean), created_at. Add appropriate indexes for efficient querying. Write RLS policies restricting access to notifications where developer_id matches the authenticated user.",
+            "status": "done",
+            "testStrategy": "Verify table schema matches requirements, test RLS by attempting to access notifications as different users, and confirm unauthorized access is blocked.",
+            "updatedAt": "2025-10-08T07:31:56.341Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Develop API Endpoints for Notifications CRUD Operations",
+            "description": "Implement REST API endpoints for listing, updating, and deleting notifications, supporting pagination and developer-only access.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create GET /api/notifications (with pagination), PATCH /api/notifications/[id] (mark as read/unread), and DELETE /api/notifications/[id] (delete notification). Ensure endpoints enforce authentication and RLS, and return appropriate error messages for unauthorized access.",
+            "status": "done",
+            "testStrategy": "Write integration tests for each endpoint, including pagination, marking as read/unread, and deletion. Test that endpoints reject unauthorized requests.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:32:50.316Z"
+          },
+          {
+            "id": 3,
+            "title": "Implement Real-Time Unread Count Badge in Header",
+            "description": "Add a real-time unread notifications count badge to the application header, updating automatically as notifications are read or received.",
+            "dependencies": [
+              2
+            ],
+            "details": "Use Supabase real-time subscriptions to listen for changes in the notifications table for the current developer. Update the unread count badge in the header UI using existing Radix UI components for styling consistency.",
+            "status": "done",
+            "testStrategy": "Simulate notification creation and status changes, verify badge updates in real-time, and test UI responsiveness.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:34:34.909Z"
+          },
+          {
+            "id": 4,
+            "title": "Build /notifications Page UI with List, Actions, and Empty State",
+            "description": "Create the /notifications page displaying notifications sorted by newest first, with mark as read/unread and delete actions, and an empty state when there are no notifications.",
+            "dependencies": [
+              2
+            ],
+            "details": "Fetch notifications from the API, display them in a list using Radix UI components, and implement buttons for marking as read/unread and deleting. Show a styled empty state when the list is empty. Ensure accessibility and responsive design.",
+            "status": "done",
+            "testStrategy": "Test UI rendering with various notification states, verify actions trigger correct API calls and UI updates, and confirm empty state displays when appropriate.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:34:35.850Z"
+          },
+          {
+            "id": 5,
+            "title": "End-to-End Testing and Validation of Notifications System",
+            "description": "Perform comprehensive end-to-end testing of the notifications system, covering database, API, UI, and real-time features.",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Test the full workflow: notification creation, listing, marking as read/unread, deletion, real-time updates, RLS enforcement, and UI consistency. Validate error handling and edge cases, such as unauthorized access and empty states.",
+            "status": "done",
+            "testStrategy": "Use automated and manual tests to verify all acceptance criteria, including security, real-time updates, and user experience across devices.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:34:36.771Z"
+          }
+        ],
+        "updatedAt": "2025-10-08T07:34:36.771Z"
+      },
+      {
+        "id": 42,
+        "title": "Add Dashboard Statistics Cards",
+        "description": "Create overview statistics cards displaying key metrics on the dashboard top section",
+        "details": "Create statistics cards component showing: total properties, available properties, sold properties (this month), average price per m². Design 4-card grid layout (2x2 on mobile, 4x1 on desktop) with icons from Lucide React, values, labels, and trend indicators (↑/↓ compared to last month). Create API endpoint GET /api/dashboard/stats returning aggregated statistics from properties table. Position cards above UploadWidget in dashboard layout. Include loading skeleton states and error handling. Use date-fns for date calculations and filtering.",
+        "testStrategy": "Verify stats cards render above upload widget, test data refreshes on page load, confirm loading skeleton displays during fetch, validate error states handled gracefully, test responsive layout on mobile and desktop",
+        "priority": "low",
+        "dependencies": [
+          "39"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Statistics API Endpoint",
+            "description": "Implement GET /api/dashboard/stats endpoint that aggregates property statistics from the database",
+            "dependencies": [],
+            "details": "Create route at src/app/api/dashboard/stats/route.ts that queries the properties table to calculate: total properties count, available properties count (status = 'available'), sold properties count for current month (status = 'sold' + date filtering), and average price per m2. Use date-fns for current month filtering with proper timezone handling. Include previous month calculations for trend comparison. Implement proper error handling, authentication via Supabase auth, and RLS policy enforcement. Return JSON response with statistics and trend indicators.",
+            "status": "done",
+            "testStrategy": "Test endpoint returns correct aggregated data, verify authentication required, confirm RLS policies work, test with empty database, validate date filtering logic",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:45:24.347Z"
+          },
+          {
+            "id": 2,
+            "title": "Create Statistics Cards Component",
+            "description": "Build reusable StatsCard component and StatisticsCards container component for displaying dashboard metrics",
+            "dependencies": [],
+            "details": "Create components/dashboard/statistics-cards.tsx with individual StatsCard component using existing Card UI components from src/components/ui/card.tsx. Include props for title, value, icon (from lucide-react), trend direction and percentage. Create StatisticsCards container component that fetches data from /api/dashboard/stats endpoint using SWR for caching. Implement responsive grid layout (2x2 on mobile, 4x1 on desktop) using CSS Grid and Tailwind classes. Add loading skeleton states using existing LoadingState pattern and error handling with proper error display.",
+            "status": "done",
+            "testStrategy": "Test component renders correctly with mock data, verify responsive layout on different screen sizes, confirm loading states display properly, test error handling scenarios",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:45:25.294Z"
+          },
+          {
+            "id": 3,
+            "title": "Add Icons and Trend Indicators",
+            "description": "Implement icon selection and trend indicator logic for each statistics card",
+            "dependencies": [
+              "42.2"
+            ],
+            "details": "Add lucide-react icons to StatsCard component: Building2 for total properties, Home for available properties, HandCoins for sold properties, Calculator for average price per m2. Implement trend indicator with up/down arrows (ChevronUp, ChevronDown) and percentage change display. Add conditional styling for positive (green) and negative (red) trends. Ensure icons are accessible with proper aria-labels and maintain consistent sizing across all cards.",
+            "status": "done",
+            "testStrategy": "Verify correct icons display for each metric, test trend indicators show proper colors and arrows, confirm accessibility attributes are present",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:45:26.192Z"
+          },
+          {
+            "id": 4,
+            "title": "Integrate Statistics Cards into Dashboard Layout",
+            "description": "Add StatisticsCards component to dashboard page above the UploadWidget component",
+            "dependencies": [
+              "42.2"
+            ],
+            "details": "Edit src/app/dashboard/page.tsx to import and add StatisticsCards component in the dashboard grid section, positioned before the UploadWidget component. Ensure proper spacing using existing space-y-6 pattern. Add Suspense wrapper with appropriate loading fallback to match existing lazy-loaded components pattern. Maintain existing dashboard structure and styling consistency.",
+            "status": "done",
+            "testStrategy": "Verify statistics cards appear above upload widget, confirm proper spacing and layout integration, test loading states work correctly with Suspense",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:45:27.069Z"
+          },
+          {
+            "id": 5,
+            "title": "Add Data Fetching and Error Handling",
+            "description": "Implement SWR-based data fetching with proper error handling and loading states",
+            "dependencies": [
+              "42.1",
+              "42.2"
+            ],
+            "details": "Add SWR hook in StatisticsCards component to fetch data from /api/dashboard/stats with automatic revalidation on page focus. Implement error boundary integration and fallback states for network errors. Add retry logic and loading skeletons that match existing component patterns. Use existing error display components and ensure consistent error messaging. Include data refresh on property updates using SWR mutate functionality.",
+            "status": "done",
+            "testStrategy": "Test data loads correctly on component mount, verify error states display properly, confirm retry functionality works, test loading skeleton appears during fetch",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:45:27.977Z"
+          },
+          {
+            "id": 6,
+            "title": "Design Responsive 4-Card Grid Layout for Statistics Cards",
+            "description": "Create a responsive grid layout for the dashboard statistics cards, displaying 2x2 on mobile and 4x1 on desktop.",
+            "dependencies": [],
+            "details": "Implement a grid layout using CSS grid or a UI library (e.g., Tailwind, MUI) to ensure the cards display as 2x2 on mobile and 4x1 on desktop. The layout should be visually consistent with the dashboard's design system.",
+            "status": "pending",
+            "testStrategy": "Resize the dashboard on different devices and verify the cards rearrange correctly (2x2 on mobile, 4x1 on desktop).",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Implement Statistics Cards Component with Icons and Trend Indicators",
+            "description": "Develop a reusable statistics card component displaying an icon, value, label, and trend indicator (↑/↓) using Lucide React icons.",
+            "dependencies": [
+              6
+            ],
+            "details": "Create a card component that accepts props for icon, value, label, and trend direction. Use Lucide React for icons and display a trend arrow (up/down) with color coding. Ensure accessibility and consistent styling.",
+            "status": "pending",
+            "testStrategy": "Render the component with sample data and verify correct display of icon, value, label, and trend indicator.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "Create API Endpoint GET /api/dashboard/stats for Aggregated Metrics",
+            "description": "Develop a backend API endpoint that returns aggregated statistics: total properties, available properties, sold properties (this month), and average price per m².",
+            "dependencies": [],
+            "details": "Implement GET /api/dashboard/stats to query the properties table, aggregate the required metrics, and return them in a JSON response. Use date-fns for date filtering (e.g., sold properties this month). Handle errors and edge cases.",
+            "status": "pending",
+            "testStrategy": "Call the endpoint with test data and verify the response structure and accuracy of aggregated values.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 9,
+            "title": "Integrate Statistics Cards with API Data, Loading Skeletons, and Error Handling",
+            "description": "Fetch statistics from the API, display loading skeletons while fetching, and handle error states in the statistics cards.",
+            "dependencies": [
+              7,
+              8
+            ],
+            "details": "Use React hooks (e.g., useEffect, useState) or a data-fetching library (e.g., SWR, React Query) to fetch data from /api/dashboard/stats. Show skeleton loaders during fetch and display error messages if the request fails.",
+            "status": "pending",
+            "testStrategy": "Simulate loading and error states; verify skeletons and error messages appear as expected.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 10,
+            "title": "Position Statistics Cards Above UploadWidget in Dashboard Layout",
+            "description": "Update the dashboard layout to place the statistics cards grid above the UploadWidget component.",
+            "dependencies": [
+              9
+            ],
+            "details": "Modify the dashboard page/component to render the statistics cards grid at the top, directly above the UploadWidget. Ensure layout consistency and spacing.",
+            "status": "pending",
+            "testStrategy": "Open the dashboard and confirm the statistics cards appear above the UploadWidget, with correct spacing and order.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-08T07:45:30.158Z"
+      },
+      {
+        "id": 43,
+        "title": "Implement Email Notification System",
+        "description": "Set up automated email notifications for important events using Resend API with React Email templates",
+        "details": "Create email notification system using existing Resend dependency and @react-email/render. Build email templates: upload completed (with summary), upload failed (with error details), weekly report (every Monday with stats). Implement notification triggers in upload API routes and create weekly cron job using Vercel Cron API routes. Create email templates directory with React Email components ensuring mobile-responsive design. Add opt-out functionality in settings page. Log failed emails for debugging. Use environment variables for Resend API key configuration.",
+        "testStrategy": "Test emails send successfully via Resend, verify templates are mobile-responsive, confirm users can opt-out in settings, test weekly report generation and sending, validate failed email logging works correctly",
+        "priority": "low",
+        "dependencies": [
+          "41"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up Resend API Integration and Environment Variables",
+            "description": "Integrate the Resend API for sending emails and securely configure API keys using environment variables.",
+            "dependencies": [],
+            "details": "Install and configure the Resend API client in the backend. Store the API key in environment variables and ensure it is accessed securely in code. Validate the connection by sending a test email.",
+            "status": "done",
+            "testStrategy": "Send a test email using the Resend API and verify receipt. Confirm API key is not exposed in code or logs.",
+            "updatedAt": "2025-10-08T07:40:27.818Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Develop Mobile-Responsive React Email Templates",
+            "description": "Create reusable, mobile-friendly email templates for upload completed, upload failed, and weekly report notifications using @react-email/render.",
+            "dependencies": [
+              1
+            ],
+            "details": "Set up a directory for React Email components. Implement three templates: upload completed (with summary), upload failed (with error details), and weekly report (with stats). Ensure all templates are mobile-responsive and visually consistent.",
+            "status": "done",
+            "testStrategy": "Render templates in development, send test emails, and verify correct appearance on desktop and mobile email clients.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:40:28.733Z"
+          },
+          {
+            "id": 3,
+            "title": "Implement Notification Triggers in API and Weekly Cron Job",
+            "description": "Add logic to trigger email notifications in upload API routes and schedule weekly report emails using Vercel Cron API routes.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Modify upload API routes to trigger the appropriate email template on success or failure. Set up a Vercel Cron job to send weekly reports every Monday. Ensure correct data is passed to templates.",
+            "status": "done",
+            "testStrategy": "Trigger uploads and failures to verify emails are sent. Confirm weekly report is sent on schedule with accurate stats.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:40:29.627Z"
+          },
+          {
+            "id": 4,
+            "title": "Add Opt-Out Functionality to User Settings",
+            "description": "Enable users to opt out of email notifications via a settings page toggle.",
+            "dependencies": [
+              1
+            ],
+            "details": "Update the settings page UI to include an opt-out toggle. Store user preferences in the database and ensure notification triggers respect this setting before sending emails.",
+            "status": "done",
+            "testStrategy": "Toggle opt-out in settings, perform actions that would trigger emails, and verify that opted-out users do not receive notifications.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:40:30.519Z"
+          },
+          {
+            "id": 5,
+            "title": "Log Failed Email Attempts for Debugging",
+            "description": "Implement logging for failed email sends to aid in debugging and monitoring.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Capture errors from the Resend API when sending emails. Log relevant details (timestamp, user, error message) to a persistent store or monitoring service for later review.",
+            "status": "done",
+            "testStrategy": "Simulate email send failures and verify that error logs are created with sufficient detail for troubleshooting.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-08T07:40:31.403Z"
+          }
+        ],
+        "updatedAt": "2025-10-08T07:40:31.403Z"
+      },
+      {
+        "id": 44,
+        "title": "Database Schema Updates for New Features",
+        "description": "Create and run database migrations for property status, notifications table, and email preferences",
+        "details": "Create Supabase migrations for: 1) Add status column to properties table with enum type (available, sold, reserved) and default 'available', 2) Create notifications table with proper indexes and RLS policies, 3) Add email_notifications_enabled and notification_frequency columns to developers table. Create proper indexes for performance: properties.status, notifications.developer_id+read+created_at. Implement RLS policies ensuring developers can only access their own data. Update TypeScript types to reflect schema changes. Test migrations in development before applying to production.",
+        "testStrategy": "Test migrations apply successfully without data loss, verify RLS policies work correctly, confirm indexes improve query performance, validate TypeScript types match database schema, test rollback procedures if needed",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-07T18:08:15.050Z"
+      },
+      {
+        "id": 45,
+        "title": "Integration Testing and Quality Assurance",
+        "description": "Comprehensive testing of all new features and existing functionality to ensure production readiness",
+        "details": "Create comprehensive test suite covering: unit tests for property status management, notifications API, statistics calculations; integration tests for email system, settings updates, dashboard functionality; end-to-end tests for critical user flows (upload → mark as sold → verify ministry endpoints). Test ministry compliance endpoints with various property statuses. Verify TypeScript compilation with 'npm run build'. Test responsive design on mobile/tablet/desktop. Perform security audit of RLS policies and API endpoints. Load test ministry endpoints. Create deployment checklist and verify Vercel deployment succeeds.",
+        "testStrategy": "All tests pass including unit, integration, and e2e tests. TypeScript compilation succeeds. Ministry endpoints return correct data excluding sold properties. Security audit passes. Load testing shows acceptable performance. Vercel deployment completes successfully.",
+        "priority": "high",
+        "dependencies": [
+          "36",
+          "37",
+          "38",
+          "39",
+          "40",
+          "41",
+          "42",
+          "43",
+          "44"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-08T08:17:08.813Z"
+      },
+      {
+        "id": 46,
+        "title": "Update Landing Page with New Pricing Plans and Features",
+        "description": "Update the main landing page to reflect the new subscription plans (Basic 149zł, Pro 249zł, Enterprise 399zł) with corrected features including subdomain support, custom domains, and a pricing calculator for Pro plan.",
+        "details": "This task involves comprehensive updates to the landing page (src/app/page.tsx) and pricing section (src/components/PricingSection.tsx) to align with the new subscription model:\n\n**Pricing Plan Updates:**\n- Basic: 149zł/month, 1 investment, max 20 properties\n- Pro: 249zł/month, 2 investments + 50zł per additional, unlimited properties, includes subdomains\n- Enterprise: 399zł/month, unlimited everything, includes custom domains\n\n**Feature Updates Required:**\n1. Update PricingSection.tsx with correct pricing (Basic 149zł, Pro 249zł, Enterprise 399zł)\n2. Correct plan features - Basic (1 investment, 20 properties), Pro (2+ investments, unlimited properties, subdomains), Enterprise (unlimited everything, custom domains)\n3. Add pricing calculator component for Pro plan showing additional investment costs (50zł each)\n4. Update landing page hero section to mention new pricing structure\n5. Update FAQ section with current pricing information\n6. Add price history features mention in plan descriptions\n7. Ensure all pricing references throughout the page are consistent\n\n**Implementation Details:**\n- Modify plans array in PricingSection.tsx with correct monthly/annual pricing\n- Update feature lists to accurately reflect plan capabilities\n- Create new PricingCalculator component for Pro plan additional investment cost calculation\n- Update landing page text to reference correct pricing tiers\n- Ensure responsive design maintains quality across all devices\n- Update structured data/metadata if pricing is referenced\n\n**Technical Considerations:**\n- Use existing Radix UI components for consistency\n- Maintain current responsive design patterns\n- Ensure pricing calculator follows existing design system\n- Update TypeScript interfaces if new pricing structure requires it\n- Test across different viewport sizes",
+        "testStrategy": "Verify pricing displays correctly across all screen sizes, test pricing calculator functionality (Pro plan additional investment calculations), confirm all plan features are accurately represented, validate FAQ section contains updated pricing, ensure structured data reflects correct pricing, test annual/monthly toggle works with new prices, verify CTA buttons link to correct signup flows with pricing parameters, test responsive design on mobile/tablet/desktop, confirm no old pricing information remains on the page, validate landing page loads quickly with new content.",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 47,
+        "title": "Update Subscription Plans Configuration in Code",
+        "description": "Update src/lib/subscription-plans.ts to match new PRD pricing: Basic (14900 grosze, 20 properties, 1 project), Pro (unlimited properties, 2 projects, 5000 grosze additional project fee), Enterprise (unlimited everything).",
+        "details": "Update the SUBSCRIPTION_PLANS configuration object in src/lib/subscription-plans.ts to match the new PRD specifications:\n\n1. **Basic Plan Updates**: Already correctly configured at 14900 grosze (149zł), 20 properties limit, 1 project limit\n\n2. **Pro Plan Updates**: Change price from 24900 to match PRD (verify exact amount), ensure propertiesLimit is null (unlimited), projectsLimit is 2, additionalProjectFee is 5000 grosze (50zł)\n\n3. **Enterprise Plan Updates**: Ensure propertiesLimit and projectsLimit are both null (unlimited)\n\n4. **Update Features Arrays**: Review and update the features arrays for each plan to accurately reflect current capabilities and remove any outdated features\n\n5. **Add calculateProPlanCost Function**: Implement a dedicated function specifically for calculating Pro plan costs including base price plus additional project fees, making it easier for UI components to display dynamic pricing\n\n6. **Verify Existing Functions**: Review calculateMonthlyCost, calculateBilling, and other utility functions to ensure they work correctly with the updated plan configuration\n\n7. **Update Comments**: Ensure the header comment block reflects the correct pricing (149zł, 249zł, 399zł)\n\n8. **Test Integration**: Verify that existing components using this configuration (PricingSection, dashboard components) will work correctly with the updates",
+        "testStrategy": "Verify all plan prices match PRD specifications (Basic: 149zł, Pro: 249zł with 50zł additional projects, Enterprise: 399zł). Test calculateProPlanCost function returns correct totals for various additional project counts. Confirm existing calculateMonthlyCost and calculateBilling functions work with updated configuration. Check that features arrays are accurate and complete. Validate TypeScript compilation passes. Test that pricing components render correctly with new configuration.",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 48,
+        "title": "Enforce Subscription Limits in Upload & Properties APIs",
+        "description": "Create middleware enforcePropertyLimit() and enforceProjectLimit() to check subscription limits before allowing uploads and property creation.",
+        "details": "Create middleware functions that check subscription limits before allowing uploads and property creation:\n\n1. **Create src/lib/subscription-limits-middleware.ts**:\n   - enforcePropertyLimit(developerId: string, newPropertiesCount: number): checks if adding properties would exceed plan limits\n   - enforceProjectLimit(developerId: string): checks if creating projects would exceed plan limits\n   - Use existing canAddProperty() and canAddProject() functions from subscription-plans.ts\n   - Return helpful error messages with current usage and upgrade links\n\n2. **Update POST /api/upload route** (src/app/api/upload/route.ts:281):\n   - Add property limit check before savePropertiesToDatabase()\n   - Check total properties count that would result after upload\n   - Return 403 with usage details and upgrade link if limit exceeded\n\n3. **Update POST /api/properties route** (create new endpoint):\n   - Add property limit check before creating individual properties\n   - Use enforcePropertyLimit() middleware\n   - Return 403 with helpful error message if limit exceeded\n\n4. **Error Response Format**:\n   ```json\n   {\n     \"error\": \"Property limit exceeded\",\n     \"currentUsage\": { \"properties\": 18, \"limit\": 20 },\n     \"message\": \"You have reached your plan limit of 20 properties. Upgrade to Pro for unlimited properties.\",\n     \"upgradeUrl\": \"/dashboard/settings#subscription\"\n   }\n   ```\n\n5. **Integration Points**:\n   - Use existing checkSubscriptionLimits() from subscription-plans.ts:300\n   - Integrate with existing rate limiting in upload route\n   - Maintain backward compatibility with existing upload flow",
+        "testStrategy": "Test property limit enforcement: 1) Create developer with Basic plan (20 property limit), 2) Upload CSV with 21 properties and verify 403 response with helpful message, 3) Upload 19 properties successfully, then try to upload 2 more and verify rejection, 4) Upgrade to Pro plan and verify unlimited properties work, 5) Test project limit enforcement similarly. Verify error messages include current usage, plan limits, and upgrade links. Test that existing functionality continues to work for users within limits.",
+        "status": "pending",
+        "dependencies": [
+          47
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 49,
+        "title": "Implement 14-Day Trial System",
+        "description": "Add trial management system with database columns, middleware enforcement, trial-expired page, and dashboard countdown banner.",
+        "details": "Implement comprehensive 14-day trial system for new developers:\n\n**1. Database Schema Updates (add to existing migration)**:\n- Add `trial_status` enum column to developers table: ('active', 'expired', 'converted', 'cancelled')\n- Ensure `trial_ends_at` timestamp column exists (already in database schema)\n- Update RLS policies to include trial status checks\n- Set default trial_status='active' and trial_ends_at=NOW() + INTERVAL '14 days' for new registrations\n\n**2. Create Trial Status Middleware**:\n- Create `src/lib/trial-middleware.ts` with `checkTrialStatus(developerId: string)` function\n- Check if trial_ends_at < NOW() and trial_status='active', then update to 'expired'\n- Return trial status and days remaining for UI display\n- Integrate with existing subscription-enforcement.ts to block expired trials\n\n**3. Create Trial Expired Page**:\n- Create `src/app/trial-expired/page.tsx` with upgrade CTA\n- Include pricing cards from PricingSection component\n- Add \"Your 14-day trial has expired\" messaging\n- Integrate with Stripe checkout for plan selection\n- Use existing subscription-plans.ts configuration\n\n**4. Dashboard Trial Banner**:\n- Create `src/components/dashboard/trial-banner.tsx` component\n- Show countdown: \"X days left in your trial\"\n- Display only when subscription_status='trialing' and trial not expired\n- Position above StatisticsCards in dashboard layout\n- Include \"Upgrade Now\" button linking to pricing\n\n**5. Integration Points**:\n- Update signup flow to set trial_ends_at automatically\n- Modify middleware.ts to redirect expired trials to /trial-expired\n- Update upload and properties APIs to check trial status using existing subscription enforcement\n- Ensure ministry endpoints remain accessible during trial period\n\n**Technical Requirements**:\n- Use existing Supabase admin client patterns from lib/supabase/server.ts\n- Follow existing TypeScript patterns and database types\n- Integrate with existing subscription-plans.ts and subscription-enforcement.ts\n- Use existing UI components (Button, Card, Alert) for consistency",
+        "testStrategy": "Test trial system functionality: 1) Create new developer account and verify trial_ends_at is set to 14 days from now, 2) Manually update trial_ends_at to past date and verify /trial-expired redirect works, 3) Test trial banner shows correct days remaining for active trials, 4) Verify trial banner hidden for paid subscriptions, 5) Test upload functionality blocked for expired trials with helpful error message, 6) Confirm ministry endpoints remain accessible during active trial, 7) Test upgrade flow from trial-expired page to Stripe checkout, 8) Verify trial_status updates correctly when subscription becomes active",
+        "status": "pending",
+        "dependencies": [
+          47
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 50,
+        "title": "Implement Card-Required Signup Flow",
+        "description": "Create onboarding pages with Stripe Checkout integration requiring card collection for 14-day trial with automatic subscription conversion.",
+        "details": "Implement comprehensive card-required signup flow with trial period support:\n\n**1. Create Onboarding Pages:**\n- Create /onboarding/select-plan page with pricing plans display using existing SUBSCRIPTION_PLANS configuration\n- Create /onboarding/payment page with Stripe Checkout integration\n- Use existing UI components from PricingSection and subscription system\n\n**2. Database Schema Updates:**\n- Add trial_status enum column to developers table: ('active', 'expired', 'converted', 'cancelled')\n- Ensure trial_ends_at timestamp exists (already in schema)\n- Add subscription tracking columns: current_period_end, subscription_status with enum ('trialing', 'active', 'inactive', 'cancelled', 'expired', 'past_due')\n- Update RLS policies to handle trial users\n\n**3. Enhanced Stripe Checkout Configuration:**\n- Modify existing /api/stripe/create-checkout-session/route.ts to support trial_period_days: 14\n- Add payment_method_collection: 'always' to ensure card is collected upfront\n- Configure automatic subscription start after trial ends\n- Add trial-specific metadata to sessions and subscriptions\n\n**4. Webhook Handlers for Trial Events:**\n- Extend existing /api/stripe/webhook/route.ts and handleStripeWebhook function\n- Handle customer.subscription.trial_will_end event (3 days before trial ends)\n- Handle customer.subscription.updated for trial to active conversion\n- Handle invoice.payment_failed for failed trial conversions\n- Update developers table with trial_status and subscription_status changes\n\n**5. Signup Flow Integration:**\n- Redirect new signups to /onboarding/select-plan instead of dashboard\n- Update authentication flow in auth callback to check if onboarding is complete\n- Set trial_status='active' and trial_ends_at=NOW() + INTERVAL '14 days' for new registrations\n- Ensure existing subscription middleware works with trial users\n\n**6. Trial User Experience:**\n- Update existing dashboard to show trial countdown banner\n- Allow full feature access during trial period\n- Implement trial-expired page with upgrade prompts\n- Send trial reminder emails using existing email system",
+        "testStrategy": "Test complete signup flow: 1) Create new account and verify redirect to /onboarding/select-plan, 2) Select plan and verify Stripe Checkout requires card with trial_period_days=14, 3) Complete checkout and verify trial_status='active' and trial_ends_at is 14 days from now, 4) Test webhook handling for trial events using Stripe CLI, 5) Verify dashboard shows trial banner with correct countdown, 6) Test trial expiration by manually updating trial_ends_at to past date, 7) Verify automatic subscription activation after trial ends, 8) Test failed payment handling during trial conversion, 9) Ensure existing subscription limits work correctly for trial users, 10) Test email notifications for trial events",
+        "status": "pending",
+        "dependencies": [
+          49
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 51,
+        "title": "Implement Trial Email Automation",
+        "description": "Create comprehensive trial email automation system with 5 Resend templates and Vercel Cron jobs for trial stage checking and personalized notifications with unsubscribe functionality.",
+        "details": "Implement complete trial email automation system for OTORAPORT based on existing email infrastructure:\n\n**1. Create Trial Email Templates in email-service.ts:**\n- Day 0: Welcome email (use existing sendDeveloperWelcomeEmail as base, enhance with trial-specific content)\n- Day 7: Midway check-in with usage stats and tips\n- Day 11: Warning email with upgrade urgency and feature benefits\n- Day 14 Success: Congratulations on conversion with next steps\n- Day 14 Failed: Re-engagement email with special offer and retention messaging\n\n**2. Database Schema Enhancements:**\n- Add trial_stage enum to developers table: ('day_0', 'day_7', 'day_11', 'day_14_success', 'day_14_failed', 'completed')\n- Add last_trial_email_sent timestamp to track email timing\n- Ensure trial_ends_at and trial_status columns exist (already in schema)\n\n**3. Create Vercel Cron Job API Routes:**\n- Create /api/cron/trial-checker route (daily at 9:00 AM UTC)\n- Query developers with trial_status='active' and check trial_ends_at dates\n- Determine appropriate email stage based on days remaining\n- Send personalized emails with developer's usage statistics\n- Update trial_stage and last_trial_email_sent after successful sends\n- Add CRON_SECRET authentication like existing weekly-reports cron\n\n**4. Email Personalization Features:**\n- Include developer's current property count and upload activity\n- Show ministry compliance status and XML endpoint availability\n- Add usage tips and feature highlights based on trial progress\n- Include subscription plan recommendations with pricing\n\n**5. Unsubscribe System Integration:**\n- Use existing email_notifications_enabled and notification_frequency columns\n- Add unsubscribe links to all trial emails using existing /api/unsubscribe endpoint\n- Respect user preferences while ensuring transactional emails (Day 0) always send\n- Add trial-specific opt-out tracking\n\n**6. Update vercel.json Configuration:**\n- Add new cron job entry for trial checker alongside existing weekly-reports\n- Configure optimal timing (daily 9:00 AM UTC) for business hours delivery\n\n**7. Error Handling and Logging:**\n- Implement comprehensive error logging for failed email sends\n- Add retry logic for temporary failures\n- Track email delivery success rates for trial campaigns\n- Use existing logEmailFailure function for consistency\n\n**8. Integration with Existing Systems:**\n- Leverage existing Resend configuration and EMAIL_FROM settings\n- Use existing email preference checking system\n- Integrate with current developer database structure\n- Maintain consistency with existing email template styling and branding",
+        "testStrategy": "Test trial email automation system comprehensively: 1) Create test developer account and verify Day 0 welcome email sends immediately with trial-specific content, 2) Manually adjust trial_ends_at dates to trigger Day 7, Day 11, and Day 14 emails and verify correct templates send, 3) Test successful subscription conversion triggers Day 14 Success email, 4) Test trial expiry without conversion triggers Day 14 Failed email, 5) Verify cron job authentication works with CRON_SECRET, 6) Test unsubscribe functionality respects email preferences while allowing critical transactional emails, 7) Validate personalized data appears correctly (property counts, usage stats, ministry compliance status), 8) Test email delivery failure handling and retry logic, 9) Verify trial_stage and last_trial_email_sent columns update correctly after each email send, 10) Test timing accuracy with various trial_ends_at scenarios to ensure emails send at appropriate intervals.",
+        "status": "pending",
+        "dependencies": [
+          49,
+          50
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 52,
+        "title": "Implement Projects (Inwestycje) System",
+        "description": "Create comprehensive projects management system with database table, RLS policies, API endpoints, project assignment in upload flow, and subscription-based project limits enforcement.",
+        "details": "Implement complete projects system for OTORAPORT allowing developers to organize properties into investment projects:\n\n**1. Database Schema (Supabase Migration):**\n- The projects table already exists in database schema (confirmed in src/types/database.ts:330-400)\n- Ensure projects table has status enum with 'active', 'inactive', 'archived' values\n- Verify RLS policies exist: developers can only CRUD their own projects\n- Confirm properties.project_id foreign key exists (already in schema at line 430, 471, 512)\n- Create database indexes: projects.developer_id, projects.status for performance\n\n**2. Create API Endpoints:**\n- Create src/app/api/projects/route.ts: GET (list all active projects for authenticated developer), POST (create new project with subscription limit validation)\n- Add project validation using existing patterns from properties API routes\n- Integrate with existing subscription-plans.ts functions: canAddProject(), enforceProjectLimit()\n- Use existing authentication patterns from src/app/api/properties/route.ts\n- Return proper TypeScript types matching database schema\n\n**3. Update Upload Flow Integration:**\n- Modify src/app/api/upload/route.ts and src/app/api/upload-parsed/route.ts\n- Add project_id assignment logic to properties during upload\n- Use existing project fetching pattern (already implemented around line 145-165)\n- Ensure existing project_id assignment in propertiesToInsert mapping works correctly\n\n**4. Enforce Subscription Limits:**\n- Use existing subscription-plans.ts: canAddProject() function handles Basic=1, Pro=2, Enterprise=unlimited\n- Implement project limit checks in POST /api/projects before creation\n- Display appropriate error messages for limit violations using existing patterns\n- Integrate with existing subscription enforcement middleware patterns\n\n**5. Project Management UI Integration:**\n- Prepare for future dashboard project selector in upload widget\n- Ensure API responses include project information for frontend consumption\n- Follow existing API response patterns from properties endpoints\n\n**Technology Integration:**\n- Use existing Supabase client patterns from src/lib/supabase/server.ts\n- Follow existing RLS policy patterns from other tables\n- Integrate with subscription-plans.ts system for limit enforcement\n- Use existing TypeScript types from src/types/database.ts",
+        "testStrategy": "Test projects system comprehensively: 1) Test POST /api/projects creates new project and verifies subscription limits (Basic plan allows 1 project, Pro allows 2, Enterprise unlimited), 2) Test GET /api/projects returns only developer's active projects with proper filtering, 3) Verify RLS policies prevent unauthorized access to other developers' projects, 4) Test upload flow assigns properties to correct project_id, 5) Validate subscription limit enforcement blocks project creation when limits exceeded, 6) Test project status filtering works correctly, 7) Verify database indexes improve query performance, 8) Test API error handling returns appropriate HTTP status codes and messages",
+        "status": "pending",
+        "dependencies": [
+          47,
+          48
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 53,
+        "title": "Implement Additional Projects Billing for Pro Plan",
+        "description": "Create Stripe infrastructure for billing additional projects in Pro plan with 50zł/month per project pricing and database tracking.",
+        "details": "Implement comprehensive additional projects billing system for Pro plan subscribers:\n\n**1. Database Schema Updates:**\n- Add additional_projects_count column to developers table (integer, default 0)\n- Update RLS policies to include additional projects count in queries\n- Create migration script for schema update\n\n**2. Update calculateMonthlyCost() Function (src/lib/subscription-plans.ts:98-111):**\n- Modify to accept additional_projects_count parameter from database\n- Enhance Pro plan billing logic to include additional projects fee (5000 grosze = 50zł per project)\n- Update calculateBilling() function to display breakdown with additional projects\n\n**3. Create Stripe Price for Additional Project:**\n- Create new Stripe Price object for additional project add-on (50zł/month)\n- Add metadata to identify as 'additional_project' price type\n- Store price ID in environment variables or configuration\n\n**4. Create POST /api/projects/add-additional Endpoint:**\n- Validate user has Pro plan subscription\n- Check current additional_projects_count in developers table\n- Create new Stripe subscription item for additional project\n- Update developers.additional_projects_count in database\n- Return updated billing information and next invoice preview\n\n**5. Enhanced Stripe Subscription Management:**\n- Update createStripeSubscription() in src/lib/stripe.ts to handle line items\n- Implement subscription modification with multiple line items (base plan + additional projects)\n- Add webhook handlers for subscription.updated events to sync additional_projects_count\n- Update handleSubscriptionUpdated() to process line items changes\n\n**6. Integration with Existing Systems:**\n- Update canAddProject() function to check additional_projects_count from database\n- Modify project limit enforcement in upload APIs to include additional projects\n- Update billing calculations in dashboard to show additional projects breakdown\n- Enhance subscription cards to display additional projects pricing",
+        "testStrategy": "Test additional projects billing system comprehensively: 1) Create Pro plan developer and verify additional_projects_count defaults to 0, 2) Test POST /api/projects/add-additional creates Stripe subscription item and increments count, 3) Verify calculateMonthlyCost() correctly adds 50zł per additional project for Pro plan, 4) Test webhook handling updates additional_projects_count when subscription changes, 5) Confirm project limits enforcement includes additional projects in calculations, 6) Test subscription modification preserves existing payment method and billing cycle, 7) Verify billing breakdown displays base plan + additional projects separately in dashboard",
+        "status": "pending",
+        "dependencies": [
+          47,
+          48,
+          52
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 54,
+        "title": "Implement Google Analytics 4 Integration",
+        "description": "Set up comprehensive GA4 tracking with property creation, script integration, automatic pageview tracking, custom event tracking for key user actions, and conversion goal configuration.",
+        "details": "Implement comprehensive Google Analytics 4 integration for OTORAPORT to track user behavior and business metrics:\n\n**1. GA4 Property Setup:**\n- Create new GA4 property in Google Analytics console for otoraport-v2.vercel.app domain\n- Configure data streams for web tracking\n- Set up enhanced ecommerce tracking for subscription events\n- Generate GA4 Measurement ID (format: G-XXXXXXXXXX)\n\n**2. Environment Configuration:**\n- Add NEXT_PUBLIC_GA4_MEASUREMENT_ID to environment variables and env-validation.ts schema\n- Update src/lib/env-validation.ts to include GA4 configuration validation\n- Add GA4 environment variable to deployment documentation\n\n**3. GA4 Script Integration in Layout:**\n- Add GA4 gtag script to src/app/layout.tsx head section using Next.js Script component\n- Implement gtag configuration with measurement ID from environment variables\n- Enable automatic pageview tracking with enhanced measurement\n- Add consent management configuration for GDPR compliance\n\n**4. Custom Event Tracking Implementation:**\n- Create src/lib/ga4-tracking.ts utility with functions for custom event tracking\n- Implement trackSignup() event for user registration completion\n- Implement trackUploadSuccess() event for successful property data uploads\n- Implement trackSubscriptionStart() event for trial/subscription activation\n- Implement trackSubscriptionConvert() event for trial-to-paid conversions\n- Add user property tracking for subscription plan and trial status\n\n**5. Event Integration in Existing Components:**\n- Add trackSignup() call to successful registration in auth/signup/page.tsx\n- Add trackUploadSuccess() call to successful uploads in upload API routes\n- Add trackSubscriptionStart() call to trial activation in subscription system\n- Add trackSubscriptionConvert() call to successful trial conversions\n- Integrate with existing error tracking to avoid duplicate analytics calls\n\n**6. Conversion Goals Configuration:**\n- Set up conversion goals in GA4: signup completion, first upload, subscription start, trial conversion\n- Configure enhanced ecommerce tracking for subscription revenue\n- Set up custom dimensions for user segment tracking (plan type, trial status)\n- Configure audience definitions for retargeting campaigns\n\n**7. Privacy Compliance:**\n- Update existing CookieBanner component to include GA4 consent controls\n- Implement analytics opt-out functionality in dashboard settings\n- Add GA4 tracking disclosure to privacy policy page\n- Ensure GDPR compliance with consent-based tracking activation",
+        "testStrategy": "Test GA4 implementation comprehensively: 1) Verify GA4 script loads correctly on all pages without console errors, 2) Test automatic pageview tracking appears in GA4 real-time reports, 3) Manually trigger signup flow and verify trackSignup() event appears in GA4 events report, 4) Test file upload and verify trackUploadSuccess() custom event tracking, 5) Verify subscription events fire correctly during trial signup process, 6) Test analytics opt-out functionality in dashboard settings, 7) Validate enhanced ecommerce tracking shows subscription revenue data, 8) Confirm conversion goals track properly in GA4 conversions report, 9) Test cookie consent banner integration with GA4 activation, 10) Verify all tracking respects user privacy preferences and GDPR requirements",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 55,
+        "title": "Implement Vercel Analytics and PostHog Integration",
+        "description": "Install posthog-js package and integrate with existing Vercel Analytics to track key user events and configure marketing funnels for signup, upload, and payment conversion tracking.",
+        "details": "Implement comprehensive analytics integration building on existing Vercel Analytics setup:\n\n**1. PostHog Installation and Configuration:**\n- Install posthog-js package: `npm install posthog-js`\n- Add environment variables to env-validation.ts schema: NEXT_PUBLIC_POSTHOG_KEY and NEXT_PUBLIC_POSTHOG_HOST\n- Update getEnv() function to include PostHog configuration\n\n**2. Create PostHog Provider (src/app/providers.tsx):**\n- Create new providers.tsx file since it doesn't exist yet\n- Initialize PostHog client with proper configuration (EU hosting, privacy settings)\n- Export PostHogProvider component and usePostHog hook\n- Configure automatic pageview tracking disabled (manual control)\n\n**3. Update Root Layout Integration:**\n- Import PostHogProvider in src/app/layout.tsx (existing file has Vercel Analytics already)\n- Wrap children with PostHogProvider while keeping existing Analytics and SpeedInsights components\n- Ensure PostHog loads after user consent for GDPR compliance\n\n**4. Event Tracking Implementation:**\n- Create src/lib/analytics-events.ts with typed event tracking functions\n- Implement key events: trackSignup(), trackLogin(), trackFileUpload(), trackSubscriptionStart(), trackTrialStart(), trackPaymentSuccess()\n- Add event tracking to existing API routes: /api/auth/callback, /api/upload, /api/stripe/webhook\n- Use existing React hooks pattern from codebase (similar to use-auth-simple.ts)\n\n**5. Marketing Funnels Configuration:**\n- Set up conversion funnels in PostHog dashboard: Signup → Upload → Trial → Paid\n- Configure cohort analysis for trial-to-paid conversion tracking\n- Create custom events for key business metrics: property_uploaded, subscription_activated, trial_converted\n- Add UTM parameter tracking for marketing attribution\n\n**6. Privacy and Compliance:**\n- Integrate with existing CookieBanner.tsx component for analytics consent\n- Respect user privacy preferences stored in localStorage\n- Configure PostHog with privacy-first settings (no automatic geolocation, IP anonymization)\n- Update privacy policy page to include PostHog data processing disclosure",
+        "testStrategy": "Test analytics implementation comprehensively: 1) Verify PostHog provider loads correctly without console errors and respects cookie consent settings, 2) Test event tracking by manually triggering signup flow and confirming events appear in PostHog live events, 3) Verify file upload tracking sends property_uploaded event with correct metadata, 4) Test subscription events fire correctly during Stripe webhook processing, 5) Confirm Vercel Analytics continues working alongside PostHog without conflicts, 6) Test funnel tracking shows complete user journey from signup to payment, 7) Verify privacy compliance by testing with analytics cookies disabled and confirming no PostHog data is sent, 8) Test UTM parameter capture and attribution tracking for marketing campaigns",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 56,
+        "title": "Implement Price History Tracking",
+        "description": "Create comprehensive price history tracking system with database table, RLS policies, automatic trigger tracking, API endpoint, and Recharts visualization component.",
+        "details": "Implement complete price history tracking system for OTORAPORT allowing developers to track property price changes over time:\n\n**1. Database Schema (Supabase Migration):**\n- Create price_history table with columns: id (uuid), property_id (uuid), developer_id (uuid), old_base_price (numeric), new_base_price (numeric), old_final_price (numeric), new_final_price (numeric), old_price_per_m2 (numeric), new_price_per_m2 (numeric), change_reason (text), changed_at (timestamp), created_by (uuid)\n- Add RLS policies: developers can only view/insert their own price history records\n- Create foreign key constraints to properties and developers tables\n- Add indexes on property_id, developer_id, and changed_at for optimal query performance\n\n**2. Database Trigger Creation:**\n- Create track_price_change() PostgreSQL function that automatically inserts price_history record when properties table is updated\n- Trigger should only fire when base_price, final_price, or price_per_m2 columns change\n- Function should capture old and new values and set changed_at to current timestamp\n- Include change_reason parameter support from existing update_property_price() function (line 592-601 in database.ts)\n\n**3. API Endpoint Development:**\n- Create GET /api/properties/[id]/price-history endpoint following existing API patterns in src/app/api/properties/[id]/route.ts\n- Implement pagination support with default limit of 50 records\n- Add filtering by date range (from/to query parameters)\n- Include proper error handling and RLS enforcement\n- Return price changes sorted by changed_at DESC (newest first)\n- Use existing database connection patterns from src/lib/supabase/server.ts\n\n**4. PriceHistoryChart Component:**\n- Install recharts package: npm install recharts @types/recharts\n- Create src/components/dashboard/price-history-chart.tsx using Recharts LineChart\n- Display price changes over time with multiple lines (base_price, final_price, price_per_m2)\n- Include hover tooltips showing exact values and change dates\n- Add responsive design following existing component patterns in src/components/dashboard/\n- Include loading states and error handling with existing UI components\n- Format prices using Polish złoty formatting\n\n**5. Property Detail Page Integration:**\n- Enhance existing property detail functionality to include price history tab\n- Use existing @radix-ui/react-tabs from package.json for tab navigation\n- Create new tab alongside existing property information\n- Integrate PriceHistoryChart component within tab content\n- Add data fetching hook using SWR pattern from existing components\n- Follow existing UI patterns from src/components/dashboard/ directory",
+        "testStrategy": "Test price history system comprehensively: 1) Create price_history table and verify RLS policies allow only developer's own records, 2) Test track_price_change() trigger by updating property prices via existing API and confirming history records are automatically created, 3) Verify GET /api/properties/[id]/price-history endpoint returns proper pagination and filtering, 4) Test PriceHistoryChart component renders correctly with sample data and handles empty states, 5) Confirm price history tab integration works in property detail view with proper loading and error states, 6) Validate trigger only fires when price fields actually change (not on other property updates), 7) Test foreign key constraints prevent orphaned records when properties are deleted",
+        "status": "pending",
+        "dependencies": [
+          39
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 57,
+        "title": "Update Landing Page with Correct Pricing & Features",
+        "description": "Update the landing page to reflect the new subscription plans (Basic: 149zł/month, 1 investment, 20 properties; Pro: 249zł/month, 2 investments, unlimited properties + 50zł per additional investment; Enterprise: 399zł/month, unlimited everything) and feature comparisons",
+        "details": "Update src/app/page.tsx and related components to show accurate pricing, create a pricing calculator for Pro plan additional investments, update FAQ section with questions about limits and additional investments, add testimonials section placeholders, ensure mobile responsiveness and SEO optimization with proper meta tags and structured data",
+        "testStrategy": "Verify pricing displays correctly across all device sizes, test pricing calculator calculations (249 + 50*additional_investments), validate FAQ content accuracy, check SEO meta tags, perform Lighthouse audit targeting 90+ scores",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 58,
+        "title": "Implement 14-Day Trial System with Database Schema",
+        "description": "Add trial functionality to the database schema and implement middleware to check trial status, including trial countdown banner and expired trial handling",
+        "details": "Create Supabase migration to add trial_ends_at and trial_status columns to developers table, implement checkTrialStatus() middleware that blocks access for expired trials, create /trial-expired page with upgrade CTA, build trial countdown banner component showing remaining days, ensure trial status is visible in user profile",
+        "testStrategy": "Test trial expiration blocking (expired users redirected to /trial-expired), verify countdown banner displays correct days remaining, test middleware protection on protected routes, validate trial status updates in database",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 59,
+        "title": "Implement Card-Required Signup Flow with Stripe Integration",
+        "description": "Create a mandatory card collection during signup using Stripe Checkout with 14-day trial period, including onboarding flow pages",
+        "details": "Create /onboarding/select-plan page for plan selection, build /onboarding/payment page with Stripe Checkout integration, configure Stripe Checkout with trial_period_days: 14, add database columns (stripe_subscription_id, subscription_status, next_billing_date), implement Stripe webhook handlers for subscription events (customer.subscription.created, invoice.payment_succeeded, etc.)",
+        "testStrategy": "Test complete signup flow: Email/Password → Select Plan → Add Card → Dashboard, verify users cannot bypass card requirement, test Stripe webhook handling for all subscription events, validate subscription_status tracking (trialing, active, past_due, canceled)",
+        "priority": "high",
+        "dependencies": [
+          58
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 60,
+        "title": "Enforce Subscription Limits in Upload & Properties APIs",
+        "description": "Implement middleware to enforce subscription plan limits on property and project counts in API endpoints",
+        "details": "Create enforcePropertyLimit() middleware checking if user exceeds property limits per plan, create enforceProjectLimit() middleware for project limits, apply middleware to POST /api/upload and POST /api/properties endpoints, return 403 errors with detailed messages including current usage and upgrade suggestions, include API response with { error, limits, currentUsage, upgradeUrl }",
+        "testStrategy": "Test Basic user blocked at 21st property with helpful error message, verify Pro users can add unlimited properties within 2 projects, test Enterprise unlimited access, validate error response format includes usage statistics and upgrade links",
+        "priority": "high",
+        "dependencies": [
+          58
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 61,
+        "title": "Implement Projects (Investments) System with Database Schema",
+        "description": "Create a projects table and system to group properties by investment projects, with proper limits enforcement per subscription plan",
+        "details": "Create projects table (id, developer_id, name, address, created_at) with RLS policies, add project_id foreign key column to properties table, create POST /api/projects endpoint for creating new projects, build GET /api/projects endpoint to list user's projects, update /api/properties routes to filter by project_id, enforce project limits (Basic=1, Pro=2, Enterprise=unlimited)",
+        "testStrategy": "Test project creation with subscription limits enforcement, verify properties can be assigned to projects, test project listing and filtering, validate RLS policies prevent cross-user access, test project limit enforcement per plan type",
+        "priority": "high",
+        "dependencies": [
+          60
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 62,
+        "title": "Implement Additional Projects Billing for Pro Plan",
+        "description": "Enable Pro plan users to purchase additional projects for 50zł/month each through Stripe subscription updates",
+        "details": "Create Stripe Price for 'Additional Project' (50zł/month), add additional_projects_count column to developers table, update calculateMonthlyCost() function to include additional project fees, create POST /api/projects/add-additional endpoint for Pro users, implement Stripe subscription line item updates for additional projects",
+        "testStrategy": "Test Pro user can purchase additional project (+50zł/month), verify Stripe subscription updates with new line items, validate next invoice shows correct breakdown (Pro Plan 249zł + Additional Project 50zł), test billing calculation accuracy, ensure Basic/Enterprise users cannot access additional project purchases",
+        "priority": "high",
+        "dependencies": [
+          61
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 63,
+        "title": "Implement Trial Email Automation System",
+        "description": "Create automated email sequence for trial users using Resend and Vercel Cron jobs",
+        "details": "Create 5 Resend email templates: Day 0 welcome, Day 7 midway reminder with tips, Day 11 warning (3 days left), Day 14 payment success confirmation, Day 14 payment failed notice. Set up Vercel Cron jobs for daily trial status checks, implement email sending logic with personalized data (name, trial_ends_at, usage stats), include unsubscribe links in all emails",
+        "testStrategy": "Test email triggers at correct trial stages, verify personalized content includes user data and usage statistics, test unsubscribe functionality, validate cron job execution, test email delivery for different trial scenarios (success/failed payments)",
+        "priority": "medium",
+        "dependencies": [
+          58,
+          59
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 64,
+        "title": "Build Admin Panel with User Management",
+        "description": "Create comprehensive admin panel for managing users, subscriptions, and system oversight",
+        "details": "Create admin_roles table with RBAC permissions, implement requireAdmin() middleware checking user admin status, build /admin/dashboard protected route with admin layout, create /admin/users page listing all users with search/filter/pagination, implement GET /api/admin/users endpoint, add chudziszewski221@gmail.com as super_admin, display user data: email, subscription plan, properties count, created_at, status",
+        "testStrategy": "Test admin access control (non-admins get 403), verify admin user list with search and filtering, test pagination functionality, validate RBAC permissions system, ensure super_admin has full access",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 65,
+        "title": "Implement Bulk Delete with Cache Invalidation",
+        "description": "Add bulk delete functionality for properties with proper cache invalidation for ministry endpoints",
+        "details": "Create POST /api/properties/bulk-delete endpoint accepting { propertyIds: string[] }, implement transactional delete (all or nothing), add cache revalidation for XML/CSV/MD5 endpoints after delete operations, build 'Delete Selected' button in Properties Table with confirmation modal showing preview of deletion count",
+        "testStrategy": "Test bulk delete with 1-100 properties, verify transaction atomicity (all deleted or none), confirm cache invalidation updates XML/CSV/MD5 endpoints, test confirmation modal displays correct count, validate success toast notifications",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 66,
+        "title": "Implement Analytics Integration (GA4, Vercel Analytics, PostHog)",
+        "description": "Set up comprehensive analytics tracking for user behavior, conversions, and performance monitoring",
+        "details": "Install and configure Google Analytics 4 with NEXT_PUBLIC_GA4_MEASUREMENT_ID, add GA4 script to app/layout.tsx for automatic pageview tracking, install @vercel/analytics and posthog-js packages, initialize PostHog in app/providers.tsx, track custom events (signup, upload_success, subscription_start), set up conversion goals and funnels (signup → upload → paid), configure feature flags for A/B testing",
+        "testStrategy": "Verify GA4 tracking shows real-time data, test custom event firing (signup, uploads, subscriptions), confirm Vercel Analytics Core Web Vitals reporting, validate PostHog funnel tracking, test feature flags functionality",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-10-08T10:23:41.855Z",
+      "updated": "2025-10-08T12:37:04.832Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
