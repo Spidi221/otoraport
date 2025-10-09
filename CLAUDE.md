@@ -105,6 +105,13 @@ coderabbit review --help
 
 **WAŻNE**: Zapisuj w tej sekcji wszystko co user musi zrobić ręcznie. Przypominaj o tym na końcu sesji!
 
+**UWAGA**: Zacząłem zapisywać zadania dla usera od **TASKA #53** (wcześniejsze taski mogą też wymagać manual actions, ale nie są tutaj udokumentowane).
+
+**NA KONIEC SESJI**:
+- Zrób podsumowanie wszystkich TODO od taska 53 wzwyż
+- Dodaj ogólne podsumowanie co user musi zrobić (łącznie z wcześniejszymi taskami jeśli pamiętasz)
+- Wyświetl to userowi w przejrzystej formie
+
 ### Aktualne TODO:
 
 #### ⚠️ Stripe Price Configuration (TASK #53)
@@ -124,6 +131,43 @@ coderabbit review --help
    ```
 
 **Status**: ⏳ Oczekuje - kod gotowy, tylko brakuje Price ID w environment variables
+
+#### 📊 Google Analytics 4 Setup (TASK #54)
+**Utworzyć GA4 property i skonfigurować measurement ID:**
+
+1. Przejdź do [Google Analytics](https://analytics.google.com/)
+2. Stwórz nową GA4 Property dla `otoraport-v2.vercel.app`
+3. Skonfiguruj data stream dla web tracking
+4. Skopiuj Measurement ID (format: `G-XXXXXXXXXX`)
+5. Dodaj do `.env.local` i `.env.production`:
+   ```bash
+   NEXT_PUBLIC_GA4_MEASUREMENT_ID=G-XXXXXXXXXX
+   ```
+6. Skonfiguruj conversion goals w GA4:
+   - Signup completion
+   - First upload
+   - Trial subscription start
+   - Trial to paid conversion
+
+**Status**: ⏳ Oczekuje - kod gotowy i działający, tylko brakuje Measurement ID
+
+#### 📈 PostHog Analytics Setup (TASK #55)
+**Utworzyć PostHog project i skonfigurować API key:**
+
+1. Przejdź do [PostHog](https://app.posthog.com/) (lub stwórz konto)
+2. Stwórz nowy projekt dla OTORAPORT
+3. W Project Settings → API Keys znajdź Project API Key
+4. Skopiuj API Key (format: `phc_xxxxxxxxxxxxx`)
+5. Dodaj do `.env.local` i `.env.production`:
+   ```bash
+   NEXT_PUBLIC_POSTHOG_KEY=phc_your_key_here
+   NEXT_PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
+   ```
+6. Skonfiguruj funnels w PostHog dashboard:
+   - Signup → Upload → Trial Start → Payment Success
+7. Ustaw conversion goals i cohort analysis
+
+**Status**: ⏳ Oczekuje - kod gotowy, tylko brakuje PostHog API Key
 
 ---
 
