@@ -1,4 +1,4 @@
-# 🧪 OTORAPORT v2 - Test Results Report
+# 🧪 OTO-RAPORT v2 - Test Results Report
 
 **Generated:** 2025-10-07 00:40 UTC
 **Tester:** Claude Code AI

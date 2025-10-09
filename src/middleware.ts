@@ -12,13 +12,13 @@ export async function middleware(req: NextRequest) {
   // ============================================================================
   // SUBDOMAIN ROUTING (for public property pages)
   // ============================================================================
-  // Extract subdomain from host (e.g., "firma.otoraport.pl" -> "firma")
+  // Extract subdomain from host (e.g., "firma.oto-raport.pl" -> "firma")
   const subdomain = host.split('.')[0]
-  const isSubdomain = host.includes('.otoraport.pl') && subdomain !== 'www' && subdomain !== 'app' && subdomain !== host
+  const isSubdomain = host.includes('.oto-raport.pl') && subdomain !== 'www' && subdomain !== 'app' && subdomain !== host
 
   // If it's a subdomain request and not an API/auth route, handle subdomain routing
   if (isSubdomain && !pathname.startsWith('/api') && !pathname.startsWith('/auth') && !pathname.startsWith('/_next')) {
-    console.log(`🌐 SUBDOMAIN ROUTING: ${subdomain}.otoraport.pl -> ${pathname}`)
+    console.log(`🌐 SUBDOMAIN ROUTING: ${subdomain}.oto-raport.pl -> ${pathname}`)
 
     // Rewrite to public property page with subdomain as parameter
     // This will be handled by app/[subdomain]/page.tsx

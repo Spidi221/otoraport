@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
     console.error('[Chatbot API] Error:', error);
     
     return NextResponse.json({
-      response: 'Przepraszam, wystąpił błąd techniczny. Spróbuj ponownie za chwilę lub skontaktuj się z naszym supportem na support@otoraport.pl',
+      response: 'Przepraszam, wystąpił błąd techniczny. Spróbuj ponownie za chwilę lub skontaktuj się z naszym supportem na support@oto-raport.pl',
       confidence: 0.0,
       error: 'Internal server error'
     }, { status: 500 });
@@ -125,10 +125,10 @@ export async function GET() {
   const openaiHealthy = await checkOpenAIHealth();
   
   return NextResponse.json({
-    name: 'OTORAPORT Chatbot API',
+    name: 'OTO-RAPORT Chatbot API',
     version: '2.0.0',
     phase: 'AI-Powered',
-    description: 'AI-powered chatbot for OTORAPORT with GPT-4o integration and comprehensive security',
+    description: 'AI-powered chatbot for OTO-RAPORT with GPT-4o integration and comprehensive security',
     features: [
       'GPT-4o AI responses with knowledge base integration',
       'Hybrid AI + FAQ mode for optimal accuracy',
@@ -174,7 +174,7 @@ export async function GET() {
  * 
  * const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
  * 
- * const systemPrompt = `You are OTORAPORT assistant. Use this knowledge: ${JSON.stringify(relevantKnowledge)}`;
+ * const systemPrompt = `You are OTO-RAPORT assistant. Use this knowledge: ${JSON.stringify(relevantKnowledge)}`;
  * 
  * const completion = await openai.chat.completions.create({
  *   messages: [

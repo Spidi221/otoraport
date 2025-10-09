@@ -169,7 +169,7 @@ export function HelpSidebar({ activeSection }: HelpSidebarProps) {
               Ustawienia
             </a>
             <a
-              href="mailto:support@otoraport.pl"
+              href="mailto:support@oto-raport.pl"
               className="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
             >
               Email support

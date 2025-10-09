@@ -107,7 +107,7 @@ export function StepWelcome({ data, onUpdate, onNext }: StepWelcomeProps) {
     <div className="w-full max-w-2xl mx-auto px-4">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Witamy w OTORAPORT! 🎉
+          Witamy w OTO-RAPORT! 🎉
         </h1>
         <p className="text-base text-gray-600">
           Zacznijmy od kilku podstawowych informacji o Twojej firmie
@@ -221,7 +221,7 @@ export function StepWelcome({ data, onUpdate, onNext }: StepWelcomeProps) {
       {/* Help text */}
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-500">
-          Te informacje pomogą nam lepiej dostosować OTORAPORT do Twoich potrzeb
+          Te informacje pomogą nam lepiej dostosować OTO-RAPORT do Twoich potrzeb
         </p>
       </div>
     </div>

@@ -97,7 +97,7 @@ export async function getUnsubscribeUrl(developerId: string): Promise<string | n
       return null
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://otoraport.vercel.app'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.vercel.app'
     return `${baseUrl}/api/unsubscribe?token=${developer.unsubscribe_token}`
   } catch (error) {
     console.error('❌ Error in getUnsubscribeUrl:', error)

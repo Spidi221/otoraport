@@ -2,7 +2,7 @@
 
 ## Overview
 
-The admin panel is a comprehensive user management system for OTORAPORT administrators. It provides secure access to user data, system statistics, and audit logs.
+The admin panel is a comprehensive user management system for OTO-RAPORT administrators. It provides secure access to user data, system statistics, and audit logs.
 
 **Task**: #57 - Build Admin Panel with User Management
 **Priority**: HIGH

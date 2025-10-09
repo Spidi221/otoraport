@@ -11,8 +11,8 @@ import { Metadata } from 'next';
 import { StatusPageContent } from '@/components/status/status-page-content';
 
 export const metadata: Metadata = {
-  title: 'Status Systemu | OTORAPORT',
-  description: 'Status i dostępność systemu OTORAPORT w czasie rzeczywistym',
+  title: 'Status Systemu | OTO-RAPORT',
+  description: 'Status i dostępność systemu OTO-RAPORT w czasie rzeczywistym',
 };
 
 // Revalidate every 30 seconds
@@ -25,7 +25,7 @@ export default async function StatusPage() {
       <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold text-gray-900">
-            Status Systemu OTORAPORT
+            Status Systemu OTO-RAPORT
           </h1>
           <p className="text-gray-600 mt-2">
             Monitorowanie dostępności i wydajności w czasie rzeczywistym
@@ -42,7 +42,7 @@ export default async function StatusPage() {
       <footer className="bg-white border-t mt-12">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between text-sm text-gray-600">
-            <p>© 2025 OTORAPORT. Wszystkie prawa zastrzeżone.</p>
+            <p>© 2025 OTO-RAPORT. Wszystkie prawa zastrzeżone.</p>
             <p>
               Dane aktualizowane co 30 sekund •{' '}
               <span className="text-blue-600">

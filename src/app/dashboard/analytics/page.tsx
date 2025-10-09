@@ -4,7 +4,7 @@ import { AdvancedAnalyticsDashboard } from '@/components/analytics/advanced-anal
 import { Header } from '@/components/dashboard/header'
 
 export const metadata = {
-  title: 'Zaawansowana Analityka | OTORAPORT',
+  title: 'Zaawansowana Analityka | OTO-RAPORT',
   description: 'Szczegółowe raporty i analizy rynkowe dla Twoich nieruchomości',
 }
 

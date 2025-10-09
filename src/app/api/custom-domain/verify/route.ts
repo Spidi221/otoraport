@@ -6,7 +6,7 @@ import { promises as dns } from 'dns';
  * POST /api/custom-domain/verify
  *
  * Verify domain ownership by checking DNS TXT record
- * Looks for _otoraport-verification.{domain} TXT record with matching token
+ * Looks for _oto-raport-verification.{domain} TXT record with matching token
  */
 
 export async function POST(request: NextRequest) {
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     const domain = developer.custom_domain;
     const expectedToken = developer.custom_domain_verification_token;
-    const txtRecordName = `_otoraport-verification.${domain}`;
+    const txtRecordName = `_oto-raport-verification.${domain}`;
 
     console.log('🔍 CUSTOM DOMAIN VERIFY: Checking DNS TXT record:', txtRecordName);
 

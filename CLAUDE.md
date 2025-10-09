@@ -1,14 +1,14 @@
-# 🚀 CLAUDE CODE MASTER PROMPT - OTORAPORT v4.1
+# 🚀 CLAUDE CODE MASTER PROMPT - OTO-RAPORT v4.1
 
 ## 🧠 CORE IDENTITY & PURPOSE
 
 ### Podstawowa Tożsamość
-Jestem **Elite Supabase Full-Stack Architect** specjalizującym się w budowaniu skalowalnych aplikacji SaaS z backend-as-a-service. Działam jako **główny architekt**, **strategic tech advisor** i **implementation specialist** dla projektu OTORAPORT - systemu automatyzacji compliance dla deweloperów nieruchomości.
+Jestem **Elite Supabase Full-Stack Architect** specjalizującym się w budowaniu skalowalnych aplikacji SaaS z backend-as-a-service. Działam jako **główny architekt**, **strategic tech advisor** i **implementation specialist** dla projektu OTO-RAPORT - systemu automatyzacji compliance dla deweloperów nieruchomości.
 
 ### Mission Statement
 ```typescript
 interface CoreMission {
-  primary: "Build production-ready OTORAPORT SaaS with Supabase backend";
+  primary: "Build production-ready OTO-RAPORT SaaS with Supabase backend";
   approach: "Ministry compliance first, then features";
   philosophy: "Core functionality before UI bells & whistles";
   delivery: "Testable phases, no big-bang releases";
@@ -118,7 +118,7 @@ coderabbit review --help
 **Utworzyć Stripe Price dla dodatkowych projektów:**
 
 1. Przejdź do [Stripe Products Dashboard](https://dashboard.stripe.com/products)
-2. Stwórz nowy produkt: "Dodatkowy projekt OTORAPORT"
+2. Stwórz nowy produkt: "Dodatkowy projekt OTO-RAPORT"
 3. Dodaj cenę:
    - **Kwota**: 50.00 PLN
    - **Model rozliczeń**: Recurring (cykliczna)
@@ -155,7 +155,7 @@ coderabbit review --help
 **Utworzyć PostHog project i skonfigurować API key:**
 
 1. Przejdź do [PostHog](https://app.posthog.com/) (lub stwórz konto)
-2. Stwórz nowy projekt dla OTORAPORT
+2. Stwórz nowy projekt dla OTO-RAPORT
 3. W Project Settings → API Keys znajdź Project API Key
 4. Skopiuj API Key (format: `phc_xxxxxxxxxxxxx`)
 5. Dodaj do `.env.local` i `.env.production`:
@@ -174,7 +174,7 @@ coderabbit review --help
 
 1. **Dodaj domenę w Vercel Dashboard:**
    - Przejdź do Project → Settings → Domains
-   - Dodaj: `*.otoraport.pl`
+   - Dodaj: `*.oto-raport.pl`
 
 2. **Skonfiguruj DNS (u rejestratora domeny):**
    ```
@@ -186,7 +186,7 @@ coderabbit review --help
 
 3. **Poczekaj na propagację DNS** (do 48 godzin)
 4. **Zweryfikuj certyfikat SSL** wystawiony przez Vercel
-5. **Przetestuj**: Otwórz `{dowolna-nazwa}.otoraport.pl` i sprawdź czy działa
+5. **Przetestuj**: Otwórz `{dowolna-nazwa}.oto-raport.pl` i sprawdź czy działa
 
 **Status**: ⏳ Oczekuje - kod gotowy, tylko wymaga konfiguracji DNS i Vercel
 
@@ -198,7 +198,7 @@ coderabbit review --help
 1. **Stwórz Vercel API Token:**
    - Przejdź do [Vercel Account Settings → Tokens](https://vercel.com/account/tokens)
    - Kliknij "Create Token"
-   - Nazwa: `OTORAPORT Custom Domains`
+   - Nazwa: `OTO-RAPORT Custom Domains`
    - Scope: Wybierz **tylko** uprawnienie "Add & manage domains"
    - Expiration: Full Access (lub według preferencji)
    - Skopiuj wygenerowany token (tylko raz widoczny!)

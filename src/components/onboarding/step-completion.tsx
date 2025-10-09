@@ -66,7 +66,7 @@ export function StepCompletion({ onComplete }: StepCompletionProps) {
 
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Witamy w OTORAPORT!
+              Witamy w OTO-RAPORT!
             </h2>
             <p className="text-gray-700 leading-relaxed">
               Pomyślnie ukończyłeś konfigurację konta. Teraz możesz w pełni korzystać z
@@ -110,7 +110,7 @@ export function StepCompletion({ onComplete }: StepCompletionProps) {
             Zacznij zarządzać swoimi nieruchomościami
           </h3>
           <p className="text-blue-100 mb-6">
-            Przejdź do panelu głównego i odkryj wszystkie możliwości OTORAPORT
+            Przejdź do panelu głównego i odkryj wszystkie możliwości OTO-RAPORT
           </p>
 
           <Button

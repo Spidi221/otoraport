@@ -156,10 +156,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 <p>
                   Jeśli problem się powtarza, skontaktuj się z{' '}
                   <a
-                    href="mailto:support@otoraport.pl"
+                    href="mailto:support@oto-raport.pl"
                     className="text-blue-600 hover:underline"
                   >
-                    support@otoraport.pl
+                    support@oto-raport.pl
                   </a>
                 </p>
               </div>

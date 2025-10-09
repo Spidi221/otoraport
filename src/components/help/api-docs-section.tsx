@@ -27,7 +27,7 @@ export function APIDocsSection({ userPlan = 'free' }: APIDocsSectionProps) {
           </h3>
           <p className="text-gray-600 mb-6">
             Dostęp do API jest dostępny tylko dla użytkowników planu Enterprise.
-            Zintegruj OTORAPORT z Twoim systemem CRM lub ERP.
+            Zintegruj OTO-RAPORT z Twoim systemem CRM lub ERP.
           </p>
 
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 mb-6">
@@ -74,14 +74,14 @@ export function APIDocsSection({ userPlan = 'free' }: APIDocsSectionProps) {
       <div>
         <h3 className="text-2xl font-bold text-gray-900 mb-4">Dokumentacja API</h3>
         <p className="text-gray-600 mb-6">
-          OTORAPORT API pozwala na programatyczne zarządzanie nieruchomościami.
+          OTO-RAPORT API pozwala na programatyczne zarządzanie nieruchomościami.
           Wszystkie endpointy wymagają uwierzytelniania przez API key.
         </p>
 
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Base URL:</strong> <code className="text-sm bg-gray-100 px-2 py-1 rounded">https://otoraport.pl/api</code>
+            <strong>Base URL:</strong> <code className="text-sm bg-gray-100 px-2 py-1 rounded">https://oto-raport.pl/api</code>
             <br />
             <strong>Authentication:</strong> Dodaj header <code className="text-sm bg-gray-100 px-2 py-1 rounded">Authorization: Bearer YOUR_API_KEY</code>
           </AlertDescription>
@@ -110,12 +110,12 @@ export function APIDocsSection({ userPlan = 'free' }: APIDocsSectionProps) {
             <h4 className="font-semibold text-gray-900 mb-2">Przykład użycia:</h4>
             <CodeExamples
               examples={{
-                curl: `curl -X GET "https://otoraport.pl/api/properties" \\
+                curl: `curl -X GET "https://oto-raport.pl/api/properties" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json"`,
                 javascript: `const apiKey = 'YOUR_API_KEY';
 
-fetch('https://otoraport.pl/api/properties', {
+fetch('https://oto-raport.pl/api/properties', {
   headers: {
     'Authorization': \`Bearer \${apiKey}\`,
     'Content-Type': 'application/json'
@@ -132,7 +132,7 @@ headers = {
 }
 
 response = requests.get(
-    'https://otoraport.pl/api/properties',
+    'https://oto-raport.pl/api/properties',
     headers=headers
 )
 data = response.json()`,

@@ -1,7 +1,7 @@
 # 14-Day Trial System Implementation - Task #49
 
 ## Overview
-Comprehensive implementation of a 14-day free trial system for OTORAPORT SaaS platform. Users can test all features for 14 days without providing a credit card, with automatic trial expiration and upgrade prompts.
+Comprehensive implementation of a 14-day free trial system for OTO-RAPORT SaaS platform. Users can test all features for 14 days without providing a credit card, with automatic trial expiration and upgrade prompts.
 
 ## Implementation Summary
 

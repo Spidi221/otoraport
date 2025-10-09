@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the admin subscription management API endpoints created for OTORAPORT. These endpoints allow administrators to manage user subscriptions, process refunds, view failed payments, and update subscription plans with full audit logging.
+This document describes the admin subscription management API endpoints created for OTO-RAPORT. These endpoints allow administrators to manage user subscriptions, process refunds, view failed payments, and update subscription plans with full audit logging.
 
 ## Authentication & Authorization
 

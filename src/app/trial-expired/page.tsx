@@ -62,7 +62,7 @@ export default function TrialExpiredPage() {
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">O</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">OTORAPORT</span>
+              <span className="text-xl font-bold text-gray-900">OTO-RAPORT</span>
             </Link>
             <Link href="/dashboard">
               <Button variant="outline" size="sm">
@@ -87,7 +87,7 @@ export default function TrialExpiredPage() {
           </h1>
 
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Dziękujemy za przetestowanie OTORAPORT! Aby kontynuować automatyzację raportowania
+            Dziękujemy za przetestowanie OTO-RAPORT! Aby kontynuować automatyzację raportowania
             dla Ministerstwa, wybierz plan dopasowany do Twojego biznesu.
           </p>
 
@@ -158,7 +158,7 @@ export default function TrialExpiredPage() {
           {/* CTA Section */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Kontynuuj z OTORAPORT
+              Kontynuuj z OTO-RAPORT
             </h2>
             <p className="text-gray-600 mb-6">
               Wybierz plan, który pasuje do rozmiaru Twojego biznesu. Możesz zmienić plan w każdej chwili.

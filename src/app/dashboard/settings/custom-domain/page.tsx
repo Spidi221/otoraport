@@ -137,7 +137,7 @@ export default function CustomDomainPage() {
                   <Crown className="ml-2 h-4 w-4" />
                 </Button>
                 <Button variant="outline" asChild>
-                  <a href="mailto:kontakt@otoraport.pl">Skontaktuj się z nami</a>
+                  <a href="mailto:kontakt@oto-raport.pl">Skontaktuj się z nami</a>
                 </Button>
               </div>
             </CardContent>
@@ -259,7 +259,7 @@ export default function CustomDomainPage() {
                     Skontaktuj się z naszym dedicated account managerem:
                   </p>
                   <Button variant="outline" asChild>
-                    <a href="mailto:kontakt@otoraport.pl">
+                    <a href="mailto:kontakt@oto-raport.pl">
                       Wyślij email
                       <ExternalLink className="ml-2 h-4 w-4" />
                     </a>

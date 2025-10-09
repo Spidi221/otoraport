@@ -43,7 +43,7 @@ export async function exportAnalyticsToPDF(data: AnalyticsData, developerName: s
     // Header
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text('OTORAPORT - Raport Analityczny', pageWidth / 2, 20, { align: 'center' });
+    doc.text('OTO-RAPORT - Raport Analityczny', pageWidth / 2, 20, { align: 'center' });
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
@@ -209,14 +209,14 @@ export async function exportAnalyticsToPDF(data: AnalyticsData, developerName: s
     doc.setFontSize(10);
     doc.setFont('helvetica', 'italic');
     doc.text(
-      'Raport wygenerowany przez OTORAPORT - System analityki nieruchomości',
+      'Raport wygenerowany przez OTO-RAPORT - System analityki nieruchomości',
       pageWidth / 2,
       doc.internal.pageSize.getHeight() - 10,
       { align: 'center' }
     );
 
     // Save PDF
-    const filename = `OTORAPORT_Analityka_${new Date().toISOString().split('T')[0]}.pdf`;
+    const filename = `OTO-RAPORT_Analityka_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(filename);
 
   } catch (error) {
@@ -235,7 +235,7 @@ export function exportAnalyticsToExcel(data: AnalyticsData, developerName: strin
 
     // Sheet 1: KPI Summary
     const kpiData = [
-      ['OTORAPORT - Raport Analityczny', '', ''],
+      ['OTO-RAPORT - Raport Analityczny', '', ''],
       [`Developer: ${developerName}`, '', ''],
       [`Data: ${new Date().toLocaleDateString('pl-PL')}`, '', ''],
       ['', '', ''],
@@ -347,7 +347,7 @@ export function exportAnalyticsToExcel(data: AnalyticsData, developerName: strin
     XLSX.utils.book_append_sheet(workbook, wsMarket, 'Rynek');
 
     // Save Excel file
-    const filename = `OTORAPORT_Analityka_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const filename = `OTO-RAPORT_Analityka_${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(workbook, filename);
 
   } catch (error) {

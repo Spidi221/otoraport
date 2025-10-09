@@ -2,7 +2,7 @@
 
 ## Overview
 
-OTORAPORT includes an automated email notification system using **Resend** API that sends:
+OTO-RAPORT includes an automated email notification system using **Resend** API that sends:
 - ✅ **Upload success emails** - When CSV/Excel files are processed successfully
 - ❌ **Upload error emails** - When file processing fails
 - 📊 **Weekly reports** - Sent every Monday at 8:00 AM UTC with property statistics
@@ -25,7 +25,7 @@ Add the following to your `.env.local` and `.env.production`:
 RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Email Configuration (optional)
-EMAIL_FROM=OTORAPORT <noreply@otoraport.pl>
+EMAIL_FROM=OTO-RAPORT <noreply@oto-raport.pl>
 NEXT_PUBLIC_APP_URL=https://otoraport.vercel.app
 
 # Cron Security (recommended for production)
@@ -37,7 +37,7 @@ CRON_SECRET=your-random-secret-string
 For production, you need to verify your sending domain in Resend:
 
 1. Go to Resend Dashboard → **Domains**
-2. Add your domain (e.g., `otoraport.pl`)
+2. Add your domain (e.g., `oto-raport.pl`)
 3. Add DNS records (SPF, DKIM, DMARC) to your domain provider
 4. Wait for verification (usually 5-10 minutes)
 
@@ -208,4 +208,4 @@ Resend pricing (as of 2025):
 - **Pro**: $20/month for 50,000 emails
 - **Enterprise**: Custom pricing
 
-Most OTORAPORT installations will stay within free tier.
+Most OTO-RAPORT installations will stay within free tier.

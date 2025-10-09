@@ -1,6 +1,6 @@
 # Production Monitoring & Alerting Setup Guide
 
-This guide helps you configure proactive monitoring and alerting for OTORAPORT production deployment.
+This guide helps you configure proactive monitoring and alerting for OTO-RAPORT production deployment.
 
 ## 📊 Components Overview
 
@@ -119,7 +119,7 @@ Our `/api/health` endpoint returns:
 2. Create new monitor:
    ```
    Monitor Type: HTTP(s)
-   Friendly Name: OTORAPORT Health Check
+   Friendly Name: OTO-RAPORT Health Check
    URL: https://otoraport.vercel.app/api/health
    Monitoring Interval: 5 minutes
    ```
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok || data.status !== 'healthy') {
       // Send alert (email/Slack)
       await sendAlert({
-        title: 'OTORAPORT Health Check Failed',
+        title: 'OTO-RAPORT Health Check Failed',
         status: data.status,
         timestamp: new Date().toISOString(),
       });
@@ -177,7 +177,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ status: 'healthy', checked_at: new Date().toISOString() });
   } catch (error) {
     await sendAlert({
-      title: 'OTORAPORT Health Check Error',
+      title: 'OTO-RAPORT Health Check Error',
       error: error instanceof Error ? error.message : 'Unknown',
     });
 
@@ -239,7 +239,7 @@ Interval: 10 minutes
 ### Alert Configuration
 ```
 Alert When: Status code != 200 OR Response time > 5s
-Recipients: ministry-alerts@otoraport.pl
+Recipients: ministry-alerts@oto-raport.pl
 Escalation: After 2 consecutive failures
 ```
 
@@ -351,7 +351,7 @@ SENTRY_PROJECT=otoraport-v2
 CRON_SECRET=your-secret-key-here
 
 # Alert notifications
-ALERT_EMAIL_TO=alerts@otoraport.pl
+ALERT_EMAIL_TO=alerts@oto-raport.pl
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx/yyy/zzz
 ```
 
@@ -406,7 +406,7 @@ Before going live, verify:
 ## 📞 Support Contacts
 
 **Escalation Path:**
-1. Primary: alerts@otoraport.pl
+1. Primary: alerts@oto-raport.pl
 2. On-call: +48 XXX XXX XXX
 3. Critical: Direct Slack DM to CTO
 

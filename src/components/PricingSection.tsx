@@ -102,7 +102,7 @@ const PricingSection = memo(function PricingSection() {
         '+50 zł/msc za każdą dodatkową',
         'Unlimited liczba mieszkań',
         'Wszystko z planu Basic',
-        'Subdomena nazwa.otoraport.pl (opcjonalnie)',
+        'Subdomena nazwa.oto-raport.pl (opcjonalnie)',
         'Strona z cenami dla klientów',
         'Priority email support',
         'Zaawansowane analytics i raporty',

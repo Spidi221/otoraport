@@ -72,8 +72,8 @@ export const FAQ_ITEMS: FAQItem[] = [
   // Ogólne (5)
   {
     id: 'what-is-otoraport',
-    question: 'Czym jest OTORAPORT i jak może pomóc mojej firmie?',
-    answer: `OTORAPORT to system automatyzacji compliance dla deweloperów nieruchomości. Pomaga w:
+    question: 'Czym jest OTO-RAPORT i jak może pomóc mojej firmie?',
+    answer: `OTO-RAPORT to system automatyzacji compliance dla deweloperów nieruchomości. Pomaga w:
 
 • Automatycznym przesyłaniu danych o cenach mieszkań do Ministerstwa Rozwoju
 • Generowaniu wymaganych formatów XML, CSV i MD5
@@ -134,7 +134,7 @@ Twoje dane pozostają bezpieczne podczas zmiany planu.`,
     question: 'Jak skontaktować się z supportem?',
     answer: `Możesz skontaktować się z nami na kilka sposobów:
 
-**Email:** support@otoraport.pl
+**Email:** support@oto-raport.pl
 Odpowiadamy w ciągu 24h (dni robocze)
 
 **Chat AI:** Kliknij ikonę pomocy w prawym dolnym rogu
@@ -344,7 +344,7 @@ Dla bardzo dużych importów, skontaktuj się z supportem.`,
 • Automatycznie generowany
 
 **Przykładowe URL:**
-https://otoraport.pl/api/public/{twoj-client-id}/data.xml
+https://oto-raport.pl/api/public/{twoj-client-id}/data.xml
 
 Te URL-e podajesz w formularzu Ministerstwa.`,
     category: FAQ_CATEGORIES.ENDPOINTS,
@@ -368,9 +368,9 @@ Te URL-e podajesz w formularzu Ministerstwa.`,
 
 **Format URL:**
 \`\`\`
-XML:  https://otoraport.pl/api/public/{client-id}/data.xml
-CSV:  https://otoraport.pl/api/public/{client-id}/data.csv
-MD5:  https://otoraport.pl/api/public/{client-id}/data.md5
+XML:  https://oto-raport.pl/api/public/{client-id}/data.xml
+CSV:  https://oto-raport.pl/api/public/{client-id}/data.csv
+MD5:  https://oto-raport.pl/api/public/{client-id}/data.md5
 \`\`\`
 
 **Własna domena (Pro/Enterprise):**
@@ -400,7 +400,7 @@ Endpointy są dostępne 24/7 bez uwierzytelniania.`,
 
 **3. Używając curl:**
 \`\`\`bash
-curl https://otoraport.pl/api/public/{client-id}/data.xml
+curl https://oto-raport.pl/api/public/{client-id}/data.xml
 \`\`\`
 
 **Co sprawdzić:**
@@ -489,7 +489,7 @@ Dla krytycznych aktualizacji, użyj funkcji "Force Sync" w ustawieniach.`,
     answer: `Proces zgłaszania danych do Ministerstwa:
 
 **Krok 1: Przygotuj dane**
-• Prześlij dane nieruchomości do OTORAPORT
+• Prześlij dane nieruchomości do OTO-RAPORT
 • Zweryfikuj poprawność w podglądzie
 • Przetestuj endpointy
 
@@ -504,7 +504,7 @@ Dla krytycznych aktualizacji, użyj funkcji "Force Sync" w ustawieniach.`,
 • Kliknij "Dodaj źródło danych"
 
 **Krok 4: Podaj URL endpointów**
-• XML: Twój endpoint URL z OTORAPORT
+• XML: Twój endpoint URL z OTO-RAPORT
 • Wybierz częstotliwość: automatyczna
 • Zapisz konfigurację
 
@@ -542,7 +542,7 @@ Szczegółową instrukcję znajdziesz w dokumentach Ministerstwa.`,
 • Wstrzymanie sprzedaży
 • Kontrole UOKiK
 
-**OTORAPORT pomaga:**
+**OTO-RAPORT pomaga:**
 • Automatyzuje cały proces
 • Zapewnia zgodność z formatami
 • Monitoring zmian
@@ -569,7 +569,7 @@ Zawsze sprawdzaj aktualne przepisy na stronie Ministerstwa.`,
 • Miesięczna weryfikacja wszystkich danych
 • Natychmiastowe usuwanie wycofanych ofert
 
-**OTORAPORT automatyzacja:**
+**OTO-RAPORT automatyzacja:**
 • Możesz podłączyć API (Enterprise)
 • Automatyczny import z Twojego systemu CRM
 • Alerty o brakujących aktualizacjach
@@ -762,7 +762,7 @@ Nie widzisz swojego formatu? Skontaktuj się - możemy dodać wsparcie.`,
 • Własna domena (np. nieruchomosci.twojafirma.pl)
 • Dostęp do DNS
 
-**Krok 1: Dodaj domenę w OTORAPORT**
+**Krok 1: Dodaj domenę w OTO-RAPORT**
 • Ustawienia → Custom Domain
 • Wpisz swoją domenę
 • Kliknij "Dodaj domenę"
@@ -778,7 +778,7 @@ TTL:   3600
 
 **Krok 3: Weryfikacja**
 • Poczekaj 1-24h na propagację DNS
-• OTORAPORT automatycznie zweryfikuje
+• OTO-RAPORT automatycznie zweryfikuje
 • Otrzymasz email z potwierdzeniem
 
 **Krok 4: SSL Certificate**
@@ -805,11 +805,11 @@ Potrzebujesz pomocy? Nasz team technicznie przeprowadzi Cię przez proces.`,
   {
     id: 'subdomain-setup',
     question: 'Jak skonfigurować subdomenę? (Pro/Enterprise)',
-    answer: `Konfiguracja subdomeny OTORAPORT:
+    answer: `Konfiguracja subdomeny OTO-RAPORT:
 
 **Dostępność:**
 • Plan Pro lub Enterprise
-• Unikalna subdomena otoraport.pl
+• Unikalna subdomena oto-raport.pl
 • Natychmiastowa aktywacja
 
 **Krok 1: Wybierz subdomenę**
@@ -821,13 +821,13 @@ Potrzebujesz pomocy? Nasz team technicznie przeprowadzi Cię przez proces.`,
 **Krok 2: Aktywacja**
 • Automatyczna w ciągu 5 minut
 • Otrzymasz email z potwierdzeniem
-• Twoja subdomena: https://inpro.otoraport.pl
+• Twoja subdomena: https://inpro.oto-raport.pl
 
 **Twoje endpointy:**
 \`\`\`
-https://inpro.otoraport.pl/data.xml
-https://inpro.otoraport.pl/data.csv
-https://inpro.otoraport.pl/data.md5
+https://inpro.oto-raport.pl/data.xml
+https://inpro.oto-raport.pl/data.csv
+https://inpro.oto-raport.pl/data.md5
 \`\`\`
 
 **Branding (Enterprise):**
@@ -864,7 +864,7 @@ Subdomena to profesjonalny sposób na prezentację danych Twojej firmy.`,
 
 **Krok 2: Email**
 • Sprawdź swoją skrzynkę email
-• Poszukaj emaila od OTORAPORT
+• Poszukaj emaila od OTO-RAPORT
 • Sprawdź też folder SPAM
 • Link ważny przez 1 godzinę
 
@@ -906,7 +906,7 @@ Bezpieczeństwo Twojego konta to priorytet.`,
 export const VIDEO_TUTORIALS: VideoTutorial[] = [
   {
     id: 'getting-started',
-    title: 'Pierwsze kroki w OTORAPORT',
+    title: 'Pierwsze kroki w OTO-RAPORT',
     description: 'Dowiedz się jak skonfigurować konto i rozpocząć pracę z systemem',
     duration: 5,
     summary: [
@@ -962,7 +962,7 @@ export const VIDEO_TUTORIALS: VideoTutorial[] = [
     description: 'Personalizacja subdomeny, dodanie logo i custom kolorów',
     duration: 5,
     summary: [
-      'Konfiguracja subdomeny otoraport.pl',
+      'Konfiguracja subdomeny oto-raport.pl',
       'Upload logo firmy',
       'Dostosowanie kolorów brandingu',
       'Konfiguracja własnej domeny (Enterprise)',
@@ -1033,9 +1033,9 @@ export const API_ENDPOINTS: APIEndpoint[] = [
       },
     ],
     codeExamples: {
-      curl: `curl -X GET "https://otoraport.pl/api/properties?page=1&limit=50" \\
+      curl: `curl -X GET "https://oto-raport.pl/api/properties?page=1&limit=50" \\
   -H "Authorization: Bearer YOUR_API_KEY"`,
-      javascript: `const response = await fetch('https://otoraport.pl/api/properties?page=1&limit=50', {
+      javascript: `const response = await fetch('https://oto-raport.pl/api/properties?page=1&limit=50', {
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY'
   }
@@ -1044,7 +1044,7 @@ const data = await response.json();`,
       python: `import requests
 
 response = requests.get(
-    'https://otoraport.pl/api/properties',
+    'https://oto-raport.pl/api/properties',
     params={'page': 1, 'limit': 50},
     headers={'Authorization': 'Bearer YOUR_API_KEY'}
 )
@@ -1103,7 +1103,7 @@ data = response.json()`,
       },
     ],
     codeExamples: {
-      curl: `curl -X POST "https://otoraport.pl/api/properties" \\
+      curl: `curl -X POST "https://oto-raport.pl/api/properties" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -1114,7 +1114,7 @@ data = response.json()`,
     "floor": 2,
     "price": 450000
   }'`,
-      javascript: `const response = await fetch('https://otoraport.pl/api/properties', {
+      javascript: `const response = await fetch('https://oto-raport.pl/api/properties', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
@@ -1141,7 +1141,7 @@ data = {
 }
 
 response = requests.post(
-    'https://otoraport.pl/api/properties',
+    'https://oto-raport.pl/api/properties',
     json=data,
     headers={'Authorization': 'Bearer YOUR_API_KEY'}
 )`,
@@ -1191,11 +1191,11 @@ response = requests.post(
       },
     ],
     codeExamples: {
-      curl: `curl -X PUT "https://otoraport.pl/api/properties/123" \\
+      curl: `curl -X PUT "https://oto-raport.pl/api/properties/123" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"price": 460000, "status": "reserved"}'`,
-      javascript: `const response = await fetch('https://otoraport.pl/api/properties/123', {
+      javascript: `const response = await fetch('https://oto-raport.pl/api/properties/123', {
   method: 'PUT',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
@@ -1210,7 +1210,7 @@ response = requests.post(
 
 data = {'price': 460000, 'status': 'reserved'}
 response = requests.put(
-    'https://otoraport.pl/api/properties/123',
+    'https://oto-raport.pl/api/properties/123',
     json=data,
     headers={'Authorization': 'Bearer YOUR_API_KEY'}
 )`,
@@ -1246,9 +1246,9 @@ response = requests.put(
       },
     ],
     codeExamples: {
-      curl: `curl -X DELETE "https://otoraport.pl/api/properties/123" \\
+      curl: `curl -X DELETE "https://oto-raport.pl/api/properties/123" \\
   -H "Authorization: Bearer YOUR_API_KEY"`,
-      javascript: `const response = await fetch('https://otoraport.pl/api/properties/123', {
+      javascript: `const response = await fetch('https://oto-raport.pl/api/properties/123', {
   method: 'DELETE',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY'
@@ -1257,7 +1257,7 @@ response = requests.put(
       python: `import requests
 
 response = requests.delete(
-    'https://otoraport.pl/api/properties/123',
+    'https://oto-raport.pl/api/properties/123',
     headers={'Authorization': 'Bearer YOUR_API_KEY'}
 )`,
     },
@@ -1300,12 +1300,12 @@ response = requests.delete(
       },
     ],
     codeExamples: {
-      curl: `curl "https://otoraport.pl/api/public/YOUR_CLIENT_ID/data.xml"`,
-      javascript: `const response = await fetch('https://otoraport.pl/api/public/YOUR_CLIENT_ID/data.xml');
+      curl: `curl "https://oto-raport.pl/api/public/YOUR_CLIENT_ID/data.xml"`,
+      javascript: `const response = await fetch('https://oto-raport.pl/api/public/YOUR_CLIENT_ID/data.xml');
 const xml = await response.text();`,
       python: `import requests
 
-response = requests.get('https://otoraport.pl/api/public/YOUR_CLIENT_ID/data.xml')
+response = requests.get('https://oto-raport.pl/api/public/YOUR_CLIENT_ID/data.xml')
 xml_data = response.text`,
     },
   },

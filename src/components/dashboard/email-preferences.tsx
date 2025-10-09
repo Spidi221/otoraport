@@ -109,7 +109,7 @@ export function EmailPreferences() {
       <CardHeader>
         <CardTitle>Ustawienia powiadomień email</CardTitle>
         <CardDescription>
-          Zarządzaj typami emaili, które chcesz otrzymywać od OTORAPORT
+          Zarządzaj typami emaili, które chcesz otrzymywać od OTO-RAPORT
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

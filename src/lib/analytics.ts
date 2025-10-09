@@ -1,4 +1,4 @@
-// Advanced analytics service for OTORAPORT
+// Advanced analytics service for OTO-RAPORT
 import { createAdminClient } from './supabase/server'
 import { subDays, format } from 'date-fns'
 import { pl } from 'date-fns/locale'

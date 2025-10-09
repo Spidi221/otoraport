@@ -16,8 +16,8 @@ export default function TermsPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Definicje i zakres zastosowania</h3>
           <p className="text-gray-700 mb-4">
             Niniejszy Regulamin świadczenia usług drogą elektroniczną (dalej: <strong>Regulamin</strong>) określa zasady,
-            warunki oraz zakres korzystania z platformy internetowej OTORAPORT (dalej: <strong>Serwis</strong>) dostępnej
-            pod adresem <strong>otoraport.pl</strong> oraz <strong>www.otoraport.pl</strong>.
+            warunki oraz zakres korzystania z platformy internetowej OTO-RAPORT (dalej: <strong>Serwis</strong>) dostępnej
+            pod adresem <strong>oto-raport.pl</strong> oraz <strong>www.oto-raport.pl</strong>.
           </p>
           <p className="text-gray-700 mb-4">
             Regulamin został wydany na podstawie art. 8 ustawy z dnia 18 lipca 2002 r. o świadczeniu usług drogą
@@ -39,7 +39,7 @@ export default function TermsPage() {
               <li>NIP: <strong>[NIP]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
               <li>REGON: <strong>[REGON]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
               <li>KRS/CEiDG: <strong>[NUMER KRS lub CEiDG]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
-              <li>Email kontaktowy: <strong>kontakt@otoraport.pl</strong></li>
+              <li>Email kontaktowy: <strong>kontakt@oto-raport.pl</strong></li>
               <li>Telefon: <strong>[NUMER TELEFONU]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
             </ul>
           </div>
@@ -49,7 +49,7 @@ export default function TermsPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-2">3. Akceptacja Regulaminu</h3>
           <p className="text-gray-700 mb-2">
             Rozpoczęcie korzystania z Serwisu, w tym założenie Konta Użytkownika, wymaga akceptacji niniejszego
-            Regulaminu oraz Polityki Prywatności dostępnej pod adresem <strong>otoraport.pl/privacy</strong>.
+            Regulaminu oraz Polityki Prywatności dostępnej pod adresem <strong>oto-raport.pl/privacy</strong>.
           </p>
           <p className="text-gray-700">
             Akceptacja następuje poprzez oznaczenie odpowiedniego pola podczas procesu rejestracji. Brak akceptacji
@@ -65,7 +65,7 @@ export default function TermsPage() {
         </p>
         <ul className="list-none space-y-3 text-gray-700">
           <li>
-            <strong>1. Serwis</strong> - platforma internetowa OTORAPORT dostępna pod adresem otoraport.pl,
+            <strong>1. Serwis</strong> - platforma internetowa OTO-RAPORT dostępna pod adresem oto-raport.pl,
             umożliwiająca automatyzację raportowania danych o nieruchomościach do organów administracji publicznej.
           </li>
           <li>
@@ -207,7 +207,7 @@ export default function TermsPage() {
             <li>Zachowania poufności danych logowania (email, hasło),</li>
             <li>Nieprzekazywania dostępu do Konta osobom trzecim,</li>
             <li>Korzystania z Serwisu zgodnie z jego przeznaczeniem, przepisami prawa oraz dobrymi obyczajami,</li>
-            <li>Niezwłocznego powiadomienia Usługodawcy o naruszeniu bezpieczeństwa Konta (email: kontakt@otoraport.pl),</li>
+            <li>Niezwłocznego powiadomienia Usługodawcy o naruszeniu bezpieczeństwa Konta (email: kontakt@oto-raport.pl),</li>
             <li>Niedziałania na szkodę innych Użytkowników, Usługodawcy lub osób trzecich.</li>
           </ul>
           <p className="text-gray-700 mt-2">
@@ -226,7 +226,7 @@ export default function TermsPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-2">3. Usunięcie Konta</h3>
           <p className="text-gray-700 mb-2">
             <strong>3.1.</strong> Użytkownik ma prawo usunąć Konto w każdej chwili, wysyłając żądanie na adres
-            kontakt@otoraport.pl. Usunięcie następuje w ciągu 14 dni roboczych.
+            kontakt@oto-raport.pl. Usunięcie następuje w ciągu 14 dni roboczych.
           </p>
           <p className="text-gray-700 mb-2">
             <strong>3.2.</strong> Usunięcie Konta skutkuje:
@@ -624,7 +624,7 @@ export default function TermsPage() {
             <strong>1.1.</strong> Użytkownik ma prawo złożyć reklamację dotyczącą nieprawidłowości w świadczeniu Usług.
           </p>
           <p className="text-gray-700 mb-2">
-            <strong>1.2.</strong> Reklamacje należy składać na adres email: <strong>kontakt@otoraport.pl</strong>
+            <strong>1.2.</strong> Reklamacje należy składać na adres email: <strong>kontakt@oto-raport.pl</strong>
             z podaniem:
           </p>
           <ul className="list-disc list-inside space-y-1 text-gray-700 ml-8">
@@ -673,7 +673,7 @@ export default function TermsPage() {
           <strong>1.</strong> Administratorem danych osobowych Użytkowników jest Usługodawca. Szczegółowe informacje
           dotyczące przetwarzania danych osobowych, w tym podstawy prawne, cele, okres przechowywania, prawa osób,
           których dane dotyczą, oraz odbiorcy danych, znajdują się w <strong>Polityce Prywatności</strong> dostępnej
-          pod adresem: <strong>otoraport.pl/privacy</strong>.
+          pod adresem: <strong>oto-raport.pl/privacy</strong>.
         </p>
         <p className="text-gray-700 mb-4">
           <strong>2.</strong> Korzystanie z Serwisu wymaga akceptacji Polityki Prywatności.
@@ -685,7 +685,7 @@ export default function TermsPage() {
         </p>
         <p className="text-gray-700">
           <strong>4.</strong> W przypadku pytań dotyczących ochrony danych osobowych prosimy o kontakt:
-          <strong> kontakt@otoraport.pl</strong>.
+          <strong> kontakt@oto-raport.pl</strong>.
         </p>
       </section>
 
@@ -732,7 +732,7 @@ export default function TermsPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Wypowiedzenie przez Użytkownika</h3>
           <p className="text-gray-700 mb-2">
             <strong>1.1.</strong> Użytkownik może w każdej chwili rozwiązać umowę poprzez anulowanie Subskrypcji
-            z poziomu panelu Konta lub wysyłając wiadomość email na adres kontakt@otoraport.pl.
+            z poziomu panelu Konta lub wysyłając wiadomość email na adres kontakt@oto-raport.pl.
           </p>
           <p className="text-gray-700 mb-2">
             <strong>1.2.</strong> Rozwiązanie umowy następuje z końcem opłaconego okresu rozliczeniowego (brak
@@ -807,7 +807,7 @@ export default function TermsPage() {
           <strong>6. Kontakt.</strong> W przypadku pytań dotyczących Regulaminu prosimy o kontakt:
         </p>
         <ul className="list-none space-y-1 text-gray-700 ml-8">
-          <li>Email: <strong>kontakt@otoraport.pl</strong></li>
+          <li>Email: <strong>kontakt@oto-raport.pl</strong></li>
           <li>Telefon: <strong>[NUMER TELEFONU]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
           <li>Adres korespondencyjny: <strong>[ADRES SIEDZIBY]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
         </ul>

@@ -2,7 +2,7 @@
  * Audit Logging System
  *
  * Provides centralized audit logging functionality for tracking user actions
- * across the OTORAPORT platform. All logs are immutable and stored in the
+ * across the OTO-RAPORT platform. All logs are immutable and stored in the
  * audit_logs table with comprehensive context.
  */
 

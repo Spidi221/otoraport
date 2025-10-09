@@ -4,8 +4,8 @@ import { OnboardingWizard } from '@/components/onboarding/onboarding-wizard';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Konfiguracja konta | OTORAPORT',
-  description: 'Skonfiguruj swoje konto OTORAPORT i zacznij automatyzować raportowanie nieruchomości',
+  title: 'Konfiguracja konta | OTO-RAPORT',
+  description: 'Skonfiguruj swoje konto OTO-RAPORT i zacznij automatyzować raportowanie nieruchomości',
 };
 
 export default async function OnboardingPage() {

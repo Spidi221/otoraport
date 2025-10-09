@@ -2232,7 +2232,7 @@
         "description": "Implement Redis caching for ministry endpoints, enable ISR for public pages, optimize database queries, add Next.js image optimization, and achieve high Lighthouse scores.",
         "details": "1. **Redis Caching for Ministry Endpoints**: Integrate Redis as an in-memory cache for ministry endpoints serving XML, CSV, and MD5 responses. Use a centralized middleware (e.g., in `middlewares/redis.js`) to handle cache reads/writes, with cache keys based on endpoint and parameters. Set a TTL (Time To Live) of 60 seconds for these responses. Use the `node-redis` client, ensure robust error handling, and monitor cache hit/miss rates for tuning[1][2][4][7].\n\n2. **Incremental Static Regeneration (ISR) for Public Pages**: For all public-facing Next.js pages, implement ISR with a `revalidate` interval of 3600 seconds (1 hour). Ensure that page data is re-fetched and rebuilt in the background after the interval, providing users with up-to-date content while maintaining fast load times.\n\n3. **Database Query Optimization**: Audit all queries related to ministry endpoints and public pages. Add appropriate indexes (e.g., on frequently filtered columns, foreign keys) and refactor queries for efficient joins and minimal data transfer. Use query analysis tools (such as PostgreSQL's `EXPLAIN ANALYZE`) to identify bottlenecks and verify improvements.\n\n4. **Next.js Image Optimization**: Refactor all image usage in public and dashboard pages to use the Next.js `<Image>` component. Configure image domains, enable AVIF/WebP formats, and set appropriate sizes and priorities for above-the-fold images. Leverage built-in lazy loading and responsive sizing for best performance.\n\n5. **Lighthouse Audit and Remediation**: Run Lighthouse audits on key public and dashboard pages. Address all issues to achieve at least Performance 90+, Accessibility 95+, Best Practices 90+, and SEO 95+. This may involve optimizing asset delivery, reducing unused JavaScript/CSS, improving ARIA/alt attributes, and ensuring semantic HTML.\n\n**Best Practices**:\n- Use environment variables for Redis connection configuration.\n- Ensure cache invalidation on relevant data updates.\n- Monitor Redis and database performance in production.\n- Document caching and ISR strategies for future maintainers.",
         "testStrategy": "1. For Redis caching, hit ministry endpoints repeatedly and verify cache hits/misses using Redis CLI or logs; confirm cache expires after 60s and updates on data change.\n2. For ISR, update backend data and confirm public pages reflect changes after revalidation interval (3600s) without full redeploy.\n3. Use database query logs and `EXPLAIN ANALYZE` to confirm indexes are used and query times are reduced; test endpoints under load.\n4. Run Lighthouse audits on public and dashboard pages, iteratively fix issues, and confirm target scores are met.\n5. Manually and automatically test image loading, responsiveness, and format negotiation on various devices and network conditions.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "52",
           "54",
@@ -2281,7 +2281,7 @@
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on performance optimization and caching implementation.",
-        "updatedAt": "2025-10-09T16:36:47.494Z"
+        "updatedAt": "2025-10-09T16:44:54.086Z"
       },
       {
         "id": "71",
@@ -2289,7 +2289,7 @@
         "description": "Update all domain references, email addresses, branding assets, documentation, and deployment configurations to reflect the new brand raportowaniecenmieszkan.pl throughout the entire codebase and supporting systems.",
         "details": "1. **Domain and URL Updates:**\n   - Search and replace all instances of 'otoraport.pl' with 'raportowaniecenmieszkan.pl' in code, configuration files, environment variables, documentation, and deployment scripts.\n   - Update all hardcoded URLs, API endpoints, and callback URLs to use the new domain.\n   - Register and configure the new domain with DNS providers and hosting platforms (e.g., Vercel), ensuring SSL certificates are updated and active.\n   - Implement 301 redirects from old URLs to new URLs to preserve SEO and user experience[3][7].\n\n2. **Email Address and System References:**\n   - Update all system-generated email addresses (e.g., noreply@otoraport.pl → noreply@raportowaniecenmieszkan.pl) in notification templates, authentication flows, and contact forms.\n   - Change email sender domains in transactional email services (e.g., SendGrid, Mailgun) and update SPF/DKIM records for deliverability.\n\n3. **Branding and Visual Assets:**\n   - Replace all logos, favicons, and brand imagery with new assets reflecting the updated brand identity.\n   - Update color palettes, typography, and design tokens in the codebase and style guides.\n   - Revise marketing collateral, email signatures, and social media profile images as needed[1][2][4].\n\n4. **Documentation and Help Center:**\n   - Update all internal and external documentation, including README files, API docs, onboarding guides, and help center articles, to reference the new brand and domain.\n   - Revise screenshots and instructional videos to reflect new branding.\n\n5. **Deployment and Configuration:**\n   - Update deployment pipelines, environment variables, and CI/CD scripts to use the new domain.\n   - Ensure all integrations (e.g., Stripe, ministry endpoints, analytics) reference the correct domain and branding.\n   - Review and update custom domain/subdomain logic to support the new brand, coordinating with related tasks for Pro and Enterprise plans.\n\n6. **Communication and Announcement:**\n   - Prepare a rebranding announcement for users, partners, and stakeholders via email, blog post, and social media.\n   - Create an FAQ page addressing the rebrand, transition timeline, and impact on users[1][4].\n\n7. **Quality Assurance:**\n   - Conduct a thorough audit using automated tools (e.g., grep, regex search, link checkers) and manual review to ensure no references to the old brand remain.\n   - Establish a review and approval process for all changes before deployment.\n\n**Best Practices:**\n- Use automated scripts for bulk search-and-replace operations to minimize manual errors.\n- Maintain a backup and rollback plan in case of unforeseen issues during deployment.\n- Communicate changes proactively to minimize user confusion and support requests.\n- Coordinate with legal and administrative teams to ensure compliance with business registrations and trademarks[1][3][6].",
         "testStrategy": "1. Perform a full-text search across the codebase, documentation, and configuration files to confirm all instances of 'otoraport.pl' have been replaced.\n2. Deploy to a staging environment and verify:\n   - All URLs, endpoints, and email addresses use the new domain.\n   - Branding assets (logos, colors, typography) are updated throughout the UI and emails.\n   - Documentation and help center content reflect the new brand.\n   - All redirects from old URLs function correctly (301 status, correct destination).\n   - Transactional and notification emails are sent from the new domain and pass SPF/DKIM checks.\n   - Integrations (Stripe, ministry endpoints, analytics) operate correctly with the new domain.\n3. Use link checkers and automated tests to identify any broken links or missed references.\n4. Review deployment logs and CI/CD output for errors related to domain or branding changes.\n5. Solicit feedback from internal stakeholders and a pilot group of users to confirm the rebrand is complete and consistent.\n6. Monitor analytics and support channels for issues post-launch.",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [
           "61",
           "62",
@@ -2357,14 +2357,15 @@
             "testStrategy": "Review all documentation and help center articles for accuracy and completeness. Confirm that all screenshots and videos display the new branding. Validate that communication materials are distributed to all intended audiences.",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2025-10-09T17:24:19.545Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-09T16:36:47.495Z",
+      "lastModified": "2025-10-09T17:24:19.546Z",
       "taskCount": 36,
-      "completedCount": 33,
+      "completedCount": 34,
       "tags": [
         "master"
       ]

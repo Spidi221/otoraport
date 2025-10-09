@@ -73,7 +73,7 @@ export async function GET(
     }
 
     // Generate CSV URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://otoraport.vercel.app'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.vercel.app'
     const csvUrl = `${baseUrl}/api/public/${clientId}/data.csv`
 
     // Generate the SAME Harvester XML as data.xml endpoint

@@ -9,14 +9,14 @@ export function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <div>
-              <h3 className="text-xl font-bold text-blue-400 mb-3">OTORAPORT</h3>
+              <h3 className="text-xl font-bold text-blue-400 mb-3">OTO-RAPORT</h3>
               <p className="text-gray-300 text-sm leading-relaxed">
                 Automatyzacja compliance dla deweloperów nieruchomości. 
                 Generowanie raportów XML/MD zgodnych z wymogami ministerstwa.
               </p>
             </div>
             <div className="text-gray-400 text-xs">
-              <p>OTORAPORT Sp. z o.o.</p>
+              <p>OTO-RAPORT Sp. z o.o.</p>
               <p>ul. Technologiczna 15</p>
               <p>00-001 Warszawa</p>
               <p>NIP: 1234567890</p>
@@ -71,10 +71,10 @@ export function Footer() {
               </li>
               <li>
                 <a 
-                  href="mailto:support@otoraport.pl" 
+                  href="mailto:support@oto-raport.pl" 
                   className="hover:text-blue-400 transition-colors"
                 >
-                  support@otoraport.pl
+                  support@oto-raport.pl
                 </a>
               </li>
             </ul>
@@ -110,10 +110,10 @@ export function Footer() {
               <h5 className="font-medium text-white mb-2 text-sm">Kontakt RODO</h5>
               <p className="text-gray-400 text-xs">
                 <a 
-                  href="mailto:dpo@otoraport.pl" 
+                  href="mailto:dpo@oto-raport.pl" 
                   className="hover:text-blue-400 transition-colors"
                 >
-                  dpo@otoraport.pl
+                  dpo@oto-raport.pl
                 </a>
               </p>
               <p className="text-gray-400 text-xs">
@@ -127,7 +127,7 @@ export function Footer() {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-gray-400 text-sm">
-              © {new Date().getFullYear()} OTORAPORT Sp. z o.o. Wszystkie prawa zastrzeżone.
+              © {new Date().getFullYear()} OTO-RAPORT Sp. z o.o. Wszystkie prawa zastrzeżone.
             </div>
             
             <div className="flex items-center gap-6 text-sm">

@@ -127,7 +127,7 @@ export function SubdomainSettings({ currentSubdomain, subscriptionPlan }: Subdom
         <Alert>
           <AlertDescription>
             Subdomena jest dostępna tylko dla planów Pro i Enterprise.
-            Upgrade swój plan aby uzyskać własną subdomenę ({'{'}twoja-firma{'}'}.otoraport.pl).
+            Upgrade swój plan aby uzyskać własną subdomenę ({'{'}twoja-firma{'}'}.oto-raport.pl).
           </AlertDescription>
         </Alert>
       </Card>
@@ -148,12 +148,12 @@ export function SubdomainSettings({ currentSubdomain, subscriptionPlan }: Subdom
           <Alert>
             <AlertDescription className="flex items-center justify-between">
               <span>
-                Twoja obecna subdomena: <strong>{currentSubdomain}.otoraport.pl</strong>
+                Twoja obecna subdomena: <strong>{currentSubdomain}.oto-raport.pl</strong>
               </span>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open(`https://${currentSubdomain}.otoraport.pl`, '_blank')}
+                onClick={() => window.open(`https://${currentSubdomain}.oto-raport.pl`, '_blank')}
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Otwórz
@@ -188,7 +188,7 @@ export function SubdomainSettings({ currentSubdomain, subscriptionPlan }: Subdom
               )}
             </div>
             <span className="flex items-center text-sm text-muted-foreground whitespace-nowrap">
-              .otoraport.pl
+              .oto-raport.pl
             </span>
           </div>
 
@@ -209,7 +209,7 @@ export function SubdomainSettings({ currentSubdomain, subscriptionPlan }: Subdom
           <div className="bg-muted p-3 rounded-md">
             <p className="text-sm font-medium mb-1">Podgląd:</p>
             <p className="text-sm text-muted-foreground">
-              https://<strong>{subdomain || 'twoja-firma'}</strong>.otoraport.pl
+              https://<strong>{subdomain || 'twoja-firma'}</strong>.oto-raport.pl
             </p>
           </div>
         )}

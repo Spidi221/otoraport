@@ -75,7 +75,7 @@ export async function GET(
     // Generate CSV URL for this developer
     // Note: Harvester XML only contains metadata and CSV URL,
     // it doesn't need the actual property data
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://otoraport.vercel.app'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.vercel.app'
     const csvUrl = `${baseUrl}/api/public/${clientId}/data.csv`
 
     // Generate Harvester XML (metadata pointing to CSV)

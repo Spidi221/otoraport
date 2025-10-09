@@ -89,11 +89,11 @@ export function ContactForm() {
           </CardHeader>
           <CardContent>
             <a
-              href="mailto:support@otoraport.pl"
+              href="mailto:support@oto-raport.pl"
               className="flex items-center space-x-3 text-blue-600 hover:text-blue-700"
             >
               <Mail className="w-5 h-5" />
-              <span>support@otoraport.pl</span>
+              <span>support@oto-raport.pl</span>
             </a>
             <p className="text-sm text-gray-500 mt-2">
               Odpowiadamy w ciągu 24h

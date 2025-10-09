@@ -33,7 +33,7 @@ export default function PrivacyPage() {
               <li>NIP: <strong>[NIP]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
               <li>REGON: <strong>[REGON]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
               <li>KRS/CEiDG: <strong>[NUMER KRS lub CEiDG]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
-              <li>Email kontaktowy: <strong>kontakt@otoraport.pl</strong></li>
+              <li>Email kontaktowy: <strong>kontakt@oto-raport.pl</strong></li>
               <li>Telefon: <strong>[NUMER TELEFONU]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
             </ul>
           </div>
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
               <li>Podstawowa działalność polega na przetwarzaniu danych szczególnych kategorii (art. 9 RODO) na dużą skalę.</li>
             </ul>
             <p className="text-sm text-gray-700 mt-2">
-              <strong>Dla OTORAPORT (B2B SaaS):</strong> Prawdopodobnie NIE jest wymagany, ale należy skonsultować z prawnikiem.
+              <strong>Dla OTO-RAPORT (B2B SaaS):</strong> Prawdopodobnie NIE jest wymagany, ale należy skonsultować z prawnikiem.
             </p>
           </div>
           <p className="text-gray-700 mt-2">
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
             na mocy RODO, można kontaktować się:
           </p>
           <ul className="list-disc list-inside space-y-1 text-gray-700 ml-4">
-            <li>Email: <strong>kontakt@otoraport.pl</strong> (temat: &quot;RODO - pytanie o dane osobowe&quot;)</li>
+            <li>Email: <strong>kontakt@oto-raport.pl</strong> (temat: &quot;RODO - pytanie o dane osobowe&quot;)</li>
             <li>Pisemnie: na adres siedziby Administratora</li>
             <li>Telefonicznie: <strong>[NUMER TELEFONU]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
           </ul>
@@ -604,7 +604,7 @@ export default function PrivacyPage() {
           <h4 className="font-semibold text-amber-900 mb-2">⚠️ Prawo do sprzeciwu wobec przekazania danych poza EOG:</h4>
           <p className="text-sm text-gray-700 mb-2">
             Jeśli nie wyrażasz zgody na przekazywanie danych do USA, możesz wnieść sprzeciw, kontaktując się z nami
-            na adres <strong>kontakt@otoraport.pl</strong>. Należy jednak pamiętać, że może to skutkować niemożnością
+            na adres <strong>kontakt@oto-raport.pl</strong>. Należy jednak pamiętać, że może to skutkować niemożnością
             świadczenia niektórych Usług (np. płatności przez Stripe, hosting aplikacji).
           </p>
           <p className="text-sm text-gray-700">
@@ -618,7 +618,7 @@ export default function PrivacyPage() {
 
         <p className="text-gray-700 mb-4">
           Zgodnie z RODO (art. 15-22) oraz polską ustawą o ochronie danych osobowych przysługują Ci następujące prawa.
-          Aby skorzystać z praw, napisz do nas na <strong>kontakt@otoraport.pl</strong> (temat: &quot;RODO - wniosek o...&quot;).
+          Aby skorzystać z praw, napisz do nas na <strong>kontakt@oto-raport.pl</strong> (temat: &quot;RODO - wniosek o...&quot;).
         </p>
 
         <div className="space-y-4">
@@ -745,7 +745,7 @@ export default function PrivacyPage() {
               <strong>Jak cofnąć zgodę:</strong>
             </p>
             <ul className="list-disc list-inside text-sm text-gray-700 ml-4 mt-1">
-              <li>Email na kontakt@otoraport.pl (temat: &quot;Cofnięcie zgody&quot;),</li>
+              <li>Email na kontakt@oto-raport.pl (temat: &quot;Cofnięcie zgody&quot;),</li>
               <li>Link &quot;Wypisz się&quot; w stopce emaili marketingowych,</li>
               <li>Panel Konta → Ustawienia → Zgody marketingowe.</li>
             </ul>
@@ -775,7 +775,7 @@ export default function PrivacyPage() {
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-6">
           <h4 className="font-semibold text-blue-900 mb-2">Jak składać wnioski o realizację praw:</h4>
           <ol className="list-decimal list-inside text-sm text-blue-900 space-y-1">
-            <li>Wyślij email na <strong>kontakt@otoraport.pl</strong> z tematem &quot;RODO - wniosek o [nazwa prawa]&quot;,</li>
+            <li>Wyślij email na <strong>kontakt@oto-raport.pl</strong> z tematem &quot;RODO - wniosek o [nazwa prawa]&quot;,</li>
             <li>Podaj: imię, nazwisko, adres email powiązany z Kontem, szczegóły wniosku,</li>
             <li>Dołącz kopię dokumentu tożsamości (w celu weryfikacji) - zalecamy zasłonięcie danych wrażliwych (np. numer PESEL),</li>
             <li>Odpowiemy w ciągu <strong>1 miesiąca</strong> (możliwe przedłużenie o 2 miesiące w skomplikowanych przypadkach).</li>
@@ -907,7 +907,7 @@ export default function PrivacyPage() {
         <div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">4. Nie używamy cookies marketingowych ani śledzących</h3>
           <p className="text-gray-700 text-sm">
-            OTORAPORT <strong>nie wykorzystuje</strong> cookies marketingowych, reklamowych ani śledzących (tracking cookies)
+            OTO-RAPORT <strong>nie wykorzystuje</strong> cookies marketingowych, reklamowych ani śledzących (tracking cookies)
             od podmiotów trzecich (np. Facebook Pixel, Google Ads, TikTok Pixel). Nie profilujemy użytkowników w celach
             marketingowych.
           </p>
@@ -976,7 +976,7 @@ export default function PrivacyPage() {
             <li>Podejmiemy natychmiastowe działania naprawcze (zmiana haseł, blokada dostępu, analiza forensic).</li>
           </ul>
           <p className="text-sm text-gray-700 mt-2">
-            <strong>Jak zgłosić podejrzenie naruszenia:</strong> Email na <strong>kontakt@otoraport.pl</strong>
+            <strong>Jak zgłosić podejrzenie naruszenia:</strong> Email na <strong>kontakt@oto-raport.pl</strong>
             z tematem &quot;PILNE - Naruszenie bezpieczeństwa&quot;.
           </p>
         </div>
@@ -986,7 +986,7 @@ export default function PrivacyPage() {
         <h2 className="text-2xl font-semibold text-gray-900 mb-4">IX. PROFILOWANIE I ZAUTOMATYZOWANE PODEJMOWANIE DECYZJI</h2>
 
         <p className="text-gray-700 mb-4">
-          <strong>OTORAPORT NIE stosuje profilowania</strong> ani zautomatyzowanego podejmowania decyzji w rozumieniu
+          <strong>OTO-RAPORT NIE stosuje profilowania</strong> ani zautomatyzowanego podejmowania decyzji w rozumieniu
           art. 22 RODO.
         </p>
 
@@ -1035,7 +1035,7 @@ export default function PrivacyPage() {
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
           <p className="text-sm text-blue-900">
             <strong>Aktualna wersja Polityki Prywatności</strong> jest zawsze dostępna pod adresem:
-            <strong> otoraport.pl/privacy</strong>
+            <strong> oto-raport.pl/privacy</strong>
           </p>
           <p className="text-sm text-blue-900 mt-2">
             Data ostatniej aktualizacji: <strong>3 października 2025 r.</strong>
@@ -1060,7 +1060,7 @@ export default function PrivacyPage() {
           <strong>2.</strong> W przypadku pytań dotyczących Polityki Prywatności lub przetwarzania danych osobowych prosimy o kontakt:
         </p>
         <ul className="list-none space-y-1 text-gray-700 ml-4">
-          <li>Email: <strong>kontakt@otoraport.pl</strong></li>
+          <li>Email: <strong>kontakt@oto-raport.pl</strong></li>
           <li>Telefon: <strong>[NUMER TELEFONU]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
           <li>Adres korespondencyjny: <strong>[ADRES SIEDZIBY]</strong> <span className="text-red-600">[DO UZUPEŁNIENIA]</span></li>
         </ul>
@@ -1097,7 +1097,7 @@ export default function PrivacyPage() {
             <li>Przekazywanie danych poza EOG (sekcja V) - weryfikacja SCC i EU-U.S. Data Privacy Framework</li>
             <li>Polityka cookies (sekcja VII) - czy Vercel Analytics wymaga zgody (rozbieżne interpretacje)</li>
             <li>Procedury Data Breach (sekcja VIII) - czy są kompletne i zgodne z art. 33-34 RODO</li>
-            <li>Ocena ryzyka (DPIA) - czy wymagana dla profilu działalności OTORAPORT</li>
+            <li>Ocena ryzyka (DPIA) - czy wymagana dla profilu działalności OTO-RAPORT</li>
             <li>Weryfikacja umów powierzenia (DPA) z dostawcami - czy aktualne i zgodne z RODO</li>
           </ul>
         </div>

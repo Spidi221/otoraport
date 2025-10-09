@@ -1,5 +1,5 @@
 /**
- * Support Email System for OTORAPORT
+ * Support Email System for OTO-RAPORT
  * Handles support requests, auto-responders, and ticket routing
  */
 
@@ -30,7 +30,7 @@ export async function sendSupportAutoResponder(request: SupportRequest) {
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
 
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTO-RAPORT</h1>
         <p style="color: #6b7280;">Support Team</p>
       </div>
 
@@ -39,7 +39,7 @@ export async function sendSupportAutoResponder(request: SupportRequest) {
 
         <p>Witaj ${request.name},</p>
 
-        <p>Dziękujemy za kontakt z zespołem OTORAPORT. Twoje zgłoszenie zostało zarejestrowane i zostanie rozpatrzone w możliwie najkrótszym czasie.</p>
+        <p>Dziękujemy za kontakt z zespołem OTO-RAPORT. Twoje zgłoszenie zostało zarejestrowane i zostanie rozpatrzone w możliwie najkrótszym czasie.</p>
 
         <div style="background: white; border-radius: 6px; padding: 20px; margin: 20px 0;">
           <h3 style="color: #15803d; margin-top: 0;">📋 Szczegóły zgłoszenia:</h3>
@@ -82,9 +82,9 @@ export async function sendSupportAutoResponder(request: SupportRequest) {
       </div>
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 14px; color: #6b7280; text-align: center;">
-        <p><strong>Zespół OTORAPORT Support</strong></p>
+        <p><strong>Zespół OTO-RAPORT Support</strong></p>
         <p style="font-size: 12px; margin-top: 10px;">
-          support@otoraport.pl | otoraport.pl
+          support@oto-raport.pl | oto-raport.pl
         </p>
         <p style="font-size: 12px; color: #9ca3af; margin-top: 15px;">
           Ten email został wysłany automatycznie jako potwierdzenie zgłoszenia.
@@ -116,8 +116,8 @@ Przydatne zasoby:
 - FAQ: ${APP_URL}/faq
 - Dashboard: ${APP_URL}/dashboard
 
-Zespół OTORAPORT Support
-support@otoraport.pl
+Zespół OTO-RAPORT Support
+support@oto-raport.pl
   `
 
   return await sendEmail({
@@ -132,7 +132,7 @@ support@otoraport.pl
  * Forward support request to development team
  */
 export async function forwardSupportRequestToTeam(request: SupportRequest) {
-  const SUPPORT_TEAM_EMAIL = process.env.SUPPORT_TEAM_EMAIL || 'admin@otoraport.pl'
+  const SUPPORT_TEAM_EMAIL = process.env.SUPPORT_TEAM_EMAIL || 'admin@oto-raport.pl'
 
   const urgencyFlag = request.category === 'urgent' ? '🚨 [PILNE] ' : ''
   const subject = `${urgencyFlag}Support Request: ${request.subject}`

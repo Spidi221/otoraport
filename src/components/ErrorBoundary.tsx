@@ -98,10 +98,10 @@ export class ErrorBoundary extends Component<Props, State> {
                 <p className="text-xs text-muted-foreground">
                   Jeśli problem się powtarza, skontaktuj się z nami:{' '}
                   <a 
-                    href="mailto:support@otoraport.pl" 
+                    href="mailto:support@oto-raport.pl" 
                     className="text-blue-600 hover:underline"
                   >
-                    support@otoraport.pl
+                    support@oto-raport.pl
                   </a>
                 </p>
               </div>

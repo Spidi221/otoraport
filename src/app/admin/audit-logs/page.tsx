@@ -11,7 +11,7 @@ import { AuditLogsTable } from '@/components/audit/audit-logs-table';
 import { Shield, AlertTriangle } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Dziennik Aktywności (Admin) | OTORAPORT',
+  title: 'Dziennik Aktywności (Admin) | OTO-RAPORT',
   description: 'Panel administratora - przegląd wszystkich działań użytkowników',
 };
 
@@ -77,7 +77,7 @@ export default async function AdminAuditLogsPage() {
             <p className="text-sm text-red-800">
               Masz dostęp do wrażliwych danych wszystkich użytkowników. Twoje działania w tym panelu
               są również logowane i podlegają audytowi. Używaj tych uprawnień odpowiedzialnie i zgodnie
-              z polityką prywatności OTORAPORT.
+              z polityką prywatności OTO-RAPORT.
             </p>
           </div>
         </div>

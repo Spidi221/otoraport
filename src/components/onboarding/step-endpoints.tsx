@@ -26,7 +26,7 @@ export function StepEndpoints({
 }: StepEndpointsProps) {
   const [copiedEndpoint, setCopiedEndpoint] = useState<string | null>(null);
 
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://otoraport.pl';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://oto-raport.pl';
 
   const endpoints = [
     {

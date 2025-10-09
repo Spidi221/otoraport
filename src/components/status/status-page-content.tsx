@@ -191,7 +191,7 @@ export function StatusPageContent() {
         <AlertDescription>
           Status systemu jest automatycznie aktualizowany co 30 sekund. Wszystkie czasy są
           wyświetlane w strefie czasowej Polska (UTC+1/+2). W przypadku pytań lub problemów,
-          skontaktuj się z naszym zespołem supportu: support@otoraport.pl
+          skontaktuj się z naszym zespołem supportu: support@oto-raport.pl
         </AlertDescription>
       </Alert>
     </div>

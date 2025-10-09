@@ -1,4 +1,4 @@
-# 🔧 OTORAPORT v2 - Szczegółowy Plan Naprawy
+# 🔧 OTO-RAPORT v2 - Szczegółowy Plan Naprawy
 
 **Data:** 2025-10-07
 **Status aplikacji:** Build ✅ | CSV Parser ✅ | Deployment ⚠️

@@ -73,7 +73,7 @@ export async function sendEndpointHealthAlert(
       </div>
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 14px; color: #6b7280; text-align: center;">
-        <p>OTORAPORT.pl - Monitoring compliance 24/7</p>
+        <p>OTO-RAPORT.pl - Monitoring compliance 24/7</p>
       </div>
     </body>
     </html>
@@ -92,7 +92,7 @@ Błąd: ${errorMessage}
 ⚠️ Ministerstwo nie może pobrać Twoich danych!
 Sprawdź dashboard: ${dashboardUrl}
 
-OTORAPORT.pl - Monitoring compliance
+OTO-RAPORT.pl - Monitoring compliance
   `
 
   // Add unsubscribe links
@@ -167,7 +167,7 @@ export async function sendDataStalenessAlert(
       </div>
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 14px; color: #6b7280; text-align: center;">
-        <p>OTORAPORT.pl - Automatyczny compliance</p>
+        <p>OTO-RAPORT.pl - Automatyczny compliance</p>
       </div>
     </body>
     </html>
@@ -192,7 +192,7 @@ Jak zaktualizować?
 
 Zaktualizuj teraz: ${dashboardUrl}
 
-OTORAPORT.pl - Automatyczny compliance
+OTO-RAPORT.pl - Automatyczny compliance
   `
 
   // Add unsubscribe links
@@ -229,7 +229,7 @@ export async function sendWeeklyComplianceDigest(
   const xmlUrl = `${APP_URL}/api/public/${developer.client_id}/data.xml`
   const unsubscribeUrl = await getUnsubscribeUrl(developer.id)
 
-  const subject = `📊 Tygodniowy raport compliance OTORAPORT`
+  const subject = `📊 Tygodniowy raport compliance OTO-RAPORT`
 
   const uptimeStatus = stats.endpointUptime >= 99 ? '🟢 Doskonały' : stats.endpointUptime >= 95 ? '🟡 Dobry' : '🔴 Wymaga uwagi'
 
@@ -244,7 +244,7 @@ export async function sendWeeklyComplianceDigest(
 
       <div style="text-align: center; margin-bottom: 40px;">
         <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">📊 Raport Tygodniowy</h1>
-        <p style="color: #6b7280;">OTORAPORT - Compliance Summary</p>
+        <p style="color: #6b7280;">OTO-RAPORT - Compliance Summary</p>
       </div>
 
       <div style="background: #f8fafc; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
@@ -290,7 +290,7 @@ export async function sendWeeklyComplianceDigest(
       </div>
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 12px; color: #9ca3af; text-align: center;">
-        <p>OTORAPORT.pl - Automatyczny compliance dla deweloperów</p>
+        <p>OTO-RAPORT.pl - Automatyczny compliance dla deweloperów</p>
         <p>Otrzymujesz ten email jako cotygodniowe podsumowanie.</p>
       </div>
     </body>
@@ -298,7 +298,7 @@ export async function sendWeeklyComplianceDigest(
   `
 
   let text = `
-📊 Tygodniowy raport compliance OTORAPORT
+📊 Tygodniowy raport compliance OTO-RAPORT
 
 Witaj ${developer.name}!
 
@@ -314,7 +314,7 @@ ${xmlUrl}
 
 Dashboard: ${dashboardUrl}
 
-OTORAPORT.pl - Automatyczny compliance
+OTO-RAPORT.pl - Automatyczny compliance
   `
 
   // Add unsubscribe links

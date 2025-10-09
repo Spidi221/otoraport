@@ -2,7 +2,7 @@
 
 ## Overview
 
-A complete, production-ready multi-step onboarding wizard for OTORAPORT that guides Polish real estate developers through initial account setup with a premium, intuitive user experience.
+A complete, production-ready multi-step onboarding wizard for OTO-RAPORT that guides Polish real estate developers through initial account setup with a premium, intuitive user experience.
 
 ## What Was Implemented
 

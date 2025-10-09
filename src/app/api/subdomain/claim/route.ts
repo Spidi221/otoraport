@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
       success: true,
       subdomain: result.subdomain,
       message: result.message,
-      url: `https://${result.subdomain}.otoraport.pl`
+      url: `https://${result.subdomain}.oto-raport.pl`
     });
 
   } catch (error) {

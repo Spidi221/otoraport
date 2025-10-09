@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully implemented a comprehensive, world-class Help Center system for OTORAPORT at `/help`. The system provides users with extensive self-service support including FAQ, video tutorials, API documentation, troubleshooting guides, and contact options.
+Successfully implemented a comprehensive, world-class Help Center system for OTO-RAPORT at `/help`. The system provides users with extensive self-service support including FAQ, video tutorials, API documentation, troubleshooting guides, and contact options.
 
 ## Implementation Details
 
@@ -57,7 +57,7 @@ Successfully implemented a comprehensive, world-class Help Center system for OTO
 
 #### Video Tutorials
 - **5 tutorial placeholders**:
-  1. Pierwsze kroki w OTORAPORT (5 min)
+  1. Pierwsze kroki w OTO-RAPORT (5 min)
   2. Import danych z pliku CSV (8 min)
   3. Konfiguracja endpointów ministerialnych (6 min)
   4. Zarządzanie nieruchomościami (7 min)
@@ -112,7 +112,7 @@ Successfully implemented a comprehensive, world-class Help Center system for OTO
 
 #### Contact Section
 - **Contact information cards**:
-  - Email: support@otoraport.pl (24h response time)
+  - Email: support@oto-raport.pl (24h response time)
   - Phone: +48 XXX XXX XXX (Mon-Fri, 9:00-17:00)
   - Live Chat button (Pro/Enterprise)
 
@@ -193,7 +193,7 @@ Successfully implemented a comprehensive, world-class Help Center system for OTO
 
 #### SEO & Meta
 - **Metadata** for help page:
-  - Title: "Centrum Pomocy | OTORAPORT"
+  - Title: "Centrum Pomocy | OTO-RAPORT"
   - Description with keywords
   - Open Graph tags for social sharing
 

@@ -122,7 +122,7 @@ export function ActionButtons() {
 
   const baseUrl = typeof window !== 'undefined'
     ? window.location.origin
-    : process.env.NEXT_PUBLIC_APP_URL || 'https://otoraport.vercel.app';
+    : process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.vercel.app';
 
   const endpoints = {
     xml: `${baseUrl}/api/public/${clientId}/data.xml`,

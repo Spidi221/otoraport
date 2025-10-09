@@ -40,7 +40,7 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent" itemProp="name">OTORAPORT</span>
+                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent" itemProp="name">OTO-RAPORT</span>
               </div>
             </div>
             <div className="hidden md:flex space-x-8" role="menubar">
@@ -50,8 +50,8 @@ export default function LandingPage() {
               <a href="#faq" className="nav-link text-gray-700 hover:text-blue-600 font-medium" role="menuitem">FAQ</a>
             </div>
             <div className="flex items-center space-x-4">
-              <a href="/auth/signin" className="text-gray-700 hover:text-blue-600 transition-colors font-medium" aria-label="Zaloguj się do konta OTORAPORT">Logowanie</a>
-              <a href="/auth/signup" className="btn-subtle-hover bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-800 font-semibold shadow-md" aria-label="Rozpocznij darmowy okres próbny OTORAPORT">
+              <a href="/auth/signin" className="text-gray-700 hover:text-blue-600 transition-colors font-medium" aria-label="Zaloguj się do konta OTO-RAPORT">Logowanie</a>
+              <a href="/auth/signup" className="btn-subtle-hover bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-800 font-semibold shadow-md" aria-label="Rozpocznij darmowy okres próbny OTO-RAPORT">
                 Wypróbuj za darmo
               </a>
             </div>
@@ -218,7 +218,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              OTORAPORT: Pełna automatyzacja compliance z dane.gov.pl
+              OTO-RAPORT: Pełna automatyzacja compliance z dane.gov.pl
             </h2>
             <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
               Jedyne rozwiązanie, które w pełni automatyzuje wymagania ministerstwa:
@@ -294,7 +294,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Dlaczego deweloperzy wybierają OTORAPORT?
+              Dlaczego deweloperzy wybierają OTO-RAPORT?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Nie jesteśmy kolejnym narzędziem - jesteśmy kompletnym rozwiązaniem compliance.
@@ -455,7 +455,7 @@ export default function LandingPage() {
               Zobacz jak to działa w praktyce
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Jeden upload, automatyczny compliance. Sprawdź jak OTORAPORT oszczędza Ci godziny pracy każdego dnia.
+              Jeden upload, automatyczny compliance. Sprawdź jak OTO-RAPORT oszczędza Ci godziny pracy każdego dnia.
             </p>
           </div>
           
@@ -475,7 +475,7 @@ export default function LandingPage() {
               <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Panel sterowania - OTORAPORT</h3>
+                    <h3 className="text-2xl font-bold text-white">Panel sterowania - OTO-RAPORT</h3>
                     <p className="text-blue-100">Witaj ponownie, Jan Kowalski</p>
                   </div>
                   <div className="flex items-center space-x-4">
@@ -708,18 +708,18 @@ export default function LandingPage() {
                 <p className="text-gray-600 leading-relaxed" itemProp="text">
                   Tak - według oficjalnej instrukcji COI dane muszą być aktualizowane <strong>codziennie</strong>. 
                   To nie oznacza, że musisz ręcznie aktualizować co dzień, ale system musi być skonfigurowany 
-                  do codziennej publikacji. OTORAPORT automatycznie spełnia ten wymóg.
+                  do codziennej publikacji. OTO-RAPORT automatycznie spełnia ten wymóg.
                 </p>
               </div>
             </div>
 
             <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
               <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
-                Jak OTORAPORT integruje się z portalem dane.gov.pl?
+                Jak OTO-RAPORT integruje się z portalem dane.gov.pl?
               </h3>
               <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
                 <p className="text-gray-600 leading-relaxed" itemProp="text">
-                  OTORAPORT generuje publiczne endpointy z danymi w formacie
+                  OTO-RAPORT generuje publiczne endpointy z danymi w formacie
                   <strong> XML 1.13 zgodnym z instrukcjami COI</strong>. Po pierwszej konfiguracji otrzymujesz stały URL,
                   który rejestrujesz w portalu dane.gov.pl - ministerstwo pobiera dane automatycznie z Twoich endpointów.
                 </p>
@@ -728,7 +728,7 @@ export default function LandingPage() {
 
             <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
               <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
-                Ile kosztuje OTORAPORT i czy warto?
+                Ile kosztuje OTO-RAPORT i czy warto?
               </h3>
               <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
                 <div className="text-gray-600 leading-relaxed" itemProp="text">
@@ -742,7 +742,7 @@ export default function LandingPage() {
                     </li>
                     <li className="flex items-start">
                       <span className="font-semibold text-gray-900 mr-2">Pro (249 zł/msc):</span>
-                      2 inwestycje bazowo + 50 zł/msc za każdą dodatkową, unlimited mieszkań, subdomena nazwa.otoraport.pl
+                      2 inwestycje bazowo + 50 zł/msc za każdą dodatkową, unlimited mieszkań, subdomena nazwa.oto-raport.pl
                     </li>
                     <li className="flex items-start">
                       <span className="font-semibold text-gray-900 mr-2">Enterprise (499 zł/msc):</span>
@@ -751,7 +751,7 @@ export default function LandingPage() {
                   </ul>
                   <p className="font-medium text-blue-700">
                     Płatność roczna = 20% taniej! Przy wymaganiu codziennego raportowania i skomplikowanych formatach XML,
-                    OTORAPORT oszczędza <strong>setki godzin pracy rocznie</strong> na każdego dewelopera.
+                    OTO-RAPORT oszczędza <strong>setki godzin pracy rocznie</strong> na każdego dewelopera.
                   </p>
                 </div>
               </div>
@@ -759,11 +759,11 @@ export default function LandingPage() {
 
             <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
               <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
-                Jak długo trwa wdrożenie OTORAPORT i czy potrzebuję wsparcia IT?
+                Jak długo trwa wdrożenie OTO-RAPORT i czy potrzebuję wsparcia IT?
               </h3>
               <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
                 <div className="text-gray-600 leading-relaxed" itemProp="text">
-                  <p className="font-semibold text-gray-900 mb-3">Zapomnij o miesiącach wdrożeń – OTORAPORT działa w 24 godziny, zero wsparcia IT.</p>
+                  <p className="font-semibold text-gray-900 mb-3">Zapomnij o miesiącach wdrożeń – OTO-RAPORT działa w 24 godziny, zero wsparcia IT.</p>
                   <p className="mb-4">Podczas gdy konkurencja oferuje skomplikowane systemy wymagające programistów, my zaprojektowaliśmy rozwiązanie tak proste, że wdroży je każdy:</p>
                   <div className="mb-4">
                     <p className="font-medium mb-2">⚡ Ekspresowe wdrożenie w 3 krokach:</p>
@@ -780,7 +780,7 @@ export default function LandingPage() {
 
             <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
               <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
-                Czy OTORAPORT obsługuje wszystkie 58 pól wymaganych przez Ministerstwo Rozwoju?
+                Czy OTO-RAPORT obsługuje wszystkie 58 pól wymaganych przez Ministerstwo Rozwoju?
               </h3>
               <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
                 <div className="text-gray-600 leading-relaxed" itemProp="text">
@@ -819,14 +819,14 @@ export default function LandingPage() {
                       <li>Niekompletne 58 pól = kara za każde brakujące pole × każdy dzień</li>
                     </ul>
                   </div>
-                  <p className="font-medium text-blue-600">🛡️ OTORAPORT eliminuje każde ryzyko poprzez stałe endpointy dostępne 24/7 (365 dni/rok), gwarancję formatu XML 1.13 i monitoring dostępności dla harvestera dane.gov.pl.</p>
+                  <p className="font-medium text-blue-600">🛡️ OTO-RAPORT eliminuje każde ryzyko poprzez stałe endpointy dostępne 24/7 (365 dni/rok), gwarancję formatu XML 1.13 i monitoring dostępności dla harvestera dane.gov.pl.</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
               <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
-                Czy mogę używać OTORAPORT dla wielu inwestycji jednocześnie?
+                Czy mogę używać OTO-RAPORT dla wielu inwestycji jednocześnie?
               </h3>
               <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
                 <div className="text-gray-600 leading-relaxed" itemProp="text">
@@ -863,7 +863,7 @@ export default function LandingPage() {
 
             <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" itemScope itemType="https://schema.org/Question">
               <h3 className="text-xl font-semibold text-gray-900 mb-4" itemProp="name">
-                Jak OTORAPORT zapewnia bezpieczeństwo i backup danych mieszkań?
+                Jak OTO-RAPORT zapewnia bezpieczeństwo i backup danych mieszkań?
               </h3>
               <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
                 <div className="text-gray-600 leading-relaxed" itemProp="text">
@@ -908,7 +908,7 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <span className="text-xl font-bold text-white">OTORAPORT</span>
+                <span className="text-xl font-bold text-white">OTO-RAPORT</span>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Automatyzacja raportowania cen mieszkań zgodnie z wymogami ustawy. Proste, szybkie, niezawodne.
@@ -953,7 +953,7 @@ export default function LandingPage() {
           <div className="pt-8 border-t border-gray-800">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="text-gray-400 text-sm mb-4 md:mb-0">
-                &copy; 2025 OTORAPORT. Wszystkie prawa zastrzeżone.
+                &copy; 2025 OTO-RAPORT. Wszystkie prawa zastrzeżone.
               </div>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-1 text-gray-400 text-sm">

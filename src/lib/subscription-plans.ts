@@ -60,7 +60,7 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanType, SubscriptionPlan> 
       '+50 zł/msc za każdą dodatkową',
       'Unlimited liczba mieszkań',
       'Wszystko z planu Basic',
-      'Subdomena nazwa.otoraport.pl',
+      'Subdomena nazwa.oto-raport.pl',
       'Strona z cenami dla klientów',
       'Priority email support',
       'Zaawansowane analytics i raporty',

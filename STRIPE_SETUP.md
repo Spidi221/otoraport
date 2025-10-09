@@ -1,7 +1,7 @@
-# Stripe Configuration Guide - OTORAPORT Basic Plan
+# Stripe Configuration Guide - OTO-RAPORT Basic Plan
 
 ## Overview
-This guide explains how to configure Stripe for the OTORAPORT Basic Plan subscription (149 PLN/month).
+This guide explains how to configure Stripe for the OTO-RAPORT Basic Plan subscription (149 PLN/month).
 
 ---
 
@@ -24,9 +24,9 @@ This guide explains how to configure Stripe for the OTORAPORT Basic Plan subscri
 Fill in the following details:
 
 **Product Information:**
-- **Name:** `OTORAPORT Basic Plan`
+- **Name:** `OTO-RAPORT Basic Plan`
 - **Description:** `Monthly subscription - CSV parser, ministry compliance, 2 projects`
-- **Image:** Upload OTORAPORT logo (optional)
+- **Image:** Upload OTO-RAPORT logo (optional)
 
 **Pricing:**
 - **Pricing model:** Standard pricing

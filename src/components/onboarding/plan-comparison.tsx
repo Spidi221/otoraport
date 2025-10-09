@@ -188,7 +188,7 @@ export function PlanComparison({ onSelectPlan, isLoading, selectedPlan }: PlanCo
                 </td>
               </tr>
               <tr className="border-b border-gray-100">
-                <td className="py-4 px-4 text-gray-700">Subdomena nazwa.otoraport.pl</td>
+                <td className="py-4 px-4 text-gray-700">Subdomena nazwa.oto-raport.pl</td>
                 <td className="py-4 px-4 text-center text-gray-400">—</td>
                 <td className="py-4 px-4 text-center bg-green-50">
                   <Check className="h-5 w-5 text-green-500 mx-auto" />

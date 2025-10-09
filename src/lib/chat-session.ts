@@ -1,5 +1,5 @@
 /**
- * Chat Session Management for OTORAPORT Chatbot
+ * Chat Session Management for OTO-RAPORT Chatbot
  * Handles local storage and session persistence
  */
 

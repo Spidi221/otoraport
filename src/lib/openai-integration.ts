@@ -2,12 +2,12 @@ import OpenAI from 'openai';
 import { findRelevantKnowledge } from './chatbot-knowledge';
 
 /**
- * Topic validation - check if question is OTORAPORT related
+ * Topic validation - check if question is OTO-RAPORT related
  */
 function validateTopicRelevance(message: string): { isRelevant: boolean; confidence: number } {
   const lowerMessage = message.toLowerCase().trim();
   
-  // OTORAPORT specific keywords (high relevance)
+  // OTO-RAPORT specific keywords (high relevance)
   const otoraportKeywords = [
     'otoraport', 'raportowanie', 'ceny mieszkań', 'dane.gov.pl',
     'ustawa', 'deweloper', 'compliance', 'xml', 'csv', 
@@ -64,7 +64,7 @@ function validateTopicRelevance(message: string): { isRelevant: boolean; confide
     }
   });
   
-  // Question patterns that suggest OTORAPORT relevance
+  // Question patterns that suggest OTO-RAPORT relevance
   const relevantPatterns = [
     /jak\s+(działa|korzystać|zacząć|setup)/i,
     /(ile|co)\s+(kosztuje|cena|cennik)/i,
@@ -106,7 +106,7 @@ function validateTopicRelevance(message: string): { isRelevant: boolean; confide
  * Get standard off-topic response
  */
 function getOffTopicResponse(): string {
-  return "Przepraszam, jestem chatbotem OTORAPORT i pomagam wyłącznie w kwestiach związanych z automatyzacją raportowania cen mieszkań. Czy mogę pomóc Ci w czymś związanym z naszym systemem compliance?";
+  return "Przepraszam, jestem chatbotem OTO-RAPORT i pomagam wyłącznie w kwestiach związanych z automatyzacją raportowania cen mieszkań. Czy mogę pomóc Ci w czymś związanym z naszym systemem compliance?";
 }
 
 // Lazy OpenAI client initialization to prevent build errors
@@ -132,14 +132,14 @@ export interface AIResponse {
 }
 
 /**
- * System prompt for OTORAPORT chatbot with strict topic restrictions
+ * System prompt for OTO-RAPORT chatbot with strict topic restrictions
  */
-const SYSTEM_PROMPT = `Jesteś profesjonalnym asystentem OTORAPORT - systemu automatyzacji raportowania cen mieszkań zgodnie z ustawą z 21 maja 2025 roku.
+const SYSTEM_PROMPT = `Jesteś profesjonalnym asystentem OTO-RAPORT - systemu automatyzacji raportowania cen mieszkań zgodnie z ustawą z 21 maja 2025 roku.
 
-KRYTYCZNE: ODPOWIADASZ TYLKO NA PYTANIA ZWIĄZANE Z OTORAPORT I RAPORTOWANIEM CEN MIESZKAŃ!
+KRYTYCZNE: ODPOWIADASZ TYLKO NA PYTANIA ZWIĄZANE Z OTO-RAPORT I RAPORTOWANIEM CEN MIESZKAŃ!
 
 TEMATY DOZWOLONE:
-- OTORAPORT: funkcjonalności, plany cenowe, setup, integracje
+- OTO-RAPORT: funkcjonalności, plany cenowe, setup, integracje
 - Ustawa z 21 maja 2025 roku o jawności cen mieszkań
 - Wymagania prawne dla deweloperów
 - Raportowanie do portalu dane.gov.pl
@@ -150,8 +150,8 @@ TEMATY DOZWOLONE:
 - Procesy automatyzacji vs manualna praca
 
 DLA PYTAŃ SPOZA TYCH TEMATÓW:
-Nie odpowiadaj na pytania niezwiązane z OTORAPORT lub raportowaniem cen mieszkań.
-ZAWSZE odpowiedz: "Przepraszam, jestem chatbotem OTORAPORT i pomagam wyłącznie w kwestiach związanych z automatyzacją raportowania cen mieszkań. Czy mogę pomóc Ci w czymś związanym z naszym systemem compliance?"
+Nie odpowiadaj na pytania niezwiązane z OTO-RAPORT lub raportowaniem cen mieszkań.
+ZAWSZE odpowiedz: "Przepraszam, jestem chatbotem OTO-RAPORT i pomagam wyłącznie w kwestiach związanych z automatyzacją raportowania cen mieszkań. Czy mogę pomóc Ci w czymś związanym z naszym systemem compliance?"
 
 EXAMPLES NIEDOZWOLONYCH PYTAŃ:
 - Recepty kulinarne (np. "jak zrobić ciasto na pizzę")
@@ -167,7 +167,7 @@ STYL KOMUNIKACJI:
 - Konkretne odpowiedzi z przykładami
 - Zawsze sprawdź czy pytanie dotyczy naszych dozwolonych tematów
 
-Pamiętaj: ZERO TOLERANCE dla off-topic questions. Zawsze przekieruj do tematów OTORAPORT!`;
+Pamiętaj: ZERO TOLERANCE dla off-topic questions. Zawsze przekieruj do tematów OTO-RAPORT!`;
 
 /**
  * Enhanced AI-powered chat response using OpenAI GPT-4o
@@ -187,7 +187,7 @@ export async function getAIChatResponse(
         sources: ['system-fallback']
       };
     }
-    // CRITICAL: First validate if the question is OTORAPORT-related
+    // CRITICAL: First validate if the question is OTO-RAPORT-related
     const topicValidation = validateTopicRelevance(message);
     
     if (!topicValidation.isRelevant) {
@@ -200,7 +200,7 @@ export async function getAIChatResponse(
         suggestedQuestions: [
           'Jakie są wymagania ustawy z 21 maja 2025?',
           'Ile kosztuje plan Basic?',
-          'Jak szybki jest setup OTORAPORT?'
+          'Jak szybki jest setup OTO-RAPORT?'
         ],
         model: 'faq'
       };
@@ -236,7 +236,7 @@ export async function getAIChatResponse(
     
     // Add additional topic reminder to the system prompt
     const enhancedSystemPrompt = SYSTEM_PROMPT + contextualInfo + 
-      `\n\nREMINDER: The user asked: "${message}" - make sure this is OTORAPORT related. If not, use the standard redirect response.`;
+      `\n\nREMINDER: The user asked: "${message}" - make sure this is OTO-RAPORT related. If not, use the standard redirect response.`;
     
     // Call OpenAI API
     const completion = await getOpenAIClient().chat.completions.create({
@@ -308,7 +308,7 @@ export async function getAIChatResponse(
     
     // Final fallback
     return {
-      response: 'Przepraszam, wystąpił błąd z systemem AI. Skontaktuj się z naszym supportem na support@otoraport.pl lub spróbuj ponownie za chwilę.',
+      response: 'Przepraszam, wystąpił błąd z systemem AI. Skontaktuj się z naszym supportem na support@oto-raport.pl lub spróbuj ponownie za chwilę.',
       confidence: 0.3,
       model: 'faq'
     };
@@ -325,11 +325,11 @@ async function generateFollowUpQuestions(userMessage: string, botResponse: strin
       messages: [
         {
           role: 'system',
-          content: 'Generate exactly 3 relevant follow-up questions in Polish ONLY about OTORAPORT system, pricing, compliance, or real estate reporting. Questions should help user continue the conversation naturally. Return only the questions, one per line, without numbers or bullets.'
+          content: 'Generate exactly 3 relevant follow-up questions in Polish ONLY about OTO-RAPORT system, pricing, compliance, or real estate reporting. Questions should help user continue the conversation naturally. Return only the questions, one per line, without numbers or bullets.'
         },
         {
           role: 'user', 
-          content: `User asked about OTORAPORT: "${userMessage}"\nBot answered: "${botResponse}"\n\nGenerate 3 OTORAPORT-related follow-up questions:`
+          content: `User asked about OTO-RAPORT: "${userMessage}"\nBot answered: "${botResponse}"\n\nGenerate 3 OTO-RAPORT-related follow-up questions:`
         }
       ],
       max_tokens: 120, // Reduced to save costs
@@ -346,16 +346,16 @@ async function generateFollowUpQuestions(userMessage: string, botResponse: strin
     
   } catch (error) {
     console.error('Follow-up questions generation error:', error);
-    // Return generic OTORAPORT follow-ups based on user message keywords
+    // Return generic OTO-RAPORT follow-ups based on user message keywords
     const lowerMessage = userMessage.toLowerCase();
     if (lowerMessage.includes('cena') || lowerMessage.includes('koszt')) {
       return ['Jaki plan najlepiej pasuje do mojej firmy?', 'Czy są dodatkowe koszty?', 'Jak działa 14-dniowy darmowy trial?'];
     } else if (lowerMessage.includes('prawo') || lowerMessage.includes('ustawa')) {
-      return ['Jakie są kary za brak compliance?', 'Co z deadlineami raportowania?', 'Jak OTORAPORT zapewnia zgodność?'];
+      return ['Jakie są kary za brak compliance?', 'Co z deadlineami raportowania?', 'Jak OTO-RAPORT zapewnia zgodność?'];
     } else if (lowerMessage.includes('xml') || lowerMessage.includes('csv')) {
-      return ['Jakie formaty plików obsługuje OTORAPORT?', 'Jak wygląda proces generowania XML?', 'Czy mogę importować dane z Excel?'];
+      return ['Jakie formaty plików obsługuje OTO-RAPORT?', 'Jak wygląda proces generowania XML?', 'Czy mogę importować dane z Excel?'];
     } else {
-      return ['Jak zacząć korzystać z OTORAPORT?', 'Ile trwa setup systemu?', 'Czy potrzebuję pomocy technicznej?'];
+      return ['Jak zacząć korzystać z OTO-RAPORT?', 'Ile trwa setup systemu?', 'Czy potrzebuję pomocy technicznej?'];
     }
   }
 }
@@ -372,7 +372,7 @@ export async function checkOpenAIHealth(): Promise<boolean> {
 
     const completion = await getOpenAIClient().chat.completions.create({
       model: 'gpt-4o',
-      messages: [{ role: 'user', content: 'Czy działa OTORAPORT?' }],
+      messages: [{ role: 'user', content: 'Czy działa OTO-RAPORT?' }],
       max_tokens: 10
     });
 

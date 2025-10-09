@@ -1,4 +1,4 @@
-# 🚀 OTORAPORT v2 - Production Deployment Checklist
+# 🚀 OTO-RAPORT v2 - Production Deployment Checklist
 
 **Date:** 2025-10-08
 **Version:** v2.0.0
@@ -106,10 +106,10 @@ NEXT_PUBLIC_APP_URL=https://otoraport.vercel.app
 
 # Resend Email API
 RESEND_API_KEY=re_...
-EMAIL_FROM=OTORAPORT <noreply@otoraport.pl>
+EMAIL_FROM=OTO-RAPORT <noreply@oto-raport.pl>
 
 # Admin
-ADMIN_EMAILS=admin@otoraport.pl
+ADMIN_EMAILS=admin@oto-raport.pl
 
 # Upstash Redis (Rate Limiting)
 UPSTASH_REDIS_REST_URL=https://...
@@ -326,7 +326,7 @@ npx supabase db reset --linked
 ## 📞 SUPPORT CONTACTS
 
 **Technical Issues:**
-- Email: support@otoraport.pl
+- Email: support@oto-raport.pl
 - Vercel Support: https://vercel.com/support
 - Supabase Support: https://supabase.com/support
 

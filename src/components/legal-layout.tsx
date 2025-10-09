@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { OtoraportLogo } from '@/components/icons/otoraport-logo'
+import { OtoRaportLogo } from '@/components/icons/oto-raport-logo'
 import { ArrowLeft } from 'lucide-react'
 
 interface LegalLayoutProps {
@@ -15,7 +15,7 @@ export function LegalLayout({ title, lastUpdated, children }: LegalLayoutProps) 
       <header className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <OtoraportLogo />
+            <OtoRaportLogo />
             <Link
               href="/"
               className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
@@ -58,7 +58,7 @@ export function LegalLayout({ title, lastUpdated, children }: LegalLayoutProps) 
             Logowanie
           </Link>
           <span className="text-gray-300">•</span>
-          <Link href="mailto:kontakt@otoraport.pl" className="hover:text-gray-900">
+          <Link href="mailto:kontakt@oto-raport.pl" className="hover:text-gray-900">
             Kontakt
           </Link>
         </nav>
@@ -67,7 +67,7 @@ export function LegalLayout({ title, lastUpdated, children }: LegalLayoutProps) 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-12">
         <div className="container mx-auto px-4 py-6 text-center text-sm text-gray-500">
-          <p>© {new Date().getFullYear()} OTORAPORT. Wszystkie prawa zastrzeżone.</p>
+          <p>© {new Date().getFullYear()} OTO-RAPORT. Wszystkie prawa zastrzeżone.</p>
         </div>
       </footer>
     </div>

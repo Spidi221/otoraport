@@ -70,7 +70,7 @@ export function BrandingSettings({
       alert('Najpierw ustaw subdomenę w sekcji powyżej');
       return;
     }
-    window.open(`https://${subdomain}.otoraport.pl`, '_blank');
+    window.open(`https://${subdomain}.oto-raport.pl`, '_blank');
   };
 
   if (!hasRequiredPlan) {

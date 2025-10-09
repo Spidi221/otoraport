@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PlanComparison } from '@/components/onboarding/plan-comparison'
 import type { SubscriptionPlanType } from '@/lib/subscription-plans'
-import { OtoraportLogo } from '@/components/icons/otoraport-logo'
+import { OtoRaportLogo } from '@/components/icons/oto-raport-logo'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
@@ -63,7 +63,7 @@ function SelectPlanContent() {
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <OtoraportLogo />
+          <OtoRaportLogo />
           <div className="text-sm text-gray-600">
             Krok 1 z 2: Wybierz plan
           </div>
@@ -96,7 +96,7 @@ function SelectPlanContent() {
           </p>
           <p>
             Masz pytania?{' '}
-            <a href="mailto:support@otoraport.pl" className="text-blue-600 hover:text-blue-700 font-medium">
+            <a href="mailto:support@oto-raport.pl" className="text-blue-600 hover:text-blue-700 font-medium">
               Skontaktuj się z nami
             </a>
           </p>

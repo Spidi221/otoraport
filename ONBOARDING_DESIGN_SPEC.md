@@ -76,7 +76,7 @@ Legend:
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                 Witamy w OTORAPORT! 🎉                   │
+│                 Witamy w OTO-RAPORT! 🎉                   │
 │      Zacznijmy od kilku podstawowych informacji         │
 │                                                          │
 │  ┌────────────────────────────────────────────────┐    │
@@ -221,7 +221,7 @@ After upload:
 │  │     Format XML zgodny z wymaganiami...         │    │
 │  │                                                 │    │
 │  │  ╔══════════════════════════════════════════╗  │    │
-│  │  ║ https://otoraport.pl/api/public/...xml ║  │    │
+│  │  ║ https://oto-raport.pl/api/public/...xml ║  │    │
 │  │  ╚══════════════════════════════════════════╝  │    │
 │  │                                                 │    │
 │  │  [ Testuj ]  [ 🔗 Otwórz ]    ✅ HTTP 200     │    │
@@ -260,7 +260,7 @@ After upload:
 │       Twoje konto jest skonfigurowane i gotowe         │
 │                                                          │
 │  ┌────────────────────────────────────────────────┐    │
-│  │  ✨ Witamy w OTORAPORT!                        │    │
+│  │  ✨ Witamy w OTO-RAPORT!                        │    │
 │  │                                                 │    │
 │  │  Pomyślnie ukończyłeś konfigurację konta...   │    │
 │  └────────────────────────────────────────────────┘    │
@@ -468,4 +468,4 @@ Not applicable - this is an interactive wizard that shouldn't be printed.
 6. **Professional Polish** - Enterprise-grade visual quality
 7. **Mobile-First** - Works beautifully on all devices
 
-This design creates a **premium onboarding experience** that makes users feel confident, supported, and excited to use OTORAPORT.
+This design creates a **premium onboarding experience** that makes users feel confident, supported, and excited to use OTO-RAPORT.

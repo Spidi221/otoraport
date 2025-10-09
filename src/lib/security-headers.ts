@@ -62,7 +62,7 @@ export function getSecurityHeaders(): SecurityHeaders {
     ].join(', '),
 
     // Hide server version
-    'Server': 'OTORAPORT'
+    'Server': 'OTO-RAPORT'
   }
 }
 
@@ -130,7 +130,7 @@ export function createSecureHTMLErrorResponse(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} - OTORAPORT</title>
+  <title>${title} - OTO-RAPORT</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { OtoraportLogo } from '@/components/icons/otoraport-logo'
+import { OtoRaportLogo } from '@/components/icons/oto-raport-logo'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, Loader2 } from 'lucide-react'
@@ -35,7 +35,7 @@ export default function PaymentPage() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <OtoraportLogo />
+          <OtoRaportLogo />
         </div>
 
         <Card className="border-2 border-green-500 shadow-xl">
@@ -99,7 +99,7 @@ export default function PaymentPage() {
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>
             Potrzebujesz pomocy?{' '}
-            <a href="mailto:support@otoraport.pl" className="text-blue-600 hover:text-blue-700 font-medium">
+            <a href="mailto:support@oto-raport.pl" className="text-blue-600 hover:text-blue-700 font-medium">
               Skontaktuj się z nami
             </a>
           </p>

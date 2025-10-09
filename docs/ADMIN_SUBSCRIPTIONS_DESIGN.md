@@ -2,7 +2,7 @@
 
 ## Overview
 
-Premium admin panel for managing OTORAPORT subscriptions with sophisticated UI/UX design. This page provides comprehensive revenue analytics, failed payment tracking, and manual subscription management controls.
+Premium admin panel for managing OTO-RAPORT subscriptions with sophisticated UI/UX design. This page provides comprehensive revenue analytics, failed payment tracking, and manual subscription management controls.
 
 **Location:** `/admin/subscriptions`
 

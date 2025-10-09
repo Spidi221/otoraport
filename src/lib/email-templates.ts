@@ -20,7 +20,7 @@ export function generateMinistryNotificationEmail(developer: Developer): EmailTe
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://ceny-sync.vercel.app';
   
   return {
-    subject: `Nowy deweloper w systemie OTORAPORT - ${developer.company_name}`,
+    subject: `Nowy deweloper w systemie OTO-RAPORT - ${developer.company_name}`,
     
     html: `
 <!DOCTYPE html>
@@ -39,7 +39,7 @@ export function generateMinistryNotificationEmail(developer: Developer): EmailTe
 </head>
 <body>
   <div class="header">
-    <h1>🏢 OTORAPORT</h1>
+    <h1>🏢 OTO-RAPORT</h1>
     <p>Automatyzacja raportowania cen nieruchomości</p>
   </div>
   
@@ -94,15 +94,15 @@ export function generateMinistryNotificationEmail(developer: Developer): EmailTe
   </div>
   
   <div class="footer">
-    <p>© ${new Date().getFullYear()} OTORAPORT - System automatyzacji raportowania cen nieruchomości</p>
-    <p>Email został wygenerowany automatycznie przez system OTORAPORT</p>
+    <p>© ${new Date().getFullYear()} OTO-RAPORT - System automatyzacji raportowania cen nieruchomości</p>
+    <p>Email został wygenerowany automatycznie przez system OTO-RAPORT</p>
     <p>Data: ${new Date().toLocaleDateString('pl-PL')} ${new Date().toLocaleTimeString('pl-PL')}</p>
   </div>
 </body>
 </html>`,
 
     text: `
-OTORAPORT - Automatyzacja raportowania cen nieruchomości
+OTO-RAPORT - Automatyzacja raportowania cen nieruchomości
 
 POWIADOMIENIE O NOWYM DEWELOPERZE
 
@@ -134,7 +134,7 @@ Prosimy o potwierdzenie rejestracji dewelopera w systemie.
 W razie pytań kontakt: ${developer.email}
 
 ---
-© ${new Date().getFullYear()} OTORAPORT
+© ${new Date().getFullYear()} OTO-RAPORT
 Email wygenerowany automatycznie: ${new Date().toLocaleString('pl-PL')}
 `
   };
@@ -145,7 +145,7 @@ export function generateDeveloperWelcomeEmail(developer: Developer): EmailTempla
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://ceny-sync.vercel.app';
 
   return {
-    subject: `Witamy w OTORAPORT - Rejestracja przebiegła pomyślnie!`,
+    subject: `Witamy w OTO-RAPORT - Rejestracja przebiegła pomyślnie!`,
     
     html: `
 <!DOCTYPE html>
@@ -165,7 +165,7 @@ export function generateDeveloperWelcomeEmail(developer: Developer): EmailTempla
 </head>
 <body>
   <div class="header">
-    <h1>🎉 Witamy w OTORAPORT!</h1>
+    <h1>🎉 Witamy w OTO-RAPORT!</h1>
     <p>Automatyzacja raportowania cen nieruchomości</p>
   </div>
 
@@ -174,7 +174,7 @@ export function generateDeveloperWelcomeEmail(developer: Developer): EmailTempla
 
     <div class="success-box">
       <h3>✅ Twoje konto zostało utworzone</h3>
-      <p>Witaj <strong>${developer.name}</strong>! Cieszymy się, że dołączyłeś do OTORAPORT.</p>
+      <p>Witaj <strong>${developer.name}</strong>! Cieszymy się, że dołączyłeś do OTO-RAPORT.</p>
     </div>
 
     <div class="next-steps">
@@ -206,17 +206,17 @@ export function generateDeveloperWelcomeEmail(developer: Developer): EmailTempla
       <h3>📞 Potrzebujesz pomocy?</h3>
       <p>W razie pytań jesteśmy do Twojej dyspozycji:</p>
       <ul>
-        <li>📧 Email: support@otoraport.pl</li>
+        <li>📧 Email: support@oto-raport.pl</li>
         <li>📱 Telefon: +48 800 123 456</li>
-        <li>📚 Dokumentacja: <a href="${baseUrl}/docs">otoraport.pl/docs</a></li>
+        <li>📚 Dokumentacja: <a href="${baseUrl}/docs">oto-raport.pl/docs</a></li>
       </ul>
     </div>
 
-    <p>Dziękujemy za wybór OTORAPORT! 🏡</p>
+    <p>Dziękujemy za wybór OTO-RAPORT! 🏡</p>
   </div>
 
   <div class="footer">
-    <p>© ${new Date().getFullYear()} OTORAPORT - System automatyzacji raportowania cen nieruchomości</p>
+    <p>© ${new Date().getFullYear()} OTO-RAPORT - System automatyzacji raportowania cen nieruchomości</p>
     <p>Ten email został wygenerowany automatycznie po Twojej rejestracji</p>
     <p>Data: ${new Date().toLocaleDateString('pl-PL')} ${new Date().toLocaleTimeString('pl-PL')}</p>
   </div>
@@ -224,11 +224,11 @@ export function generateDeveloperWelcomeEmail(developer: Developer): EmailTempla
 </html>`,
 
     text: `
-OTORAPORT - Witamy w systemie!
+OTO-RAPORT - Witamy w systemie!
 
 REJESTRACJA PRZEBIEGŁA POMYŚLNIE
 
-Witaj ${developer.name}! Cieszymy się, że dołączyłeś do OTORAPORT.
+Witaj ${developer.name}! Cieszymy się, że dołączyłeś do OTO-RAPORT.
 
 CO DALEJ?
 
@@ -248,14 +248,14 @@ LINKI:
 - Ustawienia: ${baseUrl}/settings
 
 POMOC:
-Email: support@otoraport.pl
+Email: support@oto-raport.pl
 Telefon: +48 800 123 456
 Dokumentacja: ${baseUrl}/docs
 
-Dziękujemy za wybór OTORAPORT!
+Dziękujemy za wybór OTO-RAPORT!
 
 ---
-© ${new Date().getFullYear()} OTORAPORT
+© ${new Date().getFullYear()} OTO-RAPORT
 Email wygenerowany automatycznie: ${new Date().toLocaleString('pl-PL')}
 `
   };
@@ -274,7 +274,7 @@ export function generateDataUpdateNotificationEmail(
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://ceny-sync.vercel.app';
   
   return {
-    subject: `OTORAPORT - Dane zaktualizowane pomyślnie (${updateDetails.propertiesCount} nieruchomości)`,
+    subject: `OTO-RAPORT - Dane zaktualizowane pomyślnie (${updateDetails.propertiesCount} nieruchomości)`,
     
     html: `
 <!DOCTYPE html>
@@ -294,7 +294,7 @@ export function generateDataUpdateNotificationEmail(
 </head>
 <body>
   <div class="header">
-    <h1>📊 OTORAPORT</h1>
+    <h1>📊 OTO-RAPORT</h1>
     <p>Aktualizacja danych zakończona</p>
   </div>
   
@@ -305,7 +305,7 @@ export function generateDataUpdateNotificationEmail(
     
     <div class="update-box">
       <h3>✅ Aktualizacja z dnia ${new Date(updateDetails.uploadedAt).toLocaleDateString('pl-PL')}</h3>
-      <p>Twoje dane cenowe zostały pomyślnie przetworzone i zaktualizowane w systemie OTORAPORT.</p>
+      <p>Twoje dane cenowe zostały pomyślnie przetworzone i zaktualizowane w systemie OTO-RAPORT.</p>
     </div>
     
     <div class="stats">
@@ -343,7 +343,7 @@ export function generateDataUpdateNotificationEmail(
   </div>
   
   <div class="footer">
-    <p>© ${new Date().getFullYear()} OTORAPORT - System automatyzacji raportowania cen nieruchomości</p>
+    <p>© ${new Date().getFullYear()} OTO-RAPORT - System automatyzacji raportowania cen nieruchomości</p>
     <p>Email został wygenerowany automatycznie po aktualizacji danych</p>
     <p>Data: ${new Date().toLocaleDateString('pl-PL')} ${new Date().toLocaleTimeString('pl-PL')}</p>
   </div>
@@ -351,7 +351,7 @@ export function generateDataUpdateNotificationEmail(
 </html>`,
 
     text: `
-OTORAPORT - Dane zaktualizowane pomyślnie!
+OTO-RAPORT - Dane zaktualizowane pomyślnie!
 
 Cześć ${developer.name},
 
@@ -377,7 +377,7 @@ Dashboard: ${baseUrl}/dashboard
 Twoja firma pozostaje compliance z wymaganiami ustawy.
 
 ---
-© ${new Date().getFullYear()} OTORAPORT
+© ${new Date().getFullYear()} OTO-RAPORT
 Email wygenerowany automatycznie: ${new Date().toLocaleString('pl-PL')}
 `
   };

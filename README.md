@@ -1,4 +1,4 @@
-# 🏠 OTORAPORT V2 - Real Estate Compliance Automation
+# 🏠 OTO-RAPORT V2 - Real Estate Compliance Automation
 
 > Automatyzacja raportowania cen mieszkań zgodnie z ustawą z 21 maja 2025 roku
 

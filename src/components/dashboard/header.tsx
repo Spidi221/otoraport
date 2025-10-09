@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { OtoraportLogo } from "../icons/otoraport-logo";
+import { OtoRaportLogo } from "../icons/otoraport-logo";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth-simple";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -28,7 +28,7 @@ export function PublicHeader() {
   return (
     <header className="border-b bg-white/95 backdrop-blur-lg shadow-sm px-4 py-4 lg:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
-        <OtoraportLogo />
+        <OtoRaportLogo />
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-4">
@@ -108,7 +108,7 @@ function AuthenticatedHeader() {
   return (
     <header className="border-b bg-white/95 backdrop-blur-lg shadow-sm px-4 py-4 lg:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
-        <OtoraportLogo />
+        <OtoRaportLogo />
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-4">

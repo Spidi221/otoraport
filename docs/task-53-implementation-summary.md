@@ -1,7 +1,7 @@
 # Task #53 Implementation Summary - Additional Projects Billing
 
 ## Overview
-Successfully implemented additional projects billing for Pro plan users in OTORAPORT SaaS. Pro plan users can now purchase additional projects beyond the base 2-project limit at 50zł/month each.
+Successfully implemented additional projects billing for Pro plan users in OTO-RAPORT SaaS. Pro plan users can now purchase additional projects beyond the base 2-project limit at 50zł/month each.
 
 ## Implementation Details
 

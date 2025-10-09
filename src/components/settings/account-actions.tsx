@@ -152,7 +152,7 @@ export function AccountActions() {
         </div>
 
         <p className="text-xs text-muted-foreground pt-2">
-          Potrzebujesz pomocy? Skontaktuj się z nami pod adresem support@otoraport.pl
+          Potrzebujesz pomocy? Skontaktuj się z nami pod adresem support@oto-raport.pl
         </p>
       </CardContent>
     </Card>

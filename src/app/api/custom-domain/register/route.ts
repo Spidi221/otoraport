@@ -137,13 +137,13 @@ export async function POST(request: NextRequest) {
       domain: registrationResult.domain,
       verification: {
         token: registrationResult.verification_token,
-        txtRecordName: `_otoraport-verification.${registrationResult.domain}`,
+        txtRecordName: `_oto-raport-verification.${registrationResult.domain}`,
         txtRecordValue: registrationResult.verification_token,
         instructions: {
           pl: [
             '1. Zaloguj się do panelu zarządzania DNS swojej domeny',
             '2. Dodaj nowy rekord TXT:',
-            `   - Host/Nazwa: _otoraport-verification.${registrationResult.domain}`,
+            `   - Host/Nazwa: _oto-raport-verification.${registrationResult.domain}`,
             `   - Wartość: ${registrationResult.verification_token}`,
             '   - TTL: 3600 (lub domyślny)',
             '3. Poczekaj na propagację DNS (5-30 minut)',

@@ -176,8 +176,8 @@ export class InAppHelpSystem {
       {
         id: 'getting-started',
         type: 'guide',
-        title: 'Jak zacząć z OTORAPORT',
-        description: 'Kompletny przewodnik po systemie OTORAPORT',
+        title: 'Jak zacząć z OTO-RAPORT',
+        description: 'Kompletny przewodnik po systemie OTO-RAPORT',
         url: '/help/getting-started',
         tags: ['start', 'tutorial', 'podstawy'],
         relevance_score: 0.9
@@ -218,13 +218,13 @@ export class InAppHelpSystem {
     if (context.onboarding_step === 0 && context.page === 'dashboard') {
       return {
         id: 'onboarding-tour',
-        name: 'Pierwsze kroki w OTORAPORT',
+        name: 'Pierwsze kroki w OTO-RAPORT',
         description: 'Poznaj podstawowe funkcje systemu',
         estimated_duration: 5,
         steps: [
           {
             id: 'welcome',
-            title: 'Witaj w OTORAPORT!',
+            title: 'Witaj w OTO-RAPORT!',
             description: 'System automatyzacji compliance dla deweloperów nieruchomości',
             target: 'body',
             position: 'center',

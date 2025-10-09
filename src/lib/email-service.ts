@@ -1,4 +1,4 @@
-// Email service using Resend for OTORAPORT notifications
+// Email service using Resend for OTO-RAPORT notifications
 import { Resend } from 'resend'
 import { Database } from './supabase/server'
 
@@ -6,8 +6,8 @@ type Developer = Database['public']['Tables']['developers']['Row']
 
 // Validate required environment variables
 const RESEND_API_KEY = process.env.RESEND_API_KEY
-export const EMAIL_FROM = process.env.EMAIL_FROM || 'OTORAPORT <noreply@otoraport.pl>'
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://otoraport.vercel.app'
+export const EMAIL_FROM = process.env.EMAIL_FROM || 'OTO-RAPORT <noreply@oto-raport.pl>'
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.vercel.app'
 const MINISTRY_EMAIL = process.env.MINISTRY_EMAIL || 'kontakt@dane.gov.pl'
 
 if (!RESEND_API_KEY) {
@@ -154,7 +154,7 @@ export async function sendMinistryRegistrationEmail(developer: Developer) {
   const subject = `Zgłoszenie dewelopera do systemu raportowania cen - ${developer.company_name || developer.name}`
   
   const html = `
-    <h1>OTORAPORT - System automatycznego raportowania cen mieszkań</h1>
+    <h1>OTO-RAPORT - System automatycznego raportowania cen mieszkań</h1>
     
     <p>Dzień dobry,</p>
     
@@ -179,7 +179,7 @@ export async function sendMinistryRegistrationEmail(developer: Developer) {
   `
   
   const text = `
-OTORAPORT - System automatycznego raportowania cen mieszkań
+OTO-RAPORT - System automatycznego raportowania cen mieszkań
 
 ${developer.company_name || developer.name} zgłasza się do systemu automatycznego raportowania cen mieszkań.
 
@@ -214,7 +214,7 @@ export async function sendDeveloperWelcomeEmail(developer: Developer) {
   const dashboardUrl = `${APP_URL}/dashboard`
   const planType = developer.subscription_plan || 'trial'
   
-  const subject = `Witamy w OTORAPORT! Twoje konto ${planType} jest aktywne`
+  const subject = `Witamy w OTO-RAPORT! Twoje konto ${planType} jest aktywne`
   
   const html = `
     <!DOCTYPE html>
@@ -222,19 +222,19 @@ export async function sendDeveloperWelcomeEmail(developer: Developer) {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Witaj w OTORAPORT</title>
+      <title>Witaj w OTO-RAPORT</title>
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTO-RAPORT</h1>
         <p style="color: #666; font-size: 16px;">Automatyzacja compliance dla deweloperów</p>
       </div>
 
       <div style="background: #f8fafc; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #1e293b; margin-top: 0;">Witaj, ${developer.name}! 👋</h2>
         
-        <p>Dziękujemy za dołączenie do OTORAPORT. Twoje konto <strong>${planType}</strong> zostało pomyślnie utworzone i możesz rozpocząć korzystanie z platformy.</p>
+        <p>Dziękujemy za dołączenie do OTO-RAPORT. Twoje konto <strong>${planType}</strong> zostało pomyślnie utworzone i możesz rozpocząć korzystanie z platformy.</p>
         
         <div style="background: white; border-radius: 6px; padding: 20px; margin: 20px 0;">
           <h3 style="color: #2563eb; margin-top: 0; font-size: 18px;">🚀 Następne kroki:</h3>
@@ -260,21 +260,21 @@ export async function sendDeveloperWelcomeEmail(developer: Developer) {
         <h3 style="color: #92400e; margin-top: 0; font-size: 16px;">⚠️ Ważne - Ustawa z 21 maja 2025</h3>
         <p style="margin-bottom: 0; color: #78350f; font-size: 14px;">
           Pamiętaj o obowiązku raportowania cen nieruchomości zgodnie z nową ustawą. 
-          OTORAPORT automatyzuje ten proces, ale dane muszą być aktualne i kompletne.
+          OTO-RAPORT automatyzuje ten proces, ale dane muszą być aktualne i kompletne.
         </p>
       </div>
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 14px; color: #6b7280;">
         <p><strong>Potrzebujesz pomocy?</strong></p>
         <ul style="margin: 10px 0; padding-left: 20px;">
-          <li>📧 Email: <a href="mailto:support@otoraport.pl" style="color: #2563eb;">support@otoraport.pl</a></li>
-          <li>📚 Dokumentacja: <a href="${APP_URL}/docs" style="color: #2563eb;">otoraport.pl/docs</a></li>
+          <li>📧 Email: <a href="mailto:support@oto-raport.pl" style="color: #2563eb;">support@oto-raport.pl</a></li>
+          <li>📚 Dokumentacja: <a href="${APP_URL}/docs" style="color: #2563eb;">oto-raport.pl/docs</a></li>
           <li>💬 Chat: Dostępny w panelu użytkownika</li>
         </ul>
       </div>
 
       <div style="text-align: center; margin-top: 40px; font-size: 12px; color: #9ca3af;">
-        <p>OTORAPORT.pl - Compliance made simple</p>
+        <p>OTO-RAPORT.pl - Compliance made simple</p>
         <p>Ten email został wysłany automatycznie. Nie odpowiadaj na tę wiadomość.</p>
       </div>
     </body>
@@ -282,7 +282,7 @@ export async function sendDeveloperWelcomeEmail(developer: Developer) {
   `
   
   const text = `
-Witaj w OTORAPORT, ${developer.name}!
+Witaj w OTO-RAPORT, ${developer.name}!
 
 Twoje konto ${planType} zostało pomyślnie utworzone.
 
@@ -297,10 +297,10 @@ Przejdź do dashboardu: ${dashboardUrl}
 WAŻNE: Pamiętaj o obowiązku raportowania zgodnie z ustawą z 21 maja 2025.
 
 Potrzebujesz pomocy?
-- Email: support@otoraport.pl
-- Dokumentacja: otoraport.pl/docs
+- Email: support@oto-raport.pl
+- Dokumentacja: oto-raport.pl/docs
 
-OTORAPORT.pl - Compliance made simple
+OTO-RAPORT.pl - Compliance made simple
   `
   
   return await sendEmail({
@@ -315,7 +315,7 @@ OTORAPORT.pl - Compliance made simple
  * Send trial expiry warning email
  */
 export async function sendTrialExpiryWarning(developer: Developer, daysLeft: number) {
-  const subject = `⏰ Twój trial OTORAPORT wygasa za ${daysLeft} dni`
+  const subject = `⏰ Twój trial OTO-RAPORT wygasa za ${daysLeft} dni`
   
   const html = `
     <!DOCTYPE html>
@@ -328,7 +328,7 @@ export async function sendTrialExpiryWarning(developer: Developer, daysLeft: num
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTO-RAPORT</h1>
       </div>
 
       <div style="background: #fef2f2; border: 2px solid #f87171; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
@@ -336,7 +336,7 @@ export async function sendTrialExpiryWarning(developer: Developer, daysLeft: num
         
         <p>Witaj ${developer.name},</p>
         
-        <p>Twój 14-dniowy okres próbny OTORAPORT wygasa za <strong>${daysLeft} dni</strong>. 
+        <p>Twój 14-dniowy okres próbny OTO-RAPORT wygasa za <strong>${daysLeft} dni</strong>. 
         Aby zachować dostęp do platformy i compliance z ministerstwem, wybierz plan odpowiedni dla Twojej firmy.</p>
       </div>
 
@@ -386,14 +386,14 @@ export async function sendTrialExpiryWarning(developer: Developer, daysLeft: num
       </div>
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 14px; color: #6b7280; text-align: center;">
-        <p>Masz pytania? Skontaktuj się z nami: <a href="mailto:support@otoraport.pl" style="color: #2563eb;">support@otoraport.pl</a></p>
+        <p>Masz pytania? Skontaktuj się z nami: <a href="mailto:support@oto-raport.pl" style="color: #2563eb;">support@oto-raport.pl</a></p>
       </div>
     </body>
     </html>
   `
 
   const text = `
-⏰ Twój trial OTORAPORT wygasa za ${daysLeft} dni
+⏰ Twój trial OTO-RAPORT wygasa za ${daysLeft} dni
 
 Witaj ${developer.name},
 
@@ -419,7 +419,7 @@ ENTERPRISE - 399 zł/mies
 
 Wybierz plan: ${APP_URL}/pricing
 
-Pytania? support@otoraport.pl
+Pytania? support@oto-raport.pl
   `
 
   return await sendEmail({
@@ -440,7 +440,7 @@ export async function sendComplianceNotification(
   const xmlUrl = `${APP_URL}/api/public/${developer.client_id}/data.xml`
   const mdUrl = `${APP_URL}/api/public/${developer.client_id}/data.md5`
   
-  const subject = '✅ Raport compliance OTORAPORT został wygenerowany'
+  const subject = '✅ Raport compliance OTO-RAPORT został wygenerowany'
   
   const html = `
     <!DOCTYPE html>
@@ -487,14 +487,14 @@ export async function sendComplianceNotification(
       </div>
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 14px; color: #6b7280; text-align: center;">
-        <p>OTORAPORT.pl - Automatyczny compliance dla deweloperów</p>
+        <p>OTO-RAPORT.pl - Automatyczny compliance dla deweloperów</p>
       </div>
     </body>
     </html>
   `
 
   const text = `
-✅ Raport compliance OTORAPORT gotowy!
+✅ Raport compliance OTO-RAPORT gotowy!
 
 Witaj ${developer.name},
 
@@ -507,7 +507,7 @@ Raporty są dostępne 24/7 dla ministerstwa przez nasze API.
 
 Dashboard: ${APP_URL}/dashboard
 
-OTORAPORT.pl - Automatyczny compliance
+OTO-RAPORT.pl - Automatyczny compliance
   `
 
   return await sendEmail({
@@ -530,7 +530,7 @@ export async function sendUploadErrorEmail(
   }
 ) {
   const dashboardUrl = `${APP_URL}/dashboard`
-  const supportEmail = 'support@otoraport.pl'
+  const supportEmail = 'support@oto-raport.pl'
 
   const subject = `❌ Błąd podczas przetwarzania pliku "${uploadData.fileName}"`
 
@@ -545,7 +545,7 @@ export async function sendUploadErrorEmail(
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
 
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTO-RAPORT</h1>
       </div>
 
       <div style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
@@ -591,7 +591,7 @@ export async function sendUploadErrorEmail(
       </div>
 
       <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #9ca3af;">
-        <p>OTORAPORT.pl - Automatyczny compliance dla deweloperów</p>
+        <p>OTO-RAPORT.pl - Automatyczny compliance dla deweloperów</p>
       </div>
     </body>
     </html>
@@ -619,7 +619,7 @@ Spróbuj ponownie: ${dashboardUrl}
 
 Potrzebujesz pomocy? ${supportEmail}
 
-OTORAPORT.pl
+OTO-RAPORT.pl
   `
 
   return await sendEmail({
@@ -648,7 +648,7 @@ export async function sendWeeklyReportEmail(
   const dashboardUrl = `${APP_URL}/dashboard`
   const xmlUrl = `${APP_URL}/api/public/${developer.client_id}/data.xml`
 
-  const subject = `📊 Tygodniowy raport OTORAPORT - ${new Date().toLocaleDateString('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' })}`
+  const subject = `📊 Tygodniowy raport OTO-RAPORT - ${new Date().toLocaleDateString('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' })}`
 
   const html = `
     <!DOCTYPE html>
@@ -656,12 +656,12 @@ export async function sendWeeklyReportEmail(
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Tygodniowy raport OTORAPORT</title>
+      <title>Tygodniowy raport OTO-RAPORT</title>
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
 
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTO-RAPORT</h1>
         <p style="color: #666; font-size: 16px;">Tygodniowy raport compliance</p>
       </div>
 
@@ -740,14 +740,14 @@ export async function sendWeeklyReportEmail(
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 12px; color: #6b7280; text-align: center;">
         <p>Ten raport jest wysyłany automatycznie co poniedziałek.</p>
         <p>Możesz zarządzać powiadomieniami w <a href="${dashboardUrl}/settings" style="color: #2563eb;">ustawieniach konta</a>.</p>
-        <p style="margin-top: 20px;">OTORAPORT.pl - Automatyczny compliance dla deweloperów</p>
+        <p style="margin-top: 20px;">OTO-RAPORT.pl - Automatyczny compliance dla deweloperów</p>
       </div>
     </body>
     </html>
   `
 
   const text = `
-📊 Tygodniowy raport OTORAPORT
+📊 Tygodniowy raport OTO-RAPORT
 
 Cześć ${developer.name}!
 
@@ -770,7 +770,7 @@ Dashboard: ${dashboardUrl}
 Ten raport jest wysyłany co poniedziałek.
 Zarządzaj powiadomieniami: ${dashboardUrl}/settings
 
-OTORAPORT.pl
+OTO-RAPORT.pl
   `
 
   return await sendEmail({
@@ -809,7 +809,7 @@ export async function sendUploadConfirmationEmail(
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
 
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTO-RAPORT</h1>
       </div>
 
       <div style="background: #dcfce7; border: 2px solid #16a34a; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
@@ -817,7 +817,7 @@ export async function sendUploadConfirmationEmail(
 
         <p>Witaj ${developer.name},</p>
 
-        <p>Twój plik <strong>"${uploadData.fileName}"</strong> został pomyślnie przesłany i przetworzony przez system OTORAPORT.</p>
+        <p>Twój plik <strong>"${uploadData.fileName}"</strong> został pomyślnie przesłany i przetworzony przez system OTO-RAPORT.</p>
 
         <div style="background: white; border-radius: 6px; padding: 20px; margin: 20px 0;">
           <h3 style="color: #15803d; margin-top: 0;">📊 Podsumowanie parsowania:</h3>
@@ -855,7 +855,7 @@ export async function sendUploadConfirmationEmail(
       </div>
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 14px; color: #6b7280; text-align: center;">
-        <p>OTORAPORT.pl - Automatyczny compliance dla deweloperów</p>
+        <p>OTO-RAPORT.pl - Automatyczny compliance dla deweloperów</p>
         <p style="font-size: 12px; margin-top: 10px;">
           Ten email został wysłany automatycznie po przetworzeniu Twojego pliku.
         </p>
@@ -879,7 +879,7 @@ ${xmlUrl}
 
 Zobacz szczegóły: ${dashboardUrl}
 
-OTORAPORT.pl - Automatyczny compliance
+OTO-RAPORT.pl - Automatyczny compliance
   `
 
   return await sendEmail({
@@ -897,19 +897,19 @@ OTORAPORT.pl - Automatyczny compliance
 export async function sendTrialEndingReminderEmail(developer: Developer, daysLeft: number = 3) {
   const dashboardUrl = `${APP_URL}/dashboard`
 
-  const subject = `⏰ Twój trial OTORAPORT kończy się za ${daysLeft} dni`
+  const subject = `⏰ Twój trial OTO-RAPORT kończy się za ${daysLeft} dni`
 
   const html = `
     <!DOCTYPE html>
     <html>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb;">🏢 OTO-RAPORT</h1>
       </div>
       <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #856404;">⏰ Twój trial kończy się za ${daysLeft} dni</h2>
         <p>Witaj ${developer.name},</p>
-        <p>Twój 14-dniowy trial OTORAPORT wygasa za <strong>${daysLeft} dni</strong>.</p>
+        <p>Twój 14-dniowy trial OTO-RAPORT wygasa za <strong>${daysLeft} dni</strong>.</p>
         <p>Po zakończeniu trialu automatycznie przejdziesz na wybrany plan płatny.</p>
       </div>
       <div style="text-align: center; margin: 30px 0;">
@@ -955,7 +955,7 @@ export async function sendTrialWelcomeEmail(developer: {
     year: 'numeric'
   })
 
-  const subject = `Witaj w OTORAPORT! Twój 14-dniowy trial rozpoczął się 🚀`
+  const subject = `Witaj w OTO-RAPORT! Twój 14-dniowy trial rozpoczął się 🚀`
 
   const html = `
     <!DOCTYPE html>
@@ -966,12 +966,12 @@ export async function sendTrialWelcomeEmail(developer: {
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTO-RAPORT</h1>
         <p style="color: #666; font-size: 16px;">Automatyzacja compliance dla deweloperów</p>
       </div>
 
       <div style="background: #dcfce7; border: 2px solid #16a34a; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
-        <h2 style="color: #15803d; margin-top: 0;">🚀 Witamy w OTORAPORT!</h2>
+        <h2 style="color: #15803d; margin-top: 0;">🚀 Witamy w OTO-RAPORT!</h2>
         <p>Cześć ${developer.company_name}!</p>
         <p>Twój 14-dniowy trial właśnie się rozpoczął. Masz pełny dostęp do wszystkich funkcji platformy do <strong>${trialEndDate}</strong>.</p>
       </div>
@@ -1006,7 +1006,7 @@ export async function sendTrialWelcomeEmail(developer: {
       <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 20px; margin-bottom: 30px;">
         <h3 style="color: #92400e; margin-top: 0; font-size: 16px;">💡 Potrzebujesz pomocy?</h3>
         <ul style="margin: 10px 0; padding-left: 20px; color: #78350f; font-size: 14px;">
-          <li>📧 Email: support@otoraport.pl</li>
+          <li>📧 Email: support@oto-raport.pl</li>
           <li>📚 Dokumentacja: ${docsUrl}</li>
           <li>💬 Chat na żywo w dashboardzie</li>
         </ul>
@@ -1015,14 +1015,14 @@ export async function sendTrialWelcomeEmail(developer: {
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 12px; color: #6b7280; text-align: center;">
         <p>Trial kończy się: ${trialEndDate}</p>
         <p>Ten email to transakcyjna wiadomość systemowa</p>
-        <p>OTORAPORT.pl © ${new Date().getFullYear()}</p>
+        <p>OTO-RAPORT.pl © ${new Date().getFullYear()}</p>
       </div>
     </body>
     </html>
   `
 
   const text = `
-Witaj w OTORAPORT! 🚀
+Witaj w OTO-RAPORT! 🚀
 
 Cześć ${developer.company_name}!
 
@@ -1038,12 +1038,12 @@ Dashboard: ${dashboardUrl}
 Dokumentacja: ${docsUrl}
 
 POMOC:
-Email: support@otoraport.pl
+Email: support@oto-raport.pl
 Dokumentacja: ${docsUrl}
 
 Trial kończy się: ${trialEndDate}
 
-OTORAPORT.pl
+OTO-RAPORT.pl
   `
 
   await sendEmail({
@@ -1084,7 +1084,7 @@ export async function sendTrialMidwayEmail(developer: {
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTO-RAPORT</h1>
         <p style="color: #666; font-size: 16px;">Podsumowanie tygodnia trialu</p>
       </div>
 
@@ -1130,8 +1130,8 @@ export async function sendTrialMidwayEmail(developer: {
       </div>
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 12px; color: #6b7280; text-align: center;">
-        <p>Masz pytania? Skontaktuj się: support@otoraport.pl</p>
-        <p>OTORAPORT.pl © ${new Date().getFullYear()}</p>
+        <p>Masz pytania? Skontaktuj się: support@oto-raport.pl</p>
+        <p>OTO-RAPORT.pl © ${new Date().getFullYear()}</p>
       </div>
     </body>
     </html>
@@ -1158,9 +1158,9 @@ Wykorzystaj czas na:
 
 Dashboard: ${dashboardUrl}
 
-Pytania? support@otoraport.pl
+Pytania? support@oto-raport.pl
 
-OTORAPORT.pl
+OTO-RAPORT.pl
   `
 
   await sendEmail({
@@ -1201,13 +1201,13 @@ export async function sendTrialUrgencyEmail(developer: {
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTO-RAPORT</h1>
       </div>
 
       <div style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #dc2626; margin-top: 0;">⏰ Tylko 3 dni do końca trialu!</h2>
         <p>Cześć ${developer.company_name}!</p>
-        <p>Twój 14-dniowy trial OTORAPORT kończy się za <strong>3 dni</strong> (${trialEndDate}).</p>
+        <p>Twój 14-dniowy trial OTO-RAPORT kończy się za <strong>3 dni</strong> (${trialEndDate}).</p>
         <p style="font-size: 16px; font-weight: 600; color: #dc2626;">
           Upewnij się, że Twoja metoda płatności jest aktywna, aby zachować dostęp!
         </p>
@@ -1246,8 +1246,8 @@ export async function sendTrialUrgencyEmail(developer: {
       </div>
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 12px; color: #6b7280; text-align: center;">
-        <p>Pytania? Kontakt: support@otoraport.pl</p>
-        <p>OTORAPORT.pl © ${new Date().getFullYear()}</p>
+        <p>Pytania? Kontakt: support@oto-raport.pl</p>
+        <p>OTO-RAPORT.pl © ${new Date().getFullYear()}</p>
       </div>
     </body>
     </html>
@@ -1272,9 +1272,9 @@ KORZYŚCI:
 
 Dashboard: ${dashboardUrl}
 
-Pytania? support@otoraport.pl
+Pytania? support@oto-raport.pl
 
-OTORAPORT.pl
+OTO-RAPORT.pl
   `
 
   await sendEmail({
@@ -1299,7 +1299,7 @@ export async function sendTrialConversionSuccessEmail(developer: {
   const dashboardUrl = `${APP_URL}/dashboard`
   const supportUrl = `${APP_URL}/support`
 
-  const subject = `🎉 Witaj jako klient premium OTORAPORT!`
+  const subject = `🎉 Witaj jako klient premium OTO-RAPORT!`
 
   const html = `
     <!DOCTYPE html>
@@ -1310,20 +1310,20 @@ export async function sendTrialConversionSuccessEmail(developer: {
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTO-RAPORT</h1>
       </div>
 
       <div style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); border-radius: 8px; padding: 40px; margin-bottom: 30px; text-align: center;">
         <h2 style="color: white; margin-top: 0; font-size: 32px;">🎉</h2>
         <h2 style="color: white; margin-top: 10px;">Gratulacje!</h2>
         <p style="color: white; font-size: 18px; margin-bottom: 0;">
-          Witaj jako klient premium OTORAPORT
+          Witaj jako klient premium OTO-RAPORT
         </p>
       </div>
 
       <div style="background: #f8fafc; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <p style="font-size: 16px;">Cześć ${developer.company_name}!</p>
-        <p>Dziękujemy za zaufanie i wybór OTORAPORT! Twój trial zakończył się pomyślnie i teraz jesteś oficjalnie naszym klientem premium.</p>
+        <p>Dziękujemy za zaufanie i wybór OTO-RAPORT! Twój trial zakończył się pomyślnie i teraz jesteś oficjalnie naszym klientem premium.</p>
 
         <div style="background: white; border-radius: 6px; padding: 20px; margin: 20px 0;">
           <h3 style="color: #1e293b; margin-top: 0;">📋 Szczegóły subskrypcji:</h3>
@@ -1365,15 +1365,15 @@ export async function sendTrialConversionSuccessEmail(developer: {
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 12px; color: #6b7280; text-align: center;">
         <p><strong>Dziękujemy za zaufanie!</strong></p>
-        <p>Zespół OTORAPORT</p>
-        <p>OTORAPORT.pl © ${new Date().getFullYear()}</p>
+        <p>Zespół OTO-RAPORT</p>
+        <p>OTO-RAPORT.pl © ${new Date().getFullYear()}</p>
       </div>
     </body>
     </html>
   `
 
   const text = `
-🎉 Gratulacje! Witaj jako klient premium OTORAPORT
+🎉 Gratulacje! Witaj jako klient premium OTO-RAPORT
 
 Cześć ${developer.company_name}!
 
@@ -1394,9 +1394,9 @@ Dashboard: ${dashboardUrl}
 Support: ${supportUrl}
 
 Dziękujemy za zaufanie!
-Zespół OTORAPORT
+Zespół OTO-RAPORT
 
-OTORAPORT.pl
+OTO-RAPORT.pl
   `
 
   await sendEmail({
@@ -1425,7 +1425,7 @@ export async function sendTrialFailedEmail(developer: {
     year: 'numeric'
   })
 
-  const subject = `Twój trial OTORAPORT wygasł - reaktywuj z rabatem 20%! 💳`
+  const subject = `Twój trial OTO-RAPORT wygasł - reaktywuj z rabatem 20%! 💳`
 
   const html = `
     <!DOCTYPE html>
@@ -1436,13 +1436,13 @@ export async function sendTrialFailedEmail(developer: {
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb; font-size: 28px; margin-bottom: 10px;">🏢 OTO-RAPORT</h1>
       </div>
 
       <div style="background: #fff3cd; border: 2px solid #f59e0b; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #92400e; margin-top: 0;">Twój trial wygasł</h2>
         <p>Cześć ${developer.company_name}!</p>
-        <p>Twój 14-dniowy trial OTORAPORT zakończył się ${trialEndDate}. Mamy nadzieję, że miałeś okazję poznać wszystkie funkcje platformy!</p>
+        <p>Twój 14-dniowy trial OTO-RAPORT zakończył się ${trialEndDate}. Mamy nadzieję, że miałeś okazję poznać wszystkie funkcje platformy!</p>
       </div>
 
       <div style="background: #f8fafc; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
@@ -1486,15 +1486,15 @@ export async function sendTrialFailedEmail(developer: {
       </div>
 
       <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 12px; color: #6b7280; text-align: center;">
-        <p>Masz pytania? Skontaktuj się: support@otoraport.pl</p>
-        <p>OTORAPORT.pl © ${new Date().getFullYear()}</p>
+        <p>Masz pytania? Skontaktuj się: support@oto-raport.pl</p>
+        <p>OTO-RAPORT.pl © ${new Date().getFullYear()}</p>
       </div>
     </body>
     </html>
   `
 
   const text = `
-Twój trial OTORAPORT wygasł 💳
+Twój trial OTO-RAPORT wygasł 💳
 
 Cześć ${developer.company_name}!
 
@@ -1517,9 +1517,9 @@ DLACZEGO WARTO WRÓCIĆ?
 
 Reaktywuj: ${pricingUrl}
 
-Pytania? support@otoraport.pl
+Pytania? support@oto-raport.pl
 
-OTORAPORT.pl
+OTO-RAPORT.pl
   `
 
   await sendEmail({
@@ -1539,14 +1539,14 @@ export async function sendTrialConvertedEmail(developer: Developer) {
   const dashboardUrl = `${APP_URL}/dashboard`
   const planType = developer.subscription_plan || 'basic'
 
-  const subject = `🎉 Witaj jako klient premium OTORAPORT!`
+  const subject = `🎉 Witaj jako klient premium OTO-RAPORT!`
 
   const html = `
     <!DOCTYPE html>
     <html>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb;">🏢 OTO-RAPORT</h1>
       </div>
       <div style="background: #dcfce7; border: 2px solid #16a34a; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #15803d;">🎉 Witaj jako klient premium!</h2>
@@ -1564,7 +1564,7 @@ export async function sendTrialConvertedEmail(developer: Developer) {
   `
 
   const text = `
-🎉 Witaj jako klient premium OTORAPORT!
+🎉 Witaj jako klient premium OTO-RAPORT!
 
 Witaj ${developer.name},
 Twój trial zakończył się. Jesteś teraz klientem premium na planie ${planType.toUpperCase()}!
@@ -1587,19 +1587,19 @@ Dashboard: ${dashboardUrl}
 export async function sendPaymentFailedEmail(developer: Developer) {
   const dashboardUrl = `${APP_URL}/dashboard`
 
-  const subject = `⚠️ Problem z płatnością - OTORAPORT`
+  const subject = `⚠️ Problem z płatnością - OTO-RAPORT`
 
   const html = `
     <!DOCTYPE html>
     <html>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #2563eb;">🏢 OTORAPORT</h1>
+        <h1 style="color: #2563eb;">🏢 OTO-RAPORT</h1>
       </div>
       <div style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #dc2626;">⚠️ Problem z płatnością</h2>
         <p>Witaj ${developer.name},</p>
-        <p>Nie udało się przetworzyć Twojej płatności za subskrypcję OTORAPORT.</p>
+        <p>Nie udało się przetworzyć Twojej płatności za subskrypcję OTO-RAPORT.</p>
         <p>Zaktualizuj metodę płatności aby uniknąć przerwy w dostępie.</p>
       </div>
       <div style="text-align: center; margin: 30px 0;">
@@ -1612,7 +1612,7 @@ export async function sendPaymentFailedEmail(developer: Developer) {
   `
 
   const text = `
-⚠️ Problem z płatnością - OTORAPORT
+⚠️ Problem z płatnością - OTO-RAPORT
 
 Witaj ${developer.name},
 Nie udało się przetworzyć płatności.

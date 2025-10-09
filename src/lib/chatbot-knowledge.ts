@@ -1,5 +1,5 @@
 /**
- * OTORAPORT Chatbot Knowledge Base - Phase 1
+ * OTO-RAPORT Chatbot Knowledge Base - Phase 1
  * Comprehensive knowledge base for FAQ chatbot covering all aspects of the service
  */
 
@@ -19,8 +19,8 @@ export const knowledgeBase: KnowledgeItem[] = [
     id: 'service-overview',
     category: 'Podstawy',
     keywords: ['co to', 'czym jest', 'otoraport', 'służy', 'robi', 'oferuje', 'usługa'],
-    question: 'Co to jest OTORAPORT?',
-    answer: 'OTORAPORT to automatyczne rozwiązanie do raportowania cen mieszkań zgodnie z wymogami ustawy z 21 maja 2025 roku. Pomagamy deweloperom spełnić obowiązek codziennej publikacji danych o cenach nieruchomości na portalu dane.gov.pl w formacie XML 1.13.',
+    question: 'Co to jest OTO-RAPORT?',
+    answer: 'OTO-RAPORT to automatyczne rozwiązanie do raportowania cen mieszkań zgodnie z wymogami ustawy z 21 maja 2025 roku. Pomagamy deweloperom spełnić obowiązek codziennej publikacji danych o cenach nieruchomości na portalu dane.gov.pl w formacie XML 1.13.',
     followUpQuestions: ['Jakie są wymagania prawne?', 'Ile kosztuje usługa?', 'Jak szybki jest setup?'],
     priority: 10
   },
@@ -41,8 +41,8 @@ export const knowledgeBase: KnowledgeItem[] = [
     category: 'Prawo',
     keywords: ['kary', 'grzywna', '200k', 'sankcje', 'niewykonanie', 'brak', 'compliance'],
     question: 'Jakie są kary za brak compliance?',
-    answer: 'Za niewykonanie obowiązków przewidzianych w ustawie grożą kary finansowe do **200 000 PLN**. To znacząca kwota, która wielokrotnie przekracza koszt automatyzacji przez OTORAPORT. Przy ręcznym compliance (40h/miesiąc × 60 PLN/h = 2400 PLN miesięcznie) + ryzyko kar, automatyzacja to oczywista decyzja biznesowa.',
-    followUpQuestions: ['Ile kosztuje OTORAPORT?', 'Jak się zabezpieczyć?', 'Czy są już sprawdzane firmy?'],
+    answer: 'Za niewykonanie obowiązków przewidzianych w ustawie grożą kary finansowe do **200 000 PLN**. To znacząca kwota, która wielokrotnie przekracza koszt automatyzacji przez OTO-RAPORT. Przy ręcznym compliance (40h/miesiąc × 60 PLN/h = 2400 PLN miesięcznie) + ryzyko kar, automatyzacja to oczywista decyzja biznesowa.',
+    followUpQuestions: ['Ile kosztuje OTO-RAPORT?', 'Jak się zabezpieczyć?', 'Czy są już sprawdzane firmy?'],
     priority: 8
   },
 
@@ -51,8 +51,8 @@ export const knowledgeBase: KnowledgeItem[] = [
     category: 'Prawo',
     keywords: ['codziennie', 'daily', 'aktualizacja', 'często', 'kiedy'],
     question: 'Czy naprawdę muszę publikować dane codziennie?',
-    answer: 'Tak - według oficjalnej instrukcji COI dane muszą być aktualizowane **codziennie**. To nie oznacza, że musisz ręcznie aktualizować co dzień, ale system musi być skonfigurowany do codziennej publikacji. OTORAPORT automatycznie spełnia ten wymóg - po pierwszej konfiguracji wszystko dzieje się bez Twojego udziału.',
-    followUpQuestions: ['Jak OTORAPORT to automatyzuje?', 'Co jeśli zapomnę zaktualizować?', 'Ile to kosztuje czasu ręcznie?'],
+    answer: 'Tak - według oficjalnej instrukcji COI dane muszą być aktualizowane **codziennie**. To nie oznacza, że musisz ręcznie aktualizować co dzień, ale system musi być skonfigurowany do codziennej publikacji. OTO-RAPORT automatycznie spełnia ten wymóg - po pierwszej konfiguracji wszystko dzieje się bez Twojego udziału.',
+    followUpQuestions: ['Jak OTO-RAPORT to automatyzuje?', 'Co jeśli zapomnę zaktualizować?', 'Ile to kosztuje czasu ręcznie?'],
     priority: 8
   },
 
@@ -92,8 +92,8 @@ export const knowledgeBase: KnowledgeItem[] = [
     id: 'file-formats',
     category: 'Techniczne',
     keywords: ['csv', 'xml', 'excel', 'xlsx', 'format', 'plik', 'upload', 'wgrywanie'],
-    question: 'Jakie formaty plików obsługuje OTORAPORT?',
-    answer: 'OTORAPORT obsługuje **wszystkie popularne formaty**:\n\n📁 **CSV** - najpopularniejszy format eksportu\n📁 **XML** - bezpośredni import z systemów deweloperskich\n📁 **Excel/XLSX** - łatwy import z arkuszy kalkulacyjnych\n\nSystem **automatycznie rozpoznaje format** i parsuje dane. Wystarczy jeden upload miesięcznie - reszta dzieje się automatycznie. To ogromna przewaga nad konkurencją, która wymaga ręcznego wprowadzania każdego lokalu.',
+    question: 'Jakie formaty plików obsługuje OTO-RAPORT?',
+    answer: 'OTO-RAPORT obsługuje **wszystkie popularne formaty**:\n\n📁 **CSV** - najpopularniejszy format eksportu\n📁 **XML** - bezpośredni import z systemów deweloperskich\n📁 **Excel/XLSX** - łatwy import z arkuszy kalkulacyjnych\n\nSystem **automatycznie rozpoznaje format** i parsuje dane. Wystarczy jeden upload miesięcznie - reszta dzieje się automatycznie. To ogromna przewaga nad konkurencją, która wymaga ręcznego wprowadzania każdego lokalu.',
     followUpQuestions: ['Jak przygotować plik CSV?', 'Jaka struktura danych?', 'Co z błędami w pliku?'],
     priority: 6
   },
@@ -113,8 +113,8 @@ export const knowledgeBase: KnowledgeItem[] = [
     id: 'vs-competition',
     category: 'Przewagi',
     keywords: ['wykazcen', 'konkurencja', 'porównanie', 'lepsze', 'różnice', 'przewaga'],
-    question: 'Czym OTORAPORT różni się od konkurencji (np. wykazcen.pl)?',
-    answer: '🚀 **OTORAPORT przewagi nad wykazcen.pl:**\n\n⚡ **Szybszy onboarding**: <10 min vs ich 12,5 min\n🤖 **Automatyzacja**: CSV/XML bulk import vs manual input każdego lokalu\n📊 **Lepszy XML workflow**: mamy gotowy n8n z poprawną strukturą\n💰 **Lepsza cena**: więcej funkcji w podstawowych pakietach\n🏗️ **Skalowalność**: architekteka gotowa na 1000+ klientów\n📱 **Modern UI/UX**: lepszy design i user experience',
+    question: 'Czym OTO-RAPORT różni się od konkurencji (np. wykazcen.pl)?',
+    answer: '🚀 **OTO-RAPORT przewagi nad wykazcen.pl:**\n\n⚡ **Szybszy onboarding**: <10 min vs ich 12,5 min\n🤖 **Automatyzacja**: CSV/XML bulk import vs manual input każdego lokalu\n📊 **Lepszy XML workflow**: mamy gotowy n8n z poprawną strukturą\n💰 **Lepsza cena**: więcej funkcji w podstawowych pakietach\n🏗️ **Skalowalność**: architekteka gotowa na 1000+ klientów\n📱 **Modern UI/UX**: lepszy design i user experience',
     followUpQuestions: ['Ile kosztuje wykazcen?', 'Jakie mają ograniczenia?', 'Czy można migrować dane?'],
     priority: 8
   },
@@ -123,8 +123,8 @@ export const knowledgeBase: KnowledgeItem[] = [
     id: 'setup-speed',
     category: 'Przewagi',
     keywords: ['szybkość', 'setup', 'konfiguracja', '10 minut', 'onboarding', 'wdrożenie'],
-    question: 'Jak szybki jest setup OTORAPORT?',
-    answer: '⚡ **Najszybszy setup na polskim rynku - poniżej 10 minut!**\n\n1️⃣ **Rejestracja** (2 min) - Google OAuth lub email\n2️⃣ **Upload pliku** (1 min) - CSV/XML/Excel\n3️⃣ **Auto-mapping** (2 min) - system rozpoznaje kolumny\n4️⃣ **Weryfikacja** (3 min) - sprawdzenie danych\n5️⃣ **Aktywacja** (1 min) - pierwszy raport gotowy!\n\n🎯 **Konkurencja**: wykazcen.pl = 12,5 min, inne rozwiązania = godziny\n🎯 **OTORAPORT**: <10 min do pełnego compliance',
+    question: 'Jak szybki jest setup OTO-RAPORT?',
+    answer: '⚡ **Najszybszy setup na polskim rynku - poniżej 10 minut!**\n\n1️⃣ **Rejestracja** (2 min) - Google OAuth lub email\n2️⃣ **Upload pliku** (1 min) - CSV/XML/Excel\n3️⃣ **Auto-mapping** (2 min) - system rozpoznaje kolumny\n4️⃣ **Weryfikacja** (3 min) - sprawdzenie danych\n5️⃣ **Aktywacja** (1 min) - pierwszy raport gotowy!\n\n🎯 **Konkurencja**: wykazcen.pl = 12,5 min, inne rozwiązania = godziny\n🎯 **OTO-RAPORT**: <10 min do pełnego compliance',
     followUpQuestions: ['Co potrzebuję do startu?', 'Czy mogę przetestować za darmo?', 'Co jeśli mam problemy?'],
     priority: 7
   },
@@ -134,7 +134,7 @@ export const knowledgeBase: KnowledgeItem[] = [
     id: 'dane-gov-integration',
     category: 'Techniczne',
     keywords: ['dane.gov.pl', 'integracja', 'api', 'publikacja', 'xml', 'portal'],
-    question: 'Jak OTORAPORT integruje się z portalem dane.gov.pl?',
+    question: 'Jak OTO-RAPORT integruje się z portalem dane.gov.pl?',
     answer: '🔗 **Bezpośrednia integracja z oficjalnym API dane.gov.pl:**\n\n✅ **Oficjalne API** - używamy certyfikowanego API ministerstwa\n✅ **XML format 1.13** - najnowsza wersja zgodna z COI\n✅ **Automatyczna publikacja** - bez ręcznej pracy\n✅ **Real-time status** - monitorowanie publikacji 24/7\n✅ **Error handling** - automatyczne retry przy problemach\n✅ **Compliance monitoring** - stały nadzór nad wymogami\n\nTo **jedyne rozwiązanie z pełną integracją** - konkurencja często wymaga ręcznych kroków.',
     followUpQuestions: ['Co jeśli API nie działa?', 'Jak często dane są publikowane?', 'Czy można sprawdzić status?'],
     priority: 8
@@ -145,7 +145,7 @@ export const knowledgeBase: KnowledgeItem[] = [
     id: 'free-trial',
     category: 'Start',
     keywords: ['darmowy', 'trial', 'próbny', '14 dni', 'test', 'bezpłatnie'],
-    question: 'Czy mogę przetestować OTORAPORT za darmo?',
+    question: 'Czy mogę przetestować OTO-RAPORT za darmo?',
     answer: '🎁 **TAK! 14 dni pełni funkcjonalności za darmo:**\n\n✅ **Bez karty kredytowej** - nie musisz podawać danych płatniczych\n✅ **Pełny dostęp** - wszystkie funkcje planu Basic\n✅ **Prawdziwe dane** - możesz uploadować swoje pliki\n✅ **Bez zobowiązań** - możesz anulować w każdej chwili\n✅ **Support włączony** - pomożemy w konfiguracji\n\n🚀 **Start w 2 kroki**: Rejestracja → Upload pliku → Gotowe!\n📞 **Potrzebujesz pomocy?** Nasz support pomoże w setupie.',
     followUpQuestions: ['Jak się zarejestrować?', 'Co po okresie próbnym?', 'Czy mogę przedłużyć trial?'],
     priority: 9
@@ -155,7 +155,7 @@ export const knowledgeBase: KnowledgeItem[] = [
     id: 'getting-started',
     category: 'Start',
     keywords: ['start', 'początek', 'rejestracja', 'jak zacząć', 'pierwszy krok'],
-    question: 'Jak zacząć korzystać z OTORAPORT?',
+    question: 'Jak zacząć korzystać z OTO-RAPORT?',
     answer: '🚀 **3 proste kroki do compliance:**\n\n**KROK 1: Rejestracja** (2 min)\n• Kliknij "Wypróbuj za darmo" na stronie\n• Zaloguj się przez Google lub podaj email\n• Bez karty kredytowej, bez zobowiązań\n\n**KROK 2: Upload danych** (3 min)\n• Wgraj plik CSV/XML/Excel z cenami mieszkań\n• System automatycznie rozpozna strukturę\n• Sprawdź czy dane się zgadzają\n\n**KROK 3: Aktywacja** (2 min)\n• Potwierdź konfigurację\n• System automatycznie publikuje pierwszy raport\n• Gotowe - ministerstwo ma dostęp 24/7!',
     followUpQuestions: ['Jakie dane potrzebuję?', 'Co jeśli mam problemy?', 'Ile to kosztuje?'],
     priority: 9
@@ -176,8 +176,8 @@ export const knowledgeBase: KnowledgeItem[] = [
     id: 'contact-info',
     category: 'Kontakt',
     keywords: ['kontakt', 'email', 'telefon', 'adres', 'biuro', 'gdzie'],
-    question: 'Jak skontaktować się z OTORAPORT?',
-    answer: '📞 **Kontakt z zespołem OTORAPORT:**\n\n📧 **Email**: support@otoraport.pl\n📧 **Sprzedaż**: sales@otoraport.pl\n💬 **Live Chat**: dostępny na stronie 9-17\n📞 **Telefon wsparcia**: +48 123 456 789\n\n🏢 **Biuro**: Warszawa, Polska\n⏰ **Godziny pracy**: PN-PT 9:00-17:00\n🌐 **Status systemu**: status.otoraport.pl\n\n**Uwaga**: To jest chatbot FAQ - dla złożonych problemów skorzystaj z powyższych kanałów.',
+    question: 'Jak skontaktować się z OTO-RAPORT?',
+    answer: '📞 **Kontakt z zespołem OTO-RAPORT:**\n\n📧 **Email**: support@oto-raport.pl\n📧 **Sprzedaż**: sales@oto-raport.pl\n💬 **Live Chat**: dostępny na stronie 9-17\n📞 **Telefon wsparcia**: +48 123 456 789\n\n🏢 **Biuro**: Warszawa, Polska\n⏰ **Godziny pracy**: PN-PT 9:00-17:00\n🌐 **Status systemu**: status.oto-raport.pl\n\n**Uwaga**: To jest chatbot FAQ - dla złożonych problemów skorzystaj z powyższych kanałów.',
     followUpQuestions: ['Czy można umówić demo?', 'Jakie są godziny telefonu?', 'Czy jest obsługa weekendowa?'],
     priority: 5
   },
@@ -187,8 +187,8 @@ export const knowledgeBase: KnowledgeItem[] = [
     id: 'time-savings',
     category: 'Korzyści',
     keywords: ['czas', 'oszczędność', 'godziny', 'praca', 'manualnie', 'automatycznie'],
-    question: 'Ile czasu oszczędza OTORAPORT?',
-    answer: '⏰ **Ogromne oszczędności czasu i pieniędzy:**\n\n**Praca ręczna (bez OTORAPORT):**\n• 40 godzin miesięcznie na compliance\n• 2400 PLN kosztów pracy (60 PLN/h)\n• Stres i ryzyko błędów\n• Ryzyko kar do 200k PLN\n\n**Z OTORAPORT:**\n• 10 minut setup raz na start\n• 2 minuty miesięcznie na upload nowych cen\n• 149-399 PLN miesięcznie za pełną automatyzację\n• Zero stresu, pełny compliance\n\n💰 **ROI**: oszczędność 2000+ PLN miesięcznie + eliminacja ryzyka kar',
+    question: 'Ile czasu oszczędza OTO-RAPORT?',
+    answer: '⏰ **Ogromne oszczędności czasu i pieniędzy:**\n\n**Praca ręczna (bez OTO-RAPORT):**\n• 40 godzin miesięcznie na compliance\n• 2400 PLN kosztów pracy (60 PLN/h)\n• Stres i ryzyko błędów\n• Ryzyko kar do 200k PLN\n\n**Z OTO-RAPORT:**\n• 10 minut setup raz na start\n• 2 minuty miesięcznie na upload nowych cen\n• 149-399 PLN miesięcznie za pełną automatyzację\n• Zero stresu, pełny compliance\n\n💰 **ROI**: oszczędność 2000+ PLN miesięcznie + eliminacja ryzyka kar',
     followUpQuestions: ['Ile kosztuje plan Basic?', 'Co jeśli będą zmiany w prawie?', 'Czy automatyzacja jest pewna?'],
     priority: 8
   },
@@ -199,7 +199,7 @@ export const knowledgeBase: KnowledgeItem[] = [
     category: 'Problemy',
     keywords: ['błąd', 'error', 'problem', 'nie działa', 'niepoprawny'],
     question: 'Co robić gdy wystąpi błąd w systemie?',
-    answer: '🔧 **Rozwiązywanie problemów krok po kroku:**\n\n**Błędy uploadu pliku:**\n• Sprawdź format (CSV/XML/Excel obsługiwane)\n• Weryfikuj czy plik ma wymagane kolumny\n• Usuń specjalne znaki z nazw kolumn\n\n**Problemy z publikacją:**\n• System automatycznie ponawiać próby\n• Sprawdź status na dashboard\n• Skontaktuj się z supportem jeśli błąd utrzymuje się >2h\n\n**Ogólne problemy:**\n• Odświeź przeglądarkę\n• Wyloguj się i zaloguj ponownie\n• Skontaktuj się z supportem: support@otoraport.pl\n\n✅ **99.9% uptime guarantee** - rzadko są problemy!',
+    answer: '🔧 **Rozwiązywanie problemów krok po kroku:**\n\n**Błędy uploadu pliku:**\n• Sprawdź format (CSV/XML/Excel obsługiwane)\n• Weryfikuj czy plik ma wymagane kolumny\n• Usuń specjalne znaki z nazw kolumn\n\n**Problemy z publikacją:**\n• System automatycznie ponawiać próby\n• Sprawdź status na dashboard\n• Skontaktuj się z supportem jeśli błąd utrzymuje się >2h\n\n**Ogólne problemy:**\n• Odświeź przeglądarkę\n• Wyloguj się i zaloguj ponownie\n• Skontaktuj się z supportem: support@oto-raport.pl\n\n✅ **99.9% uptime guarantee** - rzadko są problemy!',
     followUpQuestions: ['Jaki jest email wsparcia?', 'Ile trwa naprawa błędów?', 'Co z utratą danych?'],
     priority: 6
   }
@@ -255,7 +255,7 @@ export function findRelevantKnowledge(query: string, limit = 3): KnowledgeItem[]
  * Get default greeting message
  */
 export function getGreeting(): string {
-  return `Cześć! 👋 Jestem asystentem OTORAPORT - pomagam z automatyzacją raportowania cen mieszkań zgodnie z ustawą z 21 maja 2025.
+  return `Cześć! 👋 Jestem asystentem OTO-RAPORT - pomagam z automatyzacją raportowania cen mieszkań zgodnie z ustawą z 21 maja 2025.
 
 **Mogę pomóc z:**
 • Wyjaśnieniem wymagań prawnych i kar
@@ -281,7 +281,7 @@ export function getFallbackResponse(): string {
 • Integrację z dane.gov.pl
 
 **Dla złożonych pytań skontaktuj się z naszym zespołem:**
-📧 support@otoraport.pl
+📧 support@oto-raport.pl
 💬 Live chat (9-17)
 📞 +48 123 456 789
 

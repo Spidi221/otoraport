@@ -1,7 +1,7 @@
-# 🧪 OTORAPORT v2 - Comprehensive Test Plan
+# 🧪 OTO-RAPORT v2 - Comprehensive Test Plan
 
 **Generated:** 2025-10-06
-**Application:** OTORAPORT v2 - Real Estate Compliance SaaS
+**Application:** OTO-RAPORT v2 - Real Estate Compliance SaaS
 **Test Coverage:** All critical functions and user flows
 
 ---

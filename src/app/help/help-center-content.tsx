@@ -25,7 +25,7 @@ export function HelpCenterContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Centrum Pomocy OTORAPORT
+              Centrum Pomocy OTO-RAPORT
             </h1>
             <p className="text-xl text-blue-100 mb-8">
               Znajdź odpowiedzi na swoje pytania lub skontaktuj się z naszym zespołem wsparcia
@@ -55,13 +55,13 @@ export function HelpCenterContent() {
                 </div>
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900">Wprowadzenie</h2>
-                  <p className="text-gray-600">Jak zacząć z OTORAPORT w 5 krokach</p>
+                  <p className="text-gray-600">Jak zacząć z OTO-RAPORT w 5 krokach</p>
                 </div>
               </div>
 
               <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
                 <p className="text-gray-700 mb-6">
-                  Witaj w OTORAPORT! Ten przewodnik pomoże Ci szybko rozpocząć automatyzację
+                  Witaj w OTO-RAPORT! Ten przewodnik pomoże Ci szybko rozpocząć automatyzację
                   raportowania do Ministerstwa Rozwoju. Wykonaj poniższe kroki, aby w pełni
                   wykorzystać możliwości systemu.
                 </p>
@@ -140,7 +140,7 @@ export function HelpCenterContent() {
                 </div>
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900">Najczęstsze pytania</h2>
-                  <p className="text-gray-600">Odpowiedzi na pytania użytkowników OTORAPORT</p>
+                  <p className="text-gray-600">Odpowiedzi na pytania użytkowników OTO-RAPORT</p>
                 </div>
               </div>
 
@@ -178,7 +178,7 @@ export function HelpCenterContent() {
                 </div>
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900">Tutoriale wideo</h2>
-                  <p className="text-gray-600">Naucz się korzystać z OTORAPORT krok po kroku</p>
+                  <p className="text-gray-600">Naucz się korzystać z OTO-RAPORT krok po kroku</p>
                 </div>
               </div>
 

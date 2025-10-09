@@ -11,7 +11,7 @@ import { AuditLogsTable } from '@/components/audit/audit-logs-table';
 import { Activity } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Dziennik Aktywności | OTORAPORT',
+  title: 'Dziennik Aktywności | OTO-RAPORT',
   description: 'Przegląd historii działań i zdarzeń na koncie',
 };
 
@@ -88,7 +88,7 @@ export default async function ActivityPage() {
             <li>• Dziennik jest niemodyfikowalny (append-only) dla zachowania integralności</li>
             <li>• Dane starsze niż 12 miesięcy są automatycznie archiwizowane</li>
             <li>• Możesz eksportować historię w formacie CSV</li>
-            <li>• W razie pytań, skontaktuj się z supportem OTORAPORT</li>
+            <li>• W razie pytań, skontaktuj się z supportem OTO-RAPORT</li>
           </ul>
         </div>
       </div>

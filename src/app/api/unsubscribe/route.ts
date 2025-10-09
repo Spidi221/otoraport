@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         <html>
         <head>
           <meta charset="utf-8">
-          <title>Błąd - OTORAPORT</title>
+          <title>Błąd - OTO-RAPORT</title>
           <style>
             body { font-family: -apple-system, sans-serif; max-width: 600px; margin: 100px auto; padding: 20px; }
             .error { background: #fee2e2; border: 2px solid #dc2626; border-radius: 8px; padding: 30px; text-align: center; }
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
         <html>
         <head>
           <meta charset="utf-8">
-          <title>Błąd - OTORAPORT</title>
+          <title>Błąd - OTO-RAPORT</title>
           <style>
             body { font-family: -apple-system, sans-serif; max-width: 600px; margin: 100px auto; padding: 20px; }
             .error { background: #fee2e2; border: 2px solid #dc2626; border-radius: 8px; padding: 30px; text-align: center; }
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
           <div class="error">
             <h1>❌ Nieprawidłowy token</h1>
             <p>Link do wypisania się jest nieprawidłowy lub wygasł.</p>
-            <p>Jeśli nadal chcesz wypisać się z newslettera, skontaktuj się z support@otoraport.pl</p>
+            <p>Jeśli nadal chcesz wypisać się z newslettera, skontaktuj się z support@oto-raport.pl</p>
           </div>
         </body>
         </html>
@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
         <html>
         <head>
           <meta charset="utf-8">
-          <title>Błąd - OTORAPORT</title>
+          <title>Błąd - OTO-RAPORT</title>
           <style>
             body { font-family: -apple-system, sans-serif; max-width: 600px; margin: 100px auto; padding: 20px; }
             .error { background: #fee2e2; border: 2px solid #dc2626; border-radius: 8px; padding: 30px; text-align: center; }
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Wypisano z newslettera - OTORAPORT</title>
+        <title>Wypisano z newslettera - OTO-RAPORT</title>
         <style>
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
       <body>
         <div class="success">
           <h1>✅ Wypisano z newslettera</h1>
-          <p>Nie będziesz już otrzymywać emaili od OTORAPORT.</p>
+          <p>Nie będziesz już otrzymywać emaili od OTO-RAPORT.</p>
           <p><strong>Konto:</strong> ${developer.email}</p>
         </div>
 
@@ -177,7 +177,7 @@ export async function GET(request: NextRequest) {
         </div>
 
         <div style="text-align: center; margin-top: 40px; font-size: 14px; color: #6b7280;">
-          <p>OTORAPORT.pl - Automatyczny compliance dla deweloperów</p>
+          <p>OTO-RAPORT.pl - Automatyczny compliance dla deweloperów</p>
         </div>
       </body>
       </html>
@@ -196,7 +196,7 @@ export async function GET(request: NextRequest) {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Błąd - OTORAPORT</title>
+        <title>Błąd - OTO-RAPORT</title>
         <style>
           body { font-family: -apple-system, sans-serif; max-width: 600px; margin: 100px auto; padding: 20px; }
           .error { background: #fee2e2; border: 2px solid #dc2626; border-radius: 8px; padding: 30px; text-align: center; }

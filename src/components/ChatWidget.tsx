@@ -63,7 +63,7 @@ export function ChatWidget({ isOpen: controlledIsOpen, onToggle }: ChatWidgetPro
       const greetingMessage: ChatMessage = {
         id: `greeting-${Date.now()}`,
         type: 'bot',
-        content: `Cześć! 👋 Jestem asystentem OTORAPORT - pomagam **wyłącznie** z automatyzacją raportowania cen mieszkań zgodnie z ustawą z 21 maja 2025.
+        content: `Cześć! 👋 Jestem asystentem OTO-RAPORT - pomagam **wyłącznie** z automatyzacją raportowania cen mieszkań zgodnie z ustawą z 21 maja 2025.
 
 **Pomagam tylko w tematach:**
 • Wymagania prawne i kary za brak compliance
@@ -73,7 +73,7 @@ export function ChatWidget({ isOpen: controlledIsOpen, onToggle }: ChatWidgetPro
 • Integracja z dane.gov.pl
 • Proces automatyzacji raportowania
 
-**Nie odpowiadam na pytania niezwiązane z OTORAPORT.**
+**Nie odpowiadam na pytania niezwiązane z OTO-RAPORT.**
 
 Jak mogę pomóc w compliance? 🏢`,
         timestamp: new Date(),
@@ -159,7 +159,7 @@ Jak mogę pomóc w compliance? 🏢`,
         const errorMessage: ChatMessage = {
           id: `error-${Date.now()}`,
           type: 'bot',
-          content: 'Przepraszam, wystąpił błąd techniczny. Spróbuj ponownie za chwilę lub skontaktuj się z naszym supportem: support@otoraport.pl',
+          content: 'Przepraszam, wystąpił błąd techniczny. Spróbuj ponownie za chwilę lub skontaktuj się z naszym supportem: support@oto-raport.pl',
           timestamp: new Date(),
         };
         return [...withoutLoading, errorMessage];
@@ -213,7 +213,7 @@ Jak mogę pomóc w compliance? 🏢`,
         <button
           onClick={handleToggle}
           className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group"
-          aria-label="Otwórz chat z asystentem OTORAPORT"
+          aria-label="Otwórz chat z asystentem OTO-RAPORT"
         >
           <MessageCircle className="w-6 h-6" />
           {/* Notification dot for first-time users */}
@@ -243,7 +243,7 @@ Jak mogę pomóc w compliance? 🏢`,
               <MessageCircle className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-sm">Asystent OTORAPORT</h3>
+              <h3 className="font-semibold text-sm">Asystent OTO-RAPORT</h3>
               <div className="flex items-center text-xs text-blue-100">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-1 animate-pulse"></div>
                 <span>Online - zazwyczaj odpowiadamy w 1min</span>
@@ -339,10 +339,10 @@ Jak mogę pomóc w compliance? 🏢`,
                   <span className="mr-1">🤖</span>
                   <span>Zasilane przez AI • Dla złożonych pytań:</span>
                   <a 
-                    href="mailto:support@otoraport.pl" 
+                    href="mailto:support@oto-raport.pl" 
                     className="text-blue-600 hover:text-blue-700 ml-1 font-medium underline"
                   >
-                    support@otoraport.pl
+                    support@oto-raport.pl
                   </a>
                 </div>
               </div>
