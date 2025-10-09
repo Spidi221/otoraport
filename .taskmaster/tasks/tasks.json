@@ -2118,7 +2118,7 @@
         "description": "Design and implement a robust audit logging system, including database schema, event capture, API endpoint, user dashboard, and admin cross-user log view.",
         "details": "1. **Database Schema**: Create an `audit_logs` table with columns: `id` (UUID, PK), `user_id` (FK), `action` (VARCHAR), `resource_type` (VARCHAR), `changes` (JSONB), `ip_address` (INET), `user_agent` (TEXT), and `timestamp` (TIMESTAMP, default NOW). Ensure append-only structure for immutability and consider indexing on `user_id`, `action`, and `timestamp` for efficient querying[1][2][3].\n\n2. **Event Capture**: Integrate audit logging into backend services to record key actions: login, upload, delete, and subscription changes. Use middleware or service hooks to intercept these events and write structured records to the audit_logs table. For actions involving data changes, serialize pre- and post-change states in the `changes` field as JSON[1][3].\n\n3. **API Endpoint**: Implement `GET /api/user/audit-logs` to return paginated, filtered audit log entries for the authenticated user. Support query parameters for date range, action type, and resource filtering. Ensure proper access control so users only see their own logs, while admins can query all logs.\n\n4. **User Dashboard Page**: Create `/dashboard/activity` page displaying the user's audit log entries in a sortable, filterable table. Include columns for action, resource, timestamp, IP, and user agent. Provide search and export (CSV/JSON) options.\n\n5. **Admin Panel Cross-User View**: Extend the admin panel to allow privileged users to view, filter, and search audit logs across all users. Implement advanced filtering (by user, action, resource, date) and export capabilities. Ensure strict access control and audit admin access to logs.\n\n6. **Security & Retention**: Enforce append-only writes at the database level (e.g., via RLS or triggers) and implement retention policies (e.g., auto-archive logs older than N months). Ensure sensitive data in logs is handled per compliance requirements[2][6][7].\n\n7. **Best Practices**: Use standardized JSON schema for log entries to ensure consistency and future extensibility[3]. Separate audit log storage from operational tables if performance impact is observed[2].\n\n**Tech Stack Recommendations**: PostgreSQL (with JSONB for changes), RESTful API (Next.js/Express), React (MUI DataGrid or similar for dashboard), RBAC for access control.",
         "testStrategy": "1. Verify audit_logs table schema and append-only constraints; attempt unauthorized modification and confirm rejection.\n2. Trigger each key action (login, upload, delete, subscription change) and confirm audit log entry is created with correct metadata.\n3. Test GET /api/user/audit-logs endpoint for authenticated users and admins; verify filtering, pagination, and access control.\n4. Manually review /dashboard/activity page for correct display, filtering, and export functionality.\n5. Test admin panel cross-user log view for advanced filtering and export; confirm only authorized admins can access.\n6. Simulate log retention policy and confirm archival/deletion of old records.\n7. Perform security review to ensure no sensitive data leakage and audit log integrity.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "50"
         ],
@@ -2130,9 +2130,10 @@
             "description": "Create the audit_logs table and integrate event capture into backend services to record key user actions.",
             "dependencies": [],
             "details": "Define the audit_logs table with columns for id (UUID), user_id (FK), action, resource_type, changes (JSONB), ip_address, user_agent, and timestamp. Ensure append-only structure for immutability and index key columns for efficient querying. Integrate middleware or service hooks to capture events such as login, upload, delete, and subscription changes, serializing pre- and post-change states in the changes field.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify schema creation and append-only constraints. Trigger each key action and confirm audit log entry is created with correct metadata.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T13:59:56.182Z"
           },
           {
             "id": 2,
@@ -2142,9 +2143,10 @@
               1
             ],
             "details": "Create GET /api/user/audit-logs endpoint supporting query parameters for date range, action type, and resource filtering. Ensure users only see their own logs, while admins can query all logs. Apply RBAC for access management and validate filtering and pagination logic.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test endpoint with various filters and roles. Confirm users cannot access other users' logs and admins can view all logs. Validate pagination and filtering.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T13:59:57.111Z"
           },
           {
             "id": 3,
@@ -2154,15 +2156,16 @@
               2
             ],
             "details": "Create /dashboard/activity page for users to view their audit logs in a sortable, filterable table with columns for action, resource, timestamp, IP, and user agent. Add search and export (CSV/JSON) options. Extend admin panel to allow cross-user log viewing with advanced filtering and export, ensuring strict access control and logging of admin access.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify dashboard displays correct logs for users and admins. Test filtering, searching, and export features. Confirm access control and audit admin access to logs.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T13:59:58.008Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement audit logging system with api and dashboard integration.",
-        "updatedAt": "2025-10-09T13:54:15.979Z"
+        "updatedAt": "2025-10-09T13:59:58.008Z"
       },
       {
         "id": "69",
@@ -2170,7 +2173,7 @@
         "description": "Develop a public, unauthenticated /status page displaying real-time health of ministry endpoints, database metrics, Stripe API status, historical uptime (30 days), and incident history.",
         "details": "1. **Requirements & Planning:**\n   - Identify all critical systems to monitor: ministry endpoints (XML/CSV/MD5 uptime), database (latency, connection pool), Stripe API, and any other essential services.\n   - Define clear status indicators (e.g., operational, degraded, outage) and ensure consistent color-coding and iconography for quick recognition[3][4][6].\n\n2. **Health Check Implementation:**\n   - Build backend health check endpoints for each monitored service:\n     - For ministry endpoints, implement periodic HTTP(S) checks for XML/CSV/MD5 endpoints, capturing response time and status.\n     - For the database, measure query latency and connection pool stats (e.g., via a lightweight SELECT 1 and pool metrics).\n     - For Stripe, use their API status endpoint or perform a lightweight API call to verify connectivity and latency.\n   - Store health check results in a dedicated database table with timestamped entries for historical analysis.\n   - Schedule health checks using a background job (e.g., cron, serverless function, or queue worker) at a configurable interval (e.g., every 1-5 minutes).\n\n3. **Incident & Uptime Tracking:**\n   - Design an incident logging system: allow for manual or automated creation of incident records with timestamps, affected components, status, and resolution notes.\n   - Track uptime per component and aggregate for a 30-day rolling window. Calculate uptime percentages and store daily summaries for efficient chart rendering.\n\n4. **Frontend /status Page:**\n   - Build a public, unauthenticated /status route using the main frontend framework (e.g., Next.js/React).\n   - Display current status for each monitored component with clear, non-technical language[2][3][4].\n   - Render a historical uptime chart (last 30 days) using a charting library (e.g., Recharts, Chart.js, or similar), with tooltips and color-coded bars.\n   - List recent incidents with timestamps, affected systems, and resolution details for transparency.\n   - Ensure the page is mobile-friendly, accessible (WCAG 2.1 AA), and matches organization branding.\n\n5. **Best Practices & Resilience:**\n   - Host the status page independently from core infrastructure to ensure availability during outages[2][3].\n   - Automate status updates where possible, but allow for manual incident creation and updates.\n   - Document incident response procedures and ensure clear, human-readable updates are posted promptly during incidents[1][2][4].\n   - Regularly review and update monitored components and thresholds.\n\n6. **Security & Privacy:**\n   - Do not expose sensitive internal metrics or stack traces; only display high-level health and incident summaries.\n   - Ensure no authentication is required for public access, but restrict incident creation/editing to authorized staff.\n\n7. **Extensibility:**\n   - Architect the system to allow easy addition of new monitored services or metrics in the future.\n   - Consider integration with external monitoring tools (e.g., UptimeRobot, StatusGator) for enhanced reliability if needed.\n",
         "testStrategy": "1. Simulate outages and degraded performance for each monitored service (ministry endpoints, database, Stripe API) and verify that the /status page updates in real time with correct status indicators and clear, non-technical messaging.\n2. Confirm that the historical uptime chart accurately reflects simulated downtime and displays correct percentages for the last 30 days.\n3. Create and resolve incidents (both manually and via automated triggers) and verify that incident history is displayed chronologically with all required details.\n4. Test the /status page on multiple devices and browsers for responsiveness, accessibility (using tools like axe or Lighthouse), and branding consistency.\n5. Confirm that no sensitive information is leaked and that only authorized users can create or edit incidents.\n6. Perform load testing to ensure the status page remains available and performant during simulated high-traffic scenarios (e.g., major incident).\n7. Review logs and database entries to ensure health checks and incident records are stored and updated as expected.",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [
           "50"
         ],
@@ -2213,7 +2216,8 @@
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement public system status page with real-time health monitoring and incident history."
+        "expansionPrompt": "Break down this task with a focus on implement public system status page with real-time health monitoring and incident history.",
+        "updatedAt": "2025-10-09T14:25:44.746Z"
       },
       {
         "id": "70",
@@ -2350,9 +2354,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-09T13:54:15.980Z",
+      "lastModified": "2025-10-09T14:25:44.747Z",
       "taskCount": 36,
-      "completedCount": 30,
+      "completedCount": 31,
       "tags": [
         "master"
       ]
