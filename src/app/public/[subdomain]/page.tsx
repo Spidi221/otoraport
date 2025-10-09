@@ -10,6 +10,9 @@ interface PublicPropertyPageProps {
   };
 }
 
+// Revalidate every 5 minutes (property data may change frequently)
+export const revalidate = 300;
+
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PublicPropertyPageProps): Promise<Metadata> {
   const supabase = await createClient();

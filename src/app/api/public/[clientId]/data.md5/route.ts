@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateHarvesterXML } from '@/lib/harvester-xml-generator'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateClientId, applySecurityHeaders } from '@/lib/security'
-import { rateLimit, publicRateLimit } from '@/lib/redis-rate-limit'
+import { rateLimit, publicRateLimit, getCachedValue, setCachedValue, getMinistryCacheKey, MINISTRY_CACHE_TTL } from '@/lib/redis-rate-limit'
 import crypto from 'crypto'
 
 // Next.js Route Segment Config - Always fresh for Ministry compliance
@@ -32,6 +32,30 @@ export async function GET(
     }
 
     console.log(`MD5 checksum request for client: ${clientId}`)
+
+    // Try to get from Redis cache first
+    const cacheKey = getMinistryCacheKey(clientId, 'md5');
+    const cachedMd5 = await getCachedValue<string>(cacheKey);
+
+    if (cachedMd5) {
+      console.log(`[Cache HIT] Serving MD5 from Redis cache for client: ${clientId}`);
+
+      const headers = applySecurityHeaders(new Headers({
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'public, max-age=60, s-maxage=60, must-revalidate',
+        'X-Generated-At': new Date().toISOString(),
+        'X-Hash-Type': 'md5',
+        'X-Client-ID': clientId.substring(0, 8) + '****',
+        'X-Cache': 'HIT',
+        'X-RateLimit-Limit': rateLimitInfo.limit.toString(),
+        'X-RateLimit-Remaining': rateLimitInfo.remaining.toString(),
+        'X-RateLimit-Reset': rateLimitInfo.reset.toString()
+      }));
+
+      return new NextResponse(cachedMd5, { status: 200, headers });
+    }
+
+    console.log(`[Cache MISS] Generating fresh MD5 for client: ${clientId}`);
 
     // Get developer data (using admin client to bypass RLS)
     const supabase = createAdminClient()
@@ -65,7 +89,9 @@ export async function GET(
     // Generate MD5 hash
     const md5Hash = crypto.createHash('md5').update(xmlContent).digest('hex')
 
-    console.log(`Generated MD5 for ${clientId}: ${md5Hash.substring(0, 8)}...`)
+    // Cache the generated MD5 for 5 minutes
+    await setCachedValue(cacheKey, md5Hash.toLowerCase(), MINISTRY_CACHE_TTL);
+    console.log(`[Cache SET] Cached MD5 for client: ${clientId} (TTL: ${MINISTRY_CACHE_TTL}s, hash: ${md5Hash.substring(0, 8)}...)`);
 
     // Set headers with rate limit info
     const headers = applySecurityHeaders(new Headers({
@@ -74,6 +100,7 @@ export async function GET(
       'X-Generated-At': new Date().toISOString(),
       'X-Hash-Type': 'md5',
       'X-Client-ID': clientId.substring(0, 8) + '****',
+      'X-Cache': 'MISS',
       // Rate limit headers
       'X-RateLimit-Limit': rateLimitInfo.limit.toString(),
       'X-RateLimit-Remaining': rateLimitInfo.remaining.toString(),

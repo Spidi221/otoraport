@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateHarvesterXML } from '@/lib/harvester-xml-generator'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateClientId, applySecurityHeaders } from '@/lib/security'
-import { rateLimit, publicRateLimit } from '@/lib/redis-rate-limit'
+import { rateLimit, publicRateLimit, getCachedValue, setCachedValue, getMinistryCacheKey, MINISTRY_CACHE_TTL } from '@/lib/redis-rate-limit'
 
 // Next.js Route Segment Config - Always fresh for Ministry compliance
 export const revalidate = 0 // No server-side caching (Art. 19b compliance)
@@ -31,6 +31,30 @@ export async function GET(
     }
 
     console.log(`Ministry XML request for client: ${clientId}`)
+
+    // Try to get from Redis cache first
+    const cacheKey = getMinistryCacheKey(clientId, 'xml');
+    const cachedXml = await getCachedValue<string>(cacheKey);
+
+    if (cachedXml) {
+      console.log(`[Cache HIT] Serving XML from Redis cache for client: ${clientId}`);
+
+      const headers = applySecurityHeaders(new Headers({
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=60, s-maxage=60, must-revalidate',
+        'X-Generated-At': new Date().toISOString(),
+        'X-Schema-Version': '1.13',
+        'X-Client-ID': clientId.substring(0, 8) + '****',
+        'X-Cache': 'HIT',
+        'X-RateLimit-Limit': rateLimitInfo.limit.toString(),
+        'X-RateLimit-Remaining': rateLimitInfo.remaining.toString(),
+        'X-RateLimit-Reset': rateLimitInfo.reset.toString()
+      }));
+
+      return new NextResponse(cachedXml, { status: 200, headers });
+    }
+
+    console.log(`[Cache MISS] Generating fresh XML for client: ${clientId}`);
 
     // Get developer data (using admin client to bypass RLS)
     const supabase = createAdminClient()
@@ -64,6 +88,10 @@ export async function GET(
       date: new Date().toISOString().split('T')[0]
     })
 
+    // Cache the generated XML for 5 minutes
+    await setCachedValue(cacheKey, xmlContent, MINISTRY_CACHE_TTL);
+    console.log(`[Cache SET] Cached XML for client: ${clientId} (TTL: ${MINISTRY_CACHE_TTL}s)`);
+
     // Set headers with rate limit info
     const headers = applySecurityHeaders(new Headers({
       'Content-Type': 'application/xml; charset=utf-8',
@@ -71,6 +99,7 @@ export async function GET(
       'X-Generated-At': new Date().toISOString(),
       'X-Schema-Version': '1.13',
       'X-Client-ID': clientId.substring(0, 8) + '****',
+      'X-Cache': 'MISS',
       // Rate limit headers
       'X-RateLimit-Limit': rateLimitInfo.limit.toString(),
       'X-RateLimit-Remaining': rateLimitInfo.remaining.toString(),

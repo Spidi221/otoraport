@@ -1899,7 +1899,7 @@
         "description": "Develop the /admin/properties page for administrators, featuring cross-developer property search, advanced filters, bulk actions (approve, reject, delete), and CSV export functionality.",
         "details": "1. **Page Structure & Access Control:**\n   - Implement the /admin/properties route, restricting access to admin users only using existing authentication and role-based access control patterns.\n   - Use a responsive, user-friendly UI framework (e.g., Radix UI, Material UI) to ensure intuitive navigation and accessibility across devices[4][2].\n\n2. **Property Search & Filtering:**\n   - Integrate a search bar supporting queries across all developers' properties (by address, property ID, or developer name).\n   - Add advanced filters: developer (dropdown, multi-select), status (using enums from Task 39), price range (min/max), and location (city, region, or geospatial input).\n   - Ensure filters are debounced and server-driven for scalability with large datasets.\n\n3. **Properties Table:**\n   - Display properties in a paginated, sortable table with columns: Property ID, Developer, Status (with StatusBadge from Task 39), Price, Location, and Actions.\n   - Support multi-row selection with checkboxes for bulk actions.\n\n4. **Bulk Actions:**\n   - Implement toolbar for bulk approve, reject, and delete actions.\n   - Use confirmation dialogs for destructive actions (reject, delete) and optimistic UI updates with error handling.\n   - Integrate with existing PATCH /api/properties/bulk endpoint for status updates (from Task 39); create new endpoints if needed for approve/reject/delete.\n\n5. **CSV Export:**\n   - Add export button to download filtered property data as CSV.\n   - Ensure exported data respects current filters and includes all visible columns.\n   - Use streaming or background job for large exports to avoid blocking UI.\n\n6. **Performance & Security:**\n   - Use server-side pagination and filtering to handle large property datasets efficiently.\n   - Enforce strict RLS policies to prevent unauthorized data access, even for admin users.\n   - Log all bulk actions for auditability.\n\n7. **UI/UX Best Practices:**\n   - Provide loading and empty states, error feedback, and accessible keyboard navigation.\n   - Ensure all actions are undoable where feasible (e.g., soft delete with restore option).\n   - Follow consistent design patterns with the rest of the admin dashboard.\n\n8. **Documentation:**\n   - Document API endpoints, UI components, and usage instructions for future maintainers.\n\n**Technologies:** Next.js/React, TypeScript, Radix UI or Material UI, Supabase/Postgres (with RLS), CSV export libraries (e.g., papaparse), and existing API infrastructure.",
         "testStrategy": "1. Verify only admin users can access /admin/properties and all data is visible across developers.\n2. Test property search and each filter (developer, status, price, location) for accuracy and performance with large datasets.\n3. Confirm properties table displays correct data, supports sorting, pagination, and multi-row selection.\n4. Execute bulk approve, reject, and delete actions; verify database updates, UI feedback, and error handling for partial failures.\n5. Test CSV export with various filters and large result sets; ensure exported data matches visible table data.\n6. Validate RLS policies prevent unauthorized access, even via direct API calls.\n7. Check audit logs for all bulk actions.\n8. Test accessibility (keyboard navigation, ARIA labels), responsive design, and loading/error/empty states.\n9. Review documentation for completeness and clarity.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "39",
           "57"
@@ -1912,9 +1912,10 @@
             "description": "Set up the /admin/properties route with admin-only access, and build the main properties table with pagination, sorting, and multi-row selection.",
             "dependencies": [],
             "details": "Use Next.js routing and existing authentication/role-based access control to restrict the page to admin users. Integrate a UI framework (Radix UI or Material UI) for responsive layout. Create a paginated, sortable table displaying Property ID, Developer, Status (with StatusBadge), Price, Location, and Actions. Support multi-row selection with checkboxes for bulk actions. Ensure loading, empty, and error states are handled.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify only admin users can access the page. Check that the table displays correct data, supports sorting and pagination, and allows multi-row selection. Test UI responsiveness and accessibility.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T16:26:18.698Z"
           },
           {
             "id": 2,
@@ -1924,9 +1925,10 @@
               1
             ],
             "details": "Integrate a debounced search bar and server-driven filters for developer (multi-select), status (enum), price range, and location. Connect filters to backend for scalability. Implement bulk action toolbar for approve, reject, and delete, using confirmation dialogs for destructive actions. Integrate with PATCH /api/properties/bulk and create new endpoints if needed. Provide optimistic UI updates and error handling.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test search and each filter for accuracy and performance with large datasets. Verify bulk actions update property statuses correctly, show confirmation dialogs, and handle errors gracefully. Confirm audit logging for all bulk actions.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T16:26:19.629Z"
           },
           {
             "id": 3,
@@ -1936,15 +1938,16 @@
               2
             ],
             "details": "Add an export button to download filtered property data as CSV, ensuring all visible columns are included and large exports use streaming or background jobs. Enforce server-side pagination/filtering and strict RLS policies for security. Log all bulk actions. Document API endpoints, UI components, and usage instructions for maintainers.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify CSV export matches current filters and includes all columns. Test performance with large datasets. Confirm RLS prevents unauthorized access. Review documentation for completeness and clarity.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-09T16:26:20.581Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on build admin panel - property management.",
-        "updatedAt": "2025-10-09T16:23:15.680Z"
+        "updatedAt": "2025-10-09T16:26:20.581Z"
       },
       {
         "id": "65",
@@ -2229,7 +2232,7 @@
         "description": "Implement Redis caching for ministry endpoints, enable ISR for public pages, optimize database queries, add Next.js image optimization, and achieve high Lighthouse scores.",
         "details": "1. **Redis Caching for Ministry Endpoints**: Integrate Redis as an in-memory cache for ministry endpoints serving XML, CSV, and MD5 responses. Use a centralized middleware (e.g., in `middlewares/redis.js`) to handle cache reads/writes, with cache keys based on endpoint and parameters. Set a TTL (Time To Live) of 60 seconds for these responses. Use the `node-redis` client, ensure robust error handling, and monitor cache hit/miss rates for tuning[1][2][4][7].\n\n2. **Incremental Static Regeneration (ISR) for Public Pages**: For all public-facing Next.js pages, implement ISR with a `revalidate` interval of 3600 seconds (1 hour). Ensure that page data is re-fetched and rebuilt in the background after the interval, providing users with up-to-date content while maintaining fast load times.\n\n3. **Database Query Optimization**: Audit all queries related to ministry endpoints and public pages. Add appropriate indexes (e.g., on frequently filtered columns, foreign keys) and refactor queries for efficient joins and minimal data transfer. Use query analysis tools (such as PostgreSQL's `EXPLAIN ANALYZE`) to identify bottlenecks and verify improvements.\n\n4. **Next.js Image Optimization**: Refactor all image usage in public and dashboard pages to use the Next.js `<Image>` component. Configure image domains, enable AVIF/WebP formats, and set appropriate sizes and priorities for above-the-fold images. Leverage built-in lazy loading and responsive sizing for best performance.\n\n5. **Lighthouse Audit and Remediation**: Run Lighthouse audits on key public and dashboard pages. Address all issues to achieve at least Performance 90+, Accessibility 95+, Best Practices 90+, and SEO 95+. This may involve optimizing asset delivery, reducing unused JavaScript/CSS, improving ARIA/alt attributes, and ensuring semantic HTML.\n\n**Best Practices**:\n- Use environment variables for Redis connection configuration.\n- Ensure cache invalidation on relevant data updates.\n- Monitor Redis and database performance in production.\n- Document caching and ISR strategies for future maintainers.",
         "testStrategy": "1. For Redis caching, hit ministry endpoints repeatedly and verify cache hits/misses using Redis CLI or logs; confirm cache expires after 60s and updates on data change.\n2. For ISR, update backend data and confirm public pages reflect changes after revalidation interval (3600s) without full redeploy.\n3. Use database query logs and `EXPLAIN ANALYZE` to confirm indexes are used and query times are reduced; test endpoints under load.\n4. Run Lighthouse audits on public and dashboard pages, iteratively fix issues, and confirm target scores are met.\n5. Manually and automatically test image loading, responsiveness, and format negotiation on various devices and network conditions.",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [
           "52",
           "54",
@@ -2277,7 +2280,8 @@
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on performance optimization and caching implementation."
+        "expansionPrompt": "Break down this task with a focus on performance optimization and caching implementation.",
+        "updatedAt": "2025-10-09T16:36:47.494Z"
       },
       {
         "id": "71",
@@ -2358,9 +2362,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-09T16:23:15.681Z",
+      "lastModified": "2025-10-09T16:36:47.495Z",
       "taskCount": 36,
-      "completedCount": 32,
+      "completedCount": 33,
       "tags": [
         "master"
       ]

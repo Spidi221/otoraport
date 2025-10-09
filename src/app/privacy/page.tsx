@@ -1,5 +1,8 @@
 import { LegalLayout } from '@/components/legal-layout'
 
+// Revalidate every 24 hours (legal documents change infrequently)
+export const revalidate = 86400;
+
 export default function PrivacyPage() {
   return (
     <LegalLayout

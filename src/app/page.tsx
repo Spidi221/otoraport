@@ -10,6 +10,9 @@ const PricingSection = lazy(() => import('@/components/PricingSection'));
 
 export const metadata: Metadata = landingMetadata;
 
+// Revalidate every hour (landing page content changes infrequently)
+export const revalidate = 3600;
+
 function StructuredData() {
   return (
     <script

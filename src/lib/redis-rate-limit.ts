@@ -224,6 +224,91 @@ export function isRedisConfigured(): boolean {
 }
 
 /**
+ * ============================================
+ * REDIS CACHING UTILITIES
+ * ============================================
+ *
+ * Caching functions for ministry endpoints and other frequently accessed data.
+ * Cache keys follow the pattern: cache:{namespace}:{key}
+ */
+
+/**
+ * Get a value from Redis cache
+ * @param key - Cache key
+ * @returns Cached value or null if not found or Redis not configured
+ */
+export async function getCachedValue<T = any>(key: string): Promise<T | null> {
+  if (!redis) {
+    return null;
+  }
+
+  try {
+    const value = await redis.get<T>(`cache:${key}`);
+    return value;
+  } catch (error) {
+    console.error(`[Redis Cache] Error getting value for key "${key}":`, error);
+    return null;
+  }
+}
+
+/**
+ * Set a value in Redis cache with TTL
+ * @param key - Cache key
+ * @param value - Value to cache (will be JSON serialized)
+ * @param ttlSeconds - Time to live in seconds
+ * @returns Success boolean
+ */
+export async function setCachedValue<T = any>(
+  key: string,
+  value: T,
+  ttlSeconds: number
+): Promise<boolean> {
+  if (!redis) {
+    return false;
+  }
+
+  try {
+    await redis.setex(`cache:${key}`, ttlSeconds, value);
+    return true;
+  } catch (error) {
+    console.error(`[Redis Cache] Error setting value for key "${key}":`, error);
+    return false;
+  }
+}
+
+/**
+ * Delete a value from Redis cache
+ * @param key - Cache key
+ * @returns Success boolean
+ */
+export async function deleteCachedValue(key: string): Promise<boolean> {
+  if (!redis) {
+    return false;
+  }
+
+  try {
+    await redis.del(`cache:${key}`);
+    return true;
+  } catch (error) {
+    console.error(`[Redis Cache] Error deleting value for key "${key}":`, error);
+    return false;
+  }
+}
+
+/**
+ * Cache ministry endpoint responses (XML, CSV, MD5)
+ * These are cached for 5 minutes as they are frequently accessed
+ */
+export const MINISTRY_CACHE_TTL = 300; // 5 minutes
+
+/**
+ * Generate cache key for ministry endpoints
+ */
+export function getMinistryCacheKey(clientId: string, type: 'xml' | 'csv' | 'md5'): string {
+  return `ministry:${clientId}:${type}`;
+}
+
+/**
  * TIERED RATE LIMITING: Automatically choose between IP-based and user-based rate limiting
  *
  * This function checks if the request is authenticated and applies appropriate limits:

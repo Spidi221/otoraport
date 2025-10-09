@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateClientId, applySecurityHeaders } from '@/lib/security'
-import { rateLimit, publicRateLimit } from '@/lib/redis-rate-limit'
+import { rateLimit, publicRateLimit, getCachedValue, setCachedValue, getMinistryCacheKey, MINISTRY_CACHE_TTL } from '@/lib/redis-rate-limit'
 import type { Database } from '@/types/database'
 
 type Developer = Database['public']['Tables']['developers']['Row']
@@ -39,6 +39,31 @@ export async function GET(
       );
     }
 
+    // Try to get from Redis cache first
+    const cacheKey = getMinistryCacheKey(clientId, 'csv');
+    const cachedCsv = await getCachedValue<string>(cacheKey);
+
+    if (cachedCsv) {
+      console.log(`[Cache HIT] Serving CSV from Redis cache for client: ${clientId}`);
+
+      const headers = applySecurityHeaders(new Headers({
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `inline; filename="ceny-mieszkan-${clientId}-${new Date().toISOString().split('T')[0]}.csv"`,
+        'Cache-Control': 'public, max-age=300, s-maxage=3600, must-revalidate',
+        'X-Generated-At': new Date().toISOString(),
+        'X-Schema-Version': '1.13',
+        'X-Client-ID': clientId.substring(0, 8) + '****',
+        'X-Cache': 'HIT',
+        'X-RateLimit-Limit': rateLimitInfo.limit.toString(),
+        'X-RateLimit-Remaining': rateLimitInfo.remaining.toString(),
+        'X-RateLimit-Reset': rateLimitInfo.reset.toString()
+      }));
+
+      return new NextResponse(cachedCsv, { status: 200, headers });
+    }
+
+    console.log(`[Cache MISS] Generating fresh CSV for client: ${clientId}`);
+
     // Get developer data (using admin client to bypass RLS)
     const supabase = createAdminClient()
     const { data: developer, error: devError} = await supabase
@@ -66,6 +91,10 @@ export async function GET(
     // Generate CSV with 58 ministry fields
     const csvContent = generateMinistryCSV(developer, properties || [])
 
+    // Cache the generated CSV for 5 minutes
+    await setCachedValue(cacheKey, csvContent, MINISTRY_CACHE_TTL);
+    console.log(`[Cache SET] Cached CSV for client: ${clientId} (TTL: ${MINISTRY_CACHE_TTL}s)`);
+
     // Set headers with security and rate limit info
     const headers = applySecurityHeaders(new Headers({
       'Content-Type': 'text/csv; charset=utf-8',
@@ -74,6 +103,7 @@ export async function GET(
       'X-Generated-At': new Date().toISOString(),
       'X-Schema-Version': '1.13',
       'X-Client-ID': clientId.substring(0, 8) + '****',
+      'X-Cache': 'MISS',
       // Rate limit headers
       'X-RateLimit-Limit': rateLimitInfo.limit.toString(),
       'X-RateLimit-Remaining': rateLimitInfo.remaining.toString(),
