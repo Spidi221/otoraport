@@ -169,6 +169,29 @@ coderabbit review --help
 
 **Status**: ⏳ Oczekuje - kod gotowy, tylko brakuje PostHog API Key
 
+#### 🌐 Vercel Wildcard Domain Configuration (TASK #61)
+**Skonfigurować wildcard domain dla subdomen:**
+
+1. **Dodaj domenę w Vercel Dashboard:**
+   - Przejdź do Project → Settings → Domains
+   - Dodaj: `*.otoraport.pl`
+
+2. **Skonfiguruj DNS (u rejestratora domeny):**
+   ```
+   Type:   CNAME
+   Name:   *
+   Target: cname.vercel-dns.com
+   TTL:    Auto
+   ```
+
+3. **Poczekaj na propagację DNS** (do 48 godzin)
+4. **Zweryfikuj certyfikat SSL** wystawiony przez Vercel
+5. **Przetestuj**: Otwórz `{dowolna-nazwa}.otoraport.pl` i sprawdź czy działa
+
+**Status**: ⏳ Oczekuje - kod gotowy, tylko wymaga konfiguracji DNS i Vercel
+
+**Uwaga**: Middleware ma graceful degradation - jeśli wildcard domain nie jest skonfigurowany, ustawienia subdomen będą widoczne ale strony publiczne nie będą dostępne do czasu konfiguracji DNS.
+
 ---
 
 ## Task Master AI Instructions
