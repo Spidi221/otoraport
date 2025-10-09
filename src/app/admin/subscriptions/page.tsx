@@ -21,7 +21,7 @@ async function checkAdminAccess() {
   // Check if user has admin role in developers table
   const { data: developer, error } = await supabase
     .from('developers')
-    .select('id, email, company_name, role')
+    .select('id, email, company_name, is_admin')
     .eq('user_id', user.id)
     .single();
 
@@ -30,7 +30,7 @@ async function checkAdminAccess() {
   }
 
   // Check admin role
-  if (developer.role !== 'admin') {
+  if (!developer.is_admin) {
     redirect('/dashboard?error=forbidden&message=Brak uprawnień administratora');
   }
 

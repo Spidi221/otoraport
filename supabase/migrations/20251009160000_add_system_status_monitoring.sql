@@ -81,7 +81,7 @@ CREATE POLICY "Admins can create incidents"
     EXISTS (
       SELECT 1 FROM public.developers
       WHERE developers.user_id = auth.uid()
-      AND developers.role = 'admin'
+      AND developers.is_admin = true
     )
   );
 
@@ -93,7 +93,7 @@ CREATE POLICY "Admins can update incidents"
     EXISTS (
       SELECT 1 FROM public.developers
       WHERE developers.user_id = auth.uid()
-      AND developers.role = 'admin'
+      AND developers.is_admin = true
     )
   );
 

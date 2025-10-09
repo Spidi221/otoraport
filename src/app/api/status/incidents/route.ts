@@ -84,11 +84,11 @@ export async function POST(request: NextRequest) {
     // Check if user is admin
     const { data: developer, error: devError } = await supabase
       .from('developers')
-      .select('id, role')
+      .select('id, is_admin')
       .eq('user_id', user.id)
       .single();
 
-    if (devError || !developer || developer.role !== 'admin') {
+    if (devError || !developer || !developer.is_admin) {
       return NextResponse.json(
         { error: 'Forbidden: Admin access required' },
         { status: 403 }

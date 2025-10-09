@@ -38,7 +38,7 @@ CREATE POLICY "Admins can view all audit logs"
     EXISTS (
       SELECT 1 FROM public.developers
       WHERE developers.user_id = auth.uid()
-      AND developers.role = 'admin'
+      AND developers.is_admin = true
     )
   );
 

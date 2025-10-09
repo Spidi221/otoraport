@@ -61,11 +61,11 @@ export async function GET(request: NextRequest) {
     // Check if user is admin
     const { data: developer, error: devError } = await supabase
       .from('developers')
-      .select('id, role, company_name')
+      .select('id, is_admin, company_name')
       .eq('user_id', user.id)
       .single();
 
-    if (devError || !developer || developer.role !== 'admin') {
+    if (devError || !developer || !developer.is_admin) {
       // Log unauthorized access attempt
       await logAuditEvent({
         action: 'error_occurred',

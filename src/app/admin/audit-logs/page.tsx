@@ -27,11 +27,11 @@ export default async function AdminAuditLogsPage() {
   // Check if user is admin
   const { data: developer } = await supabase
     .from('developers')
-    .select('id, role, company_name, email')
+    .select('id, is_admin, company_name, email')
     .eq('user_id', user.id)
     .single();
 
-  if (!developer || developer.role !== 'admin') {
+  if (!developer || !developer.is_admin) {
     redirect('/dashboard?error=forbidden&message=Brak uprawnień administratora');
   }
 
