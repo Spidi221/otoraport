@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { getComponentDisplayName, MONITORED_COMPONENTS } from '@/lib/health-check';
+import { getComponentDisplayName, MONITORED_COMPONENTS } from '@/lib/health-check-utils';
 
 interface UptimeData {
   period: {

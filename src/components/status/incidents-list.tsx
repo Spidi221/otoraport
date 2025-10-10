@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, CheckCircle2, Clock, Search } from 'lucide-react';
-import { getComponentDisplayName } from '@/lib/health-check';
+import { getComponentDisplayName } from '@/lib/health-check-utils';
 
 interface Incident {
   id: string;

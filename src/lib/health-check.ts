@@ -1,34 +1,25 @@
 /**
- * System Health Check Library
+ * System Health Check Library - SERVER ONLY
  *
  * Provides health check functionality for monitoring critical system components
+ * IMPORTANT: This file uses server-side dependencies and should NOT be imported by client components
+ * For client components, use '@/lib/health-check-utils' instead
  */
 
 import { createServerClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
 
-export type ComponentStatus = 'operational' | 'degraded' | 'outage';
+// Re-export types and utilities from client-safe utils file
+export type { ComponentStatus, HealthCheckResult } from './health-check-utils';
+export {
+  MONITORED_COMPONENTS,
+  getComponentDisplayName,
+  getStatusDisplayInfo
+} from './health-check-utils';
 
-export interface HealthCheckResult {
-  component: string;
-  status: ComponentStatus;
-  responseTimeMs: number;
-  errorMessage?: string;
-  metadata?: Record<string, any>;
-}
-
-/**
- * Component identifiers for health monitoring
- */
-export const MONITORED_COMPONENTS = {
-  DATABASE: 'database',
-  MINISTRY_XML: 'ministry_xml',
-  MINISTRY_CSV: 'ministry_csv',
-  MINISTRY_MD5: 'ministry_md5',
-  STRIPE_API: 'stripe_api',
-  SUPABASE_AUTH: 'supabase_auth',
-  SUPABASE_STORAGE: 'supabase_storage',
-} as const;
+// Import types for use in this file
+import type { ComponentStatus, HealthCheckResult } from './health-check-utils';
+import { MONITORED_COMPONENTS } from './health-check-utils';
 
 /**
  * Check database health by measuring query latency
@@ -322,50 +313,4 @@ export async function getComponentUptime(
     date: row.date,
     uptime: row.uptime_percentage,
   }));
-}
-
-/**
- * Get human-readable component name in Polish
- */
-export function getComponentDisplayName(component: string): string {
-  const names: Record<string, string> = {
-    [MONITORED_COMPONENTS.DATABASE]: 'Baza danych',
-    [MONITORED_COMPONENTS.MINISTRY_XML]: 'Endpoint XML (Ministerstwo)',
-    [MONITORED_COMPONENTS.MINISTRY_CSV]: 'Endpoint CSV (Ministerstwo)',
-    [MONITORED_COMPONENTS.MINISTRY_MD5]: 'Endpoint MD5 (Ministerstwo)',
-    [MONITORED_COMPONENTS.STRIPE_API]: 'Płatności Stripe',
-    [MONITORED_COMPONENTS.SUPABASE_AUTH]: 'Uwierzytelnianie',
-    [MONITORED_COMPONENTS.SUPABASE_STORAGE]: 'Przechowywanie plików',
-  };
-
-  return names[component] || component;
-}
-
-/**
- * Get status display info (color, label)
- */
-export function getStatusDisplayInfo(status: ComponentStatus): {
-  color: string;
-  label: string;
-  bgColor: string;
-} {
-  const info = {
-    operational: {
-      color: 'text-green-700',
-      label: 'Działa prawidłowo',
-      bgColor: 'bg-green-100',
-    },
-    degraded: {
-      color: 'text-yellow-700',
-      label: 'Częściowa awaria',
-      bgColor: 'bg-yellow-100',
-    },
-    outage: {
-      color: 'text-red-700',
-      label: 'Awaria',
-      bgColor: 'bg-red-100',
-    },
-  };
-
-  return info[status];
 }

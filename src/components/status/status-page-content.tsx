@@ -25,7 +25,7 @@ import {
   getComponentDisplayName,
   getStatusDisplayInfo,
   type ComponentStatus,
-} from '@/lib/health-check';
+} from '@/lib/health-check-utils';
 
 interface HealthCheckData {
   component: string;

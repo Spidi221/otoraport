@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Download, Search, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getActionDisplayName, formatAuditChanges, type AuditAction } from '@/lib/audit-logger';
+import { getActionDisplayName, formatAuditChanges, type AuditAction } from '@/lib/audit-logger-utils';
 
 interface AuditLog {
   id: string;
