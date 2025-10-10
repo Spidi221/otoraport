@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { OtoRaportLogo } from "../icons/otoraport-logo";
+import { OtoRaportLogo } from "../icons/oto-raport-logo";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth-simple";
 import { useNotifications } from "@/hooks/use-notifications";
