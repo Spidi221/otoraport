@@ -105,3 +105,9 @@ export async function getDeveloperProfile(userId: string) {
 
   return data
 }
+
+/**
+ * Alias export for backward compatibility
+ * Some files import 'createServerClient' instead of 'createClient'
+ */
+export { createClient as createServerClient }
