@@ -1,5 +1,3 @@
-'use client';
-
 import { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -202,7 +200,7 @@ export function BrandedLayout({
       </footer>
 
       {/* CSS Variables for branded elements */}
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{__html: `
         .text-primary {
           color: var(--brand-primary) !important;
         }
@@ -218,7 +216,7 @@ export function BrandedLayout({
         a.text-primary:hover {
           opacity: 0.8;
         }
-      `}</style>
+      `}} />
     </div>
   );
 }
