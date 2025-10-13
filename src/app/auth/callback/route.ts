@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       const { data: developer } = await supabase
         .from('developers')
         .select('stripe_customer_id, payment_method_attached, trial_status')
-        .eq('id', data.user.id)
+        .eq('user_id', data.user.id)
         .single()
 
       // Redirect to onboarding if no Stripe customer or no payment method attached
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       const { data: developer } = await supabase
         .from('developers')
         .select('stripe_customer_id, payment_method_attached, trial_status')
-        .eq('id', data.user.id)
+        .eq('user_id', data.user.id)
         .single()
 
       // Redirect to onboarding if no Stripe customer or no payment method attached
