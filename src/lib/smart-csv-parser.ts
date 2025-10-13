@@ -844,11 +844,12 @@ export class SmartCSVParser {
     let inproScore = 0
     let customScore = 0
 
-    const normalizedHeaders = this.headers.map(h => h.toLowerCase().trim())
+    // FIX: Use normalizeString for consistent comparison (removes Polish special chars)
+    const normalizedHeaders = this.headers.map(h => this.normalizeString(h))
 
     // Score MINISTERIAL format
     ministerialSignatures.forEach(sig => {
-      const normalized = sig.toLowerCase().trim()
+      const normalized = this.normalizeString(sig)
       if (normalizedHeaders.some(h => h.includes(normalized) || normalized.includes(h))) {
         ministerialScore++
       }
@@ -856,7 +857,7 @@ export class SmartCSVParser {
 
     // Score INPRO format
     inproSignatures.forEach(sig => {
-      const normalized = sig.toLowerCase().trim()
+      const normalized = this.normalizeString(sig)
       if (normalizedHeaders.some(h => h.includes(normalized) || normalized.includes(h))) {
         inproScore++
       }
@@ -918,6 +919,17 @@ export class SmartCSVParser {
   }
 
   /**
+   * Normalize string for comparison - removes Polish special chars and normalizes whitespace
+   */
+  private normalizeString(str: string): string {
+    return str
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '') // Remove special chars (including Polish ł, ą, ć, etc.)
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim()
+  }
+
+  /**
    * Intelligent column mapping using fuzzy string matching
    */
   public analyzeColumns(): SmartParseResult {
@@ -931,12 +943,7 @@ export class SmartCSVParser {
     console.log(`📋 PARSER: ${formatDetection.details}`)
 
     // Normalize headers for comparison
-    const normalizedHeaders = this.headers.map(header =>
-      header.toLowerCase()
-        .replace(/[^\w\s]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim()
-    )
+    const normalizedHeaders = this.headers.map(header => this.normalizeString(header))
 
     let totalConfidence = 0
     let mappedCount = 0
@@ -948,9 +955,11 @@ export class SmartCSVParser {
       // Score each header against patterns
       normalizedHeaders.forEach((normalizedHeader, index) => {
         const originalHeader = this.headers[index]
-        
+
         for (const pattern of patterns) {
-          const score = this.fuzzyMatch(normalizedHeader, pattern.toLowerCase())
+          // FIX: Normalize pattern the SAME way as header before comparing!
+          const normalizedPattern = this.normalizeString(pattern)
+          const score = this.fuzzyMatch(normalizedHeader, normalizedPattern)
           if (score > 0.6) { // Confidence threshold
             matches.push({ header: originalHeader, score })
           }
