@@ -11,6 +11,7 @@ import TrialBanner from "@/components/dashboard/trial-banner";
 
 // Lazy load heavy components that are below the fold
 const ActionButtons = lazy(() => import("@/components/dashboard/action-buttons").then(m => ({ default: m.ActionButtons })));
+const ProjectsList = lazy(() => import("@/components/dashboard/projects-list").then(m => ({ default: m.ProjectsList })));
 const PropertiesTable = lazy(() => import("@/components/dashboard/properties-table").then(m => ({ default: m.PropertiesTable })));
 const ChatWidget = lazy(() => import("@/components/ChatWidget").then(m => ({ default: m.ChatWidget })));
 const StatisticsCards = lazy(() => import("@/components/dashboard/statistics-cards").then(m => ({ default: m.StatisticsCards })));
@@ -79,6 +80,11 @@ export default function HomePage() {
 
           {/* Upload Widget */}
           <UploadWidget />
+
+          {/* Projects/Files List */}
+          <Suspense fallback={<LoadingState message="Ładowanie projektów..." />}>
+            <ProjectsList />
+          </Suspense>
 
           {/* Ministry Endpoint Links */}
           <Suspense fallback={<LoadingState message="Ładowanie..." />}>

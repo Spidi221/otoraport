@@ -14,11 +14,11 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const projectId = params.id;
+    const { id: projectId } = await params;
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -66,11 +66,11 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const projectId = params.id;
+    const { id: projectId } = await params;
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -173,16 +173,16 @@ export async function PATCH(
 }
 
 /**
- * DELETE /api/projects/[id] - Delete project
- * Prevents deletion if project has properties
+ * DELETE /api/projects/[id] - Delete project and ALL its properties
+ * WARNING: This deletes all properties in the project!
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const projectId = params.id;
+    const { id: projectId } = await params;
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -190,23 +190,46 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if project has properties
+    // Get developer profile
+    const { data: developer, error: devError } = await supabase
+      .from('developers')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (devError || !developer) {
+      return NextResponse.json({ error: 'Developer profile not found' }, { status: 404 });
+    }
+
+    // Count properties before deletion (for response)
     const { count } = await supabase
       .from('properties')
       .select('id', { count: 'exact', head: true })
-      .eq('project_id', projectId);
+      .eq('project_id', projectId)
+      .eq('developer_id', developer.id);
 
-    if (count && count > 0) {
-      return NextResponse.json(
-        {
-          error: `Nie można usunąć projektu z ${count} mieszkaniami. Przenieś mieszkania do innego projektu lub usuń je.`,
-          properties_count: count
-        },
-        { status: 400 }
-      );
+    const propertiesCount = count || 0;
+
+    // STEP 1: Delete all properties in this project
+    if (propertiesCount > 0) {
+      const { error: deletePropsError } = await supabase
+        .from('properties')
+        .delete()
+        .eq('project_id', projectId)
+        .eq('developer_id', developer.id);
+
+      if (deletePropsError) {
+        console.error('❌ PROJECTS API: Error deleting properties:', deletePropsError);
+        return NextResponse.json(
+          { error: 'Failed to delete properties' },
+          { status: 500 }
+        );
+      }
+
+      console.log(`🗑️ PROJECTS API: Deleted ${propertiesCount} properties from project ${projectId}`);
     }
 
-    // Delete project (RLS ensures it belongs to this developer)
+    // STEP 2: Delete project (RLS ensures it belongs to this developer)
     const { error: deleteError } = await supabase
       .from('projects')
       .delete()
@@ -223,7 +246,8 @@ export async function DELETE(
     console.log(`✅ PROJECTS API: Deleted project ${projectId}`);
 
     return NextResponse.json({
-      message: 'Projekt usunięty pomyślnie'
+      message: `Projekt i ${propertiesCount} mieszkań usunięte pomyślnie`,
+      deleted_properties: propertiesCount
     });
 
   } catch (error: unknown) {
