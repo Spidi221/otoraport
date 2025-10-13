@@ -2528,13 +2528,175 @@
         "priority": "medium",
         "subtasks": [],
         "updatedAt": "2025-10-13T10:43:27.575Z"
+      },
+      {
+        "id": "79",
+        "title": "Add Parking and Storage Data Support to CSV Parser",
+        "description": "Extend the CSV parser to import and export parking and storage data as required by Ministry Schema 1.13 (columns 44-52), ensuring full compliance with ministerial reporting standards.",
+        "details": "This task involves updating the CSV parsing logic to recognize, map, and process parking and storage data fields from ministerial CSV files, which are currently ignored. Follow these steps for implementation:\n\n1. **Update COLUMN_PATTERNS**: In both `smart-csv-parser.ts` and `papaparse-csv-parser.ts`, add patterns to match the ministerial column names for parking and storage data (e.g., 'Rodzaj części nieruchomości będących przedmiotem umowy' → `parking_type`, 'Oznaczenie pomieszczeń przynależnych...' → `storage_designation`). Use flexible regex patterns to handle variations in column naming.\n2. **Extend Database Mapping**: Ensure the parser correctly maps CSV columns to the corresponding database fields: `parking_type`, `parking_designation`, `parking_price`, `parking_date`, `storage_type`, `storage_designation`, `storage_price`, `storage_date`. Update the TypeScript types and database schema if necessary.\n3. **CSV Export Integration**: Modify the export route (`src/app/api/public/[clientId]/data.csv/route.ts`) to include the new parking and storage fields in the output CSV, placing them in columns 44-52 as per the ministry schema.\n4. **End-to-End Testing**: Use the provided test file (`2025-10-09.csv`) to verify the full data flow: CSV → Parser → Database → Export. Confirm that values like `parking_type='Miejsce postojowe'`, `parking_designation='MP71'`, `parking_price=4000` are correctly imported and exported.\n5. **Documentation**: Update any relevant documentation to reflect the new fields and their mapping.\n\n**Best Practices**:\n- Use a centralized configuration for column patterns to ensure consistency and ease of maintenance.\n- Validate both input and output CSVs against the ministry schema to prevent compliance issues.\n- Implement unit and integration tests for the new parser logic.\n- Consider adding schema validation at the API layer to catch mismatches early.",
+        "testStrategy": "1. **Parser Unit Tests**: Write tests verifying that the parser correctly identifies and extracts parking and storage data from CSV files with ministerial column names.\n2. **Database Integration Tests**: Confirm that parsed data is accurately stored in the database, including all new fields.\n3. **Export Verification**: Use `curl https://otoraport.vercel.app/api/public/ADMIN-59bae4ef/data.csv` (or the equivalent production endpoint) to download the CSV and validate that columns 44-52 contain the expected parking and storage data.\n4. **End-to-End Test**: Process the test file `2025-10-09.csv` through the entire pipeline and verify that all parking/storage fields are present and correct in the final exported CSV.\n5. **Schema Compliance Check**: Manually review the exported CSV to ensure it matches the ministry's required format and column order.\n6. **Error Handling**: Test with malformed or missing parking/storage data to ensure the parser handles edge cases gracefully.",
+        "status": "done",
+        "dependencies": [
+          "44"
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update Column Pattern Matching for Parking and Storage Data",
+            "description": "Extend the CSV parser's column pattern configuration to recognize ministerial column names for parking and storage data, using flexible regex patterns to handle naming variations.",
+            "dependencies": [],
+            "details": "Modify COLUMN_PATTERNS in both smart-csv-parser.ts and papaparse-csv-parser.ts to include regex patterns that match ministerial column names (e.g., 'Rodzaj części nieruchomości będących przedmiotem umowy' → parking_type). Ensure patterns are robust enough to accommodate minor variations in column naming.",
+            "status": "done",
+            "testStrategy": "Write unit tests that verify the parser correctly identifies and extracts parking and storage columns from CSV files with ministerial headers, including edge cases with naming variations.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-13T16:54:48.574Z"
+          },
+          {
+            "id": 2,
+            "title": "Extend Database Mapping and Schema for New Fields",
+            "description": "Update the database schema and TypeScript types to include all new parking and storage fields, ensuring correct mapping from CSV to database.",
+            "dependencies": [
+              44
+            ],
+            "details": "Add or modify database fields (parking_type, parking_designation, parking_price, parking_date, storage_type, storage_designation, storage_price, storage_date) as required by Ministry Schema 1.13. Update TypeScript interfaces and any ORM mappings to reflect these changes. Ensure backward compatibility with existing data.",
+            "status": "done",
+            "testStrategy": "Perform integration tests to confirm that parsed CSV data is accurately stored in the database, including all new fields. Validate that migrations apply without data loss and that TypeScript types match the updated schema.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-13T16:55:52.800Z"
+          },
+          {
+            "id": 3,
+            "title": "Integrate Parking and Storage Data into CSV Export",
+            "description": "Modify the CSV export route to include parking and storage data in columns 44-52, complying with the ministerial schema.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Update src/app/api/public/[clientId]/data.csv/route.ts to export the new parking and storage fields in the correct column positions (44-52). Ensure the exported CSV matches the ministry's expected format and column order.",
+            "status": "done",
+            "testStrategy": "Test the export route with a dataset containing parking and storage data. Verify that the output CSV includes all required fields in the correct columns and that the data matches the input exactly.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-13T16:56:20.113Z"
+          },
+          {
+            "id": 4,
+            "title": "Implement End-to-End Testing with Ministry Test File",
+            "description": "Validate the full data flow using the provided ministry test file, ensuring correct import, storage, and export of parking and storage data.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Use the test file (2025-10-09.csv) to perform a complete round-trip test: import CSV → store in database → export CSV. Check that values such as parking_type='Miejsce postojowe', parking_designation='MP71', parking_price=4000 are correctly processed at each stage.",
+            "status": "done",
+            "testStrategy": "Conduct end-to-end tests to confirm data integrity throughout the import, storage, and export pipeline. Compare input and output CSVs for exact field matching and schema compliance.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-13T17:00:57.740Z"
+          },
+          {
+            "id": 5,
+            "title": "Update Documentation for New Parking and Storage Fields",
+            "description": "Revise all relevant documentation to include the new parking and storage fields, their mappings, and any changes to the CSV import/export process.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Update READMEs, API documentation, and any internal wikis to reflect the addition of parking and storage data support. Include examples of column mappings, expected CSV formats, and any new configuration options.",
+            "status": "done",
+            "testStrategy": "Review updated documentation for accuracy and completeness. Ensure that new users can correctly configure and use the enhanced CSV parser based on the provided documentation.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-13T17:13:55.802Z"
+          }
+        ],
+        "updatedAt": "2025-10-13T17:13:55.802Z"
+      },
+      {
+        "id": "80",
+        "title": "Implement Auto-Import of Developer Profile Data from Ministerial CSV",
+        "description": "Automatically extract and populate developer profile fields from the ministerial CSV during upload, eliminating manual data entry for onboarding and settings.",
+        "details": "Enhance the CSV upload flow to automatically extract columns 1-28 containing developer/company data and map them to the corresponding profile fields. Modify `src/app/api/upload/route.ts` and `src/app/api/upload-parsed/route.ts` to invoke a new `extractDeveloperInfo` method in both `src/lib/papaparse-csv-parser.ts` and `src/lib/smart-csv-parser.ts`. On CSV upload, check if the developer profile fields (e.g., company_name, NIP, REGON, address, etc.) are empty or default; if so, populate them with values from the first row of the CSV. Ensure only non-empty CSV fields overwrite empty profile fields, and never override fields already filled by the user. Handle edge cases: ignore subsequent CSV uploads with different company data, and only fill missing fields if the CSV is partial. Trigger a success notification ('Profile auto-filled from CSV') upon successful import. Ensure the settings page displays the pre-filled data and that the export CSV functionality includes the same company data. Implement for both `/api/upload` and `/api/upload-parsed` endpoints. Follow best practices for data mapping, error handling, and user feedback, referencing robust CSV import patterns such as column-to-field mapping, preview before import, and non-destructive updates[3][6][7].",
+        "testStrategy": "1. Upload a ministerial CSV containing complete developer data and verify that the developer profile is auto-populated in the settings page.\n2. Upload a CSV with partial data and confirm only empty profile fields are filled, with existing user-entered data preserved.\n3. Attempt to upload multiple CSVs with different company data and verify only the first upload is used for auto-fill.\n4. Manually fill profile fields before upload and confirm that auto-import does not overwrite them.\n5. Check that the export CSV contains the same company data as imported.\n6. Test both `/api/upload` and `/api/upload-parsed` endpoints for correct extraction and mapping.\n7. Validate that a success notification is shown after auto-fill and that error handling works for malformed or missing data.",
+        "status": "in-progress",
+        "dependencies": [
+          "66"
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design and Implement extractDeveloperInfo Method for CSV Parsing",
+            "description": "Develop a robust extractDeveloperInfo method in both papaparse-csv-parser.ts and smart-csv-parser.ts to extract columns 1-28 from the ministerial CSV and map them to developer profile fields.",
+            "dependencies": [],
+            "details": "Define the mapping between CSV columns and profile fields, ensuring blank or unknown columns are skipped. Implement logic to extract only the first row's data for developer/company fields, following best practices for column-to-field mapping and handling blank values[3][7].",
+            "status": "done",
+            "testStrategy": "Unit test extractDeveloperInfo with various CSV samples: complete, partial, and malformed data. Verify correct mapping and skipping of blank/unknown columns.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-13T17:25:31.988Z"
+          },
+          {
+            "id": 2,
+            "title": "Integrate Auto-Import Logic into Upload Endpoints",
+            "description": "Modify src/app/api/upload/route.ts and src/app/api/upload-parsed/route.ts to invoke extractDeveloperInfo and auto-populate developer profile fields during CSV upload.",
+            "dependencies": [
+              1
+            ],
+            "details": "Update both endpoints to call extractDeveloperInfo after CSV parsing. Implement logic to check if each profile field is empty or default before overwriting, ensuring only missing fields are filled and existing user data is preserved. Ignore subsequent uploads with conflicting company data.",
+            "status": "done",
+            "testStrategy": "Integration test both endpoints with CSV uploads: verify profile fields are auto-filled only when empty, and existing data is never overwritten.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-13T17:31:26.780Z"
+          },
+          {
+            "id": 3,
+            "title": "Implement User Feedback and Error Handling for Import Flow",
+            "description": "Add user notifications for successful auto-import and robust error handling for CSV parsing and mapping failures.",
+            "dependencies": [
+              2
+            ],
+            "details": "Trigger a success notification ('Profile auto-filled from CSV') upon successful import. Implement error messages for invalid or mismatched CSVs, following best practices for clear user feedback and error resolution[4].",
+            "status": "in-progress",
+            "testStrategy": "Test notification display on successful import and simulate various error scenarios (e.g., malformed CSV, missing columns) to verify appropriate error messages are shown.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-13T17:39:22.382Z"
+          },
+          {
+            "id": 4,
+            "title": "Update Settings Page and Export Functionality to Reflect Imported Data",
+            "description": "Ensure the settings page displays pre-filled developer/company data and that export CSV functionality includes the imported company data.",
+            "dependencies": [
+              2
+            ],
+            "details": "Modify the settings page to reflect any auto-filled profile fields after import. Update the export CSV logic to include the same company data, ensuring consistency between import and export flows.",
+            "status": "pending",
+            "testStrategy": "After import, verify the settings page displays the correct data and that exported CSVs contain the expected company fields.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Document Import Flow and Edge Case Handling",
+            "description": "Document the auto-import process, including mapping logic, edge cases (e.g., partial CSVs, conflicting uploads), and user guidance.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Create developer and user documentation covering the import flow, field mapping, error handling, and best practices for CSV preparation. Include guidance on how partial or conflicting data is handled and how users can verify imported data.",
+            "status": "pending",
+            "testStrategy": "Review documentation for completeness and clarity. Validate that all described behaviors match implemented logic and edge cases.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-13T17:39:22.382Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-13T10:43:27.577Z",
-      "taskCount": 43,
-      "completedCount": 39,
+      "lastModified": "2025-10-13T17:39:22.383Z",
+      "taskCount": 45,
+      "completedCount": 40,
       "tags": [
         "master"
       ]

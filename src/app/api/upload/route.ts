@@ -9,6 +9,7 @@ import { sendUploadConfirmationEmail, sendUploadErrorEmail } from '@/lib/email-s
 import { ParsedProperty, parseDecimal, parseDate } from '@/lib/api-schemas'
 import { enforcePropertyLimit, logLimitViolation } from '@/lib/middleware/subscription-limits'
 import { canAccessFeature } from '@/lib/middleware/trial-middleware'
+import * as XLSX from 'xlsx'
 
 /**
  * Helper function to get error message from unknown error
@@ -17,6 +18,81 @@ function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message
   if (typeof error === 'string') return error
   return 'Unknown error occurred'
+}
+
+/**
+ * Auto-import developer profile fields from CSV
+ * Only fills EMPTY fields - preserves existing user data
+ * @returns Number of fields successfully filled (0 if none)
+ */
+async function autoImportDeveloperInfo(parser: SmartCSVParser, developerId: string): Promise<number> {
+  console.log('🔄 AUTO-IMPORT: Extracting developer info from CSV...')
+
+  const developerInfo = parser.extractDeveloperInfo()
+
+  if (Object.keys(developerInfo).length === 0) {
+    console.log('ℹ️ AUTO-IMPORT: No developer data found in CSV')
+    return 0
+  }
+
+  console.log(`📋 AUTO-IMPORT: Found ${Object.keys(developerInfo).length} developer fields in CSV`)
+
+  // Get current developer profile
+  const supabase = await createAdminClient()
+  const { data: currentDeveloper, error: fetchError } = await supabase
+    .from('developers')
+    .select('*')
+    .eq('id', developerId)
+    .single()
+
+  if (fetchError || !currentDeveloper) {
+    console.error('❌ AUTO-IMPORT: Failed to fetch developer profile:', fetchError?.message)
+    return 0
+  }
+
+  // Build update object - only include fields that are currently empty/null
+  const updateFields: Record<string, string> = {}
+  let filledCount = 0
+
+  for (const [field, value] of Object.entries(developerInfo)) {
+    // Skip if no value to import
+    if (!value || typeof value !== 'string' || value.trim().length === 0) continue
+
+    // Check if current field is empty, null, or a default placeholder value
+    const currentValue = currentDeveloper[field as keyof typeof currentDeveloper]
+    const isEmpty = !currentValue ||
+                    currentValue === '' ||
+                    currentValue === 'My Company' ||
+                    currentValue === '0000000000' || // Default NIP placeholder
+                    currentValue === 'nieznane'
+
+    if (isEmpty) {
+      updateFields[field] = value
+      filledCount++
+      console.log(`✅ AUTO-IMPORT: Will fill ${field} = "${value}"`)
+    } else {
+      console.log(`⏭️ AUTO-IMPORT: Skipping ${field} - already has value: "${currentValue}"`)
+    }
+  }
+
+  // Update database if we have fields to fill
+  if (filledCount > 0) {
+    const { error: updateError } = await supabase
+      .from('developers')
+      .update(updateFields)
+      .eq('id', developerId)
+
+    if (updateError) {
+      console.error('❌ AUTO-IMPORT: Failed to update developer profile:', updateError.message)
+      throw updateError
+    }
+
+    console.log(`✅ AUTO-IMPORT: Successfully auto-filled ${filledCount} developer profile fields`)
+  } else {
+    console.log('ℹ️ AUTO-IMPORT: No empty fields to fill - developer profile is complete')
+  }
+
+  return filledCount
 }
 
 export async function POST(request: NextRequest) {
@@ -180,6 +256,7 @@ export async function POST(request: NextRequest) {
     let smartParseResult = null
     let propertiesCount = 0
     let savedToDatabase = false
+    let autoImportedFields = 0
 
     try {
       if (fileExtension === 'csv') {
@@ -191,13 +268,24 @@ export async function POST(request: NextRequest) {
 
         console.log(`📝 UPLOAD API: Encoding - ${encodingResult.encoding} (confidence: ${encodingResult.confidence})${encodingResult.hasPolishChars ? ' 🇵🇱' : ''}`)
 
-        smartParseResult = parseCSVSmart(encodingResult.content)
+        // Create parser instance to extract developer info
+        const parser = new SmartCSVParser(encodingResult.content)
+        smartParseResult = parser.analyzeColumns()
         propertiesCount = smartParseResult.totalRows
 
         console.log(`✅ UPLOAD API: Parsed ${smartParseResult.validRows}/${smartParseResult.totalRows} valid rows`)
         console.log(`📋 UPLOAD API: Format detected - ${smartParseResult.detectedFormat?.toUpperCase()} (${smartParseResult.formatConfidence?.toFixed(1)}%)`)
         console.log('🔍 UPLOAD API: Sample data:', JSON.stringify(smartParseResult.data[0], null, 2))
         console.log('🗺️ UPLOAD API: Mappings:', JSON.stringify(smartParseResult.mappings, null, 2))
+
+        // AUTO-IMPORT: Extract and update developer profile fields
+        try {
+          autoImportedFields = await autoImportDeveloperInfo(parser, developer.id)
+        } catch (autoImportError) {
+          // Log error but don't fail the upload
+          console.error('⚠️ UPLOAD API: Auto-import developer info failed:', autoImportError)
+          autoImportedFields = 0
+        }
 
         // SUBSCRIPTION LIMIT CHECK: Enforce property limits before saving
         if (smartParseResult.data && smartParseResult.data.length > 0) {
@@ -228,14 +316,36 @@ export async function POST(request: NextRequest) {
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
 
-        // Parse Excel file (uses same smart parser as CSV)
-        smartParseResult = parseExcelFile(buffer)
+        // Parse Excel file - convert to CSV first, then parse
+        const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true, cellNF: false, cellText: false })
+        const sheet = workbook.Sheets[workbook.SheetNames[0]]
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', blankrows: false }) as string[][]
+        const csvContent = jsonData.map(row => row.map(cell => {
+          const cellStr = String(cell || '').trim()
+          if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+            return `"${cellStr.replace(/"/g, '""')}"`
+          }
+          return cellStr
+        }).join(',')).join('\n')
+
+        // Create parser instance to extract developer info
+        const parser = new SmartCSVParser(csvContent)
+        smartParseResult = parser.analyzeColumns()
         propertiesCount = smartParseResult.totalRows
 
         console.log(`✅ UPLOAD API: Parsed ${smartParseResult.validRows}/${smartParseResult.totalRows} valid rows from Excel`)
         console.log(`📋 UPLOAD API: Format detected - ${smartParseResult.detectedFormat?.toUpperCase()} (${smartParseResult.formatConfidence?.toFixed(1)}%)`)
         console.log('🔍 UPLOAD API: Sample data:', JSON.stringify(smartParseResult.data[0], null, 2))
         console.log('🗺️ UPLOAD API: Mappings:', JSON.stringify(smartParseResult.mappings, null, 2))
+
+        // AUTO-IMPORT: Extract and update developer profile fields
+        try {
+          autoImportedFields = await autoImportDeveloperInfo(parser, developer.id)
+        } catch (autoImportError) {
+          // Log error but don't fail the upload
+          console.error('⚠️ UPLOAD API: Auto-import developer info failed:', autoImportError)
+          autoImportedFields = 0
+        }
 
         // SUBSCRIPTION LIMIT CHECK: Enforce property limits before saving
         if (smartParseResult.data && smartParseResult.data.length > 0) {
@@ -299,6 +409,7 @@ export async function POST(request: NextRequest) {
         fileName: file.name,
         recordsCount: propertiesCount,
         validRecords: smartParseResult?.validRows || 0,
+        autoImportedFields: autoImportedFields || 0,
         savedToDatabase,
         preview: smartParseResult?.data?.slice(0, 3) || null,
         // Add tracking metadata for client-side GA4 event

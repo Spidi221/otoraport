@@ -8,6 +8,142 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { rateLimitWithAuth, uploadRateLimit, uploadRateLimitAuthenticated } from '@/lib/redis-rate-limit'
 import { UploadParsedRequestSchema, parseDecimal, parseDate } from '@/lib/api-schemas'
+import { PapaParseCSVParser } from '@/lib/papaparse-csv-parser'
+
+/**
+ * Auto-import developer profile fields from raw_data in first property
+ * Only fills EMPTY fields - preserves existing user data
+ * IMPORTANT: Web Worker sends pre-parsed data, so we extract from raw_data field
+ * @returns Number of fields successfully filled (0 if none)
+ */
+async function autoImportDeveloperInfoFromRawData(
+  rawData: Record<string, unknown>,
+  developerId: string
+): Promise<number> {
+  console.log('🔄 AUTO-IMPORT: Extracting developer info from raw_data...')
+
+  try {
+    // Manual extraction from raw_data - matches ministerial column names (columns 1-28)
+    const developerInfo: Record<string, string> = {}
+
+    // Define field mappings (ministerial column name → database field)
+    const fieldMappings: Record<string, string[]> = {
+      company_name: ['Nazwa dewelopera', 'nazwa_dewelopera'],
+      legal_form: ['Forma prawna dewelopera', 'forma_prawna'],
+      krs_number: ['Nr KRS dewelopera', 'nr_krs'],
+      ceidg_number: ['Nr w Centralnej Ewidencji i Informacji o Działalności Gospodarczej', 'nr_ceidg'],
+      nip: ['NR NIP', 'nip'],
+      regon: ['NR REGON', 'regon'],
+      phone: ['Telefon dewelopera', 'telefon'],
+      email: ['E-mail dewelopera', 'email', 'e-mail'],
+
+      // Headquarters (columns 9-16)
+      headquarters_voivodeship: ['Województwo adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'],
+      headquarters_county: ['Powiat adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'],
+      headquarters_municipality: ['Gmina adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'],
+      headquarters_city: ['Miejscowość adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'],
+      headquarters_street: ['Ulica adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'],
+      headquarters_building_number: ['Numer budynku adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'],
+      headquarters_apartment_number: ['Numer lokalu adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'],
+      headquarters_postal_code: ['Kod pocztowy adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'],
+
+      // Sales office (columns 17-24)
+      sales_office_voivodeship: ['Województwo adresu biura sprzedaży, jeżeli deweloper go prowadzi'],
+      sales_office_county: ['Powiat adresu biura sprzedaży, jeżeli deweloper go prowadzi'],
+      sales_office_municipality: ['Gmina adresu biura sprzedaży, jeżeli deweloper go prowadzi'],
+      sales_office_city: ['Miejscowość adresu biura sprzedaży, jeżeli deweloper go prowadzi'],
+      sales_office_street: ['Ulica adresu biura sprzedaży, jeżeli deweloper go prowadzi'],
+      sales_office_building_number: ['Numer budynku adresu biura sprzedaży, jeżeli deweloper go prowadzi'],
+      sales_office_apartment_number: ['Numer lokalu adresu biura sprzedaży, jeżeli deweloper go prowadzi'],
+      sales_office_postal_code: ['Kod pocztowy adresu biura sprzedaży, jeżeli deweloper go prowadzi'],
+
+      // Additional info (columns 25-28)
+      additional_sales_locations: ['Wykaz innych miejsc, w których prowadzona jest sprzedaż'],
+      contact_method: ['Sposób komunikacji dewelopera z nabywcą'],
+      website: ['Adres strony internetowej dewelopera'],
+      additional_contact_info: ['Dodatkowe informacje kontaktowe']
+    }
+
+    // Extract each field from raw_data
+    for (const [dbField, csvColumns] of Object.entries(fieldMappings)) {
+      for (const csvColumn of csvColumns) {
+        const value = rawData[csvColumn]
+        if (value && typeof value === 'string' && value.trim().length > 0) {
+          developerInfo[dbField] = value.trim()
+          break // Found value, move to next field
+        }
+      }
+    }
+
+    if (Object.keys(developerInfo).length === 0) {
+      console.log('ℹ️ AUTO-IMPORT: No developer data found in raw_data')
+      return 0
+    }
+
+    console.log(`📋 AUTO-IMPORT: Found ${Object.keys(developerInfo).length} developer fields in raw_data`)
+
+    // Get current developer profile
+    const supabase = await createAdminClient()
+    const { data: currentDeveloper, error: fetchError } = await supabase
+      .from('developers')
+      .select('*')
+      .eq('id', developerId)
+      .single()
+
+    if (fetchError || !currentDeveloper) {
+      console.error('❌ AUTO-IMPORT: Failed to fetch developer profile:', fetchError?.message)
+      return 0
+    }
+
+    // Build update object - only include fields that are currently empty/null
+    const updateFields: Record<string, string> = {}
+    let filledCount = 0
+
+    for (const [field, value] of Object.entries(developerInfo)) {
+      // Skip if no value to import
+      if (!value || value.trim().length === 0) continue
+
+      // Check if current field is empty, null, or a default placeholder value
+      const currentValue = currentDeveloper[field as keyof typeof currentDeveloper]
+      const isEmpty = !currentValue ||
+                      currentValue === '' ||
+                      currentValue === 'My Company' ||
+                      currentValue === '0000000000' || // Default NIP placeholder
+                      currentValue === 'nieznane'
+
+      if (isEmpty) {
+        updateFields[field] = value
+        filledCount++
+        console.log(`✅ AUTO-IMPORT: Will fill ${field} = "${value}"`)
+      } else {
+        console.log(`⏭️ AUTO-IMPORT: Skipping ${field} - already has value: "${currentValue}"`)
+      }
+    }
+
+    // Update database if we have fields to fill
+    if (filledCount > 0) {
+      const { error: updateError } = await supabase
+        .from('developers')
+        .update(updateFields)
+        .eq('id', developerId)
+
+      if (updateError) {
+        console.error('❌ AUTO-IMPORT: Failed to update developer profile:', updateError.message)
+        throw updateError
+      }
+
+      console.log(`✅ AUTO-IMPORT: Successfully auto-filled ${filledCount} developer profile fields`)
+    } else {
+      console.log('ℹ️ AUTO-IMPORT: No empty fields to fill - developer profile is complete')
+    }
+
+    return filledCount
+  } catch (error) {
+    console.error('❌ AUTO-IMPORT: Error in autoImportDeveloperInfoFromRawData:', error)
+    // Don't throw - auto-import should not fail the upload
+    return 0
+  }
+}
 
 export async function POST(request: NextRequest) {
   console.log('🚀 UPLOAD PARSED API: Receiving pre-parsed data from Web Worker...')
@@ -81,6 +217,18 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ UPLOAD PARSED API: Developer profile found:', developer.client_id)
+
+    // AUTO-IMPORT: Extract and update developer profile fields from first property's raw_data
+    let autoImportedFields = 0
+    if (properties.length > 0 && properties[0].raw_data) {
+      try {
+        autoImportedFields = await autoImportDeveloperInfoFromRawData(properties[0].raw_data, developer.id)
+      } catch (autoImportError) {
+        // Log error but don't fail the upload
+        console.error('⚠️ UPLOAD PARSED API: Auto-import developer info failed:', autoImportError)
+        autoImportedFields = 0
+      }
+    }
 
     // If project_id provided, validate it belongs to this developer
     if (requestedProjectId) {
@@ -301,6 +449,7 @@ export async function POST(request: NextRequest) {
       message: `Parsed and saved ${validRecords} properties`,
       data: {
         propertiesAdded: propertiesToInsert.length,
+        autoImportedFields: autoImportedFields || 0,
         projectId: projectId,
         projectName: projectDetails?.name || 'Unknown',
         // Add tracking metadata for client-side GA4 event

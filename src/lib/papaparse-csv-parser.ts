@@ -482,25 +482,99 @@ export class PapaParseCSVParser {
   }
 
   /**
-   * Extract developer information
+   * Extract developer information from CSV (columns 1-28 in ministerial format)
+   * Maps ministerial column names to database developer profile fields
    */
   public extractDeveloperInfo(): DeveloperInfo {
     const developerInfo: DeveloperInfo = {}
 
-    for (const row of this.rows.slice(0, 5)) {
-      for (const [fieldName, headerName] of Object.entries(this.mappings)) {
-        const headerIndex = this.headers.indexOf(headerName)
-        if (headerIndex !== -1 && headerIndex < row.length) {
-          const value = row[headerIndex]?.trim()
+    // Define mapping from CSV column names (ministerial format) to DeveloperInfo fields
+    // Uses exact column names and normalized variations for fuzzy matching
+    const developerFieldMappings: Record<string, string[]> = {
+      company_name: ['nazwa_dewelopera', 'nazwa dewelopera', 'company name', 'nazwa firmy'],
+      legal_form: ['forma_prawna', 'forma prawna', 'legal form', 'typ spółki'],
+      krs_number: ['nr_krs', 'nr krs', 'krs', 'numer krs'],
+      ceidg_number: ['nr_ceidg', 'nr ceidg', 'ceidg', 'numer ceidg'],
+      nip: ['nip', 'nr nip', 'numer nip'],
+      regon: ['regon', 'nr regon', 'numer regon'],
+      phone: ['telefon', 'tel', 'phone', 'numer telefonu'],
+      email: ['email', 'e-mail', 'mail', 'adres email'],
 
-          if (value && ['developer_name', 'company_name', 'nip', 'phone', 'email', 'investment_name', 'investment_address', 'investment_city'].includes(fieldName)) {
-            if (!(fieldName in developerInfo) || !developerInfo[fieldName as keyof DeveloperInfo]) {
-              (developerInfo as Record<string, string>)[fieldName] = value
-            }
+      // Headquarters address (columns 9-16)
+      headquarters_voivodeship: ['wojewodztwo_siedziby', 'województwo siedziby', 'wojewodztwo siedziby'],
+      headquarters_county: ['powiat_siedziby', 'powiat siedziby'],
+      headquarters_municipality: ['gmina_siedziby', 'gmina siedziby'],
+      headquarters_city: ['miejscowosc_siedziby', 'miejscowość siedziby', 'miejscowosc siedziby'],
+      headquarters_street: ['ulica_siedziby', 'ulica siedziby'],
+      headquarters_building_number: ['nr_budynku_siedziby', 'nr budynku siedziby', 'numer budynku siedziby'],
+      headquarters_apartment_number: ['nr_lokalu_siedziby', 'nr lokalu siedziby', 'numer lokalu siedziby'],
+      headquarters_postal_code: ['kod_pocztowy_siedziby', 'kod pocztowy siedziby'],
+
+      // Sales office address (columns 17-24)
+      sales_office_voivodeship: ['wojewodztwo_lokalu_sprzedazy', 'województwo lokalu sprzedaży', 'wojewodztwo lokalu sprzedazy'],
+      sales_office_county: ['powiat_lokalu_sprzedazy', 'powiat lokalu sprzedaży', 'powiat lokalu sprzedazy'],
+      sales_office_municipality: ['gmina_lokalu_sprzedazy', 'gmina lokalu sprzedaży', 'gmina lokalu sprzedazy'],
+      sales_office_city: ['miejscowosc_lokalu_sprzedazy', 'miejscowość lokalu sprzedaży', 'miejscowosc lokalu sprzedazy'],
+      sales_office_street: ['ulica_lokalu_sprzedazy', 'ulica lokalu sprzedaży', 'ulica lokalu sprzedazy'],
+      sales_office_building_number: ['nr_budynku_lokalu_sprzedazy', 'nr budynku lokalu sprzedaży', 'nr budynku lokalu sprzedazy'],
+      sales_office_apartment_number: ['nr_lokalu_sprzedazy', 'nr lokalu sprzedaży', 'nr lokalu sprzedazy'],
+      sales_office_postal_code: ['kod_pocztowy_lokalu_sprzedazy', 'kod pocztowy lokalu sprzedaży', 'kod pocztowy lokalu sprzedazy'],
+
+      // Additional info (columns 25-28)
+      additional_sales_locations: ['dodatkowe_lokalizacje_sprzedazy', 'dodatkowe lokalizacje sprzedaży', 'dodatkowe lokalizacje sprzedazy'],
+      contact_method: ['sposob_kontaktu', 'sposób kontaktu', 'sposob kontaktu'],
+      website: ['adres_strony_www', 'adres strony www', 'strona internetowa', 'www'],
+      additional_contact_info: ['dodatkowe_informacje_kontaktowe', 'dodatkowe informacje kontaktowe']
+    }
+
+    // If CSV has no rows, return empty
+    if (this.rows.length === 0) {
+      return developerInfo
+    }
+
+    // Extract from FIRST DATA ROW ONLY (since all rows have same company data)
+    const firstRow = this.rows[0]
+
+    // Normalize headers for matching
+    const normalizedHeaders = this.headers.map(h => this.normalizeString(h))
+
+    // For each developer field, find matching column and extract value
+    for (const [devField, csvColumnPatterns] of Object.entries(developerFieldMappings)) {
+      for (const pattern of csvColumnPatterns) {
+        const normalizedPattern = this.normalizeString(pattern)
+
+        // Find column index by fuzzy matching
+        let matchedIndex = -1
+        let bestScore = 0
+
+        normalizedHeaders.forEach((header, idx) => {
+          const score = this.fuzzyMatch(header, normalizedPattern)
+          if (score > 0.6 && score > bestScore) {
+            bestScore = score
+            matchedIndex = idx
+          }
+        })
+
+        // If column found, extract value from first row
+        if (matchedIndex !== -1 && matchedIndex < firstRow.length) {
+          const value = firstRow[matchedIndex]?.trim()
+
+          // Only set if value is non-empty and not already set
+          if (value && value.length > 0 && !developerInfo[devField as keyof DeveloperInfo]) {
+            (developerInfo as Record<string, string>)[devField] = value
+            console.log(`✅ PARSER: Extracted ${devField} = "${value}" (from column ${matchedIndex}: "${this.headers[matchedIndex]}")`)
+            break // Stop searching for this field once found
           }
         }
       }
     }
+
+    // BACKWARD COMPATIBILITY: Set legacy fields if not already set
+    if (developerInfo.company_name && !developerInfo.developer_name) {
+      developerInfo.developer_name = developerInfo.company_name
+    }
+
+    console.log(`📋 PARSER: Extracted ${Object.keys(developerInfo).length} developer fields from first row`)
 
     return developerInfo
   }

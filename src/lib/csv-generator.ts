@@ -178,36 +178,36 @@ function buildCSVRow(property: any, developer: any, rowNumber: number): string {
     // Developer info (columns 2-11)
     developer.company_name || 'x',
     developer.legal_form || developer.forma_prawna || 'Spółka z ograniczoną odpowiedzialnością',
-    developer.krs || 'x',
-    developer.ceidg || 'x',
+    developer.krs_number || developer.krs || 'x', // NEW: check krs_number first
+    developer.ceidg_number || developer.ceidg || 'x', // NEW: check ceidg_number first
     developer.nip || 'x',
     developer.regon || 'x',
     developer.phone || 'x',
     developer.email || 'x',
     developer.fax || 'x',
-    developer.website_url || developer.strona_internetowa || 'x',
+    developer.website || developer.website_url || developer.strona_internetowa || 'x', // NEW: check website first
 
     // Developer headquarters address (columns 12-18)
-    developer.wojewodztwo || 'x',
-    developer.powiat || 'x',
-    developer.gmina || 'x',
-    developer.miejscowosc || 'x',
-    developer.ulica || 'x',
-    developer.nr_budynku || 'x',
-    developer.nr_lokalu || 'x',
-    developer.kod_pocztowy || 'x',
+    developer.headquarters_voivodeship || developer.wojewodztwo || 'x', // NEW: check headquarters_voivodeship first
+    developer.headquarters_county || developer.powiat || 'x', // NEW: check headquarters_county first
+    developer.headquarters_municipality || developer.gmina || 'x', // NEW: check headquarters_municipality first
+    developer.headquarters_city || developer.miejscowosc || 'x', // NEW: check headquarters_city first
+    developer.headquarters_street || developer.ulica || 'x', // NEW: check headquarters_street first
+    developer.headquarters_building_number || developer.nr_budynku || 'x', // NEW: check headquarters_building_number first
+    developer.headquarters_apartment_number || developer.nr_lokalu || 'x', // NEW: check headquarters_apartment_number first
+    developer.headquarters_postal_code || developer.kod_pocztowy || 'x', // NEW: check headquarters_postal_code first
 
-    // Sales office address (columns 19-27) - usually same as headquarters
-    developer.wojewodztwo || 'x',
-    developer.powiat || 'x',
-    developer.gmina || 'x',
-    developer.miejscowosc || 'x',
-    developer.ulica || 'x',
-    developer.nr_budynku || 'x',
-    developer.nr_lokalu || 'x',
-    developer.kod_pocztowy || 'x',
-    'x', // Additional sales locations
-    'siedziba/mail/telefon', // Contact methods
+    // Sales office address (columns 19-27)
+    developer.sales_office_voivodeship || developer.wojewodztwo || 'x', // NEW: check sales_office fields
+    developer.sales_office_county || developer.powiat || 'x',
+    developer.sales_office_municipality || developer.gmina || 'x',
+    developer.sales_office_city || developer.miejscowosc || 'x',
+    developer.sales_office_street || developer.ulica || 'x',
+    developer.sales_office_building_number || developer.nr_budynku || 'x',
+    developer.sales_office_apartment_number || developer.nr_lokalu || 'x',
+    developer.sales_office_postal_code || developer.kod_pocztowy || 'x',
+    developer.additional_sales_locations || 'x', // NEW: check additional_sales_locations
+    developer.contact_method || 'siedziba/mail/telefon', // NEW: check contact_method
 
     // Project location (columns 30-36)
     getField('wojewodztwo'),

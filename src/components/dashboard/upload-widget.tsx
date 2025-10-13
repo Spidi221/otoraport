@@ -9,6 +9,7 @@ import { trackFileUpload } from "@/lib/analytics-events";
 interface UploadResult {
   fileName: string;
   propertiesAdded: number;
+  autoImportedFields?: number;
 }
 
 // Feature flag: Use Web Worker for CSV parsing (prevents UI freezing)
@@ -70,9 +71,11 @@ export function UploadWidget() {
         throw new Error(data?.error || 'Wystąpił błąd podczas przesyłania');
       }
 
+      const autoImportedFields = data?.data?.autoImportedFields || 0;
       setUploadResult({
         fileName: 'parsed-data.csv',
-        propertiesAdded: validRows
+        propertiesAdded: validRows,
+        autoImportedFields: autoImportedFields
       });
 
       // Track successful upload in GA4 and PostHog
@@ -189,9 +192,11 @@ export function UploadWidget() {
 
       // Simplified result: just filename and count
       const recordsCount = data?.data?.validRecords || data?.data?.recordsCount || 0;
+      const autoImportedFields = data?.data?.autoImportedFields || 0;
       setUploadResult({
         fileName: file.name,
-        propertiesAdded: recordsCount
+        propertiesAdded: recordsCount,
+        autoImportedFields: autoImportedFields
       });
 
       // Track successful upload in GA4 and PostHog
@@ -312,9 +317,16 @@ export function UploadWidget() {
 
         {uploadResult && (
           <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center gap-2 text-sm text-green-700">
-              <CheckCircle className="h-4 w-4" />
-              <span>Dodano <strong>{uploadResult.propertiesAdded}</strong> mieszkań z pliku: {uploadResult.fileName}</span>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-sm text-green-700">
+                <CheckCircle className="h-4 w-4" />
+                <span>Dodano <strong>{uploadResult.propertiesAdded}</strong> mieszkań z pliku: {uploadResult.fileName}</span>
+              </div>
+              {uploadResult.autoImportedFields && uploadResult.autoImportedFields > 0 && (
+                <div className="flex items-center gap-2 text-sm text-blue-700 ml-6">
+                  <span>✨ Profil auto-uzupełniony: <strong>{uploadResult.autoImportedFields}</strong> {uploadResult.autoImportedFields === 1 ? 'pole' : uploadResult.autoImportedFields < 5 ? 'pola' : 'pól'}</span>
+                </div>
+              )}
             </div>
           </div>
         )}
