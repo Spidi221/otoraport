@@ -78,26 +78,24 @@ export async function GET(request: NextRequest) {
     // Calculate average price per m² (only available properties with valid data)
     const validProperties = allProperties.filter(p =>
       p.status === 'available' &&
-      p.price &&
-      p.area &&
-      p.price > 0 &&
-      p.area > 0
+      p.price_per_m2 &&
+      p.price_per_m2 > 0
     )
 
     const avgPricePerM2 = validProperties.length > 0
-      ? Math.round(validProperties.reduce((sum, p) => sum + (p.price / p.area), 0) / validProperties.length)
+      ? Math.round(validProperties.reduce((sum, p) => sum + p.price_per_m2, 0) / validProperties.length)
       : 0
 
     // Calculate last month's average for trend
     const lastMonthProperties = allProperties.filter(p => {
-      if (p.status !== 'available' || !p.price || !p.area) return false
+      if (p.status !== 'available' || !p.price_per_m2 || p.price_per_m2 <= 0) return false
       if (!p.created_at) return false
       const createdDate = new Date(p.created_at)
       return createdDate >= lastMonthStart && createdDate <= lastMonthEnd
     })
 
     const lastMonthAvgPrice = lastMonthProperties.length > 0
-      ? Math.round(lastMonthProperties.reduce((sum, p) => sum + (p.price / p.area), 0) / lastMonthProperties.length)
+      ? Math.round(lastMonthProperties.reduce((sum, p) => sum + p.price_per_m2, 0) / lastMonthProperties.length)
       : avgPricePerM2
 
     // Calculate trends
