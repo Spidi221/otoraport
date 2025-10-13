@@ -79,6 +79,17 @@ export class PapaParseCSVParser {
   }
 
   /**
+   * Normalize string for comparison - removes Polish special chars and normalizes whitespace
+   */
+  private normalizeString(str: string): string {
+    return str
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '') // Remove special chars (including Polish ł, ą, ć, etc.)
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim()
+  }
+
+  /**
    * Detect CSV format type (ministerial/INPRO/custom)
    * Same logic as smart-csv-parser.ts for compatibility
    */
@@ -113,17 +124,18 @@ export class PapaParseCSVParser {
     let inproScore = 0
     let customScore = 0
 
-    const normalizedHeaders = this.headers.map(h => h.toLowerCase().trim())
+    // FIX: Use normalizeString for consistent comparison (removes Polish special chars)
+    const normalizedHeaders = this.headers.map(h => this.normalizeString(h))
 
     ministerialSignatures.forEach(sig => {
-      const normalized = sig.toLowerCase().trim()
+      const normalized = this.normalizeString(sig)
       if (normalizedHeaders.some(h => h.includes(normalized) || normalized.includes(h))) {
         ministerialScore++
       }
     })
 
     inproSignatures.forEach(sig => {
-      const normalized = sig.toLowerCase().trim()
+      const normalized = this.normalizeString(sig)
       if (normalizedHeaders.some(h => h.includes(normalized) || normalized.includes(h))) {
         inproScore++
       }
@@ -184,12 +196,8 @@ export class PapaParseCSVParser {
     console.log(`🔍 PARSER: Format detected - ${formatDetection.format.toUpperCase()} (${formatDetection.confidence.toFixed(1)}% confidence)`)
     console.log(`📋 PARSER: ${formatDetection.details}`)
 
-    const normalizedHeaders = this.headers.map(header =>
-      header.toLowerCase()
-        .replace(/[^\w\s]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim()
-    )
+    // Normalize headers for comparison
+    const normalizedHeaders = this.headers.map(header => this.normalizeString(header))
 
     let totalConfidence = 0
     let mappedCount = 0
@@ -202,7 +210,9 @@ export class PapaParseCSVParser {
         const originalHeader = this.headers[index]
 
         for (const pattern of patterns) {
-          const score = this.fuzzyMatch(normalizedHeader, pattern.toLowerCase())
+          // FIX: Normalize pattern the SAME way as header before comparing!
+          const normalizedPattern = this.normalizeString(pattern)
+          const score = this.fuzzyMatch(normalizedHeader, normalizedPattern)
           if (score > 0.6) {
             matches.push({ header: originalHeader, score })
           }

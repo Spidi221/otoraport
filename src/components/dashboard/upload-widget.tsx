@@ -12,7 +12,8 @@ interface UploadResult {
 }
 
 // Feature flag: Use Web Worker for CSV parsing (prevents UI freezing)
-const USE_WEB_WORKER_FOR_CSV = typeof window !== 'undefined' && 'Worker' in window;
+// TEMPORARY FIX: Disabled to use server-side parser with Polish char fix
+const USE_WEB_WORKER_FOR_CSV = false; // typeof window !== 'undefined' && 'Worker' in window;
 
 export function UploadWidget() {
   const [dragActive, setDragActive] = useState(false);
