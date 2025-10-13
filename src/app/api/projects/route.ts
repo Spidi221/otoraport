@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     const { data: developer, error: devError } = await supabase
       .from('developers')
       .select('id, subscription_plan')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (devError || !developer) {
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     const { data: developer, error: devError } = await supabase
       .from('developers')
       .select('id, subscription_plan')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (devError || !developer) {

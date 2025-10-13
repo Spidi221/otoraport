@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     const { data: developer, error: devError } = await supabase
       .from('developers')
       .select('id, email, name, company_name, stripe_customer_id')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single()
 
     if (devError || !developer) {

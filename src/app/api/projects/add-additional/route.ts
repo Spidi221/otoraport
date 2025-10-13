@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const { data: developer, error: devError } = await supabase
       .from('developers')
       .select('*')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (devError || !developer) {
