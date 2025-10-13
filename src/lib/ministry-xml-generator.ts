@@ -51,7 +51,7 @@ ${properties.map(property => generatePropertyOffer(property, developer)).join('\
  * All developer-related fields from ministry requirements
  */
 function generateDeveloperSection(developer: Developer): string {
-  return `<nazwa>${escapeXml(developer.company_name || developer.name)}</nazwa>
+  return `<nazwa>${escapeXml(developer.company_name || developer.email)}</nazwa>
       <forma_prawna>${escapeXml(developer.legal_form || 'spółka z ograniczoną odpowiedzialnością')}</forma_prawna>
       ${developer.krs ? `<nr_krs>${escapeXml(developer.krs)}</nr_krs>` : '<nr_krs>X</nr_krs>'}
       ${developer.ceidg ? `<nr_wpisu_ceidg>${escapeXml(developer.ceidg)}</nr_wpisu_ceidg>` : '<nr_wpisu_ceidg>X</nr_wpisu_ceidg>'}
@@ -319,7 +319,7 @@ export function validateMinistryDataXML(options: MinistryXMLOptions): {
   const warnings: string[] = []
 
   // Developer validation
-  if (!developer.company_name && !developer.name) {
+  if (!developer.company_name && !developer.email) {
     errors.push('Brak nazwy dewelopera')
   }
   if (!developer.nip) {

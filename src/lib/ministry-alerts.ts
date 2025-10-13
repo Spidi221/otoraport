@@ -44,7 +44,7 @@ export async function sendEndpointHealthAlert(
       <div style="background: #fef2f2; border: 2px solid #dc2626; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #dc2626; margin-top: 0;">🚨 Endpoint ministerstwa nie działa!</h2>
 
-        <p>Witaj ${developer.name},</p>
+        <p>Witaj ${developer.company_name || developer.email},</p>
 
         <p>Wykryliśmy problem z Twoim endpointem ministerstwa:</p>
 
@@ -82,7 +82,7 @@ export async function sendEndpointHealthAlert(
   let text = `
 🚨 ALERT: Endpoint ministerstwa ${failedEndpoint.toUpperCase()} nie działa
 
-Witaj ${developer.name},
+Witaj ${developer.company_name || developer.email},
 
 Wykryliśmy problem z endpointem:
 ${endpointUrl}
@@ -137,7 +137,7 @@ export async function sendDataStalenessAlert(
       <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #92400e; margin-top: 0;">⏰ Dane wymagają aktualizacji</h2>
 
-        <p>Witaj ${developer.name},</p>
+        <p>Witaj ${developer.company_name || developer.email},</p>
 
         <p>Twoje dane dla ministerstwa nie były aktualizowane od <strong>${daysSinceLastUpdate} dni</strong>.</p>
 
@@ -176,7 +176,7 @@ export async function sendDataStalenessAlert(
   let text = `
 ⏰ Dane ministerstwa nieaktualne od ${daysSinceLastUpdate} dni
 
-Witaj ${developer.name},
+Witaj ${developer.company_name || developer.email},
 
 Twoje dane nie były aktualizowane od ${daysSinceLastUpdate} dni.
 
@@ -248,7 +248,7 @@ export async function sendWeeklyComplianceDigest(
       </div>
 
       <div style="background: #f8fafc; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
-        <h2 style="color: #1e293b; margin-top: 0;">Witaj ${developer.name}!</h2>
+        <h2 style="color: #1e293b; margin-top: 0;">Witaj ${developer.company_name || developer.email}!</h2>
 
         <p>Oto podsumowanie Twojego compliance za ostatni tydzień:</p>
 
@@ -300,7 +300,7 @@ export async function sendWeeklyComplianceDigest(
   let text = `
 📊 Tygodniowy raport compliance OTO-RAPORT
 
-Witaj ${developer.name}!
+Witaj ${developer.company_name || developer.email}!
 
 Podsumowanie za ostatni tydzień:
 

@@ -101,6 +101,42 @@ coderabbit review --help
 
 ---
 
+## 📊 WIEDZA DOMENOWA - MINISTRY COMPLIANCE
+
+### 📅 Raportowanie "od pierwszego dnia" - Marketing vs Rzeczywistość
+
+**TL;DR**: Endpointy XML/MD5 działają od pierwszego dnia, ale ministerstwo musi je najpierw podłączyć.
+
+**Proces wg dokumentacji ministerstwa (Przewodnik XML v1.02):**
+
+1. **Deweloper przygotowuje** pliki XML + MD5 na swoim serwerze
+2. **Deweloper wysyła wniosek** na kontakt@dane.gov.pl z:
+   - URL do pliku XML
+   - URL do pliku MD5
+   - Częstotliwość aktualizacji (dziennie/tydzień/miesiąc/kwartał)
+3. **⏳ Ministerstwo konfiguruje** automatyczne pobieranie (czas nieznany)
+4. **✅ Dopiero po konfiguracji** dane są pobierane automatycznie (codziennie o 5:00 AM)
+
+**Co oznacza "raportowanie od pierwszego dnia" u konkurencji:**
+
+To **marketing** - prawdopodobnie oznacza:
+- ✅ Endpointy XML/MD5 są gotowe i działają od pierwszego dnia (na serwerze dewelopera)
+- ✅ System automatycznie generuje pliki od razu po pierwszym uploadzie
+- ❌ **ALE** ministerstwo ich jeszcze nie pobiera (musi skonfigurować harvester)
+
+**Nasza przewaga marketingowa - możemy reklamować dokładnie to samo:**
+- ✅ "Endpointy XML/MD5 gotowe od pierwszego dnia"
+- ✅ "Automatyczna generacja raportów od pierwszego uploadu"
+- ✅ "System gotowy do integracji z ministerswem od startu"
+- ✅ "Zgodność 100% z instrukcją ministerstwa (v1.0.5 z 29.09.2025)"
+
+**Źródła:**
+- Przewodnik automatycznego zasilania danych XML (wersja 1.02)
+- Instrukcja przygotowania pliku XML dla deweloperów (wersja 1.0.5 z 29.09.2025)
+- Badania rynkowe (voxdeveloper.com, eksporta.pl, jawnecenymieszkan.pl)
+
+---
+
 ## 📋 TODO DLA USERA - MANUAL ACTIONS REQUIRED
 
 **WAŻNE**: Zapisuj w tej sekcji wszystko co user musi zrobić ręcznie. Przypominaj o tym na końcu sesji!

@@ -45,7 +45,7 @@ export function generateHarvesterXML(params: HarvesterXMLParams): string {
 <ns2:datasets xmlns:ns2="urn:otwarte-dane:harvester:1.13">
   <dataset status="published">
     <extIdent>${extIdent}</extIdent>
-    <extTitle>Ceny ofertowe mieszkań - ${developer.name} - ${date}</extTitle>
+    <extTitle>Ceny ofertowe mieszkań - ${developer.company_name || developer.email} - ${date}</extTitle>
     <extSchemaType>mieszkania</extSchemaType>
     <extSchemaVersion>1.13</extSchemaVersion>
     <resources>

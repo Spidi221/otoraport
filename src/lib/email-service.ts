@@ -151,19 +151,18 @@ export async function sendMinistryRegistrationEmail(developer: Developer) {
   const xmlUrl = `${APP_URL}/api/public/${developer.client_id}/data.xml`
   const mdUrl = `${APP_URL}/api/public/${developer.client_id}/data.md5`
   
-  const subject = `Zgłoszenie dewelopera do systemu raportowania cen - ${developer.company_name || developer.name}`
+  const subject = `Zgłoszenie dewelopera do systemu raportowania cen - ${developer.company_name}`
   
   const html = `
     <h1>OTO-RAPORT - System automatycznego raportowania cen mieszkań</h1>
     
     <p>Dzień dobry,</p>
     
-    <p><strong>${developer.company_name || developer.name}</strong> zgłasza się do systemu automatycznego raportowania cen mieszkań zgodnie z wymogami ustawy z dnia 21 maja 2025 r.</p>
+    <p><strong>${developer.company_name}</strong> zgłasza się do systemu automatycznego raportowania cen mieszkań zgodnie z wymogami ustawy z dnia 21 maja 2025 r.</p>
     
     <h3>Dane dewelopera:</h3>
     <ul>
       <li>Nazwa firmy: ${developer.company_name || 'Nie podano'}</li>
-      <li>Imię i nazwisko: ${developer.name}</li>
       <li>NIP: ${developer.nip || 'Nie podano'}</li>
       <li>Email: ${developer.email}</li>
       <li>Telefon: ${developer.phone || 'Nie podano'}</li>
@@ -174,18 +173,17 @@ export async function sendMinistryRegistrationEmail(developer: Developer) {
     <p><strong>Markdown:</strong> <a href="${mdUrl}">${mdUrl}</a></p>
     
     <p>Prosimy o potwierdzenie rejestracji w systemie harvestera danych.</p>
-    
-    <p>Pozdrawiam,<br>${developer.name}</p>
+
+    <p>Pozdrawiam,<br>${developer.company_name}</p>
   `
   
   const text = `
 OTO-RAPORT - System automatycznego raportowania cen mieszkań
 
-${developer.company_name || developer.name} zgłasza się do systemu automatycznego raportowania cen mieszkań.
+${developer.company_name} zgłasza się do systemu automatycznego raportowania cen mieszkań.
 
 Dane dewelopera:
 - Nazwa: ${developer.company_name || 'Nie podano'}
-- Kontakt: ${developer.name}
 - Email: ${developer.email}
 
 Adresy URL:
@@ -194,7 +192,7 @@ Markdown: ${mdUrl}
 
 Prosimy o potwierdzenie rejestracji.
 
-${developer.name}
+${developer.company_name}
   `
 
   const ministryEmail = MINISTRY_EMAIL
@@ -232,7 +230,7 @@ export async function sendDeveloperWelcomeEmail(developer: Developer) {
       </div>
 
       <div style="background: #f8fafc; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
-        <h2 style="color: #1e293b; margin-top: 0;">Witaj, ${developer.name}! 👋</h2>
+        <h2 style="color: #1e293b; margin-top: 0;">Witaj, ${developer.company_name}! 👋</h2>
         
         <p>Dziękujemy za dołączenie do OTO-RAPORT. Twoje konto <strong>${planType}</strong> zostało pomyślnie utworzone i możesz rozpocząć korzystanie z platformy.</p>
         
@@ -282,7 +280,7 @@ export async function sendDeveloperWelcomeEmail(developer: Developer) {
   `
   
   const text = `
-Witaj w OTO-RAPORT, ${developer.name}!
+Witaj w OTO-RAPORT, ${developer.company_name}!
 
 Twoje konto ${planType} zostało pomyślnie utworzone.
 
@@ -333,8 +331,8 @@ export async function sendTrialExpiryWarning(developer: Developer, daysLeft: num
 
       <div style="background: #fef2f2; border: 2px solid #f87171; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #dc2626; margin-top: 0;">⏰ Twój trial wygasa za ${daysLeft} dni</h2>
-        
-        <p>Witaj ${developer.name},</p>
+
+        <p>Witaj ${developer.company_name},</p>
         
         <p>Twój 14-dniowy okres próbny OTO-RAPORT wygasa za <strong>${daysLeft} dni</strong>. 
         Aby zachować dostęp do platformy i compliance z ministerstwem, wybierz plan odpowiedni dla Twojej firmy.</p>
@@ -395,7 +393,7 @@ export async function sendTrialExpiryWarning(developer: Developer, daysLeft: num
   const text = `
 ⏰ Twój trial OTO-RAPORT wygasa za ${daysLeft} dni
 
-Witaj ${developer.name},
+Witaj ${developer.company_name},
 
 Twój 14-dniowy trial kończy się za ${daysLeft} dni. Wybierz plan:
 
@@ -454,8 +452,8 @@ export async function sendComplianceNotification(
       
       <div style="background: #dcfce7; border: 2px solid #16a34a; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #15803d; margin-top: 0;">✅ Raport compliance gotowy!</h2>
-        
-        <p>Witaj ${developer.name},</p>
+
+        <p>Witaj ${developer.company_name},</p>
         
         <p>Twój automatyczny raport compliance został pomyślnie wygenerowany dla <strong>${propertiesCount} nieruchomości</strong>.</p>
         
@@ -496,7 +494,7 @@ export async function sendComplianceNotification(
   const text = `
 ✅ Raport compliance OTO-RAPORT gotowy!
 
-Witaj ${developer.name},
+Witaj ${developer.company_name},
 
 Raport dla ${propertiesCount} nieruchomości został wygenerowany:
 
@@ -551,7 +549,7 @@ export async function sendUploadErrorEmail(
       <div style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #dc2626; margin-top: 0;">❌ Błąd przetwarzania pliku</h2>
 
-        <p>Witaj ${developer.name},</p>
+        <p>Witaj ${developer.company_name},</p>
 
         <p>Niestety, wystąpił błąd podczas przetwarzania pliku <strong>"${uploadData.fileName}"</strong>.</p>
 
@@ -600,7 +598,7 @@ export async function sendUploadErrorEmail(
   const text = `
 ❌ Błąd podczas przetwarzania pliku "${uploadData.fileName}"
 
-Witaj ${developer.name},
+Witaj ${developer.company_name},
 
 Wystąpił błąd podczas przetwarzania Twojego pliku.
 
@@ -666,7 +664,7 @@ export async function sendWeeklyReportEmail(
       </div>
 
       <div style="background: #f8fafc; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
-        <h2 style="color: #1e293b; margin-top: 0;">Cześć ${developer.name}! 👋</h2>
+        <h2 style="color: #1e293b; margin-top: 0;">Cześć ${developer.company_name}! 👋</h2>
 
         <p>Oto podsumowanie Twoich nieruchomości z ostatniego tygodnia:</p>
 
@@ -749,7 +747,7 @@ export async function sendWeeklyReportEmail(
   const text = `
 📊 Tygodniowy raport OTO-RAPORT
 
-Cześć ${developer.name}!
+Cześć ${developer.company_name}!
 
 Podsumowanie nieruchomości:
 - Wszystkie: ${reportData.totalProperties}
@@ -815,7 +813,7 @@ export async function sendUploadConfirmationEmail(
       <div style="background: #dcfce7; border: 2px solid #16a34a; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #15803d; margin-top: 0;">✅ Plik pomyślnie przetworzony!</h2>
 
-        <p>Witaj ${developer.name},</p>
+        <p>Witaj ${developer.company_name},</p>
 
         <p>Twój plik <strong>"${uploadData.fileName}"</strong> został pomyślnie przesłany i przetworzony przez system OTO-RAPORT.</p>
 
@@ -867,7 +865,7 @@ export async function sendUploadConfirmationEmail(
   const text = `
 ✅ Plik "${uploadData.fileName}" został pomyślnie przetworzony
 
-Witaj ${developer.name},
+Witaj ${developer.company_name},
 
 Podsumowanie parsowania:
 - Przetworzonych mieszkań: ${uploadData.validProperties}
@@ -908,7 +906,7 @@ export async function sendTrialEndingReminderEmail(developer: Developer, daysLef
       </div>
       <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #856404;">⏰ Twój trial kończy się za ${daysLeft} dni</h2>
-        <p>Witaj ${developer.name},</p>
+        <p>Witaj ${developer.company_name},</p>
         <p>Twój 14-dniowy trial OTO-RAPORT wygasa za <strong>${daysLeft} dni</strong>.</p>
         <p>Po zakończeniu trialu automatycznie przejdziesz na wybrany plan płatny.</p>
       </div>
@@ -924,7 +922,7 @@ export async function sendTrialEndingReminderEmail(developer: Developer, daysLef
   const text = `
 ⏰ Twój trial kończy się za ${daysLeft} dni
 
-Witaj ${developer.name},
+Witaj ${developer.company_name},
 Twój 14-dniowy trial wygasa za ${daysLeft} dni.
 
 Dashboard: ${dashboardUrl}
@@ -1550,7 +1548,7 @@ export async function sendTrialConvertedEmail(developer: Developer) {
       </div>
       <div style="background: #dcfce7; border: 2px solid #16a34a; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #15803d;">🎉 Witaj jako klient premium!</h2>
-        <p>Witaj ${developer.name},</p>
+        <p>Witaj ${developer.company_name},</p>
         <p>Twój trial zakończył się i teraz jesteś klientem premium na planie <strong>${planType.toUpperCase()}</strong>!</p>
         <p>Dziękujemy za zaufanie.</p>
       </div>
@@ -1566,7 +1564,7 @@ export async function sendTrialConvertedEmail(developer: Developer) {
   const text = `
 🎉 Witaj jako klient premium OTO-RAPORT!
 
-Witaj ${developer.name},
+Witaj ${developer.company_name},
 Twój trial zakończył się. Jesteś teraz klientem premium na planie ${planType.toUpperCase()}!
 
 Dashboard: ${dashboardUrl}
@@ -1598,7 +1596,7 @@ export async function sendPaymentFailedEmail(developer: Developer) {
       </div>
       <div style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
         <h2 style="color: #dc2626;">⚠️ Problem z płatnością</h2>
-        <p>Witaj ${developer.name},</p>
+        <p>Witaj ${developer.company_name},</p>
         <p>Nie udało się przetworzyć Twojej płatności za subskrypcję OTO-RAPORT.</p>
         <p>Zaktualizuj metodę płatności aby uniknąć przerwy w dostępie.</p>
       </div>
@@ -1614,7 +1612,7 @@ export async function sendPaymentFailedEmail(developer: Developer) {
   const text = `
 ⚠️ Problem z płatnością - OTO-RAPORT
 
-Witaj ${developer.name},
+Witaj ${developer.company_name},
 Nie udało się przetworzyć płatności.
 
 Dashboard: ${dashboardUrl}

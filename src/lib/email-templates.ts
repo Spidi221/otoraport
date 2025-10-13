@@ -2,7 +2,6 @@
 
 interface Developer {
   id: string;
-  name: string;
   company_name: string;
   nip: string;
   email: string;
@@ -54,7 +53,6 @@ export function generateMinistryNotificationEmail(developer: Developer): EmailTe
       <h3>📋 Dane dewelopera:</h3>
       <ul>
         <li><strong>Nazwa firmy:</strong> ${developer.company_name}</li>
-        <li><strong>Osoba kontaktowa:</strong> ${developer.name}</li>
         <li><strong>NIP:</strong> ${developer.nip}</li>
         <li><strong>Email:</strong> ${developer.email}</li>
         ${developer.phone ? `<li><strong>Telefon:</strong> ${developer.phone}</li>` : ''}
@@ -112,7 +110,6 @@ ${developer.company_name} zgłasza się do systemu automatycznego raportowania c
 
 DANE DEWELOPERA:
 - Nazwa firmy: ${developer.company_name}
-- Osoba kontaktowa: ${developer.name}
 - NIP: ${developer.nip}
 - Email: ${developer.email}
 ${developer.phone ? `- Telefon: ${developer.phone}` : ''}
@@ -174,7 +171,7 @@ export function generateDeveloperWelcomeEmail(developer: Developer): EmailTempla
 
     <div class="success-box">
       <h3>✅ Twoje konto zostało utworzone</h3>
-      <p>Witaj <strong>${developer.name}</strong>! Cieszymy się, że dołączyłeś do OTO-RAPORT.</p>
+      <p>Witaj <strong>${developer.company_name}</strong>! Cieszymy się, że dołączyłeś do OTO-RAPORT.</p>
     </div>
 
     <div class="next-steps">
@@ -228,7 +225,7 @@ OTO-RAPORT - Witamy w systemie!
 
 REJESTRACJA PRZEBIEGŁA POMYŚLNIE
 
-Witaj ${developer.name}! Cieszymy się, że dołączyłeś do OTO-RAPORT.
+Witaj ${developer.company_name}! Cieszymy się, że dołączyłeś do OTO-RAPORT.
 
 CO DALEJ?
 
@@ -300,8 +297,8 @@ export function generateDataUpdateNotificationEmail(
   
   <div class="content">
     <h2>Dane zaktualizowane pomyślnie!</h2>
-    
-    <p>Cześć ${developer.name},</p>
+
+    <p>Cześć ${developer.company_name},</p>
     
     <div class="update-box">
       <h3>✅ Aktualizacja z dnia ${new Date(updateDetails.uploadedAt).toLocaleDateString('pl-PL')}</h3>
@@ -353,7 +350,7 @@ export function generateDataUpdateNotificationEmail(
     text: `
 OTO-RAPORT - Dane zaktualizowane pomyślnie!
 
-Cześć ${developer.name},
+Cześć ${developer.company_name || developer.email},
 
 AKTUALIZACJA Z DNIA ${new Date(updateDetails.uploadedAt).toLocaleDateString('pl-PL')}
 Twoje dane cenowe zostały pomyślnie przetworzone i zaktualizowane.

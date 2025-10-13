@@ -2502,13 +2502,39 @@
         "priority": "high",
         "subtasks": [],
         "updatedAt": "2025-10-10T07:56:04.616Z"
+      },
+      {
+        "id": "77",
+        "title": "Replace All References to Non-Existent developer.name with developer.company_name (Fallback to developer.email)",
+        "description": "Update all code references to the non-existent developer.name property in specified files, replacing them with developer.company_name and falling back to developer.email where necessary.",
+        "details": "1. **Identify All Occurrences:** Use code search tools (e.g., `grep`, VSCode global search) to locate every instance of `developer.name` in the files: `email-templates.ts`, `ministry-xml-generator.ts`, `harvester-xml-generator.ts`, `ministry-alerts.ts`, `email-service.ts`, and any other relevant files.\n\n2. **Replace with Existing Column:** Replace each occurrence of `developer.name` with `developer.company_name`. If the context requires a fallback (e.g., if `company_name` may be null or undefined), use a fallback to `developer.email`. For example, in TypeScript:\n```typescript\ndeveloper.company_name || developer.email\n```\n\n3. **Type Safety:** Ensure that all replacements are type-safe. Update TypeScript types/interfaces if necessary to reflect the correct developer object shape, removing any references to the non-existent `name` property and ensuring `company_name` and `email` are present and correctly typed[6][7].\n\n4. **Test for Nullish Values:** Where the code previously assumed `developer.name` was always present, audit for potential null/undefined issues and handle them gracefully (e.g., using nullish coalescing `??` or logical OR `||`).\n\n5. **Documentation:** Add comments where fallback logic is used, explaining the rationale for future maintainers.\n\n6. **Refactor Related Logic:** If any business logic, validation, or display logic depends on `developer.name`, refactor it to use the new property and fallback pattern.\n\n7. **Code Review:** Submit changes for peer review to ensure all references are correctly updated and no regressions are introduced.\n\n**Best Practices:**\n- Use automated refactoring tools where possible to minimize manual errors.\n- Write or update unit tests to cover cases where `company_name` is missing and fallback to `email` is expected.\n- Ensure all changes are consistent across the codebase to avoid future confusion.",
+        "testStrategy": "1. **Static Code Analysis:** Run TypeScript compiler (`tsc --noEmit`) and linter to ensure there are no references to `developer.name` and no type errors.\n\n2. **Automated Search:** Perform a final global search for `developer.name` to confirm all instances have been replaced.\n\n3. **Unit and Integration Tests:** Run all existing tests. Add or update tests to verify that wherever `developer.company_name` is missing, the code correctly falls back to `developer.email`.\n\n4. **Manual Verification:** For each affected feature (emails, XML generation, alerts), manually trigger scenarios where developer data is used and verify correct output in both normal and fallback cases.\n\n5. **Code Review:** Ensure at least one peer reviews the changes, focusing on correctness and completeness of the replacements.",
+        "status": "done",
+        "dependencies": [
+          "76"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2025-10-13T10:39:05.196Z"
+      },
+      {
+        "id": "78",
+        "title": "Implement Admin Panel with Dashboard and Route Protection",
+        "description": "Create an admin panel accessible via the /admin route, featuring user management, subscription overview, system logs, and statistics, ensuring only admin users have access.",
+        "details": "1. **Setup Admin Route**: Create a new route `/admin` and ensure it returns the admin dashboard page instead of a 404 error. Use React Router for routing management[3].\n2. **Admin Dashboard Components**: Utilize existing components from `src/components/admin/` to build the dashboard. Include sections for user management, subscription overview, system logs, and statistics[1][2].\n3. **Route Protection**: Implement authentication checks using NextAuth or similar tools to ensure only users with `is_admin=true` can access the admin panel[1].\n4. **UI and UX**: Design the dashboard with a responsive layout, possibly using Tailwind CSS for styling[3].\n5. **Testing**: Verify that the admin panel is accessible only by admin users and that all features function as expected.",
+        "testStrategy": "1. **Route Verification**: Confirm that the `/admin` route correctly renders the admin dashboard for authorized users and returns a 404 or redirects unauthorized users.\n2. **Feature Testing**: Test each section of the admin dashboard (user management, subscription overview, system logs, statistics) to ensure they display accurate data and function correctly.\n3. **Security Testing**: Perform penetration testing or use tools like OWASP ZAP to ensure route protection is secure and no unauthorized access is possible.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2025-10-13T10:43:27.575Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-10T07:57:03.064Z",
-      "taskCount": 41,
-      "completedCount": 37,
+      "lastModified": "2025-10-13T10:43:27.577Z",
+      "taskCount": 43,
+      "completedCount": 39,
       "tags": [
         "master"
       ]
