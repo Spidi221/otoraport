@@ -35,9 +35,15 @@ export async function GET(request: NextRequest) {
     if (data.user) {
       const { data: developer } = await supabase
         .from('developers')
-        .select('stripe_customer_id, payment_method_attached, trial_status')
+        .select('stripe_customer_id, payment_method_attached, trial_status, is_admin')
         .eq('user_id', data.user.id)
         .single()
+
+      // Skip onboarding for admins
+      if (developer?.is_admin) {
+        console.log('✅ AUTH CALLBACK: Admin user - skipping onboarding')
+        return NextResponse.redirect(new URL(next, requestUrl.origin))
+      }
 
       // Redirect to onboarding if no Stripe customer or no payment method attached
       if (!developer?.stripe_customer_id || !developer?.payment_method_attached) {
@@ -74,9 +80,15 @@ export async function GET(request: NextRequest) {
     if (data.user) {
       const { data: developer } = await supabase
         .from('developers')
-        .select('stripe_customer_id, payment_method_attached, trial_status')
+        .select('stripe_customer_id, payment_method_attached, trial_status, is_admin')
         .eq('user_id', data.user.id)
         .single()
+
+      // Skip onboarding for admins
+      if (developer?.is_admin) {
+        console.log('✅ AUTH CALLBACK: Admin user - skipping onboarding')
+        return NextResponse.redirect(new URL(next, requestUrl.origin))
+      }
 
       // Redirect to onboarding if no Stripe customer or no payment method attached
       if (!developer?.stripe_customer_id || !developer?.payment_method_attached) {
