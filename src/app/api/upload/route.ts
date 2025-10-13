@@ -55,6 +55,12 @@ async function autoImportDeveloperInfo(parser: SmartCSVParser, developerId: stri
   let filledCount = 0
 
   for (const [field, value] of Object.entries(developerInfo)) {
+    // Skip legacy fields that don't exist in database schema
+    if (field === 'developer_name') {
+      console.log(`⏭️ AUTO-IMPORT: Skipping ${field} - legacy field (not in database schema)`)
+      continue
+    }
+
     // Skip if no value to import
     if (!value || typeof value !== 'string' || value.trim().length === 0) continue
 
@@ -63,7 +69,10 @@ async function autoImportDeveloperInfo(parser: SmartCSVParser, developerId: stri
     const isEmpty = !currentValue ||
                     currentValue === '' ||
                     currentValue === 'My Company' ||
+                    currentValue === 'LessManual Admin' || // Allow overwrite of auto-generated placeholder
                     currentValue === '0000000000' || // Default NIP placeholder
+                    currentValue === '1234567890' || // User's test NIP
+                    currentValue === '123456789' || // User's test REGON
                     currentValue === 'nieznane'
 
     if (isEmpty) {

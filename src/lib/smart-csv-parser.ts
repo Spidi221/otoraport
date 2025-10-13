@@ -1354,10 +1354,17 @@ export class SmartCSVParser {
         console.log(`🔍 PARSER: Auto-detected status for property ${property.property_number || 'unknown'}: ${detectedStatus}`)
       }
 
-      // MINISTRY CSV FIX: Calculate area if missing (area = total_price / price_per_m2)
-      if (!property.area && property.total_price && property.price_per_m2 && property.price_per_m2 > 0) {
-        property.area = Math.round((property.total_price / property.price_per_m2) * 100) / 100
-        console.log(`🔢 PARSER: Calculated area for ${property.property_number || 'unknown'}: ${property.total_price} / ${property.price_per_m2} = ${property.area} m²`)
+      // MINISTRY CSV FIX: Calculate area if missing OR if mapped to wrong column (e.g. row_number)
+      // Ministry CSV NEVER has "powierzchnia" column - must calculate from total_price / price_per_m2
+      const shouldCalculateArea = (
+        !property.area || // No area at all
+        (property.area && property.area < 10 && property.total_price && property.total_price > 100000) // Area suspiciously small for expensive property (probably mapped to row_number)
+      )
+
+      if (shouldCalculateArea && property.total_price && property.price_per_m2 && property.price_per_m2 > 0) {
+        const calculatedArea = Math.round((property.total_price / property.price_per_m2) * 100) / 100
+        console.log(`🔢 PARSER: Calculated area for ${property.property_number || 'unknown'}: ${property.total_price} / ${property.price_per_m2} = ${calculatedArea} m² (replacing old value: ${property.area})`)
+        property.area = calculatedArea
       } else if (!property.area) {
         console.log(`⚠️ PARSER: Cannot calculate area for ${property.property_number || 'unknown'}: area=${property.area}, total_price=${property.total_price}, price_per_m2=${property.price_per_m2}`)
       }
