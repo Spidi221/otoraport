@@ -199,7 +199,26 @@ export async function POST(request: NextRequest) {
 
     // Prepare properties for database insert (map Web Worker parsed data to DB schema)
     const projectId = project.id // Store in const for TypeScript
-    const propertiesToInsert = properties.map(property => {
+
+    // DEBUG: Log first property to see what parser sends
+    if (properties.length > 0) {
+      console.log('🔍 DEBUG: First parsed property:', JSON.stringify(properties[0], null, 2))
+    }
+
+    const propertiesToInsert = properties.map((property, idx) => {
+      // DEBUG: Log property mapping for first 3 properties
+      if (idx < 3) {
+        console.log(`🔍 DEBUG Property ${idx + 1}:`, {
+          property_number: property.property_number,
+          apartment_number: property.apartment_number,
+          area: property.area,
+          price_per_m2: property.price_per_m2,
+          total_price: property.total_price,
+          final_price: property.final_price,
+          base_price: property.base_price
+        })
+      }
+
       return {
         project_id: projectId,
         developer_id: developer.id,
