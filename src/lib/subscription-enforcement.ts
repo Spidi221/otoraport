@@ -54,10 +54,10 @@ export async function checkSubscriptionAccess(
       }
     )
 
-    // Fetch developer subscription info
+    // Fetch developer subscription info (including is_admin flag)
     const { data: developer, error } = await supabase
       .from('developers')
-      .select('subscription_plan, subscription_status, trial_ends_at, current_period_end')
+      .select('subscription_plan, subscription_status, trial_ends_at, current_period_end, is_admin')
       .eq('user_id', userId)
       .maybeSingle()
 
@@ -67,6 +67,20 @@ export async function checkSubscriptionAccess(
         hasAccess: false,
         reason: 'no_subscription',
         subscription: null
+      }
+    }
+
+    // ✅ ADMIN BYPASS: Admins always have access
+    if (developer.is_admin) {
+      console.log('✅ SUBSCRIPTION: Admin user - bypassing subscription check')
+      return {
+        hasAccess: true,
+        subscription: {
+          plan: 'admin',
+          status: 'active',
+          trial_ends_at: null,
+          current_period_end: null
+        }
       }
     }
 
