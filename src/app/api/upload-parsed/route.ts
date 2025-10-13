@@ -163,28 +163,55 @@ export async function POST(request: NextRequest) {
       if (!project) {
         console.log(`📦 DATABASE: Creating new project: "${projectName}"`)
 
-        const { data: newProject, error: insertError } = await createAdminClient()
-          .from('projects')
-          .insert({
-            developer_id: developer.id,
-            name: projectName,
-            slug: projectSlug,
-            description: `Auto-created from Web Worker parsed CSV upload`,
-            status: 'active'
-          })
-          .select('id')
-          .single()
+        // Try to create project, handle slug conflicts by adding unique suffix
+        let finalSlug = projectSlug
+        let attempt = 0
+        let newProject = null
+        let insertError = null
+
+        while (attempt < 5) {
+          const result = await createAdminClient()
+            .from('projects')
+            .insert({
+              developer_id: developer.id,
+              name: projectName,
+              slug: finalSlug,
+              description: `Auto-created from Web Worker parsed CSV upload`,
+              status: 'active'
+            })
+            .select('id')
+            .single()
+
+          insertError = result.error
+          newProject = result.data
+
+          // Success - break out
+          if (!insertError && newProject) {
+            break
+          }
+
+          // If unique constraint violation on slug, try with suffix
+          if (insertError?.code === '23505') {
+            attempt++
+            finalSlug = `${projectSlug}-${Date.now()}-${attempt}`
+            console.log(`⚠️ DATABASE: Slug conflict, retrying with: ${finalSlug}`)
+            continue
+          }
+
+          // Other error - break and return error
+          break
+        }
 
         if (insertError || !newProject) {
           console.error('❌ DATABASE: Project creation failed:', insertError)
           return NextResponse.json(
-            { error: 'Failed to create project' },
+            { error: 'Failed to create project: ' + (insertError?.message || 'Unknown error') },
             { status: 500 }
           )
         }
 
         project = newProject
-        console.log(`✅ DATABASE: Created project ${newProject.id}`)
+        console.log(`✅ DATABASE: Created project ${newProject.id} with slug ${finalSlug}`)
       } else {
         console.log(`♻️ DATABASE: Found existing project (id: ${projectData.id}), will replace properties`)
 
