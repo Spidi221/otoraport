@@ -1357,6 +1357,9 @@ export class SmartCSVParser {
       // MINISTRY CSV FIX: Calculate area if missing (area = total_price / price_per_m2)
       if (!property.area && property.total_price && property.price_per_m2 && property.price_per_m2 > 0) {
         property.area = Math.round((property.total_price / property.price_per_m2) * 100) / 100
+        console.log(`🔢 PARSER: Calculated area for ${property.property_number || 'unknown'}: ${property.total_price} / ${property.price_per_m2} = ${property.area} m²`)
+      } else if (!property.area) {
+        console.log(`⚠️ PARSER: Cannot calculate area for ${property.property_number || 'unknown'}: area=${property.area}, total_price=${property.total_price}, price_per_m2=${property.price_per_m2}`)
       }
 
       // MINISTRY CSV FIX: Calculate price_per_m2 if missing

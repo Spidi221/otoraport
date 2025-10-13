@@ -573,7 +573,12 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
     // Prepare properties for database insert
     // Map parsed properties to database schema
     const projectId = project.id // Store in const for TypeScript
-    const propertiesToInsert = properties.map(property => {
+    const propertiesToInsert = properties.map((property, idx) => {
+      // DEBUG: Log area value before parsing for first 3 properties
+      if (idx < 3) {
+        console.log(`🔍 DATABASE INSERT: Property ${property.property_number || idx} - raw area: ${property.area}, parsed: ${parseDecimal(property.area)}`)
+      }
+
       return {
         project_id: projectId,
         developer_id: developerId,
