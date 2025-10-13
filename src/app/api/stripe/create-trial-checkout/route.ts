@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     // Get developer profile
     const { data: developer, error: devError } = await supabase
       .from('developers')
-      .select('id, email, name, company_name, stripe_customer_id')
+      .select('id, email, company_name, stripe_customer_id')
       .eq('user_id', user.id)
       .single()
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       // Create new Stripe customer
       const customer = await stripe().customers.create({
         email: developer.email,
-        name: developer.name || developer.company_name || developer.email,
+        name: developer.company_name || developer.email,
         metadata: {
           developer_id: developer.id,
           company_name: developer.company_name || '',
