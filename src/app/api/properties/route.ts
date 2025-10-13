@@ -47,15 +47,22 @@ export async function GET(request: NextRequest) {
 
     if (propsError) {
       console.error('❌ PROPERTIES API: Error fetching properties:', propsError)
-      return NextResponse.json({ error: propsError.message }, { status: 500 })
+      return NextResponse.json({
+        success: false,
+        error: propsError.message
+      }, { status: 500 })
     }
 
+    // FIXED: Return correct PaginatedResponse format
     return NextResponse.json({
-      properties: properties || [],
-      total: count || 0,
-      page,
-      limit,
-      totalPages: Math.ceil((count || 0) / limit)
+      success: true,
+      data: properties || [],
+      pagination: {
+        total: count || 0,
+        page,
+        limit,
+        totalPages: Math.ceil((count || 0) / limit)
+      }
     })
 
   } catch (error: unknown) {
