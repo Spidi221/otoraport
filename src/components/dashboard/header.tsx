@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Settings, User, Shield, Menu, X } from "lucide-react";
+import { Bell, Settings, User, Shield, Menu, X, TrendingUp } from "lucide-react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
@@ -187,7 +187,13 @@ function AuthenticatedHeader() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/settings/domains">
+                <Link href="/dashboard/analytics">
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  Zaawansowana Analityka
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings/custom-domain">
                   <Settings className="mr-2 h-4 w-4" />
                   Domeny niestandardowe
                 </Link>
@@ -323,7 +329,13 @@ function AuthenticatedHeader() {
                       Profil użytkownika
                     </Button>
                   </Link>
-                  <Link href="/settings/domains" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link href="/dashboard/analytics" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start">
+                      <TrendingUp className="mr-3 h-4 w-4" />
+                      Zaawansowana Analityka
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard/settings/custom-domain" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button variant="ghost" className="w-full justify-start">
                       <Settings className="mr-3 h-4 w-4" />
                       Domeny niestandardowe
