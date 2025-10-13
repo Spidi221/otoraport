@@ -142,89 +142,48 @@ export async function POST(request: NextRequest) {
 
       console.log(`🔍 DATABASE: Auto-creating project from data: "${projectName}" (slug: ${projectSlug})`)
 
-      // Get or create project
-      const { data: projectData, error: projectLookupError } = await createAdminClient()
+      // FIXED: Use upsert to prevent race condition duplicates
+      // If project with this slug exists, return it. Otherwise create new.
+      const { data: upsertedProject, error: upsertError } = await createAdminClient()
         .from('projects')
+        .upsert(
+          {
+            developer_id: developer.id,
+            slug: projectSlug,
+            name: projectName,
+            description: `Auto-created from Web Worker parsed CSV upload`,
+            status: 'active'
+          },
+          {
+            onConflict: 'developer_id,slug',
+            ignoreDuplicates: false // Return existing project if conflict
+          }
+        )
         .select('id')
-        .eq('developer_id', developer.id)
-        .eq('slug', projectSlug)
-        .maybeSingle()
+        .single()
 
-      project = projectData
-
-      if (projectLookupError) {
-        console.error('❌ DATABASE: Error looking up project:', projectLookupError.message)
+      if (upsertError) {
+        console.error('❌ DATABASE: Project upsert failed:', upsertError)
         return NextResponse.json(
-          { error: 'Failed to lookup project' },
+          { error: 'Failed to create/update project: ' + upsertError.message },
           { status: 500 }
         )
       }
 
-      if (!project) {
-        console.log(`📦 DATABASE: Creating new project: "${projectName}"`)
+      project = upsertedProject
+      console.log(`✅ DATABASE: Upserted project ${upsertedProject.id} with slug ${projectSlug}`)
 
-        // Try to create project, handle slug conflicts by adding unique suffix
-        let finalSlug = projectSlug
-        let attempt = 0
-        let newProject = null
-        let insertError = null
-
-        while (attempt < 5) {
-          const result = await createAdminClient()
-            .from('projects')
-            .insert({
-              developer_id: developer.id,
-              name: projectName,
-              slug: finalSlug,
-              description: `Auto-created from Web Worker parsed CSV upload`,
-              status: 'active'
-            })
-            .select('id')
-            .single()
-
-          insertError = result.error
-          newProject = result.data
-
-          // Success - break out
-          if (!insertError && newProject) {
-            break
-          }
-
-          // If unique constraint violation on slug, try with suffix
-          if (insertError?.code === '23505') {
-            attempt++
-            finalSlug = `${projectSlug}-${Date.now()}-${attempt}`
-            console.log(`⚠️ DATABASE: Slug conflict, retrying with: ${finalSlug}`)
-            continue
-          }
-
-          // Other error - break and return error
-          break
-        }
-
-        if (insertError || !newProject) {
-          console.error('❌ DATABASE: Project creation failed:', insertError)
-          return NextResponse.json(
-            { error: 'Failed to create project: ' + (insertError?.message || 'Unknown error') },
-            { status: 500 }
-          )
-        }
-
-        project = newProject
-        console.log(`✅ DATABASE: Created project ${newProject.id} with slug ${finalSlug}`)
-      } else {
-        console.log(`♻️ DATABASE: Found existing project (id: ${projectData.id}), will replace properties`)
-
-        // Delete old properties before inserting new ones
+      // Delete old properties before inserting new ones (re-upload scenario)
+      if (project?.id) {
         const { error: deleteError } = await createAdminClient()
           .from('properties')
           .delete()
-          .eq('project_id', projectData.id)
+          .eq('project_id', project.id)
 
         if (deleteError) {
           console.error('⚠️ DATABASE: Error deleting old properties:', deleteError.message)
         } else {
-          console.log(`🗑️ DATABASE: Cleared old properties for project ${projectData.id}`)
+          console.log(`🗑️ DATABASE: Cleared old properties for project ${project.id}`)
         }
       }
     }
