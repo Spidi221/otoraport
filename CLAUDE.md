@@ -269,6 +269,58 @@ To **marketing** - prawdopodobnie oznacza:
 
 ---
 
+## 📝 SESSION LOG - OSTATNIA SESJA (2025-10-13)
+
+### ✅ Ukończone Taski
+
+#### Task #77: Replace developer.name with company_name
+**Status**: ✅ Done
+**Commit**: `ca49a34`
+
+**Problem**: Kod używał nieistniejącej kolumny `developer.name` w emailach i XML-ach ministerstwa
+
+**Rozwiązanie**: Zastąpiono wszystkie referencje na `developer.company_name || developer.email`
+
+**Zmienione pliki**:
+- `src/lib/ministry-alerts.ts` (6 wystąpień)
+- `src/lib/ministry-xml-generator.ts` (2 wystąpienia)
+- `src/lib/email-templates.ts` (1 wystąpienie)
+- `src/lib/harvester-xml-generator.ts` (1 wystąpienie)
+
+**Rezultat**: Wszystkie emaile i raporty XML teraz pokazują prawidłową nazwę firmy z fallbackiem do email
+
+---
+
+#### Task #78: Add /admin Route Redirect
+**Status**: ✅ Done
+**Commit**: `ca49a34`
+
+**Problem**: Brak głównego route `/admin` - użytkownik dostawał 404
+
+**Rozwiązanie**: Utworzono `src/app/admin/page.tsx` z redirectem do `/admin/dashboard`
+
+**Rezultat**: Użytkownik może teraz wejść na krótszy URL `/admin` zamiast `/admin/dashboard`
+
+**Uwaga**: Admin panel był już w 99% gotowy - brakowało tylko redirecta
+
+---
+
+### 📊 Progress Summary
+
+**Ogólny postęp**: 91% (39/43 tasków done)
+- ✅ Done: 39 tasków
+- ❌ Cancelled: 1 task
+- ⏳ Pending: 3 taski (wszystkie dotyczą domain configuration)
+
+**Remaining Tasks**:
+1. **Task #72**: Configure oto-raport.pl in Vercel Dashboard ⏳ (dependencies: done)
+2. **Task #73**: Configure oto-raport.pl in Google Cloud Console ⏳ (depends: 72)
+3. **Task #74**: Update OAuth Authorized Domains ⏳ (depends: 72, 73)
+
+**Następny task**: #72 - Configure oto-raport.pl Domain in Vercel Dashboard
+
+---
+
 ## Task Master AI Instructions
 **Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
 @./.taskmaster/CLAUDE.md
