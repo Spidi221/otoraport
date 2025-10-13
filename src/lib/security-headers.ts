@@ -38,11 +38,11 @@ export function getSecurityHeaders(): SecurityHeaders {
     // Content Security Policy - strict but allows necessary resources
     'Content-Security-Policy': [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com", // unsafe-inline needed for Next.js, Vercel Analytics
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com https://eu-assets.i.posthog.com", // Next.js + Vercel + PostHog
       "style-src 'self' 'unsafe-inline'", // unsafe-inline needed for styled-jsx and Tailwind
       "img-src 'self' data: https: blob:", // Allow images from HTTPS and data URLs
       "font-src 'self' data:",
-      "connect-src 'self' https://vercel.live https://*.supabase.co wss://*.supabase.co https://api.stripe.com", // Supabase + Stripe + Vercel
+      "connect-src 'self' https://vercel.live https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://www.google-analytics.com https://analytics.google.com", // Supabase + Stripe + Vercel + PostHog + GA4
       "frame-ancestors 'none'", // Same as X-Frame-Options: DENY
       "base-uri 'self'",
       "form-action 'self'",

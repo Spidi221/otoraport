@@ -356,8 +356,16 @@ export function PropertiesTable() {
                           ? `${property.area} m²`
                           : <span className="text-gray-400 italic">Brak danych</span>}
                       </td>
-                      <td className="py-3 text-sm">{property.price_per_m2.toLocaleString('pl-PL')} zł</td>
-                      <td className="py-3 text-sm font-medium">{property.total_price.toLocaleString('pl-PL')} zł</td>
+                      <td className="py-3 text-sm">
+                        {property.price_per_m2 !== null && property.price_per_m2 !== undefined
+                          ? `${property.price_per_m2.toLocaleString('pl-PL')} zł`
+                          : <span className="text-gray-400 italic">Brak danych</span>}
+                      </td>
+                      <td className="py-3 text-sm font-medium">
+                        {property.total_price !== null && property.total_price !== undefined
+                          ? `${property.total_price.toLocaleString('pl-PL')} zł`
+                          : <span className="text-gray-400 italic">Brak danych</span>}
+                      </td>
                       <td className="py-3">
                         <StatusSelect
                           currentStatus={property.status}
