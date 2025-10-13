@@ -6,6 +6,10 @@ import { SubdomainSettings } from '@/components/dashboard/subdomain-settings'
 import { BrandingSettings } from '@/components/dashboard/branding-settings'
 import { Separator } from '@/components/ui/separator'
 import { createClient } from '@/lib/supabase/server'
+import { Header } from '@/components/dashboard/header'
+import Link from 'next/link'
+import { ChevronLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -34,13 +38,33 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-5xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Ustawienia</h1>
-        <p className="text-muted-foreground mt-2">
-          Zarządzaj swoimi preferencjami i ustawieniami konta
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Header showUserMenu={true} />
+
+      <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-6 lg:px-6">
+        {/* Breadcrumb Navigation */}
+        <div className="mb-6 flex items-center gap-4">
+          <Link href="/dashboard">
+            <Button variant="ghost" size="sm" className="gap-2">
+              <ChevronLeft className="h-4 w-4" />
+              Powrót do Dashboardu
+            </Button>
+          </Link>
+          <nav className="flex items-center space-x-2 text-sm text-gray-600">
+            <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+              Dashboard
+            </Link>
+            <span>/</span>
+            <span className="text-gray-900 font-medium">Ustawienia</span>
+          </nav>
+        </div>
+
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight">Ustawienia</h1>
+          <p className="text-muted-foreground mt-2">
+            Zarządzaj swoimi preferencjami i ustawieniami konta
+          </p>
+        </div>
 
       <div className="space-y-8">
         {/* Profile Settings */}
@@ -92,6 +116,7 @@ export default async function SettingsPage() {
           <AccountActions />
         </section>
       </div>
+      </main>
     </div>
   )
 }
