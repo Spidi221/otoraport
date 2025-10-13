@@ -25,6 +25,9 @@ export function UploadWidget() {
   // Web Worker for CSV parsing
   const csvWorker = useCSVParserWorker();
 
+  // FIXED: Use ref to prevent duplicate uploads
+  const uploadedRef = useRef(false);
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -36,7 +39,15 @@ export function UploadWidget() {
   };
 
   // HOISTED: Define uploadParsedData before useEffect that references it (fixes TDZ)
+  // FIXED: Remove csvWorker from dependencies to prevent re-creation
   const uploadParsedData = useCallback(async (parsedData: Record<string, unknown>[], validRows: number) => {
+    // FIXED: Guard against duplicate uploads
+    if (uploadedRef.current) {
+      console.log('[Upload] Skipping duplicate upload attempt');
+      return;
+    }
+    uploadedRef.current = true;
+
     try {
       setParsingStatus('Uploading to server...');
 
@@ -78,18 +89,20 @@ export function UploadWidget() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Wystąpił nieznany błąd');
       setParsingStatus(null);
+      uploadedRef.current = false; // Reset on error to allow retry
     } finally {
       setUploading(false);
     }
-  }, [csvWorker]);
+  }, []); // FIXED: Empty deps to prevent re-creation
 
   // Handle Web Worker parse completion
+  // FIXED: Only depend on result, not uploadParsedData
   useEffect(() => {
     if (csvWorker.result && csvWorker.result.data.length > 0) {
       // Worker finished parsing - now send parsed data to server
       uploadParsedData(csvWorker.result.data, csvWorker.result.validRows);
     }
-  }, [csvWorker.result, uploadParsedData]);
+  }, [csvWorker.result]); // FIXED: Removed uploadParsedData dependency
 
   // Handle Web Worker errors with Sentry logging
   useEffect(() => {
@@ -141,6 +154,7 @@ export function UploadWidget() {
     setError(null);
     setUploadResult(null);
     setParsingStatus(null);
+    uploadedRef.current = false; // FIXED: Reset upload guard for new file
 
     try {
       const fileExtension = file.name.split('.').pop()?.toLowerCase();

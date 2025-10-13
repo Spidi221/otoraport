@@ -20,15 +20,19 @@ export interface PaginatedResponse<T> extends BaseApiResponse<T[]> {
 // Property types
 export interface PropertyData {
   readonly id: string;
-  readonly property_number: string;
+  readonly apartment_number: string; // FIXED: Match database column name
+  readonly property_number?: string; // Legacy alias for compatibility
   readonly property_type: 'apartment' | 'house' | 'commercial' | 'other';
   readonly area: number | null; // CRITICAL: Allow null for sold properties without area data
   readonly price_per_m2: number;
-  readonly total_price: number;
+  readonly base_price: number; // FIXED: Match database column name
+  readonly final_price: number; // FIXED: Match database column name
+  readonly total_price?: number; // Legacy alias for compatibility
   readonly status: 'available' | 'reserved' | 'sold';
   readonly floor?: number;
   readonly rooms?: number;
-  readonly building_number?: string;
+  readonly nr_budynku?: string; // FIXED: Match database column name
+  readonly building_number?: string; // Legacy alias
   readonly project_id?: string;
   readonly project_name?: string;
   readonly created_at: string;

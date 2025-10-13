@@ -86,11 +86,13 @@ export function PropertiesTable() {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((property) => {
+        const propNumber = property.apartment_number || property.property_number || '';
+        const totalPrice = property.final_price || property.base_price || property.total_price || 0;
         return (
-          property.property_number?.toLowerCase().includes(query) ||
+          propNumber.toLowerCase().includes(query) ||
           property.area?.toString().includes(query) ||
           property.price_per_m2?.toString().includes(query) ||
-          property.total_price?.toString().includes(query) ||
+          totalPrice.toString().includes(query) ||
           property.status?.toLowerCase().includes(query)
         );
       });
@@ -99,8 +101,19 @@ export function PropertiesTable() {
     // Apply sorting
     if (sortColumn) {
       filtered.sort((a, b) => {
-        let aVal: string | number = a[sortColumn as keyof PropertyData] as string | number;
-        let bVal: string | number = b[sortColumn as keyof PropertyData] as string | number;
+        // Handle column name aliases for backward compatibility
+        const getColumnValue = (property: PropertyData, column: string): string | number => {
+          if (column === 'property_number') {
+            return property.apartment_number || property.property_number || '';
+          }
+          if (column === 'total_price') {
+            return property.final_price || property.base_price || property.total_price || 0;
+          }
+          return property[column as keyof PropertyData] as string | number;
+        };
+
+        let aVal = getColumnValue(a, sortColumn);
+        let bVal = getColumnValue(b, sortColumn);
 
         // Handle null/undefined
         if (aVal == null) aVal = '';
@@ -137,8 +150,8 @@ export function PropertiesTable() {
   const isSomeSelected = selectedIds.length > 0 && selectedIds.length < filteredProperties.length;
 
   // Delete handler for individual property
-  const handleDelete = async (id: string, propertyNumber: string) => {
-    if (!confirm(`Czy na pewno chcesz usunąć mieszkanie ${propertyNumber}?`)) {
+  const handleDelete = async (id: string, apartmentNumber: string) => {
+    if (!confirm(`Czy na pewno chcesz usunąć mieszkanie ${apartmentNumber}?`)) {
       return;
     }
 
@@ -152,7 +165,7 @@ export function PropertiesTable() {
       const result = await response.json();
 
       if (result.success) {
-        toast.success(`Usunięto mieszkanie ${propertyNumber}`);
+        toast.success(`Usunięto mieszkanie ${apartmentNumber}`);
         // Refresh data from server
         mutate();
       } else {
@@ -347,10 +360,12 @@ export function PropertiesTable() {
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={(checked) => handleSelectOne(property.id, checked as boolean)}
-                          aria-label={`Zaznacz ${property.property_number}`}
+                          aria-label={`Zaznacz ${property.apartment_number || property.property_number || 'mieszkanie'}`}
                         />
                       </td>
-                      <td className="py-3 font-mono text-sm">{property.property_number}</td>
+                      <td className="py-3 font-mono text-sm">
+                        {property.apartment_number || property.property_number || <span className="text-gray-400 italic">Brak danych</span>}
+                      </td>
                       <td className="py-3 text-sm">
                         {property.area !== null && property.area !== undefined && property.area > 0
                           ? `${property.area} m²`
@@ -362,9 +377,12 @@ export function PropertiesTable() {
                           : <span className="text-gray-400 italic">Brak danych</span>}
                       </td>
                       <td className="py-3 text-sm font-medium">
-                        {property.total_price !== null && property.total_price !== undefined
-                          ? `${property.total_price.toLocaleString('pl-PL')} zł`
-                          : <span className="text-gray-400 italic">Brak danych</span>}
+                        {(() => {
+                          const price = property.final_price || property.base_price || property.total_price;
+                          return price !== null && price !== undefined
+                            ? `${price.toLocaleString('pl-PL')} zł`
+                            : <span className="text-gray-400 italic">Brak danych</span>;
+                        })()}
                       </td>
                       <td className="py-3">
                         <StatusSelect
@@ -387,7 +405,7 @@ export function PropertiesTable() {
                           <DialogContent className="max-w-4xl">
                             <DialogHeader>
                               <DialogTitle>
-                                Historia cen - Mieszkanie {property.property_number}
+                                Historia cen - Mieszkanie {property.apartment_number || property.property_number}
                               </DialogTitle>
                             </DialogHeader>
                             <div className="mt-4">
@@ -400,7 +418,7 @@ export function PropertiesTable() {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleDelete(property.id, property.property_number)}
+                          onClick={() => handleDelete(property.id, property.apartment_number || property.property_number || 'unknown')}
                           disabled={isDeleting}
                         >
                           {isDeleting ? (
