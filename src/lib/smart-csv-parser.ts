@@ -1599,19 +1599,43 @@ export function parseCSVSmart(csvContent: string): SmartParseResult {
 }
 
 /**
- * Validate parsed data against Ministry Schema 1.13 requirements (58 fields)
+ * Enhanced validation result with detailed row-level reporting
  */
-export function validateMinistryCompliance(data: ParsedProperty[]): {
+export interface ValidationResult {
   valid: boolean
   errors: string[]
   warnings: string[]
   complianceScore: number
   totalRequiredFields: number
   missingCriticalFields: string[]
-} {
+  rowErrors: RowValidationError[]
+  fieldValidation: FieldValidationSummary
+}
+
+export interface RowValidationError {
+  rowNumber: number
+  propertyNumber?: string
+  errors: string[]
+  warnings: string[]
+}
+
+export interface FieldValidationSummary {
+  totalFields: number
+  validFields: number
+  missingRequired: string[]
+  missingRecommended: string[]
+  invalidFormats: { field: string, count: number, examples: string[] }[]
+}
+
+/**
+ * Validate parsed data against Ministry Schema 1.13 requirements (58 fields)
+ * Enhanced with detailed field-level and row-level validation (Task #81.2)
+ */
+export function validateMinistryCompliance(data: ParsedProperty[]): ValidationResult {
   const errors: string[] = []
   const warnings: string[] = []
   const missingCriticalFields: string[] = []
+  const rowErrors: RowValidationError[] = []
 
   if (data.length === 0) {
     errors.push('Brak danych nieruchomości do przetworzenia')
@@ -1621,63 +1645,212 @@ export function validateMinistryCompliance(data: ParsedProperty[]): {
       warnings,
       complianceScore: 0,
       totalRequiredFields: 58,
-      missingCriticalFields: ['property_data']
+      missingCriticalFields: ['property_data'],
+      rowErrors: [],
+      fieldValidation: {
+        totalFields: 0,
+        validFields: 0,
+        missingRequired: ['property_data'],
+        missingRecommended: [],
+        invalidFormats: []
+      }
     }
   }
 
-  // MINISTRY CRITICAL FIELDS (must have for Schema 1.13 compliance)
-  const criticalFields = [
-    'property_number',    // numer_lokalu
-    'total_price',        // cena_calkowita
-    'area',              // powierzchnia_uzytkowa
-    'price_per_m2',      // cena_za_m2
-    'wojewodztwo',       // REQUIRED by Ministry
-    'powiat',            // REQUIRED by Ministry
-    'gmina'              // REQUIRED by Ministry
-  ]
+  // MINISTRY CRITICAL FIELDS (MUST HAVE for Schema 1.13 compliance)
+  const criticalFields: Record<string, { rawDataKey?: string, type: 'string' | 'number' | 'date' }> = {
+    property_number: { rawDataKey: 'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera', type: 'string' },
+    total_price: { rawDataKey: 'Cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]', type: 'number' },
+    area: { type: 'number' }, // Calculated field
+    price_per_m2: { rawDataKey: 'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]', type: 'number' },
+    wojewodztwo: { rawDataKey: 'Województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', type: 'string' },
+    powiat: { rawDataKey: 'Powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', type: 'string' },
+    gmina: { rawDataKey: 'Gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', type: 'string' }
+  }
 
-  // MINISTRY RECOMMENDED FIELDS (should have for better compliance)
-  const recommendedFields = [
-    'property_type',      // typ_lokalu
-    'status',            // status_sprzedazy
-    'miejscowosc',       // miejscowosc
-    'ulica',            // ulica
-    'kod_pocztowy',     // kod_pocztowy
-    'liczba_pokoi',     // liczba_pokoi
-    'kondygnacja',      // pietro/kondygnacja
-    'construction_year', // rok_budowy
-    'energy_class',     // klasa_energetyczna
-    'data_pierwszej_oferty', // data_pierwszej_publikacji
-  ]
+  // MINISTRY RECOMMENDED FIELDS (SHOULD HAVE for better compliance)
+  const recommendedFields: Record<string, { rawDataKey?: string, type: 'string' | 'number' | 'date' }> = {
+    property_type: { rawDataKey: 'Rodzaj nieruchomości: lokal mieszkalny, dom jednorodzinny', type: 'string' },
+    miejscowosc: { rawDataKey: 'Miejscowość lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', type: 'string' },
+    ulica: { rawDataKey: 'Ulica lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', type: 'string' },
+    kod_pocztowy: { rawDataKey: 'Kod pocztowy lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', type: 'string' },
+    liczba_pokoi: { rawDataKey: 'Liczba pokoi', type: 'number' },
+    kondygnacja: { rawDataKey: 'Numer kondygnacji', type: 'number' },
+    construction_year: { rawDataKey: 'Rok budowy', type: 'number' },
+    energy_class: { rawDataKey: 'Klasa energetyczna', type: 'string' },
+    data_pierwszej_oferty: { rawDataKey: 'Data pierwszej oferty', type: 'date' },
+    developer_name: { rawDataKey: 'Nazwa dewelopera', type: 'string' }
+  }
 
   let complianceScore = 0
   const totalRequiredFields = 58
+  const invalidFormats: { field: string, count: number, examples: string[] }[] = []
 
-  // Check critical fields
-  for (const field of criticalFields) {
-    const hasField = data.some(item => item[field as keyof ParsedProperty])
+  // GLOBAL FIELD CHECKS: Check if fields exist across dataset
+  const globalMissingRequired: string[] = []
+  const globalMissingRecommended: string[] = []
+
+  for (const [fieldName, config] of Object.entries(criticalFields)) {
+    const hasField = data.some(item => {
+      const value = item[fieldName as keyof ParsedProperty]
+      return value !== undefined && value !== null && value !== ''
+    })
+
     if (hasField) {
       complianceScore += 3 // Critical fields worth more points
     } else {
-      errors.push(`KRYTYCZNE: Brak wymaganego pola '${field}'`)
-      missingCriticalFields.push(field)
+      const displayName = config.rawDataKey || fieldName
+      errors.push(`KRYTYCZNE: Brak wymaganego pola '${displayName}' we wszystkich wierszach`)
+      missingCriticalFields.push(fieldName)
+      globalMissingRequired.push(displayName)
     }
   }
 
-  // Check recommended fields
-  for (const field of recommendedFields) {
-    const hasField = data.some(item => item[field as keyof ParsedProperty])
+  for (const [fieldName, config] of Object.entries(recommendedFields)) {
+    const hasField = data.some(item => {
+      const value = item[fieldName as keyof ParsedProperty]
+      return value !== undefined && value !== null && value !== ''
+    })
+
     if (hasField) {
       complianceScore += 2
     } else {
-      warnings.push(`Zalecane: Brak pola '${field}'`)
+      const displayName = config.rawDataKey || fieldName
+      warnings.push(`Zalecane: Brak pola '${displayName}'`)
+      globalMissingRecommended.push(displayName)
     }
   }
 
-  // Data quality checks
-  const withoutNumbers = data.filter(item => !item.property_number).length
-  if (withoutNumbers > data.length * 0.1) {
-    warnings.push(`${withoutNumbers} mieszkań bez numeru lokalu (${Math.round(withoutNumbers/data.length*100)}%)`)
+  // ROW-LEVEL VALIDATION: Validate each property individually
+  data.forEach((property, index) => {
+    const rowNumber = index + 2 // +2 for header and 1-based indexing
+    const rowErrs: string[] = []
+    const rowWarns: string[] = []
+
+    // VALIDATION 1: Property Number (REQUIRED)
+    if (!property.property_number || property.property_number.trim() === '') {
+      rowErrs.push('Brak numeru lokalu (pole wymagane)')
+    }
+
+    // VALIDATION 2: Price Validation (REQUIRED)
+    if (!property.price_per_m2 || property.price_per_m2 <= 0) {
+      rowErrs.push('Brak lub nieprawidłowa cena za m² (musi być > 0)')
+    } else if (property.price_per_m2 < 1000) {
+      rowWarns.push(`Niska cena za m²: ${property.price_per_m2} zł (może być błąd?)`)
+    } else if (property.price_per_m2 > 50000) {
+      rowWarns.push(`Bardzo wysoka cena za m²: ${property.price_per_m2} zł (może być błąd?)`)
+    }
+
+    if (!property.total_price || property.total_price <= 0) {
+      rowErrs.push('Brak lub nieprawidłowa cena całkowita (musi być > 0)')
+    }
+
+    // VALIDATION 3: Area Validation (REQUIRED - calculated from price/m² × price)
+    if (!property.area || property.area <= 0) {
+      rowErrs.push('Brak lub nieprawidłowa powierzchnia (musi być > 0)')
+    } else if (property.area < 10) {
+      rowWarns.push(`Bardzo mała powierzchnia: ${property.area} m² (może być błąd?)`)
+    } else if (property.area > 500) {
+      rowWarns.push(`Bardzo duża powierzchnia: ${property.area} m² (może być błąd?)`)
+    }
+
+    // VALIDATION 4: Price Consistency Check
+    if (property.total_price && property.price_per_m2 && property.area) {
+      const calculatedPrice = Math.round(property.price_per_m2 * property.area)
+      const priceDiff = Math.abs(calculatedPrice - property.total_price)
+      const percentDiff = (priceDiff / property.total_price) * 100
+
+      if (percentDiff > 5) { // More than 5% difference
+        rowWarns.push(`Niezgodność cen: cena całkowita (${property.total_price} zł) nie odpowiada iloczynowi ceny za m² × powierzchnia (${calculatedPrice} zł, różnica: ${percentDiff.toFixed(1)}%)`)
+      }
+    }
+
+    // VALIDATION 5: Location Fields (REQUIRED by Ministry)
+    const wojewodztwo = property.raw_data?.['Województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego'] as string
+    const powiat = property.raw_data?.['Powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego'] as string
+    const gmina = property.raw_data?.['Gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego'] as string
+
+    if (!wojewodztwo || wojewodztwo.trim() === '') {
+      rowErrs.push('Brak województwa (pole wymagane)')
+    }
+    if (!powiat || powiat.trim() === '') {
+      rowErrs.push('Brak powiatu (pole wymagane)')
+    }
+    if (!gmina || gmina.trim() === '') {
+      rowErrs.push('Brak gminy (pole wymagane)')
+    }
+
+    // VALIDATION 6: Postal Code Format (if present)
+    const kodPocztowy = property.raw_data?.['Kod pocztowy lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego'] as string
+    if (kodPocztowy && !/^\d{2}-\d{3}$/.test(kodPocztowy)) {
+      rowWarns.push(`Nieprawidłowy format kodu pocztowego: "${kodPocztowy}" (powinien być XX-XXX)`)
+    }
+
+    // VALIDATION 7: Developer Information (REQUIRED by Ministry)
+    const developerName = property.raw_data?.['Nazwa dewelopera'] as string
+    const nip = property.raw_data?.['Nr NIP'] as string
+
+    if (!developerName || developerName.trim() === '') {
+      rowErrs.push('Brak nazwy dewelopera (pole wymagane)')
+    }
+    if (!nip || nip.trim() === '') {
+      rowErrs.push('Brak numeru NIP dewelopera (pole wymagane)')
+    } else if (!/^\d{10}$/.test(nip.replace(/[-\s]/g, ''))) {
+      rowWarns.push(`Nieprawidłowy format NIP: "${nip}" (powinien być 10 cyfr)`)
+    }
+
+    // VALIDATION 8: Date Format Validation (if present)
+    const dataOferty = property.raw_data?.['Data pierwszej oferty'] as string
+    if (dataOferty && dataOferty.trim() !== '') {
+      // Check YYYY-MM-DD format
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dataOferty)) {
+        rowWarns.push(`Nieprawidłowy format daty pierwszej oferty: "${dataOferty}" (powinien być YYYY-MM-DD)`)
+      } else {
+        // Validate date is not in future
+        const offerDate = new Date(dataOferty)
+        const today = new Date()
+        if (offerDate > today) {
+          rowWarns.push(`Data pierwszej oferty jest w przyszłości: ${dataOferty}`)
+        }
+      }
+    }
+
+    // VALIDATION 9: Property Type (RECOMMENDED)
+    const propertyType = property.raw_data?.['Rodzaj nieruchomości: lokal mieszkalny, dom jednorodzinny'] as string
+    if (!propertyType || propertyType.trim() === '') {
+      rowWarns.push('Brak rodzaju nieruchomości (pole zalecane)')
+    }
+
+    // VALIDATION 10: Rooms Count (RECOMMENDED, if present should be valid)
+    if (property.liczba_pokoi !== undefined && property.liczba_pokoi !== null) {
+      if (property.liczba_pokoi <= 0 || property.liczba_pokoi > 20) {
+        rowWarns.push(`Nieprawidłowa liczba pokoi: ${property.liczba_pokoi} (powinna być 1-20)`)
+      }
+    }
+
+    // VALIDATION 11: Construction Year (RECOMMENDED, if present should be valid)
+    if (property.construction_year !== undefined && property.construction_year !== null) {
+      const currentYear = new Date().getFullYear()
+      if (property.construction_year < 1900 || property.construction_year > currentYear + 5) {
+        rowWarns.push(`Nieprawidłowy rok budowy: ${property.construction_year} (powinien być ${1900}-${currentYear + 5})`)
+      }
+    }
+
+    // Add row to errors list if any issues found
+    if (rowErrs.length > 0 || rowWarns.length > 0) {
+      rowErrors.push({
+        rowNumber,
+        propertyNumber: property.property_number || 'Brak numeru',
+        errors: rowErrs,
+        warnings: rowWarns
+      })
+    }
+  })
+
+  // AGGREGATED DATA QUALITY CHECKS
+  const withoutNumbers = data.filter(item => !item.property_number || item.property_number.trim() === '').length
+  if (withoutNumbers > 0) {
+    errors.push(`${withoutNumbers} mieszkań bez numeru lokalu (${Math.round(withoutNumbers/data.length*100)}%)`)
   }
 
   const withoutPrices = data.filter(item => !item.total_price || !item.price_per_m2).length
@@ -1685,36 +1858,66 @@ export function validateMinistryCompliance(data: ParsedProperty[]): {
     errors.push(`${withoutPrices} mieszkań bez kompletnych danych cenowych`)
   }
 
-  const withoutLocation = data.filter(item =>
-    !item.raw_data?.wojewodztwo && !item.raw_data?.powiat && !item.raw_data?.gmina
-  ).length
+  const withoutLocation = data.filter(item => {
+    const wojewodztwo = item.raw_data?.['Województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego']
+    const powiat = item.raw_data?.['Powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego']
+    const gmina = item.raw_data?.['Gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego']
+    return !wojewodztwo || !powiat || !gmina
+  }).length
   if (withoutLocation > 0) {
     errors.push(`${withoutLocation} mieszkań bez wymaganych danych lokalizacji (województwo/powiat/gmina)`)
   }
 
-  // Additional Ministry validation
-  const invalidPrices = data.filter(item =>
-    (item.price_per_m2 && item.price_per_m2 <= 0) ||
-    (item.total_price && item.total_price <= 0)
-  ).length
-  if (invalidPrices > 0) {
-    errors.push(`${invalidPrices} mieszkań z nieprawidłowymi cenami (≤ 0)`)
+  // FORMAT VALIDATION SUMMARY
+  const invalidPostalCodes = data.filter(item => {
+    const kod = item.raw_data?.['Kod pocztowy lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego'] as string
+    return kod && !/^\d{2}-\d{3}$/.test(kod)
+  })
+  if (invalidPostalCodes.length > 0) {
+    invalidFormats.push({
+      field: 'Kod pocztowy',
+      count: invalidPostalCodes.length,
+      examples: invalidPostalCodes.slice(0, 3).map(p => p.raw_data?.['Kod pocztowy lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego'] as string)
+    })
   }
 
-  const invalidAreas = data.filter(item => item.area && item.area <= 0).length
-  if (invalidAreas > 0) {
-    errors.push(`${invalidAreas} mieszkań z nieprawidłową powierzchnią (≤ 0)`)
+  const invalidNIPs = data.filter(item => {
+    const nip = item.raw_data?.['Nr NIP'] as string
+    return nip && !/^\d{10}$/.test(nip.replace(/[-\s]/g, ''))
+  })
+  if (invalidNIPs.length > 0) {
+    invalidFormats.push({
+      field: 'NIP',
+      count: invalidNIPs.length,
+      examples: invalidNIPs.slice(0, 3).map(p => p.raw_data?.['Nr NIP'] as string)
+    })
   }
 
   // Calculate percentage compliance
-  const maxScore = (criticalFields.length * 3) + (recommendedFields.length * 2)
+  const maxScore = (Object.keys(criticalFields).length * 3) + (Object.keys(recommendedFields).length * 2)
   const compliancePercentage = Math.round((complianceScore / maxScore) * 100)
 
   // Ministry compliance threshold: 77% (45/58 fields)
-  const isCompliant = errors.length === 0 && compliancePercentage >= 77
+  const hasBlockingErrors = errors.length > 0 || rowErrors.some(r => r.errors.length > 0)
+  const isCompliant = !hasBlockingErrors && compliancePercentage >= 77
 
-  if (!isCompliant && errors.length === 0) {
+  if (!isCompliant && !hasBlockingErrors) {
     warnings.push(`Zgodność Ministerstwa: ${compliancePercentage}% (wymagane: 77%)`)
+  }
+
+  // Field validation summary
+  const validFields = data.length > 0 ? Object.keys(criticalFields).filter(field =>
+    data.some(item => item[field as keyof ParsedProperty])
+  ).length + Object.keys(recommendedFields).filter(field =>
+    data.some(item => item[field as keyof ParsedProperty])
+  ).length : 0
+
+  const fieldValidation: FieldValidationSummary = {
+    totalFields: Object.keys(criticalFields).length + Object.keys(recommendedFields).length,
+    validFields,
+    missingRequired: globalMissingRequired,
+    missingRecommended: globalMissingRecommended,
+    invalidFormats
   }
 
   return {
@@ -1723,7 +1926,9 @@ export function validateMinistryCompliance(data: ParsedProperty[]): {
     warnings,
     complianceScore: compliancePercentage,
     totalRequiredFields,
-    missingCriticalFields
+    missingCriticalFields,
+    rowErrors,
+    fieldValidation
   }
 }
 

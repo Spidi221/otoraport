@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { parseCSVSmart, parseExcelFile } from '@/lib/papaparse-csv-parser'
-import { SmartCSVParser } from '@/lib/smart-csv-parser'
+import { SmartCSVParser, validateMinistryCompliance, ValidationResult } from '@/lib/smart-csv-parser'
 import { validateUploadFile } from '@/lib/security'
 import { rateLimitWithAuth, uploadRateLimit, uploadRateLimitAuthenticated } from '@/lib/redis-rate-limit'
 import { sendUploadConfirmationEmail, sendUploadErrorEmail } from '@/lib/email-service'
@@ -287,6 +287,54 @@ export async function POST(request: NextRequest) {
         console.log('🔍 UPLOAD API: Sample data:', JSON.stringify(smartParseResult.data[0], null, 2))
         console.log('🗺️ UPLOAD API: Mappings:', JSON.stringify(smartParseResult.mappings, null, 2))
 
+        // TASK #81.2: Validate CSV data against Ministry Schema 1.13 requirements
+        console.log('🔍 VALIDATION: Running comprehensive Ministry compliance validation...')
+        const validationResult: ValidationResult = validateMinistryCompliance(smartParseResult.data)
+
+        console.log(`📊 VALIDATION: Compliance score: ${validationResult.complianceScore}%`)
+        console.log(`📊 VALIDATION: Errors: ${validationResult.errors.length}, Warnings: ${validationResult.warnings.length}`)
+        console.log(`📊 VALIDATION: Row errors: ${validationResult.rowErrors.length} properties with issues`)
+
+        // BLOCK UPLOAD if critical validation errors found
+        const hasBlockingErrors = validationResult.errors.length > 0 ||
+                                   validationResult.rowErrors.some(r => r.errors.length > 0)
+
+        if (hasBlockingErrors) {
+          console.error('❌ VALIDATION: Upload blocked due to critical errors')
+
+          // Build detailed error report for client
+          const errorReport = {
+            valid: false,
+            complianceScore: validationResult.complianceScore,
+            summary: {
+              totalErrors: validationResult.errors.length,
+              totalWarnings: validationResult.warnings.length,
+              propertiesWithErrors: validationResult.rowErrors.filter(r => r.errors.length > 0).length,
+              propertiesWithWarnings: validationResult.rowErrors.filter(r => r.warnings.length > 0).length
+            },
+            globalErrors: validationResult.errors,
+            globalWarnings: validationResult.warnings,
+            missingCriticalFields: validationResult.missingCriticalFields,
+            fieldValidation: validationResult.fieldValidation,
+            rowErrors: validationResult.rowErrors.slice(0, 10) // Limit to first 10 rows for response size
+          }
+
+          return NextResponse.json(
+            {
+              error: 'Walidacja CSV nie powiodła się',
+              message: 'Plik zawiera błędy krytyczne i nie może zostać przesłany. Popraw błędy i spróbuj ponownie.',
+              validation: errorReport
+            },
+            { status: 400 }
+          )
+        }
+
+        // Log warnings but allow upload to proceed
+        if (validationResult.warnings.length > 0) {
+          console.log(`⚠️ VALIDATION: ${validationResult.warnings.length} warnings found (upload will proceed):`)
+          validationResult.warnings.forEach(warning => console.log(`  - ${warning}`))
+        }
+
         // AUTO-IMPORT: Extract and update developer profile fields
         try {
           autoImportedFields = await autoImportDeveloperInfo(parser, developer.id)
@@ -346,6 +394,54 @@ export async function POST(request: NextRequest) {
         console.log(`📋 UPLOAD API: Format detected - ${smartParseResult.detectedFormat?.toUpperCase()} (${smartParseResult.formatConfidence?.toFixed(1)}%)`)
         console.log('🔍 UPLOAD API: Sample data:', JSON.stringify(smartParseResult.data[0], null, 2))
         console.log('🗺️ UPLOAD API: Mappings:', JSON.stringify(smartParseResult.mappings, null, 2))
+
+        // TASK #81.2: Validate Excel data against Ministry Schema 1.13 requirements
+        console.log('🔍 VALIDATION: Running comprehensive Ministry compliance validation...')
+        const validationResult: ValidationResult = validateMinistryCompliance(smartParseResult.data)
+
+        console.log(`📊 VALIDATION: Compliance score: ${validationResult.complianceScore}%`)
+        console.log(`📊 VALIDATION: Errors: ${validationResult.errors.length}, Warnings: ${validationResult.warnings.length}`)
+        console.log(`📊 VALIDATION: Row errors: ${validationResult.rowErrors.length} properties with issues`)
+
+        // BLOCK UPLOAD if critical validation errors found
+        const hasBlockingErrors = validationResult.errors.length > 0 ||
+                                   validationResult.rowErrors.some(r => r.errors.length > 0)
+
+        if (hasBlockingErrors) {
+          console.error('❌ VALIDATION: Upload blocked due to critical errors')
+
+          // Build detailed error report for client
+          const errorReport = {
+            valid: false,
+            complianceScore: validationResult.complianceScore,
+            summary: {
+              totalErrors: validationResult.errors.length,
+              totalWarnings: validationResult.warnings.length,
+              propertiesWithErrors: validationResult.rowErrors.filter(r => r.errors.length > 0).length,
+              propertiesWithWarnings: validationResult.rowErrors.filter(r => r.warnings.length > 0).length
+            },
+            globalErrors: validationResult.errors,
+            globalWarnings: validationResult.warnings,
+            missingCriticalFields: validationResult.missingCriticalFields,
+            fieldValidation: validationResult.fieldValidation,
+            rowErrors: validationResult.rowErrors.slice(0, 10) // Limit to first 10 rows for response size
+          }
+
+          return NextResponse.json(
+            {
+              error: 'Walidacja Excel nie powiodła się',
+              message: 'Plik zawiera błędy krytyczne i nie może zostać przesłany. Popraw błędy i spróbuj ponownie.',
+              validation: errorReport
+            },
+            { status: 400 }
+          )
+        }
+
+        // Log warnings but allow upload to proceed
+        if (validationResult.warnings.length > 0) {
+          console.log(`⚠️ VALIDATION: ${validationResult.warnings.length} warnings found (upload will proceed):`)
+          validationResult.warnings.forEach(warning => console.log(`  - ${warning}`))
+        }
 
         // AUTO-IMPORT: Extract and update developer profile fields
         try {
