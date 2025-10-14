@@ -100,7 +100,8 @@ export async function GET(
       .order('created_at', { ascending: false })
 
     if (propsError) {
-      return new NextResponse('Error fetching properties', { status: 500 })
+      console.error('[CSV ERROR] Failed to fetch properties:', propsError)
+      return new NextResponse(`Error fetching properties: ${propsError.message}`, { status: 500 })
     }
 
     // TASK #81.9: Filter to only latest raw_csv_data version (if exists)
