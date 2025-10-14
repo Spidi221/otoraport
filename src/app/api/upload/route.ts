@@ -644,19 +644,65 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
       }
     })
 
-    // Insert properties in batch
+    // Insert properties in batch and return IDs for raw_csv_data linking
     console.log(`🔧 DATABASE: Inserting ${propertiesToInsert.length} properties`)
 
-    const { error: insertError } = await createAdminClient()
+    const { data: insertedProperties, error: insertError } = await createAdminClient()
       .from('properties')
       .insert(propertiesToInsert)
+      .select('id, apartment_number')
 
     if (insertError) {
       console.error('❌ DATABASE INSERT ERROR:', insertError)
       throw new Error(`Database insert failed: ${insertError.message}`)
     }
 
-    console.log(`✅ DATABASE: Saved ${propertiesToInsert.length} properties to project ${projectId}`)
+    if (!insertedProperties || insertedProperties.length === 0) {
+      throw new Error('Properties insert returned no data')
+    }
+
+    console.log(`✅ DATABASE: Saved ${insertedProperties.length} properties to project ${projectId}`)
+
+    // TASK #81.1: Store raw CSV data in dedicated table (single source of truth)
+    console.log(`🔧 DATABASE: Inserting ${properties.length} raw CSV records into raw_csv_data table`)
+
+    const rawCsvDataToInsert = properties.map((property, idx) => {
+      // Find matching inserted property by apartment_number
+      const insertedProperty = insertedProperties.find(
+        p => p.apartment_number === (property.property_number || property.apartment_number || `Property-${Date.now()}`)
+      )
+
+      if (!insertedProperty) {
+        console.warn(`⚠️ DATABASE: Could not find inserted property for ${property.property_number || idx}`)
+        return null
+      }
+
+      return {
+        property_id: insertedProperty.id,
+        project_id: projectId,
+        developer_id: developerId,
+        raw_data: property.raw_data || {}, // All 58+ ministerial columns as uploaded
+        file_name: fileName,
+        row_number: idx + 2, // +2 because: +1 for header, +1 for 1-based indexing
+        uploaded_at: new Date().toISOString()
+      }
+    }).filter(Boolean) // Remove nulls
+
+    if (rawCsvDataToInsert.length > 0) {
+      const { error: rawDataInsertError } = await createAdminClient()
+        .from('raw_csv_data')
+        .insert(rawCsvDataToInsert)
+
+      if (rawDataInsertError) {
+        console.error('❌ DATABASE: Error inserting raw CSV data:', rawDataInsertError.message)
+        // Don't fail the whole upload if raw data insert fails - properties are already saved
+        console.warn('⚠️ DATABASE: Raw CSV data insert failed, but properties were saved successfully')
+      } else {
+        console.log(`✅ DATABASE: Saved ${rawCsvDataToInsert.length} raw CSV records to raw_csv_data table`)
+      }
+    } else {
+      console.warn('⚠️ DATABASE: No raw CSV data to insert (all properties had matching issues)')
+    }
 
   } catch (error) {
     console.error('❌ DATABASE: Error saving properties:', error)

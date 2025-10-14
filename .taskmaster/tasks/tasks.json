@@ -2690,12 +2690,88 @@
           }
         ],
         "updatedAt": "2025-10-13T17:39:22.382Z"
+      },
+      {
+        "id": "81",
+        "title": "Implement CSV-First Data Strategy with Validation and Manual Fill UI",
+        "description": "Make uploaded CSV the authoritative source for all ministerial fields, implement robust validation, and provide a UI for manual completion of missing data in Settings.",
+        "details": "1. **CSV Parsing and Storage:** Refactor `smart-csv-parser.ts` to strictly parse all 58 ministerial columns, enforcing consistent formatting, correct data types, and column alignment. Store raw CSV data in a dedicated database table, separate from user-edited or developer data, ensuring UTF-8 encoding and version control for traceability[1][5].\n\n2. **Validation Logic:** In `upload/route.ts`, implement comprehensive validation checks:\n   - Required fields: Block upload and display clear, actionable error messages for missing required fields.\n   - Recommended fields: Show non-blocking warnings for missing recommended fields.\n   - Validate data types, formats (especially dates, numbers), and check for column consistency and delimiter issues[1][5].\n   - Provide a downloadable validation report summarizing errors and warnings.\n\n3. **Manual Fill UI:** In `profile-settings.tsx`, build a user-friendly interface listing all missing required/recommended fields per property. Allow users to manually complete missing data, with inline validation and contextual help. Ensure that manual edits update only the gaps in the raw CSV data, never overwriting existing CSV values.\n\n4. **Export Logic:** Refactor `csv-generator.ts` so that exported CSV files are always generated from the raw CSV data, with manual fills supplementing only missing fields. Guarantee that exported CSV matches the original import for all present data, with no developer table or placeholder values overwriting CSV content.\n\n5. **Database Design:** Store raw CSV data and manual fills in separate tables or columns, linking them by property ID. Ensure auditability and rollback capability. Never allow auto-import or developer table updates to overwrite CSV-sourced data.\n\n6. **Best Practices:** Implement automated tests for CSV parsing and validation. Regularly audit CSV data for integrity. Use descriptive header rows and avoid mixing data types in columns[5].\n\n7. **Documentation:** Provide clear documentation for CSV format requirements, validation rules, and manual fill workflow for end users.",
+        "testStrategy": "1. Upload a sample CSV (e.g., 2025-10-09.csv) and verify that all 58 columns are parsed and stored as raw data, with no overwrites from developer table or placeholders.\n2. Trigger validation logic: Confirm that missing required fields block upload with clear error messages, and missing recommended fields show warnings.\n3. Use the Settings UI to manually fill missing fields; verify that these fills are reflected in the export and do not overwrite existing CSV data.\n4. Export CSV and compare byte-for-byte with the original import for all present data; confirm 100% match.\n5. Attempt auto-import and developer table updates; verify that CSV data remains unchanged and placeholders are never used.\n6. Run automated tests for edge cases: inconsistent columns, invalid data types, delimiter issues, and encoding problems.\n7. Review audit logs and rollback functionality for manual fills.",
+        "status": "in-progress",
+        "dependencies": [
+          "66"
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Refactor CSV Parsing and Storage Logic",
+            "description": "Update the CSV parser to strictly handle all 58 ministerial columns, enforce formatting, and store raw CSV data in a dedicated table.",
+            "dependencies": [],
+            "details": "Refactor `smart-csv-parser.ts` to parse all 58 columns, enforce correct data types, formatting, and column alignment. Store the parsed raw CSV data in a new database table, ensuring UTF-8 encoding and version control for traceability. This table must be separate from user-edited or developer data.",
+            "status": "in-progress",
+            "testStrategy": "Upload a sample CSV and verify all columns are parsed and stored in the raw CSV table, with no overwrites from developer or user-edited tables.",
+            "updatedAt": "2025-10-14T06:48:57.486Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Comprehensive CSV Validation Logic",
+            "description": "Add robust validation checks for required and recommended fields, data types, and formats during CSV upload.",
+            "dependencies": [
+              1
+            ],
+            "details": "In `upload/route.ts`, implement validation to block uploads with missing required fields, display clear error messages, and show non-blocking warnings for missing recommended fields. Validate data types, formats (dates, numbers), column consistency, and delimiter issues. Generate a downloadable validation report summarizing errors and warnings.",
+            "status": "pending",
+            "testStrategy": "Upload CSVs with various errors and verify that required field errors block upload, recommended field warnings are shown, and a validation report is generated.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Design and Build Manual Fill UI for Missing Data",
+            "description": "Create a user interface in Settings for manual completion of missing required and recommended fields.",
+            "dependencies": [
+              2
+            ],
+            "details": "In `profile-settings.tsx`, build a UI listing all missing required/recommended fields per property. Allow users to manually fill missing data with inline validation and contextual help. Ensure manual edits only supplement gaps in the raw CSV data and never overwrite existing CSV values.",
+            "status": "pending",
+            "testStrategy": "Simulate missing fields in the CSV, use the UI to fill them, and verify that only missing fields are updated and existing CSV values remain unchanged.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Refactor CSV Export Logic to Prioritize Raw Data",
+            "description": "Ensure exported CSVs are generated from raw CSV data, with manual fills supplementing only missing fields.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Update `csv-generator.ts` so that exported CSV files use raw CSV data as the authoritative source. Manual fills should only fill missing fields, and no developer or placeholder values should overwrite CSV content. Exported CSV must match the original import for all present data.",
+            "status": "pending",
+            "testStrategy": "Export CSV after manual fills and verify that all original CSV data is preserved, with only missing fields filled from manual input.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Redesign Database Schema for Auditability and Separation",
+            "description": "Update the database to store raw CSV data and manual fills separately, ensuring auditability and rollback capability.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Design or update the schema to store raw CSV data and manual fills in separate tables or columns, linked by property ID. Implement audit trails and rollback mechanisms. Ensure that auto-imports or developer table updates cannot overwrite CSV-sourced data.",
+            "status": "pending",
+            "testStrategy": "Test data updates and rollbacks, ensuring that raw CSV data is never overwritten and all changes are auditable.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-14T06:48:57.486Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-13T17:39:22.383Z",
-      "taskCount": 45,
+      "lastModified": "2025-10-14T06:48:57.488Z",
+      "taskCount": 46,
       "completedCount": 40,
       "tags": [
         "master"
