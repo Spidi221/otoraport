@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateClientId, applySecurityHeaders } from '@/lib/security'
 import { rateLimit, publicRateLimit, getCachedValue, setCachedValue, getMinistryCacheKey, MINISTRY_CACHE_TTL } from '@/lib/redis-rate-limit'
+import { COLUMN_PATTERNS } from '@/lib/smart-csv-parser'
 import type { Database } from '@/types/database'
 
 type Developer = Database['public']['Tables']['developers']['Row']
@@ -189,15 +190,58 @@ function generateMinistryCSV(developer: Developer, properties: PropertyWithRawDa
   }
 
   /**
+   * Normalize string for column name matching (same as SmartCSVParser)
+   */
+  const normalizeString = (str: string): string => {
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .replace(/ł/g, 'l')
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+  }
+
+  /**
    * Get field value with priority: raw CSV > property table > default
+   * ENHANCED: If ministryFieldName is empty, search through COLUMN_PATTERNS variations
    */
   const getFieldValue = (property: PropertyWithRawData, ministryFieldName: string, internalFieldName: string, defaultValue: string = ''): string => {
-    // 1. Try raw CSV data (PRIMARY SOURCE) - only if ministry field name provided
+    const rawData = property.raw_csv_data?.[0]?.raw_data || {}
+
+    // 1. Try raw CSV data (PRIMARY SOURCE)
     if (ministryFieldName) {
-      const rawData = property.raw_csv_data?.[0]?.raw_data || {}
+      // Direct match with provided ministry field name
       const rawValue = rawData[ministryFieldName]
       if (rawValue !== undefined && rawValue !== null && rawValue !== '') {
         return String(rawValue)
+      }
+    } else if (internalFieldName && COLUMN_PATTERNS[internalFieldName as keyof typeof COLUMN_PATTERNS]) {
+      // No ministry field name provided - search through COLUMN_PATTERNS variations
+      const patterns = COLUMN_PATTERNS[internalFieldName as keyof typeof COLUMN_PATTERNS]
+
+      // Try exact match first (case-sensitive)
+      for (const pattern of patterns) {
+        if (rawData[pattern] !== undefined && rawData[pattern] !== null && rawData[pattern] !== '') {
+          return String(rawData[pattern])
+        }
+      }
+
+      // Try normalized match (case-insensitive, diacritic-insensitive)
+      const normalizedPatterns = patterns.map(p => normalizeString(p))
+      const rawDataKeys = Object.keys(rawData)
+
+      for (let i = 0; i < patterns.length; i++) {
+        const normalizedPattern = normalizedPatterns[i]
+
+        for (const key of rawDataKeys) {
+          if (normalizeString(key) === normalizedPattern) {
+            const rawValue = rawData[key]
+            if (rawValue !== undefined && rawValue !== null && rawValue !== '') {
+              return String(rawValue)
+            }
+          }
+        }
       }
     }
 
