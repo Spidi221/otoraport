@@ -2709,9 +2709,9 @@
             "description": "Update the CSV parser to strictly handle all 58 ministerial columns, enforce formatting, and store raw CSV data in a dedicated table.",
             "dependencies": [],
             "details": "Refactor `smart-csv-parser.ts` to parse all 58 columns, enforce correct data types, formatting, and column alignment. Store the parsed raw CSV data in a new database table, ensuring UTF-8 encoding and version control for traceability. This table must be separate from user-edited or developer data.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Upload a sample CSV and verify all columns are parsed and stored in the raw CSV table, with no overwrites from developer or user-edited tables.",
-            "updatedAt": "2025-10-14T06:48:57.486Z",
+            "updatedAt": "2025-10-14T07:16:32.995Z",
             "parentId": "undefined"
           },
           {
@@ -2765,12 +2765,12 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-10-14T06:48:57.486Z"
+        "updatedAt": "2025-10-14T07:16:32.995Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-14T06:48:57.488Z",
+      "lastModified": "2025-10-14T07:16:32.996Z",
       "taskCount": 46,
       "completedCount": 40,
       "tags": [
