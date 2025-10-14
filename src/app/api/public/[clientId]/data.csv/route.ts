@@ -278,7 +278,7 @@ function generateMinistryCSV(developer: Developer, properties: PropertyWithRawDa
       escapeCSV(developer.nip || ''),
       escapeCSV(developer.regon || ''),
       escapeCSV(developer.phone || ''),
-      escapeCSV(developer.email),
+      escapeCSV(developer.email || ''),
       escapeCSV(developer.headquarters_voivodeship || ''),
       escapeCSV(developer.headquarters_county || ''),
       escapeCSV(developer.headquarters_municipality || ''),
