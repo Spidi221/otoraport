@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Upload, FileText, CheckCircle, Loader2, AlertCircle } from "lucide-react";
+import { Upload, FileText, CheckCircle, Loader2, AlertCircle, Download } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { useCSVParserWorker } from "@/hooks/use-csv-parser-worker";
@@ -274,6 +274,86 @@ export function UploadWidget() {
     fileInputRef.current?.click();
   };
 
+  // Download validation report as CSV
+  const downloadValidationReport = () => {
+    if (!validationError) return;
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const filename = `validation-report-${timestamp}.csv`;
+
+    // Build CSV content
+    const lines: string[] = [];
+
+    // Header
+    lines.push('=== RAPORT WALIDACJI CSV - OTO-RAPORT ===');
+    lines.push(`Data: ${new Date().toLocaleString('pl-PL')}`);
+    lines.push(`Wynik zgodności: ${validationError.complianceScore}%`);
+    lines.push('');
+
+    // Summary
+    lines.push('=== PODSUMOWANIE ===');
+    lines.push(`Liczba błędów: ${validationError.summary.totalErrors}`);
+    lines.push(`Liczba ostrzeżeń: ${validationError.summary.totalWarnings}`);
+    lines.push(`Nieruchomości z błędami: ${validationError.summary.propertiesWithErrors}`);
+    lines.push(`Nieruchomości z ostrzeżeniami: ${validationError.summary.propertiesWithWarnings}`);
+    lines.push('');
+
+    // Global errors
+    if (validationError.globalErrors.length > 0) {
+      lines.push('=== BŁĘDY KRYTYCZNE (GLOBALNE) ===');
+      validationError.globalErrors.forEach((err, idx) => {
+        lines.push(`${idx + 1}. ${err}`);
+      });
+      lines.push('');
+    }
+
+    // Global warnings
+    if (validationError.globalWarnings.length > 0) {
+      lines.push('=== OSTRZEŻENIA (GLOBALNE) ===');
+      validationError.globalWarnings.forEach((warn, idx) => {
+        lines.push(`${idx + 1}. ${warn}`);
+      });
+      lines.push('');
+    }
+
+    // Missing critical fields
+    if (validationError.missingCriticalFields.length > 0) {
+      lines.push('=== BRAKUJĄCE POLA KRYTYCZNE ===');
+      validationError.missingCriticalFields.forEach((field, idx) => {
+        lines.push(`${idx + 1}. ${field}`);
+      });
+      lines.push('');
+    }
+
+    // Row-level errors
+    if (validationError.rowErrors.length > 0) {
+      lines.push('=== BŁĘDY W WIERSZACH ===');
+      lines.push('Wiersz,Nr lokalu,Błędy,Ostrzeżenia');
+      validationError.rowErrors.forEach((rowError) => {
+        const propertyNum = rowError.propertyNumber || 'N/A';
+        const errors = rowError.errors.join('; ');
+        const warnings = rowError.warnings.join('; ');
+        lines.push(`${rowError.rowNumber},"${propertyNum}","${errors}","${warnings}"`);
+      });
+      lines.push('');
+    }
+
+    // Recommendations
+    lines.push('=== SUGEROWANE DZIAŁANIA ===');
+    lines.push('1. Popraw wszystkie błędy krytyczne (czerwone) w pliku CSV');
+    lines.push('2. Rozważ uzupełnienie pól zalecanych (żółte ostrzeżenia)');
+    lines.push('3. Sprawdź format danych (daty: YYYY-MM-DD, kody pocztowe: XX-XXX, NIP: 10 cyfr)');
+    lines.push('4. Wgraj poprawiony plik ponownie do systemu OTO-RAPORT');
+
+    // Create and download CSV file
+    const csvContent = lines.join('\n');
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' }); // UTF-8 BOM for Excel
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+  };
+
   return (
     <Card className="col-span-full lg:col-span-2">
       <CardHeader>
@@ -404,10 +484,19 @@ export function UploadWidget() {
                 )}
 
                 {/* Action hint */}
-                <div className="mt-3 pt-3 border-t border-red-300">
+                <div className="mt-3 pt-3 border-t border-red-300 space-y-2">
                   <p className="text-xs text-red-700">
                     💡 <strong>Sugerowane działania:</strong> Popraw błędy w pliku CSV zgodnie z wymogami ministerstwa i wgraj ponownie.
                   </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadValidationReport}
+                    className="w-full text-red-700 border-red-300 hover:bg-red-100"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Pobierz pełny raport walidacji (CSV)
+                  </Button>
                 </div>
               </div>
             </div>
