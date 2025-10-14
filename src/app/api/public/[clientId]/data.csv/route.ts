@@ -203,6 +203,33 @@ function generateMinistryCSV(developer: Developer, properties: PropertyWithRawDa
   }
 
   /**
+   * TASK #85.1: Get developer field value with priority: raw CSV > developer table > default
+   * Uses first property's raw_csv_data (developer fields are same across all properties from one CSV)
+   */
+  const getDeveloperFieldValue = (ministryFieldName: string, developerFieldName: keyof Developer, defaultValue: string = ''): string => {
+    // Get first property's raw_csv_data (developer fields are same for all properties)
+    const firstProperty = properties[0]
+    const rawData = firstProperty?.raw_csv_data?.[0]?.raw_data || {}
+
+    // 1. Try raw CSV data (PRIMARY SOURCE)
+    if (ministryFieldName) {
+      const rawValue = rawData[ministryFieldName]
+      if (rawValue !== undefined && rawValue !== null && rawValue !== '') {
+        return String(rawValue)
+      }
+    }
+
+    // 2. Try developer table (FALLBACK)
+    const devValue = developer[developerFieldName]
+    if (devValue !== undefined && devValue !== null && devValue !== '') {
+      return String(devValue)
+    }
+
+    // 3. Return default
+    return defaultValue
+  }
+
+  /**
    * Get field value with priority: raw CSV > property table > default
    * ENHANCED: If ministryFieldName is empty, search through COLUMN_PATTERNS variations
    */
@@ -321,52 +348,53 @@ function generateMinistryCSV(developer: Developer, properties: PropertyWithRawDa
 
   const rows = properties.map((property) => {
     return [
-      // Dane dewelopera (1-28) - FIXED: Added nr_faxu, moved adres_strony_www, removed dodatkowe_informacje_kontaktowe
-      escapeCSV(developer.company_name || ''),              // 1
-      escapeCSV(developer.legal_form || 'Spółka z o.o.'),   // 2
-      escapeCSV(developer.krs_number || ''),                // 3
-      escapeCSV(developer.ceidg_number || ''),              // 4
-      escapeCSV(developer.nip || ''),                       // 5
-      escapeCSV(developer.regon || ''),                     // 6
-      escapeCSV(developer.phone || ''),                     // 7
-      escapeCSV(developer.email || ''),                     // 8
-      escapeCSV(''),                                        // 9 - nr_faxu (not in database, empty by default)
-      escapeCSV(developer.website || ''),                   // 10 - adres_strony_www (moved from position 27)
-      escapeCSV(developer.headquarters_voivodeship || ''),  // 11
-      escapeCSV(developer.headquarters_county || ''),       // 12
-      escapeCSV(developer.headquarters_municipality || ''), // 13
-      escapeCSV(developer.headquarters_city || ''),         // 14
-      escapeCSV(developer.headquarters_street || ''),       // 15
-      escapeCSV(developer.headquarters_building_number || ''), // 16
-      escapeCSV(developer.headquarters_apartment_number || ''), // 17
-      escapeCSV(developer.headquarters_postal_code || ''),  // 18
-      escapeCSV(developer.sales_office_voivodeship || ''),  // 19
-      escapeCSV(developer.sales_office_county || ''),       // 20
-      escapeCSV(developer.sales_office_municipality || ''), // 21
-      escapeCSV(developer.sales_office_city || ''),         // 22
-      escapeCSV(developer.sales_office_street || ''),       // 23
-      escapeCSV(developer.sales_office_building_number || ''), // 24
-      escapeCSV(developer.sales_office_apartment_number || ''), // 25
-      escapeCSV(developer.sales_office_postal_code || ''),  // 26
-      escapeCSV(developer.additional_sales_locations || ''), // 27
-      escapeCSV(developer.contact_method || 'email, telefon'), // 28
-      // Lokalizacja inwestycji - TASK #81.9: Preserve raw CSV data
-      escapeCSV(getFieldValue(property, 'Województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'wojewodztwo')),
-      escapeCSV(getFieldValue(property, 'Powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'powiat')),
-      escapeCSV(getFieldValue(property, 'Gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'gmina')),
-      escapeCSV(getFieldValue(property, 'Miejscowość lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'miejscowosc')),
-      escapeCSV(getFieldValue(property, 'Ulica lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'ulica')),
-      escapeCSV(getFieldValue(property, 'Nr budynku lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'nr_budynku')),
-      escapeCSV(getFieldValue(property, 'Kod pocztowy lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'kod_pocztowy')),
+      // TASK #85.1: Developer fields now read from raw_csv_data with fallback to developers table
+      escapeCSV(getDeveloperFieldValue('nazwa_dewelopera', 'company_name')),                              // 1
+      escapeCSV(getDeveloperFieldValue('forma_prawna', 'legal_form', 'Spółka z o.o.')),                   // 2
+      escapeCSV(getDeveloperFieldValue('nr_krs', 'krs_number')),                                          // 3
+      escapeCSV(getDeveloperFieldValue('nr_ceidg', 'ceidg_number')),                                      // 4
+      escapeCSV(getDeveloperFieldValue('nip', 'nip')),                                                    // 5
+      escapeCSV(getDeveloperFieldValue('regon', 'regon')),                                                // 6
+      escapeCSV(getDeveloperFieldValue('telefon', 'phone')),                                              // 7
+      escapeCSV(getDeveloperFieldValue('email', 'email')),                                                // 8
+      escapeCSV(getDeveloperFieldValue('nr_faxu', 'phone')),                                              // 9 - nr_faxu (not in database, will be empty from raw_csv_data)
+      escapeCSV(getDeveloperFieldValue('adres_strony_www', 'website')),                                   // 10
+      escapeCSV(getDeveloperFieldValue('wojewodztwo_siedziby', 'headquarters_voivodeship')),              // 11
+      escapeCSV(getDeveloperFieldValue('powiat_siedziby', 'headquarters_county')),                        // 12
+      escapeCSV(getDeveloperFieldValue('gmina_siedziby', 'headquarters_municipality')),                   // 13
+      escapeCSV(getDeveloperFieldValue('miejscowosc_siedziby', 'headquarters_city')),                     // 14
+      escapeCSV(getDeveloperFieldValue('ulica_siedziby', 'headquarters_street')),                         // 15
+      escapeCSV(getDeveloperFieldValue('nr_budynku_siedziby', 'headquarters_building_number')),           // 16
+      escapeCSV(getDeveloperFieldValue('nr_lokalu_siedziby', 'headquarters_apartment_number')),           // 17
+      escapeCSV(getDeveloperFieldValue('kod_pocztowy_siedziby', 'headquarters_postal_code')),             // 18
+      escapeCSV(getDeveloperFieldValue('wojewodztwo_lokalu_sprzedazy', 'sales_office_voivodeship')),      // 19
+      escapeCSV(getDeveloperFieldValue('powiat_lokalu_sprzedazy', 'sales_office_county')),                // 20
+      escapeCSV(getDeveloperFieldValue('gmina_lokalu_sprzedazy', 'sales_office_municipality')),           // 21
+      escapeCSV(getDeveloperFieldValue('miejscowosc_lokalu_sprzedazy', 'sales_office_city')),             // 22
+      escapeCSV(getDeveloperFieldValue('ulica_lokalu_sprzedazy', 'sales_office_street')),                 // 23
+      escapeCSV(getDeveloperFieldValue('nr_budynku_lokalu_sprzedazy', 'sales_office_building_number')),   // 24
+      escapeCSV(getDeveloperFieldValue('nr_lokalu_sprzedazy', 'sales_office_apartment_number')),          // 25
+      escapeCSV(getDeveloperFieldValue('kod_pocztowy_lokalu_sprzedazy', 'sales_office_postal_code')),     // 26
+      escapeCSV(getDeveloperFieldValue('dodatkowe_lokalizacje_sprzedazy', 'additional_sales_locations')), // 27
+      escapeCSV(getDeveloperFieldValue('sposob_kontaktu', 'contact_method', 'email, telefon')),           // 28
+      // TASK #85.2: Investment location - use COLUMN_PATTERNS to match short CSV column names
+      escapeCSV(getFieldValue(property, '', 'wojewodztwo')),       // wojewodztwo_inwestycji
+      escapeCSV(getFieldValue(property, '', 'powiat')),             // powiat_inwestycji
+      escapeCSV(getFieldValue(property, '', 'gmina')),              // gmina_inwestycji
+      escapeCSV(getFieldValue(property, '', 'miejscowosc')),        // miejscowosc_inwestycji
+      escapeCSV(getFieldValue(property, '', 'ulica')),              // ulica_inwestycji
+      escapeCSV(getFieldValue(property, '', 'numer_nieruchomosci')), // nr_budynku_inwestycji - FIXED: each apartment has unique building number
+      escapeCSV(getFieldValue(property, '', 'kod_pocztowy')),       // kod_pocztowy_inwestycji
       // Dane mieszkania - TASK #81.9: Preserve raw CSV data
       escapeCSV(getFieldValue(property, 'Rodzaj nieruchomości: lokal mieszkalny, dom jednorodzinny', 'property_type', 'mieszkanie')),
       escapeCSV(getFieldValue(property, 'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera', 'apartment_number')),
       escapeCSV(getFieldValue(property, 'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]', 'price_per_m2')),
       escapeCSV(getFieldValue(property, 'Data obowiązywania ceny m 2', 'price_valid_from', new Date().toISOString().split('T')[0])),
-      escapeCSV(getFieldValue(property, '', 'base_price')), // base_price - not in ministry schema, manual fill only
+      // TASK #85.3: Base price and final price - use COLUMN_PATTERNS to match cena_bazowa and cena_koncowa
+      escapeCSV(getFieldValue(property, '', 'base_price')), // cena_bazowa
       escapeCSV(getFieldValue(property, '', 'base_price_valid_from', new Date().toISOString().split('T')[0])),
-      escapeCSV(getFieldValue(property, 'Cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]', 'final_price')),
-      escapeCSV(getFieldValue(property, 'Data obowiązywania ceny lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni', 'final_price_valid_from', new Date().toISOString().split('T')[0])),
+      escapeCSV(getFieldValue(property, '', 'final_price')), // cena_koncowa - FIXED: now reads from raw CSV
+      escapeCSV(getFieldValue(property, '', 'final_price_valid_from', new Date().toISOString().split('T')[0])),
       // Additional property data - preserve from raw CSV or manual fills
       escapeCSV(getFieldValue(property, '', 'parking_type')),
       escapeCSV(getFieldValue(property, '', 'parking_designation')),
@@ -376,20 +404,15 @@ function generateMinistryCSV(developer: Developer, properties: PropertyWithRawDa
       escapeCSV(getFieldValue(property, '', 'storage_designation')),
       escapeCSV(getFieldValue(property, '', 'storage_price')),
       escapeCSV(getFieldValue(property, '', 'storage_date')),
-      // TASK #83.3: Combined necessary_rights_type + necessary_rights_description into one field
-      escapeCSV(
-        [
-          getFieldValue(property, '', 'necessary_rights_type'),
-          getFieldValue(property, '', 'necessary_rights_description')
-        ].filter(Boolean).join(' - ') || ''
-      ), // 52 - prawa_niezbedne_wyszczegolnienie
+      // TASK #85.4 & #85.5: Necessary rights and prospectus - use COLUMN_PATTERNS
+      escapeCSV(getFieldValue(property, '', 'necessary_rights')),       // 52 - prawa_niezbedne_wyszczegolnienie (single combined field)
       escapeCSV(getFieldValue(property, '', 'necessary_rights_price')), // 53
       escapeCSV(getFieldValue(property, '', 'necessary_rights_date')),  // 54
-      // TASK #83.3: Renamed other_services_type to wyszczególnienie (specification)
+      // Other services
       escapeCSV(getFieldValue(property, '', 'other_services_type')),    // 55 - inne_swiadczenia_wyszczegolnienie
       escapeCSV(getFieldValue(property, '', 'other_services_price')),   // 56
       escapeCSV(getFieldValue(property, '', 'other_services_date')),    // 57
-      escapeCSV(getFieldValue(property, '', 'prospectus_url', developer.website || '')), // 58
+      escapeCSV(getFieldValue(property, '', 'prospectus_url', developer.website || '')), // 58 - adres_prospektu
     ].join(';')  // TASK #83.3: Changed separator from comma to semicolon (Ministry requirement)
   })
 

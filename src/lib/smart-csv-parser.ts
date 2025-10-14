@@ -19,7 +19,10 @@ interface ColumnMapping {
   // Prices
   price_per_m2: string[]
   total_price: string[]
+  base_price: string[]  // TASK #85.3: Ministry base price (cena bazowa)
+  base_price_valid_from: string[]  // TASK #85.3
   final_price: string[]
+  final_price_valid_from: string[]  // TASK #85.3
   cena_za_m2_poczatkowa: string[]
   cena_bazowa_poczatkowa: string[]
   
@@ -133,6 +136,12 @@ interface ColumnMapping {
   ksiega_wieczysta: string[]
   udzial_w_gruncie: string[]
   waluta: string[]
+
+  // TASK #85.4 & #85.5: Ministry fields for necessary rights and prospectus
+  necessary_rights: string[]  // prawa_niezbedne_wyszczegolnienie
+  necessary_rights_price: string[]
+  necessary_rights_date: string[]
+  prospectus_url: string[]  // adres_prospektu
 }
 
 // Polish real estate field variations - COMPLETE 58+ field mapping
@@ -181,12 +190,32 @@ export const COLUMN_PATTERNS: ColumnMapping = {
     'cena całkowita', 'cena calkowita', 'cena', 'cena brutto', 'cena bazowa',
     'total_price', 'price', 'cena_calkowita', 'cena_bazowa', 'cena_brutto'
   ],
+  // TASK #85.3: Base price (cena bazowa = price_per_m2 * area, without extras)
+  base_price: [
+    'cena bazowa', 'cena_bazowa', 'base_price', 'cena podstawowa', 'cena_podstawowa',
+    // MINISTRY OFFICIAL NAMES (column 40):
+    'cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]',
+    'cena będąca iloczynem powierzchni oraz metrażu'
+  ],
+  base_price_valid_from: [
+    'data bazowa', 'data_bazowa', 'data ceny bazowej', 'data_ceny_bazowej', 'base_price_date',
+    // MINISTRY OFFICIAL NAMES (column 41):
+    'data obowiązywania ceny lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni',
+    'data obowiazywania ceny bazowej'
+  ],
   final_price: [
-    'cena finalna', 'cena końcowa', 'cena ostateczna', 'final_price',
-    'cena_finalna', 'cena_koncowa', 'cena_ostateczna',
-    // MINISTRY OFFICIAL NAMES:
+    'cena finalna', 'cena końcowa', 'cena ostateczna', 'cena_koncowa', 'final_price',
+    'cena_finalna', 'cena_ostateczna',
+    // MINISTRY OFFICIAL NAMES (column 42):
     'cena lokalu mieszkalnego lub domu jednorodzinnego uwzględniająca cenę lokalu stanowiącą iloczyn powierzchni oraz metrażu i innych składowych ceny, o których mowa w art. 19a ust. 1 pkt 1), 2) lub 3) [zł]',
     'cena uwzględniająca wszystkie składowe'
+  ],
+  final_price_valid_from: [
+    'data finalna', 'data_finalna', 'data ceny finalnej', 'data_ceny_finalnej', 'final_price_date',
+    'data końcowa', 'data_koncowa',
+    // MINISTRY OFFICIAL NAMES (column 43):
+    'data obowiązywania ceny lokalu mieszkalnego lub domu jednorodzinnego uwzględniająca cenę lokalu stanowiącą iloczyn powierzchni oraz metrażu i innych składowych ceny, o których mowa w art. 19a ust. 1 pkt 1), 2) lub 3)',
+    'data obowiazywania ceny finalnej', 'data obowiazywania ceny koncowej'
   ],
 
   // Areas and spaces
@@ -233,18 +262,24 @@ export const COLUMN_PATTERNS: ColumnMapping = {
   wojewodztwo: [
     'województwo', 'wojewodztwo', 'voivodeship', 'region',
     'woj', 'woj.', 'province',
+    // MINISTRY SHORT NAMES (TASK #85.2):
+    'wojewodztwo_inwestycji', 'województwo_inwestycji',
     // MINISTRY OFFICIAL NAMES:
     'województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
     'województwo adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
   ],
   powiat: [
     'powiat', 'county', 'district', 'pow', 'pow.',
+    // MINISTRY SHORT NAMES (TASK #85.2):
+    'powiat_inwestycji',
     // MINISTRY OFFICIAL NAMES:
     'powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
     'powiat adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
   ],
   gmina: [
     'gmina', 'municipality', 'commune', 'gm', 'gm.',
+    // MINISTRY SHORT NAMES (TASK #85.2):
+    'gmina_inwestycji',
     // MINISTRY OFFICIAL NAMES:
     'gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
     'gmina adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
@@ -252,23 +287,31 @@ export const COLUMN_PATTERNS: ColumnMapping = {
   miejscowosc: [
     'miejscowość', 'miejscowosc', 'miasto', 'city', 'town',
     'locality', 'place',
+    // MINISTRY SHORT NAMES (TASK #85.2):
+    'miejscowosc_inwestycji', 'miejscowość_inwestycji',
     // MINISTRY OFFICIAL NAMES:
     'miejscowość lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
     'miejscowość adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
   ],
   ulica: [
     'ulica', 'ul', 'ul.', 'street', 'adres', 'address',
+    // MINISTRY SHORT NAMES (TASK #85.2):
+    'ulica_inwestycji',
     // MINISTRY OFFICIAL NAMES:
     'ulica lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
     'ulica adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
   ],
   numer_nieruchomosci: [
     'numer nieruchomości', 'nr nieruchomości', 'numer_nieruchomosci',
-    'nr budynku', 'building_number', 'house_number'
+    'nr budynku', 'building_number', 'house_number',
+    // MINISTRY SHORT NAMES (TASK #85.2):
+    'nr_budynku_inwestycji'
   ],
   kod_pocztowy: [
     'kod pocztowy', 'kod_pocztowy', 'postal_code', 'zip_code',
-    'zip', 'postal'
+    'zip', 'postal',
+    // MINISTRY SHORT NAMES (TASK #85.2):
+    'kod_pocztowy_inwestycji'
   ],
   
   // Price history and dates
@@ -674,6 +717,36 @@ export const COLUMN_PATTERNS: ColumnMapping = {
   waluta: [
     'waluta', 'currency', 'PLN', 'EUR', 'USD',
     'w jakiej walucie', 'symbol waluty'
+  ],
+
+  // TASK #85.4: Necessary rights (prawa niezbędne) - Ministry columns 52-54
+  necessary_rights: [
+    'prawa niezbędne', 'prawa_niezbedne', 'prawa niezbedne wyszczególnienie', 'prawa_niezbedne_wyszczegolnienie',
+    'necessary_rights', 'rights', 'udzial w gruncie', 'udział w gruncie',
+    // MINISTRY OFFICIAL NAMES (column 52):
+    'wyszczególnienie praw niezbędnych do korzystania z nieruchomości wspólnych',
+    'wyszczegolnienie praw niezbednych'
+  ],
+  necessary_rights_price: [
+    'prawa cena', 'prawa_niezbedne_cena', 'necessary_rights_price',
+    // MINISTRY OFFICIAL NAMES (column 53):
+    'cena praw niezbędnych',
+    'cena praw niezbednych'
+  ],
+  necessary_rights_date: [
+    'prawa data', 'prawa_niezbedne_data', 'necessary_rights_date',
+    // MINISTRY OFFICIAL NAMES (column 54):
+    'data obowiązywania ceny praw niezbędnych',
+    'data obowiazywania ceny praw niezbednych'
+  ],
+
+  // TASK #85.5: Prospectus address (adres prospektu) - Ministry column 58
+  prospectus_url: [
+    'adres prospektu', 'adres_prospektu', 'prospekt', 'prospectus',
+    'prospectus_url', 'url prospektu', 'link do prospektu',
+    // MINISTRY OFFICIAL NAMES (column 58):
+    'adres strony internetowej prospektu informacyjnego',
+    'adres prospektu informacyjnego'
   ]
 }
 

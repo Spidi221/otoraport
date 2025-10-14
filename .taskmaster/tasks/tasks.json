@@ -2927,13 +2927,158 @@
           }
         ],
         "updatedAt": "2025-10-14T15:42:44.600Z"
+      },
+      {
+        "id": "84",
+        "title": "Update Auto-Import to Always Overwrite Developer Data from CSV Uploads",
+        "description": "Modify the auto-import logic so that CSV uploads always overwrite developer profile data, enabling fast, frictionless onboarding and eliminating the need for manual profile edits after upload.",
+        "status": "in-progress",
+        "dependencies": [
+          "80",
+          "83"
+        ],
+        "priority": "medium",
+        "details": "Update the autoImportDeveloperInfo() function in src/app/api/upload/route.ts to remove the 'isEmpty' check that currently prevents overwriting user-filled fields. Instead, always update all specified developer fields (company_name, NIP, REGON, phone, email, address, legal_form, etc.) from the CSV, except when the CSV field itself is empty (preserve existing data in that case). Add a user notification confirming the update, e.g., 'Profil dewelopera zaktualizowany z CSV (X pól)'. Ensure the implementation maintains all existing safety and validation checks. This change enables users to upload a new CSV at any time to fully refresh their developer profile, with the latest CSV always taking precedence. Follow current best practices for CSV parsing and data integrity by leveraging robust libraries (e.g., PapaParse) and validating file types/sizes client-side. This enables fast onboarding without confirmation dialogs - instead we'll add an 'Undo last upload' feature later as a nice-to-have safety net.",
+        "testStrategy": "1. Test that uploading a CSV with all fields populated overwrites every corresponding developer profile field, regardless of previous values. 2. Verify that empty CSV fields do not overwrite existing profile data. 3. Test sequential uploads with different CSVs to confirm the latest upload always determines the profile state. 4. Check that the user notification displays correctly and includes the count of updated fields. 5. Validate that all existing safety and validation checks (e.g., file type, size) remain functional. 6. Perform integration testing with the updated onboarding flow to ensure end-to-end functionality. 7. Test edge cases, such as uploading a CSV with only partial data, to confirm no unintended data loss occurs. 8. Review logs and audit trails to ensure all updates are properly recorded.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Remove 'isEmpty' Check and Always Overwrite Developer Fields in autoImportDeveloperInfo()",
+            "description": "Modify the autoImportDeveloperInfo() function to always overwrite developer profile fields with values from the uploaded CSV, except when the CSV field is empty.",
+            "dependencies": [],
+            "details": "In src/app/api/upload/route.ts:28-105, update the autoImportDeveloperInfo() function by modifying lines 68-84. Currently the function checks if a field isEmpty (lines 69-76) before updating. Remove this check and always update fields from CSV except when CSV field is empty. Change the logic to: 1) Skip if CSV value is empty/null 2) Always update the field with CSV value regardless of current value 3) Update the console logging to reflect 'overwriting' instead of 'filling empty fields'.",
+            "status": "done",
+            "testStrategy": "Unit test the function with various CSV inputs: all fields filled, some fields empty, and verify correct overwriting and preservation behavior.",
+            "updatedAt": "2025-10-14T16:52:31.106Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Ensure Robust CSV Parsing and Data Validation",
+            "description": "Integrate or update CSV parsing logic to use a robust library and validate file type and size before processing.",
+            "dependencies": [
+              1
+            ],
+            "details": "The codebase already uses SmartCSVParser and robust encoding detection (lines 274-282, 388-396) with proper validation. Ensure the existing validation in validateMinistryCompliance() (lines 291-330, 399-438) continues to work after the auto-import changes. Verify client-side validation remains intact.",
+            "status": "pending",
+            "testStrategy": "Test with valid and invalid CSV files (wrong type, too large, malformed data) to ensure only proper files are processed and errors are handled gracefully.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement User Notification After Successful Profile Update",
+            "description": "Add a user notification that confirms the developer profile has been updated from the CSV, including the number of fields changed.",
+            "dependencies": [
+              1
+            ],
+            "details": "After the import process completes (around line 341-345), enhance the response object (lines 510-526) to include autoImportedFields count. Update the success message to inform users about profile updates, e.g., 'Profil dewelopera zaktualizowany z CSV (X pól)' when autoImportedFields > 0.",
+            "status": "pending",
+            "testStrategy": "Verify that the notification appears after a successful upload and accurately reflects the number of fields updated.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Update User Guide and API Documentation to Reflect New Import Behavior",
+            "description": "Revise documentation to describe the new overwrite logic and notification feature for CSV imports.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Update the user guide to explain that CSV uploads now always overwrite developer profile data (except for empty fields), describe the notification feature, and provide best practices for preparing CSV files. Update API documentation to reflect the new autoImportedFields behavior in the response.",
+            "status": "pending",
+            "testStrategy": "Review documentation for completeness and clarity; have a non-developer follow the updated guide to verify accuracy.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-14T16:52:31.106Z"
+      },
+      {
+        "id": "85",
+        "title": "Fix Critical CSV Data Loss and Mapping Issues Identified in Comparison Report",
+        "description": "Resolve five critical CSV data loss and mapping problems affecting developer, property, and rights fields to ensure full data integrity and compliance with the ministerial schema.",
+        "details": "Address the following five critical issues as identified in /tmp/csv_comparison_report.md:\n\n1. **Developer Fields Sourcing**: Refactor all relevant code (especially in CSV parsing and profile population logic) so that developer fields are always read from `raw_csv_data` rather than the database or cached values. Audit all usages of developer fields in both backend and frontend to ensure they reflect the latest CSV upload, leveraging the authoritative raw CSV-first strategy from Task 81.\n\n2. **Nr budynku Value Consistency**: Investigate the mapping logic for the 'Nr budynku' field in apartment/unit records. Ensure that each apartment correctly receives its unique building number from the CSV, rather than inheriting a single value for all. Validate that the parser correctly associates each row's building number, and update mapping logic if necessary.\n\n3. **Final Price Calculation**: Audit the logic that sets 'final price' for each apartment. Ensure that the final price is correctly calculated or mapped from the CSV, and is not erroneously set to the base price. If the CSV does not provide a final price, implement a clear fallback or validation error, as per best practices for required fields[1].\n\n4. **Prawa Niezbędne Field Population**: Fix the mapping for 'prawa_niezbędne' so that it is correctly populated from the CSV. Ensure that the parser does not skip or misinterpret this field, and that any nested or multi-value structures are handled according to the ministry schema (see Task 83 for correct structure).\n\n5. **Adres Prospektu Field Population**: Ensure 'adres prospektu' is correctly extracted and mapped from the CSV. Audit both the parser and the UI to confirm that this field is displayed and stored as expected.\n\nGeneral best practices to follow:\n- Validate all CSV fields before import, ensuring required fields are present and correctly formatted[1].\n- Use UTF-8 encoding and proper text qualifiers for all fields, especially those containing special characters or non-ASCII data[1].\n- Maintain strict column alignment and avoid mixing data sources for any ministerial fields.\n- Implement version control and backup for raw CSV data before any transformation or overwrite[1].\n- Update documentation to reflect the corrected mapping logic and field sourcing.\n\nCoordinate with recent schema and parser updates (Tasks 81, 83, 84) to avoid regression and ensure compatibility.",
+        "testStrategy": "1. Upload a ministerial CSV containing distinct values for all five problematic fields and verify that:\n   - Developer profile fields in the app match the latest CSV (not database values).\n   - Each apartment/unit displays its correct 'Nr budynku' value from the CSV.\n   - 'Final price' is correctly set from the CSV or triggers a validation error if missing.\n   - 'Prawa niezbędne' and 'adres prospektu' fields are populated and displayed as per the CSV and ministry schema.\n2. Upload a CSV with missing or malformed data for these fields and confirm that validation errors are triggered and no silent data loss occurs.\n3. Perform regression testing on all CSV import and mapping flows to ensure no other fields are affected.\n4. Review raw_csv_data backups and version history to confirm no data loss during import.\n5. Audit UI and API endpoints to ensure all displayed data reflects the latest CSV upload, not stale database values.",
+        "status": "done",
+        "dependencies": [
+          "81",
+          "83",
+          "84"
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Refactor Developer Fields Sourcing to Use Raw CSV Data Exclusively",
+            "description": "Update all backend and frontend logic to ensure developer fields are always sourced from raw_csv_data, not from the database or cached values.",
+            "dependencies": [],
+            "details": "Audit all usages of developer fields in both backend and frontend code. Refactor CSV parsing and profile population logic to read developer fields directly from raw_csv_data. Ensure the authoritative raw CSV-first strategy from Task 81 is consistently applied. Update documentation to reflect the new sourcing logic.",
+            "status": "done",
+            "testStrategy": "Upload a CSV with distinct developer field values. Verify that all developer profile fields in the app match the latest CSV upload and do not reflect outdated database values.",
+            "updatedAt": "2025-10-14T17:22:32.004Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Fix 'Nr budynku' Mapping Logic for Unique Building Numbers",
+            "description": "Investigate and correct the mapping logic so each apartment/unit receives its unique building number from the CSV, not a shared value.",
+            "dependencies": [
+              1
+            ],
+            "details": "Review the parser logic for the 'Nr budynku' field in apartment/unit records. Ensure each row's building number is correctly associated and mapped. Update mapping logic if necessary to prevent inheritance of a single value. Validate parser output for correct column alignment and uniqueness.",
+            "status": "done",
+            "testStrategy": "Upload a CSV with different 'Nr budynku' values for each apartment. Confirm that each unit displays its correct building number in the app and database.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-14T17:26:05.665Z"
+          },
+          {
+            "id": 3,
+            "title": "Audit and Correct Final Price Calculation and Fallback Logic",
+            "description": "Ensure 'final price' for each apartment is accurately mapped from the CSV, with proper fallback or validation error if missing.",
+            "dependencies": [
+              2
+            ],
+            "details": "Review the logic that sets the 'final price' field. Ensure it is mapped from the CSV and not set to the base price by default. Implement fallback logic or validation error if the CSV does not provide a final price, following best practices for required fields[1][2]. Update documentation to clarify the mapping and fallback behavior.",
+            "status": "done",
+            "testStrategy": "Upload a CSV with and without 'final price' values. Verify that apartments show the correct final price or trigger a validation error if missing.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-14T17:28:36.360Z"
+          },
+          {
+            "id": 4,
+            "title": "Correct 'Prawa Niezbędne' Field Mapping and Structure",
+            "description": "Fix the mapping for 'prawa_niezbędne' to ensure correct population from the CSV, handling nested or multi-value structures per ministry schema.",
+            "dependencies": [
+              3
+            ],
+            "details": "Audit the parser logic for 'prawa_niezbędne'. Ensure the field is not skipped or misinterpreted, and that nested/multi-value structures are handled according to Task 83 and the ministry schema. Update code and documentation to reflect the correct mapping and structure.",
+            "status": "done",
+            "testStrategy": "Upload a CSV with complex 'prawa_niezbędne' values. Confirm correct parsing, storage, and display in the app, matching the ministry schema.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-14T17:30:34.190Z"
+          },
+          {
+            "id": 5,
+            "title": "Ensure Accurate Extraction and Display of 'Adres Prospektu'",
+            "description": "Verify that 'adres prospektu' is correctly extracted from the CSV and displayed/stored as expected in both parser and UI.",
+            "dependencies": [
+              4
+            ],
+            "details": "Audit the parser and UI logic for 'adres prospektu'. Ensure the field is extracted, mapped, and displayed correctly. Validate UTF-8 encoding and text qualifiers for special characters. Update documentation to reflect the corrected handling.",
+            "status": "done",
+            "testStrategy": "Upload a CSV with various 'adres prospektu' values, including special characters. Verify correct extraction, storage, and display in the UI.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-14T17:30:35.076Z"
+          }
+        ],
+        "updatedAt": "2025-10-14T17:30:35.076Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-14T15:42:44.601Z",
-      "taskCount": 48,
-      "completedCount": 43,
+      "lastModified": "2025-10-14T17:30:35.078Z",
+      "taskCount": 50,
+      "completedCount": 44,
       "tags": [
         "master"
       ]
