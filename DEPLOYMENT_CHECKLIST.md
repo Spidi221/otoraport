@@ -288,6 +288,306 @@ npx supabase db reset --linked
 
 ---
 
+## 🌐 MANUAL DOMAIN CONFIGURATION (Tasks #72-74)
+
+### Task #72: Configure oto-raport.pl Domain in Vercel Dashboard
+
+**Status:** ⏳ Requires Manual Configuration
+
+**Prerequisites:**
+- Tasks #71, #75, #76 completed ✅
+- Access to Vercel Dashboard
+- Access to domain registrar DNS settings
+
+**Steps:**
+
+#### 1. Vercel Dashboard Configuration
+```bash
+# Login to Vercel Dashboard
+https://vercel.com/dashboard
+
+# Navigate to Project Settings
+Project → Settings → Domains
+```
+
+1. Click **"Add Domain"**
+2. Enter: `oto-raport.pl`
+3. Click **"Add"**
+4. Vercel will provide DNS configuration instructions
+
+#### 2. DNS Configuration at Registrar
+
+Configure the following DNS records at your domain registrar:
+
+**For Apex Domain (oto-raport.pl):**
+```
+Type:   A
+Name:   @
+Value:  76.76.21.21
+TTL:    300 (or Auto)
+```
+
+**For WWW Subdomain:**
+```
+Type:   CNAME
+Name:   www
+Value:  cname.vercel-dns.com
+TTL:    300 (or Auto)
+```
+
+**For Wildcard Subdomain (Custom Subdomains):**
+```
+Type:   CNAME
+Name:   *
+Value:  cname.vercel-dns.com
+TTL:    300 (or Auto)
+```
+
+#### 3. SSL Certificate Verification
+
+1. **Wait for propagation** (5-15 minutes typically, up to 48 hours)
+2. **Check DNS propagation:**
+   ```bash
+   # Check A record
+   dig oto-raport.pl A
+
+   # Check CNAME records
+   dig www.oto-raport.pl CNAME
+   dig test.oto-raport.pl CNAME
+   ```
+
+3. **Verify SSL in Vercel Dashboard:**
+   - Go to Project → Settings → Domains
+   - Check that SSL status shows ✅ "Valid"
+   - Certificate should be automatically issued by Vercel
+
+4. **Test HTTPS access:**
+   ```bash
+   # Should redirect HTTP → HTTPS
+   curl -I http://oto-raport.pl
+
+   # Should return 200 with SSL
+   curl -I https://oto-raport.pl
+
+   # Test www subdomain
+   curl -I https://www.oto-raport.pl
+   ```
+
+#### 4. Environment Variables Update
+
+Update the following in Vercel Dashboard → Settings → Environment Variables:
+
+```bash
+# Update these variables:
+NEXT_PUBLIC_APP_URL=https://oto-raport.pl
+NEXT_PUBLIC_BASE_URL=https://oto-raport.pl
+
+# For development/preview (optional):
+NEXT_PUBLIC_APP_URL_PREVIEW=https://preview.oto-raport.pl
+```
+
+**Important:** After updating environment variables, redeploy:
+```bash
+vercel --prod --force
+```
+
+#### 5. Verification Checklist
+
+- [ ] oto-raport.pl resolves to Vercel IP (76.76.21.21)
+- [ ] www.oto-raport.pl redirects to https://oto-raport.pl
+- [ ] SSL certificate is valid and auto-renewing
+- [ ] HTTP requests redirect to HTTPS
+- [ ] Wildcard subdomain works (*.oto-raport.pl)
+- [ ] Environment variables updated and deployed
+- [ ] Old vercel.app URLs redirect to new domain
+
+---
+
+### Task #73: Configure oto-raport.pl Domain in Supabase
+
+**Status:** ⏳ Requires Manual Configuration
+
+**Prerequisites:**
+- Task #72 completed (Vercel domain configured)
+- Access to Supabase Dashboard
+
+**Steps:**
+
+#### 1. Login to Supabase Dashboard
+```bash
+https://app.supabase.com/project/YOUR_PROJECT_ID
+```
+
+#### 2. Update Authorized URLs
+
+Navigate to: **Authentication → URL Configuration**
+
+**Add the following URLs to "Redirect URLs":**
+```
+https://oto-raport.pl/auth/callback
+https://oto-raport.pl/auth/confirm
+https://www.oto-raport.pl/auth/callback
+https://www.oto-raport.pl/auth/confirm
+
+# For subdomain support (Pro/Enterprise users)
+https://*.oto-raport.pl/auth/callback
+https://*.oto-raport.pl/auth/confirm
+```
+
+**Update "Site URL":**
+```
+https://oto-raport.pl
+```
+
+**Additional Allowed Origins (CORS):**
+```
+https://oto-raport.pl
+https://www.oto-raport.pl
+https://*.oto-raport.pl
+```
+
+#### 3. Email Templates Update
+
+Navigate to: **Authentication → Email Templates**
+
+Update all email templates to reference new domain:
+
+**Confirm Signup Template:**
+- Replace `{{ .ConfirmationURL }}` links to use `oto-raport.pl`
+
+**Magic Link Template:**
+- Replace `{{ .ConfirmationURL }}` links to use `oto-raport.pl`
+
+**Reset Password Template:**
+- Replace `{{ .ConfirmationURL }}` links to use `oto-raport.pl`
+
+#### 4. Verification Checklist
+
+- [ ] All redirect URLs added to Supabase
+- [ ] Site URL updated to https://oto-raport.pl
+- [ ] Email templates reference new domain
+- [ ] Test OAuth login flow
+- [ ] Test magic link authentication
+- [ ] Test password reset flow
+
+**Test Commands:**
+```bash
+# Test authentication callback
+curl https://oto-raport.pl/auth/callback
+
+# Should not return CORS errors
+curl -H "Origin: https://oto-raport.pl" \
+  https://YOUR_PROJECT.supabase.co/auth/v1/user
+```
+
+---
+
+### Task #74: Update Google Cloud Console OAuth Authorized Domains
+
+**Status:** ⏳ Requires Manual Configuration
+
+**Prerequisites:**
+- Task #72 completed (Vercel domain configured)
+- Task #73 completed (Supabase URLs updated)
+- Access to Google Cloud Console
+
+**Steps:**
+
+#### 1. Login to Google Cloud Console
+```bash
+https://console.cloud.google.com/
+```
+
+#### 2. Navigate to OAuth Consent Screen
+
+1. Select your project
+2. Go to: **APIs & Services → OAuth consent screen**
+3. Scroll to **"Authorized domains"** section
+
+#### 3. Add New Domain
+
+Click **"+ Add Domain"** and add:
+```
+oto-raport.pl
+```
+
+**Note:** You can only add the apex domain (not subdomains or wildcards)
+
+#### 4. Update OAuth 2.0 Client IDs
+
+Navigate to: **APIs & Services → Credentials**
+
+For each OAuth 2.0 Client ID used in your app:
+
+1. Click on the Client ID name
+2. Under **"Authorized JavaScript origins"**, add:
+   ```
+   https://oto-raport.pl
+   https://www.oto-raport.pl
+   ```
+
+3. Under **"Authorized redirect URIs"**, add:
+   ```
+   https://oto-raport.pl/auth/callback
+   https://oto-raport.pl/auth/callback/google
+   https://www.oto-raport.pl/auth/callback
+   https://www.oto-raport.pl/auth/callback/google
+
+   # Supabase callback (if using Supabase Auth with Google)
+   https://YOUR_PROJECT.supabase.co/auth/v1/callback
+   ```
+
+4. Click **"Save"**
+
+#### 5. Verification Checklist
+
+- [ ] oto-raport.pl added to authorized domains
+- [ ] JavaScript origins updated for all OAuth clients
+- [ ] Redirect URIs updated for all OAuth clients
+- [ ] Test Google Sign-In flow from new domain
+- [ ] No CORS errors in browser console
+- [ ] OAuth consent screen shows correct app name and domain
+
+**Test Google OAuth:**
+```bash
+# Test from production domain
+# 1. Navigate to https://oto-raport.pl/auth/signin
+# 2. Click "Sign in with Google"
+# 3. Should redirect to Google OAuth consent
+# 4. After authorization, should redirect back to oto-raport.pl
+# 5. User should be logged in successfully
+```
+
+#### 6. Troubleshooting
+
+**Common Issues:**
+
+1. **"redirect_uri_mismatch" error:**
+   - Double-check redirect URIs match exactly
+   - Ensure HTTPS (not HTTP)
+   - Check for trailing slashes
+
+2. **"unauthorized_client" error:**
+   - Verify authorized domains list includes oto-raport.pl
+   - Check OAuth client ID is correct in environment variables
+
+3. **CORS errors:**
+   - Verify JavaScript origins include https://oto-raport.pl
+   - Check browser console for specific origin mismatch
+
+**DNS Propagation Check:**
+```bash
+# Verify domain resolves correctly
+nslookup oto-raport.pl
+dig oto-raport.pl
+
+# Check from different DNS servers
+dig @8.8.8.8 oto-raport.pl
+dig @1.1.1.1 oto-raport.pl
+```
+
+---
+
 ## 📝 POST-DEPLOYMENT TASKS
 
 1. **Documentation**
@@ -304,6 +604,12 @@ npx supabase db reset --linked
    - [ ] Run Lighthouse audit
    - [ ] Record initial metrics
    - [ ] Set performance budgets
+
+4. **Domain Configuration** (Manual Tasks #72-74)
+   - [ ] Task #72: Vercel domain configuration completed
+   - [ ] Task #73: Supabase URLs updated
+   - [ ] Task #74: Google OAuth domains configured
+   - [ ] All authentication flows tested on new domain
 
 ---
 
