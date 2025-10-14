@@ -12,6 +12,26 @@ interface UploadResult {
   autoImportedFields?: number;
 }
 
+interface ValidationError {
+  valid: false;
+  complianceScore: number;
+  summary: {
+    totalErrors: number;
+    totalWarnings: number;
+    propertiesWithErrors: number;
+    propertiesWithWarnings: number;
+  };
+  globalErrors: string[];
+  globalWarnings: string[];
+  missingCriticalFields: string[];
+  rowErrors: Array<{
+    rowNumber: number;
+    propertyNumber?: string;
+    errors: string[];
+    warnings: string[];
+  }>;
+}
+
 // Feature flag: Use Web Worker for CSV parsing (prevents UI freezing)
 // TEMPORARY FIX: Disabled to use server-side parser with Polish char fix
 const USE_WEB_WORKER_FOR_CSV = false; // typeof window !== 'undefined' && 'Worker' in window;
@@ -21,6 +41,7 @@ export function UploadWidget() {
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<ValidationError | null>(null);
   const [parsingStatus, setParsingStatus] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,7 +89,16 @@ export function UploadWidget() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error || 'Wystąpił błąd podczas przesyłania');
+        // Check if this is a validation error with detailed report
+        if (data?.validation) {
+          setValidationError(data.validation);
+        } else {
+          setError(data?.error || 'Wystąpił błąd podczas przesyłania');
+        }
+        uploadedRef.current = false; // Reset on error to allow retry
+        setParsingStatus(null);
+        setUploading(false);
+        return;
       }
 
       const autoImportedFields = data?.data?.autoImportedFields || 0;
@@ -156,6 +186,7 @@ export function UploadWidget() {
   const uploadFile = async (file: File) => {
     setUploading(true);
     setError(null);
+    setValidationError(null);
     setUploadResult(null);
     setParsingStatus(null);
     uploadedRef.current = false; // FIXED: Reset upload guard for new file
@@ -187,7 +218,13 @@ export function UploadWidget() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error || 'Wystąpił błąd podczas przesyłania');
+        // Check if this is a validation error with detailed report
+        if (data?.validation) {
+          setValidationError(data.validation);
+        } else {
+          setError(data?.error || 'Wystąpił błąd podczas przesyłania');
+        }
+        return;
       }
 
       // Simplified result: just filename and count
@@ -311,6 +348,68 @@ export function UploadWidget() {
             <div className="flex items-center gap-2 text-sm text-red-700">
               <AlertCircle className="h-4 w-4" />
               {error}
+            </div>
+          </div>
+        )}
+
+        {/* Validation errors with detailed report */}
+        {validationError && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg space-y-3">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <h4 className="text-sm font-semibold text-red-900">
+                  Walidacja nie powiodła się (zgodność: {validationError.complianceScore}%)
+                </h4>
+                <p className="text-sm text-red-700">
+                  Znaleziono <strong>{validationError.summary.totalErrors}</strong> {validationError.summary.totalErrors === 1 ? 'błąd' : 'błędów'}
+                  {validationError.summary.totalWarnings > 0 && (
+                    <> i <strong>{validationError.summary.totalWarnings}</strong> {validationError.summary.totalWarnings === 1 ? 'ostrzeżenie' : 'ostrzeżeń'}</>
+                  )}
+                </p>
+
+                {/* Global errors */}
+                {validationError.globalErrors.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    <p className="text-xs font-medium text-red-900">Błędy krytyczne:</p>
+                    <ul className="text-xs text-red-700 space-y-1 list-disc list-inside">
+                      {validationError.globalErrors.map((err, idx) => (
+                        <li key={idx}>{err}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Row-level errors (first 3) */}
+                {validationError.rowErrors.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    <p className="text-xs font-medium text-red-900">
+                      Przykładowe błędy w wierszach (pokazano {Math.min(3, validationError.rowErrors.length)} z {validationError.summary.propertiesWithErrors}):
+                    </p>
+                    <div className="space-y-2">
+                      {validationError.rowErrors.slice(0, 3).map((rowError, idx) => (
+                        <div key={idx} className="text-xs bg-white/50 p-2 rounded">
+                          <p className="font-medium text-red-800">
+                            Wiersz {rowError.rowNumber}{rowError.propertyNumber ? ` (${rowError.propertyNumber})` : ''}:
+                          </p>
+                          <ul className="mt-1 space-y-0.5 list-disc list-inside text-red-700">
+                            {rowError.errors.map((err, errIdx) => (
+                              <li key={errIdx}>{err}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Action hint */}
+                <div className="mt-3 pt-3 border-t border-red-300">
+                  <p className="text-xs text-red-700">
+                    💡 <strong>Sugerowane działania:</strong> Popraw błędy w pliku CSV zgodnie z wymogami ministerstwa i wgraj ponownie.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -4,6 +4,7 @@ import { EmailPreferences } from '@/components/dashboard/email-preferences'
 import { AccountActions } from '@/components/settings/account-actions'
 import { SubdomainSettings } from '@/components/dashboard/subdomain-settings'
 import { BrandingSettings } from '@/components/dashboard/branding-settings'
+import { MissingFieldsSection } from '@/components/settings/missing-fields-section'
 import { Separator } from '@/components/ui/separator'
 import { createClient } from '@/lib/supabase/server'
 import { Header } from '@/components/dashboard/header'
@@ -70,6 +71,13 @@ export default async function SettingsPage() {
         {/* Profile Settings */}
         <section>
           <ProfileSettings />
+        </section>
+
+        <Separator />
+
+        {/* Missing Fields Section - Ministry Compliance */}
+        <section>
+          <MissingFieldsSection />
         </section>
 
         <Separator />

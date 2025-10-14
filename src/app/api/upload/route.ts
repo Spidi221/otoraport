@@ -759,8 +759,42 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
 
     console.log(`✅ DATABASE: Saved ${insertedProperties.length} properties to project ${projectId}`)
 
-    // TASK #81.1: Store raw CSV data in dedicated table (single source of truth)
+    // TASK #81.1 & #81.6: Store raw CSV data with version control
     console.log(`🔧 DATABASE: Inserting ${properties.length} raw CSV records into raw_csv_data table`)
+
+    // TASK #81.6: Determine version number for this upload
+    const { data: existingVersions, error: versionQueryError } = await createAdminClient()
+      .from('raw_csv_data')
+      .select('version')
+      .eq('project_id', projectId)
+      .order('version', { ascending: false })
+      .limit(1)
+
+    if (versionQueryError) {
+      console.warn(`⚠️ VERSION CONTROL: Error querying versions: ${versionQueryError.message}`)
+    }
+
+    const nextVersion = existingVersions && existingVersions.length > 0 ? existingVersions[0].version + 1 : 1
+    const isReupload = nextVersion > 1
+
+    if (isReupload) {
+      console.log(`🔄 VERSION CONTROL: Re-upload detected - creating version ${nextVersion}`)
+
+      // Mark all previous versions as not latest
+      const { error: updateLatestError } = await createAdminClient()
+        .from('raw_csv_data')
+        .update({ is_latest: false })
+        .eq('project_id', projectId)
+        .eq('is_latest', true)
+
+      if (updateLatestError) {
+        console.warn(`⚠️ VERSION CONTROL: Error updating is_latest flags: ${updateLatestError.message}`)
+      } else {
+        console.log(`✅ VERSION CONTROL: Marked previous versions as not latest`)
+      }
+    } else {
+      console.log(`🆕 VERSION CONTROL: First upload - creating version 1`)
+    }
 
     const rawCsvDataToInsert = properties.map((property, idx) => {
       // Find matching inserted property by apartment_number
@@ -780,7 +814,9 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
         raw_data: property.raw_data || {}, // All 58+ ministerial columns as uploaded
         file_name: fileName,
         row_number: idx + 2, // +2 because: +1 for header, +1 for 1-based indexing
-        uploaded_at: new Date().toISOString()
+        uploaded_at: new Date().toISOString(),
+        version: nextVersion, // TASK #81.6: Version tracking
+        is_latest: true // TASK #81.6: Mark as latest version
       }
     }).filter(Boolean) // Remove nulls
 
@@ -794,7 +830,7 @@ async function savePropertiesToDatabase(developerId: string, properties: any[], 
         // Don't fail the whole upload if raw data insert fails - properties are already saved
         console.warn('⚠️ DATABASE: Raw CSV data insert failed, but properties were saved successfully')
       } else {
-        console.log(`✅ DATABASE: Saved ${rawCsvDataToInsert.length} raw CSV records to raw_csv_data table`)
+        console.log(`✅ DATABASE: Saved ${rawCsvDataToInsert.length} raw CSV records to raw_csv_data table (version ${nextVersion})`)
       }
     } else {
       console.warn('⚠️ DATABASE: No raw CSV data to insert (all properties had matching issues)')
