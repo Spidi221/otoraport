@@ -813,7 +813,7 @@ export interface ParsedProperty {
 }
 
 export interface DeveloperInfo {
-  // Basic company info (columns 1-8)
+  // Basic company info (columns 1-10)
   company_name?: string
   legal_form?: string
   krs_number?: string
@@ -822,6 +822,8 @@ export interface DeveloperInfo {
   regon?: string
   phone?: string
   email?: string
+  fax?: string
+  website?: string
 
   // Headquarters address (columns 9-16)
   headquarters_voivodeship?: string
@@ -846,7 +848,6 @@ export interface DeveloperInfo {
   // Additional info (columns 25-28)
   additional_sales_locations?: string
   contact_method?: string
-  website?: string
   additional_contact_info?: string
 
   // Legacy fields (for backward compatibility)
@@ -1506,39 +1507,125 @@ export class SmartCSVParser {
     // Define mapping from CSV column names (ministerial format) to DeveloperInfo fields
     // Uses exact column names and normalized variations for fuzzy matching
     const developerFieldMappings: Record<string, string[]> = {
-      company_name: ['nazwa_dewelopera', 'nazwa dewelopera', 'company name', 'nazwa firmy'],
-      legal_form: ['forma_prawna', 'forma prawna', 'legal form', 'typ spółki'],
-      krs_number: ['nr_krs', 'nr krs', 'krs', 'numer krs'],
-      ceidg_number: ['nr_ceidg', 'nr ceidg', 'ceidg', 'numer ceidg'],
-      nip: ['nip', 'nr nip', 'numer nip'],
-      regon: ['regon', 'nr regon', 'numer regon'],
-      phone: ['telefon', 'tel', 'phone', 'numer telefonu'],
-      email: ['email', 'e-mail', 'mail', 'adres email'],
+      company_name: [
+        'Nazwa dewelopera',
+        'nazwa_dewelopera', 'nazwa dewelopera', 'company name', 'nazwa firmy'
+      ],
+      legal_form: [
+        'Forma prawna dewelopera',
+        'forma_prawna', 'forma prawna', 'legal form', 'typ spółki'
+      ],
+      krs_number: [
+        'Nr KRS',
+        'nr_krs', 'nr krs', 'krs', 'numer krs'
+      ],
+      ceidg_number: [
+        'Nr wpisu do CEiDG',
+        'nr_ceidg', 'nr ceidg', 'ceidg', 'numer ceidg'
+      ],
+      nip: [
+        'Nr NIP',
+        'nip', 'nr nip', 'numer nip'
+      ],
+      regon: [
+        'Nr REGON',
+        'regon', 'nr regon', 'numer regon'
+      ],
+      phone: [
+        'Nr telefonu',
+        'telefon', 'tel', 'phone', 'numer telefonu'
+      ],
+      email: [
+        'Adres poczty elektronicznej',
+        'email', 'e-mail', 'mail', 'adres email'
+      ],
+      fax: [
+        'Nr faxu',
+        'nr_faxu', 'nr faxu', 'fax', 'numer faxu'
+      ],
+      website: [
+        'Adres strony internetowej dewelopera',
+        'adres_strony_www', 'adres strony www', 'strona internetowa', 'www'
+      ],
 
       // Headquarters address (columns 9-16)
-      headquarters_voivodeship: ['wojewodztwo_siedziby', 'województwo siedziby', 'wojewodztwo siedziby'],
-      headquarters_county: ['powiat_siedziby', 'powiat siedziby'],
-      headquarters_municipality: ['gmina_siedziby', 'gmina siedziby'],
-      headquarters_city: ['miejscowosc_siedziby', 'miejscowość siedziby', 'miejscowosc siedziby'],
-      headquarters_street: ['ulica_siedziby', 'ulica siedziby'],
-      headquarters_building_number: ['nr_budynku_siedziby', 'nr budynku siedziby', 'numer budynku siedziby'],
-      headquarters_apartment_number: ['nr_lokalu_siedziby', 'nr lokalu siedziby', 'numer lokalu siedziby'],
-      headquarters_postal_code: ['kod_pocztowy_siedziby', 'kod pocztowy siedziby'],
+      headquarters_voivodeship: [
+        'Województwo adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera',
+        'wojewodztwo_siedziby', 'województwo siedziby', 'wojewodztwo siedziby'
+      ],
+      headquarters_county: [
+        'Powiat adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera',
+        'Powiat adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera ', // z spacją!
+        'powiat_siedziby', 'powiat siedziby'
+      ],
+      headquarters_municipality: [
+        'Gmina adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera',
+        'gmina_siedziby', 'gmina siedziby'
+      ],
+      headquarters_city: [
+        'Miejscowość adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera',
+        'miejscowosc_siedziby', 'miejscowość siedziby', 'miejscowosc siedziby'
+      ],
+      headquarters_street: [
+        'Ulica adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera',
+        'ulica_siedziby', 'ulica siedziby'
+      ],
+      headquarters_building_number: [
+        'Nr nieruchomości adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera',
+        'nr_budynku_siedziby', 'nr budynku siedziby', 'numer budynku siedziby'
+      ],
+      headquarters_apartment_number: [
+        'Nr lokalu adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera',
+        'nr_lokalu_siedziby', 'nr lokalu siedziby', 'numer lokalu siedziby'
+      ],
+      headquarters_postal_code: [
+        'Kod pocztowy adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera',
+        'kod_pocztowy_siedziby', 'kod pocztowy siedziby'
+      ],
 
       // Sales office address (columns 17-24)
-      sales_office_voivodeship: ['wojewodztwo_lokalu_sprzedazy', 'województwo lokalu sprzedaży', 'wojewodztwo lokalu sprzedazy'],
-      sales_office_county: ['powiat_lokalu_sprzedazy', 'powiat lokalu sprzedaży', 'powiat lokalu sprzedazy'],
-      sales_office_municipality: ['gmina_lokalu_sprzedazy', 'gmina lokalu sprzedaży', 'gmina lokalu sprzedazy'],
-      sales_office_city: ['miejscowosc_lokalu_sprzedazy', 'miejscowość lokalu sprzedaży', 'miejscowosc lokalu sprzedazy'],
-      sales_office_street: ['ulica_lokalu_sprzedazy', 'ulica lokalu sprzedaży', 'ulica lokalu sprzedazy'],
-      sales_office_building_number: ['nr_budynku_lokalu_sprzedazy', 'nr budynku lokalu sprzedaży', 'nr budynku lokalu sprzedazy'],
-      sales_office_apartment_number: ['nr_lokalu_sprzedazy', 'nr lokalu sprzedaży', 'nr lokalu sprzedazy'],
-      sales_office_postal_code: ['kod_pocztowy_lokalu_sprzedazy', 'kod pocztowy lokalu sprzedaży', 'kod pocztowy lokalu sprzedazy'],
+      sales_office_voivodeship: [
+        'Województwo adresu lokalu, w którym prowadzona jest sprzedaż',
+        'wojewodztwo_lokalu_sprzedazy', 'województwo lokalu sprzedaży', 'wojewodztwo lokalu sprzedazy'
+      ],
+      sales_office_county: [
+        'Powiat adresu lokalu, w którym prowadzona jest sprzedaż',
+        'powiat_lokalu_sprzedazy', 'powiat lokalu sprzedaży', 'powiat lokalu sprzedazy'
+      ],
+      sales_office_municipality: [
+        'Gmina adresu lokalu, w którym prowadzona jest sprzedaż',
+        'gmina_lokalu_sprzedazy', 'gmina lokalu sprzedaży', 'gmina lokalu sprzedazy'
+      ],
+      sales_office_city: [
+        'Miejscowość adresu lokalu, w którym prowadzona jest sprzedaż',
+        'miejscowosc_lokalu_sprzedazy', 'miejscowość lokalu sprzedaży', 'miejscowosc lokalu sprzedazy'
+      ],
+      sales_office_street: [
+        'Ulica adresu lokalu, w którym prowadzona jest sprzedaż',
+        'ulica_lokalu_sprzedazy', 'ulica lokalu sprzedaży', 'ulica lokalu sprzedazy'
+      ],
+      sales_office_building_number: [
+        'Nr nieruchomości adresu lokalu, w którym prowadzona jest sprzedaż',
+        'nr_budynku_lokalu_sprzedazy', 'nr budynku lokalu sprzedaży', 'nr budynku lokalu sprzedazy'
+      ],
+      sales_office_apartment_number: [
+        'Nr lokalu adresu lokalu, w którym prowadzona jest sprzedaż',
+        'nr_lokalu_sprzedazy', 'nr lokalu sprzedaży', 'nr lokalu sprzedazy'
+      ],
+      sales_office_postal_code: [
+        'Kod pocztowy adresu lokalu, w którym prowadzona jest sprzedaż',
+        'kod_pocztowy_lokalu_sprzedazy', 'kod pocztowy lokalu sprzedaży', 'kod pocztowy lokalu sprzedazy'
+      ],
 
       // Additional info (columns 25-28)
-      additional_sales_locations: ['dodatkowe_lokalizacje_sprzedazy', 'dodatkowe lokalizacje sprzedaży', 'dodatkowe lokalizacje sprzedazy'],
-      contact_method: ['sposob_kontaktu', 'sposób kontaktu', 'sposob kontaktu'],
-      website: ['adres_strony_www', 'adres strony www', 'strona internetowa', 'www'],
+      additional_sales_locations: [
+        'Dodatkowe lokalizacje, w których prowadzona jest sprzedaż',
+        'dodatkowe_lokalizacje_sprzedazy', 'dodatkowe lokalizacje sprzedaży', 'dodatkowe lokalizacje sprzedazy'
+      ],
+      contact_method: [
+        'Sposób kontaktu nabywcy z deweloperem',
+        'sposob_kontaktu', 'sposób kontaktu', 'sposob kontaktu'
+      ],
       additional_contact_info: ['dodatkowe_informacje_kontaktowe', 'dodatkowe informacje kontaktowe']
     }
 
