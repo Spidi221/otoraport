@@ -1,7 +1,13 @@
 /**
  * PUBLIC CSV ENDPOINT - Ministry Compliance
  * URL: /api/public/{clientId}/data.csv
- * Returns: CSV file with 58 columns of property data
+ * Returns: CSV file with 59 columns of property data (Ministry Schema 1.13)
+ *
+ * TASK #83.2: Fixed missing developer fields (nr_faxu, adres_strony_www)
+ * - Added nr_faxu at position 9 (empty by default, not in database)
+ * - Moved adres_strony_www from position 27 to position 10
+ * - Added inne_swiadczenia_data at position 57 (empty by default, not in database)
+ * - Removed dodatkowe_informacje_kontaktowe (not in ministry schema)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -117,7 +123,7 @@ export async function GET(
       return prop
     })
 
-    // Generate CSV with 58 ministry fields (preserving raw CSV data)
+    // Generate CSV with 59 ministry fields (preserving raw CSV data)
     const csvContent = generateMinistryCSV(developer, propertiesWithLatestRaw)
 
     // Cache the generated CSV for 5 minutes
@@ -204,37 +210,37 @@ function generateMinistryCSV(developer: Developer, properties: PropertyWithRawDa
     // 3. Return default
     return defaultValue
   }
-  // CSV Header (58 kolumn według wymagań ministerstwa)
+  // CSV Header (59 kolumn według wymagań ministerstwa - Ministry Schema 1.13)
   const headers = [
-    // Dane dewelopera (1-28)
-    'nazwa_dewelopera',
-    'forma_prawna',
-    'nr_krs',
-    'nr_ceidg',
-    'nip',
-    'regon',
-    'telefon',
-    'email',
-    'wojewodztwo_siedziby',
-    'powiat_siedziby',
-    'gmina_siedziby',
-    'miejscowosc_siedziby',
-    'ulica_siedziby',
-    'nr_budynku_siedziby',
-    'nr_lokalu_siedziby',
-    'kod_pocztowy_siedziby',
-    'wojewodztwo_lokalu_sprzedazy',
-    'powiat_lokalu_sprzedazy',
-    'gmina_lokalu_sprzedazy',
-    'miejscowosc_lokalu_sprzedazy',
-    'ulica_lokalu_sprzedazy',
-    'nr_budynku_lokalu_sprzedazy',
-    'nr_lokalu_sprzedazy',
-    'kod_pocztowy_lokalu_sprzedazy',
-    'dodatkowe_lokalizacje_sprzedazy',
-    'sposob_kontaktu',
-    'adres_strony_www',
-    'dodatkowe_informacje_kontaktowe',
+    // Dane dewelopera (1-27) - FIXED: Added nr_faxu at position 9, moved adres_strony_www to position 10
+    'nazwa_dewelopera',           // 1
+    'forma_prawna',               // 2
+    'nr_krs',                     // 3
+    'nr_ceidg',                   // 4
+    'nip',                        // 5
+    'regon',                      // 6
+    'telefon',                    // 7
+    'email',                      // 8
+    'nr_faxu',                    // 9 - ADDED (missing from database, exported as empty)
+    'adres_strony_www',           // 10 - MOVED from position 27
+    'wojewodztwo_siedziby',       // 11
+    'powiat_siedziby',            // 12
+    'gmina_siedziby',             // 13
+    'miejscowosc_siedziby',       // 14
+    'ulica_siedziby',             // 15
+    'nr_budynku_siedziby',        // 16
+    'nr_lokalu_siedziby',         // 17
+    'kod_pocztowy_siedziby',      // 18
+    'wojewodztwo_lokalu_sprzedazy', // 19
+    'powiat_lokalu_sprzedazy',    // 20
+    'gmina_lokalu_sprzedazy',     // 21
+    'miejscowosc_lokalu_sprzedazy', // 22
+    'ulica_lokalu_sprzedazy',     // 23
+    'nr_budynku_lokalu_sprzedazy', // 24
+    'nr_lokalu_sprzedazy',        // 25
+    'kod_pocztowy_lokalu_sprzedazy', // 26
+    'dodatkowe_lokalizacje_sprzedazy', // 27
+    'sposob_kontaktu',            // 28 - REMOVED 'dodatkowe_informacje_kontaktowe' (not in ministry schema)
     // Lokalizacja inwestycji (29-35)
     'wojewodztwo_inwestycji',
     'powiat_inwestycji',
@@ -260,46 +266,46 @@ function generateMinistryCSV(developer: Developer, properties: PropertyWithRawDa
     'pomieszczenia_przynalezne_oznaczenie',
     'pomieszczenia_przynalezne_cena',
     'pomieszczenia_przynalezne_data',
-    'prawa_niezbedne_rodzaj',
-    'prawa_niezbedne_opis',
-    'prawa_niezbedne_cena',
-    'prawa_niezbedne_data',
-    'inne_swiadczenia_rodzaj',
-    'inne_swiadczenia_cena',
-    'adres_prospektu',
+    'prawa_niezbedne_wyszczegolnienie',  // 52 - FIXED: Combined rodzaj + opis into wyszczególnienie
+    'prawa_niezbedne_cena',              // 53
+    'prawa_niezbedne_data',              // 54
+    'inne_swiadczenia_wyszczegolnienie', // 55 - FIXED: Renamed from rodzaj to wyszczególnienie
+    'inne_swiadczenia_cena',             // 56
+    'inne_swiadczenia_data',             // 57
+    'adres_prospektu',                   // 58
   ]
 
   const rows = properties.map((property) => {
     return [
-      // Dane dewelopera
-      escapeCSV(developer.company_name || ''),
-      escapeCSV(developer.legal_form || 'Spółka z o.o.'),
-      escapeCSV(developer.krs_number || ''),
-      escapeCSV(developer.ceidg_number || ''),
-      escapeCSV(developer.nip || ''),
-      escapeCSV(developer.regon || ''),
-      escapeCSV(developer.phone || ''),
-      escapeCSV(developer.email || ''),
-      escapeCSV(developer.headquarters_voivodeship || ''),
-      escapeCSV(developer.headquarters_county || ''),
-      escapeCSV(developer.headquarters_municipality || ''),
-      escapeCSV(developer.headquarters_city || ''),
-      escapeCSV(developer.headquarters_street || ''),
-      escapeCSV(developer.headquarters_building_number || ''),
-      escapeCSV(developer.headquarters_apartment_number || ''),
-      escapeCSV(developer.headquarters_postal_code || ''),
-      escapeCSV(developer.sales_office_voivodeship || ''),
-      escapeCSV(developer.sales_office_county || ''),
-      escapeCSV(developer.sales_office_municipality || ''),
-      escapeCSV(developer.sales_office_city || ''),
-      escapeCSV(developer.sales_office_street || ''),
-      escapeCSV(developer.sales_office_building_number || ''),
-      escapeCSV(developer.sales_office_apartment_number || ''),
-      escapeCSV(developer.sales_office_postal_code || ''),
-      escapeCSV(developer.additional_sales_locations || ''),
-      escapeCSV(developer.contact_method || 'email, telefon'),
-      escapeCSV(developer.website || ''),
-      escapeCSV(developer.additional_contact_info || ''),
+      // Dane dewelopera (1-28) - FIXED: Added nr_faxu, moved adres_strony_www, removed dodatkowe_informacje_kontaktowe
+      escapeCSV(developer.company_name || ''),              // 1
+      escapeCSV(developer.legal_form || 'Spółka z o.o.'),   // 2
+      escapeCSV(developer.krs_number || ''),                // 3
+      escapeCSV(developer.ceidg_number || ''),              // 4
+      escapeCSV(developer.nip || ''),                       // 5
+      escapeCSV(developer.regon || ''),                     // 6
+      escapeCSV(developer.phone || ''),                     // 7
+      escapeCSV(developer.email || ''),                     // 8
+      escapeCSV(''),                                        // 9 - nr_faxu (not in database, empty by default)
+      escapeCSV(developer.website || ''),                   // 10 - adres_strony_www (moved from position 27)
+      escapeCSV(developer.headquarters_voivodeship || ''),  // 11
+      escapeCSV(developer.headquarters_county || ''),       // 12
+      escapeCSV(developer.headquarters_municipality || ''), // 13
+      escapeCSV(developer.headquarters_city || ''),         // 14
+      escapeCSV(developer.headquarters_street || ''),       // 15
+      escapeCSV(developer.headquarters_building_number || ''), // 16
+      escapeCSV(developer.headquarters_apartment_number || ''), // 17
+      escapeCSV(developer.headquarters_postal_code || ''),  // 18
+      escapeCSV(developer.sales_office_voivodeship || ''),  // 19
+      escapeCSV(developer.sales_office_county || ''),       // 20
+      escapeCSV(developer.sales_office_municipality || ''), // 21
+      escapeCSV(developer.sales_office_city || ''),         // 22
+      escapeCSV(developer.sales_office_street || ''),       // 23
+      escapeCSV(developer.sales_office_building_number || ''), // 24
+      escapeCSV(developer.sales_office_apartment_number || ''), // 25
+      escapeCSV(developer.sales_office_postal_code || ''),  // 26
+      escapeCSV(developer.additional_sales_locations || ''), // 27
+      escapeCSV(developer.contact_method || 'email, telefon'), // 28
       // Lokalizacja inwestycji - TASK #81.9: Preserve raw CSV data
       escapeCSV(getFieldValue(property, 'Województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'wojewodztwo')),
       escapeCSV(getFieldValue(property, 'Powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'powiat')),
@@ -326,26 +332,35 @@ function generateMinistryCSV(developer: Developer, properties: PropertyWithRawDa
       escapeCSV(getFieldValue(property, '', 'storage_designation')),
       escapeCSV(getFieldValue(property, '', 'storage_price')),
       escapeCSV(getFieldValue(property, '', 'storage_date')),
-      escapeCSV(getFieldValue(property, '', 'necessary_rights_type')),
-      escapeCSV(getFieldValue(property, '', 'necessary_rights_description')),
-      escapeCSV(getFieldValue(property, '', 'necessary_rights_price')),
-      escapeCSV(getFieldValue(property, '', 'necessary_rights_date')),
-      escapeCSV(getFieldValue(property, '', 'other_services_type')),
-      escapeCSV(getFieldValue(property, '', 'other_services_price')),
-      escapeCSV(getFieldValue(property, '', 'prospectus_url', developer.website || '')),
-    ].join(',')
+      // TASK #83.3: Combined necessary_rights_type + necessary_rights_description into one field
+      escapeCSV(
+        [
+          getFieldValue(property, '', 'necessary_rights_type'),
+          getFieldValue(property, '', 'necessary_rights_description')
+        ].filter(Boolean).join(' - ') || ''
+      ), // 52 - prawa_niezbedne_wyszczegolnienie
+      escapeCSV(getFieldValue(property, '', 'necessary_rights_price')), // 53
+      escapeCSV(getFieldValue(property, '', 'necessary_rights_date')),  // 54
+      // TASK #83.3: Renamed other_services_type to wyszczególnienie (specification)
+      escapeCSV(getFieldValue(property, '', 'other_services_type')),    // 55 - inne_swiadczenia_wyszczegolnienie
+      escapeCSV(getFieldValue(property, '', 'other_services_price')),   // 56
+      escapeCSV(getFieldValue(property, '', 'other_services_date')),    // 57
+      escapeCSV(getFieldValue(property, '', 'prospectus_url', developer.website || '')), // 58
+    ].join(';')  // TASK #83.3: Changed separator from comma to semicolon (Ministry requirement)
   })
 
-  return [headers.join(','), ...rows].join('\n')
+  return [headers.join(';'), ...rows].join('\n')  // TASK #83.3: Changed separator to semicolon
 }
 
 /**
- * Escape CSV special characters
+ * Escape CSV special characters (TASK #83.3: Updated for semicolon separator)
+ * Escapes semicolons, quotes, and newlines according to RFC 4180
  */
 function escapeCSV(value: string | null | undefined): string {
   if (!value) return ''
   const str = value.toString()
-  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+  // Escape if contains semicolon, quote, or newline
+  if (str.includes(';') || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`
   }
   return str
