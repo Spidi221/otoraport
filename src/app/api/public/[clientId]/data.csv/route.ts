@@ -13,6 +13,14 @@ import type { Database } from '@/types/database'
 type Developer = Database['public']['Tables']['developers']['Row']
 type Property = Database['public']['Tables']['properties']['Row']
 
+// TASK #81.9: Type for property with raw CSV data
+interface PropertyWithRawData extends Property {
+  raw_csv_data: Array<{
+    raw_data: Record<string, unknown>
+    is_latest: boolean
+  }>
+}
+
 // Next.js Route Segment Config - Dynamic with ISR
 export const revalidate = 300 // Revalidate every 5 minutes
 export const dynamic = 'force-dynamic'
@@ -76,10 +84,17 @@ export async function GET(
       return new NextResponse('Developer not found', { status: 404 })
     }
 
-    // Get all properties for this developer (exclude sold properties)
+    // TASK #81.9: Get all properties WITH raw_csv_data for preserving source data
+    // Use LEFT JOIN to include manually added properties (without CSV)
     const { data: properties, error: propsError } = await supabase
       .from('properties')
-      .select('*')
+      .select(`
+        *,
+        raw_csv_data!left(
+          raw_data,
+          is_latest
+        )
+      `)
       .eq('developer_id', developer.id)
       .neq('status', 'sold') // Filter out sold properties from public exports
       .order('created_at', { ascending: false })
@@ -88,8 +103,21 @@ export async function GET(
       return new NextResponse('Error fetching properties', { status: 500 })
     }
 
-    // Generate CSV with 58 ministry fields
-    const csvContent = generateMinistryCSV(developer, properties || [])
+    // TASK #81.9: Filter to only latest raw_csv_data version (if exists)
+    const propertiesWithLatestRaw = (properties || []).map(prop => {
+      if (Array.isArray(prop.raw_csv_data) && prop.raw_csv_data.length > 0) {
+        // Find latest version
+        const latestRaw = prop.raw_csv_data.find(r => r.is_latest === true) || prop.raw_csv_data[0]
+        return {
+          ...prop,
+          raw_csv_data: [latestRaw]
+        }
+      }
+      return prop
+    })
+
+    // Generate CSV with 58 ministry fields (preserving raw CSV data)
+    const csvContent = generateMinistryCSV(developer, propertiesWithLatestRaw)
 
     // Cache the generated CSV for 5 minutes
     await setCachedValue(cacheKey, csvContent, MINISTRY_CACHE_TTL);
@@ -132,9 +160,49 @@ export async function GET(
 }
 
 /**
- * Generate CSV with all 58 ministry required fields
+ * TASK #81.9: Generate CSV preserving raw CSV data as primary source
+ * Priority: raw_csv_data > properties (manual fills) > developer (auto-import) > defaults
  */
-function generateMinistryCSV(developer: Developer, properties: Property[]): string {
+function generateMinistryCSV(developer: Developer, properties: PropertyWithRawData[]): string {
+  // Mapping: Ministry CSV column name → internal field name
+  const FIELD_MAPPING: Record<string, string> = {
+    'Województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'wojewodztwo',
+    'Powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'powiat',
+    'Gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'gmina',
+    'Miejscowość lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'miejscowosc',
+    'Ulica lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'ulica',
+    'Nr budynku lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'nr_budynku',
+    'Kod pocztowy lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'kod_pocztowy',
+    'Rodzaj nieruchomości: lokal mieszkalny, dom jednorodzinny': 'property_type',
+    'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera': 'apartment_number',
+    'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]': 'price_per_m2',
+    'Data obowiązywania ceny m 2': 'price_valid_from',
+    'Cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]': 'final_price',
+    'Data obowiązywania ceny lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni': 'final_price_valid_from',
+  }
+
+  /**
+   * Get field value with priority: raw CSV > property table > default
+   */
+  const getFieldValue = (property: PropertyWithRawData, ministryFieldName: string, internalFieldName: string, defaultValue: string = ''): string => {
+    // 1. Try raw CSV data (PRIMARY SOURCE) - only if ministry field name provided
+    if (ministryFieldName) {
+      const rawData = property.raw_csv_data?.[0]?.raw_data || {}
+      const rawValue = rawData[ministryFieldName]
+      if (rawValue !== undefined && rawValue !== null && rawValue !== '') {
+        return String(rawValue)
+      }
+    }
+
+    // 2. Try properties table (MANUAL FILLS)
+    const propertyValue = property[internalFieldName as keyof Property]
+    if (propertyValue !== undefined && propertyValue !== null && propertyValue !== '') {
+      return String(propertyValue)
+    }
+
+    // 3. Return default
+    return defaultValue
+  }
   // CSV Header (58 kolumn według wymagań ministerstwa)
   const headers = [
     // Dane dewelopera (1-28)
@@ -231,38 +299,39 @@ function generateMinistryCSV(developer: Developer, properties: Property[]): stri
       escapeCSV(developer.contact_method || 'email, telefon'),
       escapeCSV(developer.website || ''),
       escapeCSV(developer.additional_contact_info || ''),
-      // Lokalizacja inwestycji
-      escapeCSV(property.wojewodztwo || ''),
-      escapeCSV(property.powiat || ''),
-      escapeCSV(property.gmina || ''),
-      escapeCSV(property.miejscowosc || ''),
-      escapeCSV(property.ulica || ''),
-      escapeCSV(property.nr_budynku || ''),
-      escapeCSV(property.kod_pocztowy || ''),
-      // Dane mieszkania
-      escapeCSV(property.property_type || 'mieszkanie'),
-      escapeCSV(property.apartment_number),
-      escapeCSV(property.price_per_m2?.toString() || ''),
-      escapeCSV(property.price_valid_from || new Date().toISOString().split('T')[0]),
-      escapeCSV(property.base_price?.toString() || ''),
-      escapeCSV(property.base_price_valid_from || new Date().toISOString().split('T')[0]),
-      escapeCSV(property.final_price?.toString() || ''),
-      escapeCSV(property.final_price_valid_from || new Date().toISOString().split('T')[0]),
-      escapeCSV(property.parking_type || ''),
-      escapeCSV(property.parking_designation || ''),
-      escapeCSV(property.parking_price?.toString() || ''),
-      escapeCSV(property.parking_date || ''),
-      escapeCSV(property.storage_type || ''),
-      escapeCSV(property.storage_designation || ''),
-      escapeCSV(property.storage_price?.toString() || ''),
-      escapeCSV(property.storage_date || ''),
-      escapeCSV(property.necessary_rights_type || ''),
-      escapeCSV(property.necessary_rights_description || ''),
-      escapeCSV(property.necessary_rights_price?.toString() || ''),
-      escapeCSV(property.necessary_rights_date || ''),
-      escapeCSV(property.other_services_type || ''),
-      escapeCSV(property.other_services_price?.toString() || ''),
-      escapeCSV(property.prospectus_url || developer.website || ''),
+      // Lokalizacja inwestycji - TASK #81.9: Preserve raw CSV data
+      escapeCSV(getFieldValue(property, 'Województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'wojewodztwo')),
+      escapeCSV(getFieldValue(property, 'Powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'powiat')),
+      escapeCSV(getFieldValue(property, 'Gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'gmina')),
+      escapeCSV(getFieldValue(property, 'Miejscowość lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'miejscowosc')),
+      escapeCSV(getFieldValue(property, 'Ulica lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'ulica')),
+      escapeCSV(getFieldValue(property, 'Nr budynku lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'nr_budynku')),
+      escapeCSV(getFieldValue(property, 'Kod pocztowy lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego', 'kod_pocztowy')),
+      // Dane mieszkania - TASK #81.9: Preserve raw CSV data
+      escapeCSV(getFieldValue(property, 'Rodzaj nieruchomości: lokal mieszkalny, dom jednorodzinny', 'property_type', 'mieszkanie')),
+      escapeCSV(getFieldValue(property, 'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera', 'apartment_number')),
+      escapeCSV(getFieldValue(property, 'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]', 'price_per_m2')),
+      escapeCSV(getFieldValue(property, 'Data obowiązywania ceny m 2', 'price_valid_from', new Date().toISOString().split('T')[0])),
+      escapeCSV(getFieldValue(property, '', 'base_price')), // base_price - not in ministry schema, manual fill only
+      escapeCSV(getFieldValue(property, '', 'base_price_valid_from', new Date().toISOString().split('T')[0])),
+      escapeCSV(getFieldValue(property, 'Cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]', 'final_price')),
+      escapeCSV(getFieldValue(property, 'Data obowiązywania ceny lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni', 'final_price_valid_from', new Date().toISOString().split('T')[0])),
+      // Additional property data - preserve from raw CSV or manual fills
+      escapeCSV(getFieldValue(property, '', 'parking_type')),
+      escapeCSV(getFieldValue(property, '', 'parking_designation')),
+      escapeCSV(getFieldValue(property, '', 'parking_price')),
+      escapeCSV(getFieldValue(property, '', 'parking_date')),
+      escapeCSV(getFieldValue(property, '', 'storage_type')),
+      escapeCSV(getFieldValue(property, '', 'storage_designation')),
+      escapeCSV(getFieldValue(property, '', 'storage_price')),
+      escapeCSV(getFieldValue(property, '', 'storage_date')),
+      escapeCSV(getFieldValue(property, '', 'necessary_rights_type')),
+      escapeCSV(getFieldValue(property, '', 'necessary_rights_description')),
+      escapeCSV(getFieldValue(property, '', 'necessary_rights_price')),
+      escapeCSV(getFieldValue(property, '', 'necessary_rights_date')),
+      escapeCSV(getFieldValue(property, '', 'other_services_type')),
+      escapeCSV(getFieldValue(property, '', 'other_services_price')),
+      escapeCSV(getFieldValue(property, '', 'prospectus_url', developer.website || '')),
     ].join(',')
   })
 
