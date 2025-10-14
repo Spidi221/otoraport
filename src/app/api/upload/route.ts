@@ -22,8 +22,8 @@ function getErrorMessage(error: unknown): string {
 
 /**
  * Auto-import developer profile fields from CSV
- * Only fills EMPTY fields - preserves existing user data
- * @returns Number of fields successfully filled (0 if none)
+ * TASK #84.1: ALWAYS overwrites developer data from CSV (fast onboarding <1min)
+ * @returns Number of fields successfully updated (0 if none)
  */
 async function autoImportDeveloperInfo(parser: SmartCSVParser, developerId: string): Promise<number> {
   console.log('🔄 AUTO-IMPORT: Extracting developer info from CSV...')
@@ -50,9 +50,9 @@ async function autoImportDeveloperInfo(parser: SmartCSVParser, developerId: stri
     return 0
   }
 
-  // Build update object - only include fields that are currently empty/null
+  // TASK #84.1: Build update object - ALWAYS overwrite fields from CSV (unless CSV field is empty)
   const updateFields: Record<string, string> = {}
-  let filledCount = 0
+  let updatedCount = 0
 
   for (const [field, value] of Object.entries(developerInfo)) {
     // Skip legacy fields that don't exist in database schema
@@ -61,31 +61,26 @@ async function autoImportDeveloperInfo(parser: SmartCSVParser, developerId: stri
       continue
     }
 
-    // Skip if no value to import
-    if (!value || typeof value !== 'string' || value.trim().length === 0) continue
+    // Skip if no value to import (preserve existing data when CSV field is empty)
+    if (!value || typeof value !== 'string' || value.trim().length === 0) {
+      console.log(`⏭️ AUTO-IMPORT: Skipping ${field} - CSV field is empty`)
+      continue
+    }
 
-    // Check if current field is empty, null, or a default placeholder value
+    // ALWAYS update field from CSV (latest CSV wins)
     const currentValue = currentDeveloper[field as keyof typeof currentDeveloper]
-    const isEmpty = !currentValue ||
-                    currentValue === '' ||
-                    currentValue === 'My Company' ||
-                    currentValue === 'LessManual Admin' || // Allow overwrite of auto-generated placeholder
-                    currentValue === '0000000000' || // Default NIP placeholder
-                    currentValue === '1234567890' || // User's test NIP
-                    currentValue === '123456789' || // User's test REGON
-                    currentValue === 'nieznane'
+    updateFields[field] = value
+    updatedCount++
 
-    if (isEmpty) {
-      updateFields[field] = value
-      filledCount++
-      console.log(`✅ AUTO-IMPORT: Will fill ${field} = "${value}"`)
+    if (currentValue && currentValue !== value) {
+      console.log(`🔄 AUTO-IMPORT: Updating ${field}: "${currentValue}" → "${value}"`)
     } else {
-      console.log(`⏭️ AUTO-IMPORT: Skipping ${field} - already has value: "${currentValue}"`)
+      console.log(`✅ AUTO-IMPORT: Setting ${field} = "${value}"`)
     }
   }
 
-  // Update database if we have fields to fill
-  if (filledCount > 0) {
+  // Update database if we have fields to update
+  if (updatedCount > 0) {
     const { error: updateError } = await supabase
       .from('developers')
       .update(updateFields)
@@ -96,12 +91,12 @@ async function autoImportDeveloperInfo(parser: SmartCSVParser, developerId: stri
       throw updateError
     }
 
-    console.log(`✅ AUTO-IMPORT: Successfully auto-filled ${filledCount} developer profile fields`)
+    console.log(`✅ AUTO-IMPORT: Successfully updated ${updatedCount} developer profile fields from CSV`)
   } else {
-    console.log('ℹ️ AUTO-IMPORT: No empty fields to fill - developer profile is complete')
+    console.log('ℹ️ AUTO-IMPORT: No fields to update - CSV contained no valid developer data')
   }
 
-  return filledCount
+  return updatedCount
 }
 
 export async function POST(request: NextRequest) {
