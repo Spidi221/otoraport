@@ -459,7 +459,10 @@
             "updatedAt": "2025-10-08T07:34:36.771Z"
           }
         ],
-        "updatedAt": "2025-10-08T07:34:36.771Z"
+        "updatedAt": "2025-10-08T07:34:36.771Z",
+        "complexity": 5,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Break down into: 1) Designing notifications database schema and RLS policies, 2) Implementing API endpoints for CRUD operations, 3) Building the notifications UI page, 4) Integrating unread count badge and state management, 5) Testing access control and UI interactions."
       },
       {
         "id": "42",
@@ -598,7 +601,10 @@
             "updatedAt": "2025-10-09T17:34:10.258Z"
           }
         ],
-        "updatedAt": "2025-10-09T17:34:10.258Z"
+        "updatedAt": "2025-10-09T17:34:10.258Z",
+        "complexity": 3,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Split into: 1) Building statistics cards UI component, 2) Implementing API endpoint for aggregated statistics and integrating with dashboard."
       },
       {
         "id": "43",
@@ -690,7 +696,10 @@
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2025-10-07T18:08:15.050Z"
+        "updatedAt": "2025-10-07T18:08:15.050Z",
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide into: 1) Creating and running migrations for new columns and tables, 2) Implementing RLS policies and indexes, 3) Updating TypeScript types and testing migration rollback."
       },
       {
         "id": "45",
@@ -1627,9 +1636,9 @@
             "updatedAt": "2025-10-08T13:42:46.256Z"
           }
         ],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on build admin panel with user management.",
+        "complexity": 6,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Expand into: 1) Designing admin roles and RBAC permissions, 2) Implementing admin-only middleware and protected routes, 3) Building user management UI with search/filter/pagination, 4) Testing access control and admin features.",
         "updatedAt": "2025-10-08T13:42:46.256Z"
       },
       {
@@ -3072,12 +3081,503 @@
           }
         ],
         "updatedAt": "2025-10-14T17:30:35.076Z"
+      },
+      {
+        "id": "86",
+        "title": "Debug raw_csv_data JOIN bug in Ministry CSV export",
+        "description": "Fix the broken raw_csv_data LEFT JOIN that returns empty arrays, causing ministerial columns J-AA and AX-BE to be empty in CSV exports",
+        "details": "The current export route uses a LEFT JOIN to fetch raw_csv_data but it returns empty arrays or null data. Need to: 1) Add comprehensive logging to data.csv route to trace raw_csv_data queries, 2) Verify the JOIN syntax and foreign key relationships, 3) Check if is_latest=true filter is working correctly, 4) Test with actual user data to confirm the fix. The getDeveloperFieldValue function at line 209 should receive populated raw_data objects instead of empty ones.",
+        "testStrategy": "Add console.log statements to trace raw_csv_data lookups, verify data exists in database with direct SQL queries, test export with user's CSV file, compare exported CSV columns J-AA with uploaded CSV data",
+        "priority": "high",
+        "dependencies": [],
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add comprehensive logging to trace raw_csv_data LEFT JOIN queries in data.csv route",
+            "description": "Instrument the data.csv export route with detailed logging to capture the exact SQL queries and parameters used for the raw_csv_data LEFT JOIN.",
+            "dependencies": [],
+            "details": "Insert logging statements before and after the LEFT JOIN execution to record the full query, input parameters, and returned results. Ensure logs capture cases where empty arrays or nulls are returned. Use console.log or a structured logger as appropriate for the codebase.",
+            "status": "pending",
+            "testStrategy": "Trigger the export route and verify that logs show the executed JOIN queries, parameters, and returned data for several test cases, including those that previously returned empty arrays.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Verify SQL LEFT JOIN syntax and foreign key relationships for raw_csv_data",
+            "description": "Review and validate the SQL LEFT JOIN statement and the foreign key relationships between the main and raw_csv_data tables.",
+            "dependencies": [
+              1
+            ],
+            "details": "Check that the JOIN condition matches the correct columns and that foreign keys exist and are indexed. Use EXPLAIN or similar tools to inspect the query plan. Confirm that the JOIN does not unintentionally filter out rows or return nulls due to incorrect keys or missing relationships.",
+            "status": "pending",
+            "testStrategy": "Run the JOIN query directly in the database with sample data, verify that expected rows are returned, and inspect the execution plan for anomalies.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Check is_latest=true filter logic in raw_csv_data JOIN",
+            "description": "Ensure that the is_latest=true filter is correctly applied in the JOIN and does not exclude valid data.",
+            "dependencies": [
+              2
+            ],
+            "details": "Review the SQL WHERE or ON clause to confirm that is_latest is filtered in a way that preserves the intended rows. Test with and without the filter to observe its effect on the result set. Adjust the filter placement if necessary to avoid excluding valid JOIN results.",
+            "status": "pending",
+            "testStrategy": "Modify test data to include both is_latest=true and is_latest=false records, run the export, and confirm only the correct records are joined and exported.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Test export with real user data and confirm CSV columns J-AA and AX-BE are populated",
+            "description": "Run the full export process using actual user data to verify that the previously empty columns are now correctly populated.",
+            "dependencies": [
+              3
+            ],
+            "details": "After implementing fixes, perform an end-to-end test of the CSV export. Inspect columns J-AA and AX-BE in the output to ensure they contain the expected data. Compare against the source data and check that getDeveloperFieldValue receives populated raw_data objects.",
+            "status": "pending",
+            "testStrategy": "Export a CSV with known populated data, open the file, and verify that all relevant columns are filled. Cross-check with the database to ensure accuracy.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down the debugging process into: 1) Adding logging to trace JOIN queries, 2) Verifying SQL JOIN syntax and foreign key relationships, 3) Checking is_latest filter logic, 4) Testing with real user data and confirming output.",
+        "updatedAt": "2025-10-14T20:44:45.214Z"
+      },
+      {
+        "id": "87",
+        "title": "Add manual_overrides JSONB column to properties table",
+        "description": "Create database migration to add manual_overrides column for storing user-edited ministerial fields that persist across CSV re-uploads",
+        "details": "Create Supabase migration: ALTER TABLE properties ADD COLUMN manual_overrides JSONB DEFAULT '{}'; CREATE INDEX idx_properties_manual_overrides ON properties USING gin(manual_overrides); This column will store ministerial field overrides in format: {'wojewodztwo_siedziby': 'mazowieckie', 'email': 'contact@developer.com', 'parking_price': '50000'}. This enables 3-tier data priority: manual_overrides > raw_csv_data > defaults.",
+        "testStrategy": "Test migration rollback capability, verify JSONB operations work correctly, test index performance on large datasets, validate data persistence across re-uploads",
+        "priority": "high",
+        "dependencies": [
+          "86"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Supabase migration to add manual_overrides JSONB column and index",
+            "description": "Write and apply a database migration that adds the manual_overrides JSONB column to the properties table and creates a GIN index for efficient querying.",
+            "dependencies": [],
+            "details": "Implement a Supabase migration with: ALTER TABLE properties ADD COLUMN manual_overrides JSONB DEFAULT '{}'; and CREATE INDEX idx_properties_manual_overrides ON properties USING gin(manual_overrides); Ensure the migration is reversible and tested on a staging environment.",
+            "status": "pending",
+            "testStrategy": "Run migration up/down, verify column exists with default, and check index presence using database introspection.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Update TypeScript types and application models for manual_overrides",
+            "description": "Modify TypeScript interfaces and any relevant ORM/entity models to include the new manual_overrides field as a JSON object.",
+            "dependencies": [
+              1
+            ],
+            "details": "Update the Property type/interface to add manual_overrides: Record<string, any> or a more specific type. Ensure all code paths that read/write properties are updated to handle the new field, including API DTOs and validation logic.",
+            "status": "pending",
+            "testStrategy": "Type-check the codebase, ensure no type errors, and write unit tests to verify correct serialization/deserialization of manual_overrides.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement and test JSONB query patterns and index performance",
+            "description": "Add and test queries that read and write to the manual_overrides JSONB column, ensuring the GIN index is used for efficient lookups.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Write SQL queries and application logic to filter properties based on manual_overrides fields (e.g., properties where manual_overrides->>'email' IS NOT NULL). Benchmark query performance with and without the index on sample data. Document best practices for JSONB usage in the codebase.",
+            "status": "pending",
+            "testStrategy": "Use EXPLAIN ANALYZE to confirm index usage, run integration tests for all query scenarios, and validate performance on large datasets.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on add manual_overrides jsonb column to properties table."
+      },
+      {
+        "id": "88",
+        "title": "Implement 3-tier ministry field value lookup system",
+        "description": "Replace getDeveloperFieldValue and getFieldValue with unified getMinistryFieldValue function that implements manual_overrides > raw_csv_data > defaults priority",
+        "details": "Create new universal field getter: getMinistryFieldValue(ministryFieldName, property, developer?, defaultValue). Priority: 1) property.manual_overrides[fieldName], 2) property.raw_csv_data[0].raw_data[fieldName], 3) developer.raw_csv_data (for developer fields), 4) defaultValue. Update all 59 field references in data.csv route to use this new function. Remove old getDeveloperFieldValue and getFieldValue functions entirely.",
+        "testStrategy": "Unit tests for all 3 tiers working correctly, test with missing data at each tier, verify developer-level fields fall back properly, test with real CSV data",
+        "priority": "high",
+        "dependencies": [
+          "87"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design and Implement getMinistryFieldValue Utility with 3-Tier Lookup",
+            "description": "Create a unified field getter function that resolves ministry field values using manual_overrides, raw_csv_data, developer-level data, and default values in priority order.",
+            "dependencies": [],
+            "details": "Implement getMinistryFieldValue(ministryFieldName, property, developer?, defaultValue) to check property.manual_overrides, then property.raw_csv_data[0].raw_data, then developer.raw_csv_data (for developer fields), and finally defaultValue. Ensure the logic strictly follows the specified priority.",
+            "status": "pending",
+            "testStrategy": "Unit test each priority tier and fallback logic with mock data for all input scenarios.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Replace Legacy getDeveloperFieldValue and getFieldValue References",
+            "description": "Refactor all existing code to use the new getMinistryFieldValue function instead of legacy getter functions.",
+            "dependencies": [
+              1
+            ],
+            "details": "Identify all 59 field references in the data.csv route and update them to use getMinistryFieldValue. Ensure all usages of getDeveloperFieldValue and getFieldValue are replaced and no legacy calls remain.",
+            "status": "pending",
+            "testStrategy": "Automated search for legacy function calls, manual verification of replacements, and regression testing of affected routes.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Column Name Normalization in Field Lookup",
+            "description": "Add logic to normalize column names to ensure consistent field matching across manual overrides, CSV data, and developer fields.",
+            "dependencies": [
+              1
+            ],
+            "details": "Integrate normalization (e.g., case insensitivity, whitespace trimming, alias mapping) into getMinistryFieldValue so that field lookups are robust against naming inconsistencies.",
+            "status": "pending",
+            "testStrategy": "Unit tests for various column name formats, including edge cases and alias scenarios.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Write Comprehensive Unit Tests for All Priority Tiers and Fallback Logic",
+            "description": "Develop unit tests to verify correct value resolution for all priority tiers, fallback scenarios, and edge cases.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Create test cases covering manual overrides, raw CSV data, developer-level data, and default values. Include tests for missing data at each tier and for column normalization logic.",
+            "status": "pending",
+            "testStrategy": "Automated unit test suite with coverage reports for all logical branches and fallback paths.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Validate System with Real CSV Data and Edge Case Scenarios",
+            "description": "Test the new field lookup system using actual CSV files and edge case data to ensure correctness and robustness.",
+            "dependencies": [
+              2,
+              4
+            ],
+            "details": "Load real-world CSV datasets and simulate edge cases (e.g., missing fields, conflicting overrides, developer-specific fields) to verify correct operation and error handling.",
+            "status": "pending",
+            "testStrategy": "Integration tests with production-like CSV data, manual QA for edge cases, and verification of expected outputs.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Divide implementation into: 1) Designing the unified getMinistryFieldValue function, 2) Refactoring all field references to use the new function, 3) Removing legacy getter functions, 4) Writing unit tests for all priority tiers and fallback logic, 5) Validating with real CSV data and edge cases."
+      },
+      {
+        "id": "89",
+        "title": "Create ministry field validation service",
+        "description": "Build comprehensive validation service to detect missing required ministerial fields and format errors across all 59 schema columns",
+        "details": "Create src/lib/ministry-validation.ts with validateProperty function that checks: 1) Required fields (nazwa_dewelopera, nip, regon, email, etc.), 2) Conditionally required (nr_krs vs nr_ceidg based on legal form), 3) Format validation (postal codes XX-XXX, NIP 10 digits, REGON 9/14 digits, email format), 4) Business logic (at least one price field filled). Return ValidationResult with missing fields categorized by severity (required/recommended/optional) and specific validation errors.",
+        "testStrategy": "Test all 28 developer + 30 property required fields detection, verify conditional logic for KRS vs CEIDG, test format validation edge cases, validate business rule enforcement",
+        "priority": "medium",
+        "dependencies": [
+          "88"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define validation rules for required, conditionally required, and recommended fields",
+            "description": "Enumerate all 59 schema columns, specifying which are required, recommended, optional, and which are conditionally required based on business logic (e.g., nr_krs vs nr_ceidg depending on legal form).",
+            "dependencies": [],
+            "details": "Create a ruleset object or schema definition (e.g., using Zod or a custom structure) that clearly marks each field's validation requirements, including conditional logic for fields like nr_krs and nr_ceidg. Document the logic for maintainability.",
+            "status": "pending",
+            "testStrategy": "Review the ruleset for completeness and correctness against ministry documentation; peer review for logic accuracy.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement format validation for all field types",
+            "description": "Develop functions to validate the format of each field, such as postal codes (XX-XXX), NIP (10 digits), REGON (9 or 14 digits), and email addresses.",
+            "dependencies": [
+              1
+            ],
+            "details": "For each field, implement regex or algorithmic checks as appropriate. Integrate these checks into the validateProperty function. Ensure extensibility for future format changes.",
+            "status": "pending",
+            "testStrategy": "Unit test each format validator with valid and invalid examples, including edge cases (e.g., malformed emails, short/long NIP/REGON).",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Code business logic checks and aggregate validation results",
+            "description": "Implement business rule validations, such as ensuring at least one price field is filled, and aggregate all validation errors into a structured ValidationResult object.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Add logic to check cross-field dependencies (e.g., at least one price field present). Build the ValidationResult structure to categorize missing fields by severity and include detailed error messages for each property.",
+            "status": "pending",
+            "testStrategy": "Test with sample data covering all business rules, including cases where multiple rules fail simultaneously. Verify ValidationResult structure matches requirements.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Write comprehensive unit tests for validation logic and edge cases",
+            "description": "Develop a suite of unit tests to cover all validation rules, conditional logic, format checks, and business rules, including edge cases and error categorization.",
+            "dependencies": [
+              3
+            ],
+            "details": "Create test cases for all 28 developer and 30 property required fields, conditional requirements, format errors, and business logic. Include tests for empty, malformed, and borderline-valid data.",
+            "status": "pending",
+            "testStrategy": "Run all tests and ensure 100% coverage of validation logic. Manually review test results for accuracy and completeness.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 6,
+        "expansionPrompt": "Expand into: 1) Defining validation rules for required and conditionally required fields, 2) Implementing format validation for all field types, 3) Coding business logic checks, 4) Building the ValidationResult structure, 5) Writing comprehensive unit tests for edge cases, 6) Documenting validation logic for future maintenance."
+      },
+      {
+        "id": "90",
+        "title": "Create missing fields detection API endpoint",
+        "description": "Build API endpoint to analyze developer's properties and return summary of missing required ministerial fields",
+        "details": "Create GET /api/validation/missing-fields?developerId={id} that uses ministry-validation service to scan all properties and return: totalProperties count, propertiesWithIssues count, missingFieldsSummary object with field counts, and detailed breakdown per property. Response includes apartment numbers, missing field lists, and validation errors. Enable dashboard to show actionable validation warnings.",
+        "testStrategy": "Test with large property datasets (100+ properties), verify performance with complex validation rules, test edge cases with completely empty fields, validate summary accuracy",
+        "priority": "medium",
+        "dependencies": [
+          "89"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design API Endpoint Contract and Response Schema",
+            "description": "Define the GET /api/validation/missing-fields endpoint contract, including required query parameters, authentication, and detailed JSON response structure.",
+            "dependencies": [],
+            "details": "Specify the endpoint path, required query parameters (developerId), authentication requirements (e.g., JWT in Authorization header), and the full response schema: totalProperties, propertiesWithIssues, missingFieldsSummary, and detailed property breakdowns. Ensure the schema includes apartment numbers, missing field lists, and validation errors. Document the contract using OpenAPI/Swagger for clarity and future maintenance.",
+            "status": "pending",
+            "testStrategy": "Review OpenAPI/Swagger documentation for completeness and accuracy; validate schema with example payloads.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement API Endpoint Logic and Integration with Validation Service",
+            "description": "Develop the GET /api/validation/missing-fields endpoint logic, integrating with the ministry-validation service to process all developer properties and generate the required summary.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement the endpoint handler to authenticate requests, fetch all properties for the given developerId, and invoke the ministry-validation service for each property. Aggregate results to compute totalProperties, propertiesWithIssues, missingFieldsSummary, and detailed breakdowns. Ensure robust error handling and informative error messages. Follow RESTful API best practices for endpoint naming, HTTP methods, and response codes.",
+            "status": "pending",
+            "testStrategy": "Unit test endpoint logic with mock validation service; integration test with real data; verify error handling and response accuracy.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Enable Dashboard Integration and Actionable Validation Warnings",
+            "description": "Expose the new API endpoint to the dashboard frontend and ensure actionable validation warnings are displayed to users.",
+            "dependencies": [
+              2
+            ],
+            "details": "Update the dashboard to call the new API endpoint, parse the response, and display validation summaries and detailed warnings per property. Ensure users can easily identify and act on missing required fields. Provide clear UI feedback for properties with issues and support for large datasets. Coordinate with frontend developers to ensure seamless integration.",
+            "status": "pending",
+            "testStrategy": "End-to-end test with dashboard UI; verify warnings display correctly for various data scenarios; test usability with large property lists.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on create missing fields detection api endpoint."
+      },
+      {
+        "id": "91",
+        "title": "Build missing fields warning banner for dashboard",
+        "description": "Create React component to display validation warnings on developer dashboard with missing field counts and quick action buttons",
+        "details": "Create banner component that fetches from /api/validation/missing-fields on dashboard load. Display: warning icon, count of properties needing attention, top missing fields with counts, [View Details] [Bulk Edit] [Dismiss] buttons. Style as non-intrusive but visible warning. Update count in real-time after bulk edits. Use Radix UI components consistent with existing design system.",
+        "testStrategy": "Test responsive design on mobile/desktop, verify real-time updates after bulk operations, test dismissal persistence, validate accessibility with screen readers",
+        "priority": "medium",
+        "dependencies": [
+          "90"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Build banner component and fetch missing fields validation data",
+            "description": "Develop a React banner component for the dashboard that fetches missing fields validation data from the API and displays warning information.",
+            "dependencies": [],
+            "details": "Implement a React component that loads on dashboard initialization, fetches data from /api/validation/missing-fields, and displays a warning icon, count of properties needing attention, and a summary of top missing fields with their counts. Use Radix UI components and ensure the banner is styled as non-intrusive but visible. Integrate quick action buttons ([View Details], [Bulk Edit], [Dismiss]) in the banner layout.",
+            "status": "pending",
+            "testStrategy": "Verify banner renders with correct data on dashboard load, test API error handling, and confirm UI matches design system.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement real-time updates and interactive action buttons",
+            "description": "Enable real-time updates of missing field counts after bulk edits and implement interactive action buttons for viewing details, bulk editing, and dismissing the banner.",
+            "dependencies": [
+              1
+            ],
+            "details": "Set up event listeners or subscriptions to update the banner count and field summary in real-time after bulk edit actions. Ensure [View Details] navigates to a detailed validation view, [Bulk Edit] triggers the bulk editing workflow, and [Dismiss] hides the banner with persistence. Confirm all actions are accessible and provide feedback to users.",
+            "status": "pending",
+            "testStrategy": "Test real-time updates after bulk edits, verify each button's functionality, and check dismissal persistence across sessions.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide into: 1) Building the banner component and fetching validation data, 2) Implementing real-time updates and action buttons, 3) Ensuring responsive design and accessibility compliance."
+      },
+      {
+        "id": "92",
+        "title": "Implement bulk field editing API and UI",
+        "description": "Create API endpoint and modal UI for bulk editing ministerial fields across multiple properties",
+        "details": "Create POST /api/properties/bulk-update-fields endpoint accepting propertyIds array and fieldUpdates object. Save changes to manual_overrides JSONB column. Build modal UI with: field selector dropdown, value input, property selection (checkboxes or 'Apply to all'), progress indicator for large operations. Use optimistic updates and proper error handling. Integrate with existing dashboard using shadcn/ui components.",
+        "testStrategy": "Test bulk operations with 100+ properties, verify transaction atomicity, test partial failure scenarios, validate UI responsiveness during long operations, test undo functionality",
+        "priority": "medium",
+        "dependencies": [
+          "91"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on implement bulk field editing api and ui."
+      },
+      {
+        "id": "93",
+        "title": "Implement CSV re-upload merge strategy",
+        "description": "Add intelligent merge logic for CSV re-uploads that preserves manual edits while updating raw_csv_data and marking missing properties as sold",
+        "details": "Enhance upload/route.ts with handleReUpload function: 1) Match properties by apartment_number + investment_address, 2) For matched: update raw_csv_data, preserve manual_overrides, update status if needed, 3) For new properties: insert normally, 4) For missing properties: mark as sold with sold_at timestamp. Implement fuzzy matching for address variations. Add user notification email with summary (X updated, Y new, Z marked sold).",
+        "testStrategy": "Test with various CSV scenarios (partial updates, new properties, removed properties), verify manual edits preservation, test fuzzy matching accuracy, validate sold status updates",
+        "priority": "medium",
+        "dependencies": [
+          "92"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement property matching and merge logic in handleReUpload",
+            "description": "Develop logic to match properties by apartment_number and investment_address (with fuzzy matching), update raw_csv_data for matched properties, preserve manual_overrides, and update status if needed.",
+            "dependencies": [],
+            "details": "Enhance upload/route.ts by implementing handleReUpload to: 1) Match incoming CSV rows to existing properties using apartment_number and fuzzy address matching; 2) For matched properties, update raw_csv_data while preserving manual_overrides; 3) Update property status if required. Use a fuzzy string comparison library for address variations.",
+            "status": "pending",
+            "testStrategy": "Unit test with CSVs containing exact and slightly varied addresses; verify correct matching, raw_csv_data updates, and preservation of manual_overrides.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Handle insertion of new properties and marking missing properties as sold",
+            "description": "Insert new properties from the CSV and mark properties missing from the upload as sold, setting the sold_at timestamp.",
+            "dependencies": [
+              1
+            ],
+            "details": "After matching, insert any properties from the CSV not found in the database as new records. For properties in the database not present in the new CSV, update their status to 'sold' and set the sold_at timestamp. Ensure transactional integrity for batch updates.",
+            "status": "pending",
+            "testStrategy": "Integration test with CSVs that add new properties and remove existing ones; verify correct insertion and that missing properties are marked as sold with accurate timestamps.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement user notification email with merge summary",
+            "description": "Send a summary email to the user after re-upload, detailing the number of updated, new, and sold properties.",
+            "dependencies": [
+              2
+            ],
+            "details": "After the merge operation, generate a summary (X updated, Y new, Z marked sold) and send an email notification to the user. Use existing email infrastructure and ensure the summary accurately reflects the merge results.",
+            "status": "pending",
+            "testStrategy": "Test with various CSV uploads and verify that the email summary matches the actual merge results in the database.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on implement csv re-upload merge strategy."
+      },
+      {
+        "id": "94",
+        "title": "Add export validation and blocking",
+        "description": "Implement pre-export validation that blocks CSV generation if required ministerial fields are missing",
+        "details": "Update data.csv route to run validateProperty on all properties before CSV generation. If any required fields missing or validation errors found, return 400 status with JSON error response including: error message, propertiesWithIssues count, totalProperties count, first 10 validation details, hint to fill missing fields in dashboard. Add proper error handling in ministry harvester systems to gracefully handle validation blocks.",
+        "testStrategy": "Test blocking behavior with missing required fields, verify error response format, test with edge cases (empty properties, invalid data), validate ministry system error handling",
+        "priority": "medium",
+        "dependencies": [
+          "93"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate validation service into data.csv export route",
+            "description": "Update the data.csv export route to invoke validateProperty on all properties before generating the CSV file.",
+            "dependencies": [],
+            "details": "Modify the export endpoint to call the validation logic for each property. Ensure that validation runs before any CSV data is streamed or written. Collect validation results for all properties and prepare them for downstream error handling if issues are found.",
+            "status": "pending",
+            "testStrategy": "Unit test the export route to confirm validateProperty is called for each property and that validation runs before CSV generation.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement error response logic and blocking behavior",
+            "description": "Block CSV generation and return a structured error response if required fields are missing or validation errors are detected.",
+            "dependencies": [
+              1
+            ],
+            "details": "If validation errors exist, prevent CSV output and return HTTP 400 with a JSON body including: error message, propertiesWithIssues count, totalProperties count, first 10 validation details, and a hint to fill missing fields in the dashboard. Ensure the response format is consistent and actionable.",
+            "status": "pending",
+            "testStrategy": "Integration test with various invalid data states to verify that the correct error response is returned and CSV is not generated.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Handle ministry harvester error scenarios gracefully",
+            "description": "Ensure ministry harvester systems can handle validation blocks and error responses without crashing or data loss.",
+            "dependencies": [
+              2
+            ],
+            "details": "Update ministry harvester error handling to detect 400 responses from the export route, log the error details, and provide clear feedback or retry logic as appropriate. Prevent downstream failures or silent data drops.",
+            "status": "pending",
+            "testStrategy": "Simulate validation failures and verify that the harvester logs errors, does not crash, and provides actionable feedback.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Test export validation and blocking with various data states and edge cases",
+            "description": "Comprehensively test the export validation and blocking logic using a range of data scenarios, including edge cases.",
+            "dependencies": [
+              3
+            ],
+            "details": "Create test cases for missing required fields, empty property lists, invalid data formats, and valid data. Verify correct blocking, error response structure, and system robustness under all scenarios.",
+            "status": "pending",
+            "testStrategy": "Automated and manual tests covering all edge cases, verifying both error and success paths, and ensuring no unhandled exceptions.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Split into: 1) Integrating validation service into export route, 2) Implementing error response logic and blocking behavior, 3) Handling ministry harvester error scenarios, 4) Testing with various data states and edge cases."
+      },
+      {
+        "id": "95",
+        "title": "Create comprehensive integration tests for ministry compliance",
+        "description": "Build end-to-end test suite covering the complete raw CSV data architecture from upload to export",
+        "details": "Create test suite covering: 1) CSV upload with missing fields → banner display → bulk edit → export success flow, 2) CSV upload → manual edit → re-upload → manual edits preserved flow, 3) Upload 100 properties → re-upload 80 → 20 marked sold flow, 4) Export blocking with validation errors, 5) 3-tier data priority working correctly. Use actual ministry CSV format and test with Polish characters, various encodings, edge cases.",
+        "testStrategy": "Run tests against staging database with realistic data volumes, test performance with large datasets, verify all 59 ministerial columns populated correctly, validate compliance with Ministry Schema 1.13",
+        "priority": "low",
+        "dependencies": [
+          "94"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on create comprehensive integration tests for ministry compliance."
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-14T17:30:35.078Z",
-      "taskCount": 50,
+      "lastModified": "2025-10-14T20:44:45.216Z",
+      "taskCount": 60,
       "completedCount": 44,
       "tags": [
         "master"
