@@ -7,7 +7,7 @@ type Developer = Database['public']['Tables']['developers']['Row']
 // Validate required environment variables
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 export const EMAIL_FROM = process.env.EMAIL_FROM || 'OTO-RAPORT <noreply@oto-raport.pl>'
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.vercel.app'
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.pl'
 const MINISTRY_EMAIL = process.env.MINISTRY_EMAIL || 'kontakt@dane.gov.pl'
 
 if (!RESEND_API_KEY) {

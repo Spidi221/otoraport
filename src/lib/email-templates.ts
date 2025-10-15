@@ -16,7 +16,7 @@ interface EmailTemplate {
 
 // Template dla ministerstwa - zawiadomienie o nowym deweloperze
 export function generateMinistryNotificationEmail(developer: Developer): EmailTemplate {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://ceny-sync.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.pl';
   
   return {
     subject: `Nowy deweloper w systemie OTO-RAPORT - ${developer.company_name}`,
@@ -139,7 +139,7 @@ Email wygenerowany automatycznie: ${new Date().toLocaleString('pl-PL')}
 
 // Template dla dewelopera - prosty email powitalny (BEZ URLi - te będą w kolejnym mailu)
 export function generateDeveloperWelcomeEmail(developer: Developer): EmailTemplate {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://ceny-sync.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.pl';
 
   return {
     subject: `Witamy w OTO-RAPORT - Rejestracja przebiegła pomyślnie!`,
@@ -268,7 +268,7 @@ export function generateDataUpdateNotificationEmail(
     uploadedAt: string;
   }
 ): EmailTemplate {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://ceny-sync.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.pl';
   
   return {
     subject: `OTO-RAPORT - Dane zaktualizowane pomyślnie (${updateDetails.propertiesCount} nieruchomości)`,

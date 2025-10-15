@@ -23,7 +23,7 @@ export function ApiConfiguration() {
   const [isLoading, setIsLoading] = useState(true)
   const [isRegenerating, setIsRegenerating] = useState(false)
   const [clientId, setClientId] = useState('')
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oto-raport.pl'
 
   // Fetch client_id on mount
   useEffect(() => {
