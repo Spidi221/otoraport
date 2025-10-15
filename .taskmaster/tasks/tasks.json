@@ -3445,9 +3445,10 @@
               1
             ],
             "details": "Create PATCH /api/properties/bulk-edit endpoint that accepts property IDs and field updates (kod_pocztowy, ulica, etc.). Validate field formats using ministry validation rules. Update properties table and related raw_csv_data records. Handle partial success scenarios where some properties update successfully and others fail. Return detailed response with success/failure counts and specific error messages per property. Ensure RLS policies allow bulk updates for developer's own properties.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test bulk field updates with valid/invalid data, verify partial update handling, test RLS security, validate ministry field format compliance.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:57:37.369Z"
           },
           {
             "id": 3,
@@ -3466,7 +3467,7 @@
         "complexity": 4,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Divide into: 1) Building the banner component and fetching validation data, 2) Implementing real-time updates and action buttons, 3) Ensuring responsive design and accessibility compliance.",
-        "updatedAt": "2025-10-15T10:55:45.977Z"
+        "updatedAt": "2025-10-15T10:57:37.369Z"
       },
       {
         "id": "92",
@@ -3617,7 +3618,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T10:55:45.979Z",
+      "lastModified": "2025-10-15T10:57:37.370Z",
       "taskCount": 60,
       "completedCount": 50,
       "tags": [
