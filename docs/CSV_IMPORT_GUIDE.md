@@ -35,7 +35,8 @@ OTO-RAPORT implements a **CSV-first data strategy** designed specifically for co
 - ✅ Intelligent column mapping with fuzzy matching
 - ✅ Comprehensive validation with detailed error reporting
 - ✅ Version control for upload history
-- ✅ Developer profile auto-import (optional)
+- ✅ **Automatic developer profile update from CSV** (always overwrites)
+- ✅ User notification for profile changes
 - ✅ Excel (.xlsx, .xls) and CSV support
 
 ---
@@ -200,6 +201,133 @@ Every CSV upload creates a new version:
 3. Marks previous versions as `is_latest = false`
 4. Stores new version with `is_latest = true`
 5. **Preserves all historical versions** for audit trail
+
+---
+
+### Developer Profile Auto-Import
+
+**NEW (Task #84.1):** Every CSV upload automatically updates your developer profile with data found in the CSV.
+
+#### How It Works
+
+When you upload a CSV file, the system:
+
+1. **Extracts developer information** from the first row (or header metadata)
+2. **Automatically updates your profile** with any new data found
+3. **Overwrites existing fields** with CSV data (latest CSV always wins)
+4. **Preserves existing data** when CSV field is empty
+5. **Notifies you** about the number of fields updated
+
+#### Auto-Import Rules
+
+```typescript
+// RULE 1: CSV data ALWAYS overwrites profile fields
+if (csvField.hasValue() && profileField.hasValue()) {
+  profileField = csvField  // ✅ CSV wins (overwrite)
+}
+
+// RULE 2: CSV fills empty profile fields
+if (csvField.hasValue() && !profileField.hasValue()) {
+  profileField = csvField  // ✅ Fill empty field
+}
+
+// RULE 3: Empty CSV fields are skipped (preserve existing data)
+if (!csvField.hasValue() && profileField.hasValue()) {
+  // ❌ Do nothing - keep existing profile data
+}
+```
+
+#### Example Scenario
+
+```typescript
+// Initial profile state
+profile.company_name = "Old Company Name"
+profile.nip = "1234567890"
+profile.email = "old@example.com"
+profile.phone = ""  // Empty
+
+// CSV upload contains:
+csv.company_name = "New Company Name"  // Different value
+csv.nip = "9876543210"                 // Different NIP
+csv.email = ""                         // Empty in CSV
+csv.phone = "123456789"                // New value
+
+// After auto-import:
+profile.company_name = "New Company Name"  // ✅ Overwritten from CSV
+profile.nip = "9876543210"                 // ✅ Overwritten from CSV
+profile.email = "old@example.com"          // ✅ Preserved (CSV was empty)
+profile.phone = "123456789"                // ✅ Filled from CSV
+
+// User sees notification:
+"Profil dewelopera zaktualizowany z CSV (3 pól)."
+```
+
+#### Supported Developer Fields
+
+The auto-import recognizes these developer-related CSV columns:
+
+**Company Information:**
+- `nazwa_dewelopera` → `company_name`
+- `forma_prawna` → `legal_form`
+- `nip` → `nip`
+- `regon` → `regon`
+- `nr_krs` → `krs_number`
+- `nr_ceidg` → `ceidg_number`
+
+**Contact Information:**
+- `telefon` → `phone`
+- `email` → `email`
+- `nr_faxu` → `fax`
+- `adres_strony_www` → `website`
+
+**Address (Headquarters):**
+- `wojewodztwo_siedziby` → `headquarters_voivodeship`
+- `powiat_siedziby` → `headquarters_county`
+- `gmina_siedziby` → `headquarters_municipality`
+- `miejscowosc_siedziby` → `headquarters_city`
+- `ulica_siedziby` → `headquarters_street`
+- `nr_budynku_siedziby` → `headquarters_building_number`
+- `nr_lokalu_siedziby` → `headquarters_apartment_number`
+- `kod_pocztowy_siedziby` → `headquarters_postal_code`
+
+**Additional Information:**
+- `dodatkowe_lokalizacje_sprzedazy` → `additional_sales_locations`
+- `sposob_kontaktu` → `contact_method`
+
+#### User Notification
+
+After a successful upload with auto-import, you'll see:
+
+```
+✅ Plik został pomyślnie przesłany i przetworzony.
+   Dane zapisane w bazie.
+   Profil dewelopera zaktualizowany z CSV (15 pól).
+```
+
+The notification shows:
+- Number of fields updated from CSV
+- Only appears when `autoImportedFields > 0`
+- Helps you track what data was automatically imported
+
+#### Best Practices
+
+**✅ DO:**
+- Include complete developer data in every CSV upload
+- Use consistent company name across all CSVs
+- Verify auto-imported data in Settings after first upload
+- Keep your CSV as single source of truth for company info
+
+**❌ DON'T:**
+- Manually edit developer profile if using CSV uploads (will be overwritten)
+- Mix different company names in CSVs (latest CSV wins)
+- Leave developer fields empty in CSV if you want to preserve existing data
+
+#### Disabling Auto-Import
+
+Auto-import **cannot be disabled** - it's a core feature for fast onboarding. However:
+- Empty CSV fields won't overwrite existing profile data
+- You can review changes in Settings → Developer Profile after upload
+- Historical profile state is not tracked (only current state matters)
 
 ---
 
@@ -761,7 +889,49 @@ Download the official ministry CSV template from:
 - [dane.gov.pl/pl/dataset/2849](https://dane.gov.pl/pl/dataset/2849) (official template)
 - Or use OTO-RAPORT's pre-filled template (available in dashboard)
 
-#### Step 2: Fill Required Fields
+#### Step 2: Include Developer Information (Recommended)
+
+**NEW:** OTO-RAPORT automatically updates your developer profile from CSV data. Include these fields for **instant onboarding (<1 minute)**:
+
+**Required Developer Fields:**
+```csv
+nazwa_dewelopera;      # Company name (e.g., "ACME Development Sp. z o.o.")
+nip;                   # Tax ID (10 digits, e.g., "1234567890")
+email;                 # Contact email
+telefon;               # Phone number
+```
+
+**Recommended Developer Fields:**
+```csv
+forma_prawna;          # Legal form (e.g., "Spółka z ograniczoną odpowiedzialnością")
+regon;                 # REGON number (9 or 14 digits)
+nr_krs;                # KRS number (10 digits, only for Sp. z o.o., S.A., etc.)
+nr_ceidg;              # CEIDG number (if applicable)
+adres_strony_www;      # Website URL
+
+# Headquarters address
+wojewodztwo_siedziby;
+powiat_siedziby;
+gmina_siedziby;
+miejscowosc_siedziby;
+ulica_siedziby;
+nr_budynku_siedziby;
+kod_pocztowy_siedziby;
+```
+
+**Example CSV Header (first row):**
+```csv
+nazwa_dewelopera;forma_prawna;nip;regon;email;telefon;wojewodztwo_siedziby;...
+ACME Development Sp. z o.o.;Spółka z ograniczoną odpowiedzialnością;1234567890;123456789;contact@acme.pl;+48123456789;mazowieckie;...
+```
+
+**Important Notes:**
+- Developer fields should be **the same in every row** (system uses first row)
+- Latest CSV upload **always overwrites** your profile (Task #84.1)
+- Empty CSV fields preserve existing profile data
+- You'll see notification: "Profil dewelopera zaktualizowany z CSV (X pól)."
+
+#### Step 3: Fill Required Property Fields
 
 Ensure these 8 fields are present in **every row**:
 
@@ -839,16 +1009,21 @@ Go to: `https://oto-raport.pl/dashboard`
 ```json
 {
   "success": true,
-  "message": "Plik został pomyślnie przesłany",
+  "message": "Plik został pomyślnie przesłany i przetworzony. Dane zapisane w bazie. Profil dewelopera zaktualizowany z CSV (15 pól).",
   "data": {
     "fileName": "osiedle_example.csv",
     "recordsCount": 100,
     "validRecords": 100,
-    "autoImportedFields": 3,
+    "autoImportedFields": 15,
     "savedToDatabase": true
   }
 }
 ```
+
+**Success Message Breakdown:**
+- `"Plik został pomyślnie przesłany i przetworzony."` - Base success message
+- `"Dane zapisane w bazie."` - Confirms properties saved to database
+- `"Profil dewelopera zaktualizowany z CSV (15 pól)."` - **NEW:** Shows auto-import results (only if `autoImportedFields > 0`)
 
 **Error Response:**
 ```json
@@ -1031,14 +1206,14 @@ FormData:
 ```typescript
 {
   success: true,
-  message: "Plik został pomyślnie przesłany i przetworzony",
+  message: string,  // Dynamic message with profile update notification
   data: {
-    fileName: string,
-    recordsCount: number,
-    validRecords: number,
-    autoImportedFields: number,
-    savedToDatabase: boolean,
-    preview: ParsedProperty[],
+    fileName: string,           // Original file name
+    recordsCount: number,       // Total properties in CSV
+    validRecords: number,       // Properties that passed validation
+    autoImportedFields: number, // NEW: Number of developer profile fields updated from CSV
+    savedToDatabase: boolean,   // Whether data was saved successfully
+    preview: ParsedProperty[],  // First 3 properties for preview
     trackingData: {
       fileType: 'csv' | 'xlsx' | 'xls',
       recordsCount: number
@@ -1046,6 +1221,33 @@ FormData:
   }
 }
 ```
+
+**Message Format (Task #84.3):**
+```typescript
+// Base message
+message = "Plik został pomyślnie przesłany i przetworzony."
+
+// Append database save confirmation
+if (savedToDatabase) {
+  message += " Dane zapisane w bazie."
+}
+
+// Append profile update notification (NEW)
+if (autoImportedFields > 0) {
+  message += ` Profil dewelopera zaktualizowany z CSV (${autoImportedFields} pól).`
+}
+
+// Example full messages:
+"Plik został pomyślnie przesłany i przetworzony. Dane zapisane w bazie. Profil dewelopera zaktualizowany z CSV (15 pól)."
+"Plik został pomyślnie przesłany i przetworzony. Dane zapisane w bazie."
+```
+
+**Field Details:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `autoImportedFields` | number | **NEW (Task #84.1):** Number of developer profile fields automatically updated from CSV. `0` if no fields were updated or auto-import failed. Use this to show user feedback about profile changes. |
+| `message` | string | **UPDATED (Task #84.3):** Dynamic success message that includes profile update notification when `autoImportedFields > 0`. Shows user exactly what happened during upload. |
 
 **Response (Validation Failure):**
 ```typescript
@@ -1581,6 +1783,119 @@ See [Re-uploads and Versioning](#2-re-uploads-and-versioning) for details.
 
 ---
 
+### Auto-Import Questions
+
+**Q: What is auto-import and how does it work?**
+
+A: **Auto-import** automatically updates your developer profile from CSV data during every upload.
+
+**How it works:**
+1. System extracts developer info from CSV (company name, NIP, address, etc.)
+2. Automatically updates your profile with new data
+3. **Overwrites existing profile fields** with CSV values (latest CSV wins)
+4. Preserves existing data when CSV field is empty
+5. Shows notification: "Profil dewelopera zaktualizowany z CSV (X pól)."
+
+**Benefits:**
+- ✅ Instant onboarding (<1 minute setup)
+- ✅ Always up-to-date company information
+- ✅ CSV as single source of truth
+
+See [Developer Profile Auto-Import](#developer-profile-auto-import) for full details.
+
+---
+
+**Q: Will auto-import overwrite my manually edited profile data?**
+
+A: **Yes.** Auto-import **always overwrites** profile fields with CSV data (Task #84.1).
+
+**Example:**
+```
+Profile: company_name = "Old Name"
+CSV: company_name = "New Name"
+Result: company_name = "New Name" (CSV wins)
+```
+
+**Exception:** Empty CSV fields preserve existing data:
+```
+Profile: phone = "123456789"
+CSV: phone = ""  (empty)
+Result: phone = "123456789" (preserved)
+```
+
+**Best practice:** Keep your CSV as single source of truth for company data.
+
+---
+
+**Q: How do I prevent auto-import from changing certain fields?**
+
+A: **Leave those fields empty in your CSV.**
+
+Auto-import skips empty CSV fields, preserving existing profile data.
+
+**Example:**
+```csv
+# To preserve existing email, leave email column empty:
+nazwa_dewelopera;nip;email;telefon
+ACME Development;1234567890;;+48123456789
+                            ↑ empty - won't overwrite
+```
+
+**Note:** Auto-import cannot be completely disabled. It's a core feature for fast onboarding.
+
+---
+
+**Q: What happens if I upload CSVs with different company names?**
+
+A: **Latest CSV always wins.** Each upload overwrites your profile with new CSV data.
+
+**Example scenario:**
+```
+Upload 1: nazwa_dewelopera = "ACME Development"
+→ Profile updated to "ACME Development"
+
+Upload 2: nazwa_dewelopera = "ACME Real Estate"
+→ Profile updated to "ACME Real Estate" (overwrites previous)
+
+Upload 3: nazwa_dewelopera = "" (empty)
+→ Profile keeps "ACME Real Estate" (empty field skipped)
+```
+
+**Best practice:** Use consistent company name across all CSV uploads.
+
+---
+
+**Q: Which CSV columns are used for auto-import?**
+
+A: Auto-import recognizes **23 developer-related columns**:
+
+**Company info:** `nazwa_dewelopera`, `forma_prawna`, `nip`, `regon`, `nr_krs`, `nr_ceidg`
+**Contact:** `telefon`, `email`, `nr_faxu`, `adres_strony_www`, `sposob_kontaktu`
+**Address:** `wojewodztwo_siedziby`, `powiat_siedziby`, `gmina_siedziby`, `miejscowosc_siedziby`, `ulica_siedziby`, `nr_budynku_siedziby`, `nr_lokalu_siedziby`, `kod_pocztowy_siedziby`
+**Other:** `dodatkowe_lokalizacje_sprzedazy`
+
+See [Supported Developer Fields](#supported-developer-fields) for complete mapping.
+
+---
+
+**Q: How do I know if auto-import worked?**
+
+A: Check the success message after upload:
+
+```
+✅ "Plik został pomyślnie przesłany i przetworzony.
+    Dane zapisane w bazie.
+    Profil dewelopera zaktualizowany z CSV (15 pól)."
+                                                    ↑ Shows how many fields updated
+```
+
+**Also check:**
+- `autoImportedFields` in API response (e.g., `15`)
+- Settings → Developer Profile to verify changes
+- Console logs show detailed auto-import activity
+
+---
+
 ### Data Priority Questions
 
 **Q: If I edit data manually, will it affect ministry reports?**
@@ -1774,7 +2089,15 @@ Need help? Contact us:
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2025-10-14
+**Document Version:** 1.1 (Task #84.4 - Auto-Import Documentation)
+**Last Updated:** 2025-10-15
 **Ministry Schema:** 1.13 (58-59 columns)
 **Compliance:** ustawa z dnia 21 maja 2025 r. o jawności cen mieszkań
+
+**Changelog:**
+- **v1.1 (2025-10-15):** Added auto-import documentation (Task #84.1, #84.3, #84.4)
+  - New section: Developer Profile Auto-Import
+  - Updated API response documentation (autoImportedFields, message)
+  - Added best practices for CSV preparation with developer data
+  - Added FAQ entries for auto-import behavior
+- **v1.0 (2025-10-14):** Initial release
