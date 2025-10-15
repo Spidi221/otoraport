@@ -3417,41 +3417,56 @@
       {
         "id": "91",
         "title": "Build missing fields warning banner for dashboard",
-        "description": "Create React component to display validation warnings on developer dashboard with missing field counts and quick action buttons",
-        "details": "Create banner component that fetches from /api/validation/missing-fields on dashboard load. Display: warning icon, count of properties needing attention, top missing fields with counts, [View Details] [Bulk Edit] [Dismiss] buttons. Style as non-intrusive but visible warning. Update count in real-time after bulk edits. Use Radix UI components consistent with existing design system.",
-        "testStrategy": "Test responsive design on mobile/desktop, verify real-time updates after bulk operations, test dismissal persistence, validate accessibility with screen readers",
-        "priority": "medium",
+        "description": "Build bulk edit functionality for fixing missing required fields across multiple properties. Create modal/dialog for bulk field editing allowing users to fill missing fields (e.g., kod_pocztowy, ulica) for selected properties at once and integrate with existing DataQualityWidget.",
+        "status": "in-progress",
         "dependencies": [
           "90"
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Create bulk edit dialog component that integrates with the existing DataQualityWidget action button. Allow users to select properties with missing fields and fill common missing fields (kod_pocztowy, ulica, etc.) across multiple properties simultaneously. Build API endpoint to handle bulk field updates. Update properties via PATCH /api/properties/bulk-edit with field-specific updates. Refresh validation data after successful bulk update to show improved compliance scores. Use existing Radix UI Dialog components consistent with design system. Focus on actionable bulk editing tools rather than visual warnings (already handled by DataQualityWidget in Task #90.3).",
+        "testStrategy": "Test bulk field selection and validation, verify API handles partial updates correctly, test real-time validation refresh after bulk edits, validate form field validation and error states, test bulk edit modal accessibility with screen readers, verify integration with existing DataQualityWidget action button",
         "subtasks": [
           {
             "id": 1,
-            "title": "Build banner component and fetch missing fields validation data",
-            "description": "Develop a React banner component for the dashboard that fetches missing fields validation data from the API and displays warning information.",
+            "title": "Create bulk edit dialog component with field selection interface",
+            "description": "Develop a React dialog component for bulk editing missing fields across multiple properties with property selection and field input forms.",
             "dependencies": [],
-            "details": "Implement a React component that loads on dashboard initialization, fetches data from /api/validation/missing-fields, and displays a warning icon, count of properties needing attention, and a summary of top missing fields with their counts. Use Radix UI components and ensure the banner is styled as non-intrusive but visible. Integrate quick action buttons ([View Details], [Bulk Edit], [Dismiss]) in the banner layout.",
-            "status": "pending",
-            "testStrategy": "Verify banner renders with correct data on dashboard load, test API error handling, and confirm UI matches design system.",
-            "parentId": "undefined"
+            "details": "Implement a modal dialog using Radix UI Dialog that displays properties with missing fields, allows multi-select of properties, and provides form inputs for common missing fields (kod_pocztowy, ulica, numer_nieruchomosci, etc.). Include validation for required field formats (postal codes, street addresses). Display property summaries with current missing field counts. Add form validation and error handling for each field type according to ministry requirements.",
+            "status": "done",
+            "testStrategy": "Verify dialog opens from DataQualityWidget, test property selection interface, validate form field validation and error handling, test responsive design on mobile/desktop.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:55:45.977Z"
           },
           {
             "id": 2,
-            "title": "Implement real-time updates and interactive action buttons",
-            "description": "Enable real-time updates of missing field counts after bulk edits and implement interactive action buttons for viewing details, bulk editing, and dismissing the banner.",
+            "title": "Build bulk edit API endpoint for field-specific property updates",
+            "description": "Create API endpoint to handle bulk updates of specific fields across multiple properties with proper validation and error handling.",
             "dependencies": [
               1
             ],
-            "details": "Set up event listeners or subscriptions to update the banner count and field summary in real-time after bulk edit actions. Ensure [View Details] navigates to a detailed validation view, [Bulk Edit] triggers the bulk editing workflow, and [Dismiss] hides the banner with persistence. Confirm all actions are accessible and provide feedback to users.",
+            "details": "Create PATCH /api/properties/bulk-edit endpoint that accepts property IDs and field updates (kod_pocztowy, ulica, etc.). Validate field formats using ministry validation rules. Update properties table and related raw_csv_data records. Handle partial success scenarios where some properties update successfully and others fail. Return detailed response with success/failure counts and specific error messages per property. Ensure RLS policies allow bulk updates for developer's own properties.",
             "status": "pending",
-            "testStrategy": "Test real-time updates after bulk edits, verify each button's functionality, and check dismissal persistence across sessions.",
+            "testStrategy": "Test bulk field updates with valid/invalid data, verify partial update handling, test RLS security, validate ministry field format compliance.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Integrate bulk edit with DataQualityWidget and implement real-time validation refresh",
+            "description": "Connect bulk edit dialog to DataQualityWidget action button and implement automatic validation data refresh after successful bulk edits.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Update DataQualityWidget action button to open bulk edit dialog instead of current scroll behavior. Implement callback system to refresh validation data from /api/validation/missing-fields after successful bulk edit operations. Update compliance scores and missing field counts in real-time. Add success/error toast notifications for bulk edit results. Ensure smooth user experience with loading states during API operations.",
+            "status": "pending",
+            "testStrategy": "Test integration between DataQualityWidget and bulk edit dialog, verify real-time validation refresh after bulk edits, test success/error notifications, validate loading states and user feedback.",
             "parentId": "undefined"
           }
         ],
         "complexity": 4,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divide into: 1) Building the banner component and fetching validation data, 2) Implementing real-time updates and action buttons, 3) Ensuring responsive design and accessibility compliance."
+        "expansionPrompt": "Divide into: 1) Building the banner component and fetching validation data, 2) Implementing real-time updates and action buttons, 3) Ensuring responsive design and accessibility compliance.",
+        "updatedAt": "2025-10-15T10:55:45.977Z"
       },
       {
         "id": "92",
@@ -3602,7 +3617,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T10:42:40.637Z",
+      "lastModified": "2025-10-15T10:55:45.979Z",
       "taskCount": 60,
       "completedCount": 50,
       "tags": [

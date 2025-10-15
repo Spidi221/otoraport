@@ -5,8 +5,9 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/loading'
-import { CheckCircle, AlertCircle, AlertTriangle, Info, ArrowRight, ShieldCheck } from 'lucide-react'
+import { CheckCircle, AlertCircle, AlertTriangle, Info, Edit3, ShieldCheck } from 'lucide-react'
 import type { ValidationMissingFieldsResponse } from '@/lib/api-schemas'
+import { BulkEditDialog } from './bulk-edit-dialog'
 
 interface ComplianceLevel {
   label: string
@@ -75,29 +76,30 @@ export function DataQualityWidget() {
   const [data, setData] = useState<ValidationMissingFieldsResponse['data'] | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [bulkEditOpen, setBulkEditOpen] = useState(false)
+
+  const fetchValidationData = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      const response = await fetch('/api/validation/missing-fields')
+
+      if (!response.ok) {
+        throw new Error('Nie udało się pobrać danych walidacji')
+      }
+
+      const result: ValidationMissingFieldsResponse = await response.json()
+      setData(result.data)
+    } catch (err) {
+      console.error('Error fetching validation data:', err)
+      setError(err instanceof Error ? err.message : 'Wystąpił błąd')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchValidationData = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-
-        const response = await fetch('/api/validation/missing-fields')
-
-        if (!response.ok) {
-          throw new Error('Nie udało się pobrać danych walidacji')
-        }
-
-        const result: ValidationMissingFieldsResponse = await response.json()
-        setData(result.data)
-      } catch (err) {
-        console.error('Error fetching validation data:', err)
-        setError(err instanceof Error ? err.message : 'Wystąpił błąd')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     fetchValidationData()
   }, [])
 
@@ -284,17 +286,32 @@ export function DataQualityWidget() {
         <Button
           variant="outline"
           className="w-full group hover:bg-primary hover:text-primary-foreground transition-all"
-          onClick={() => {
-            // Scroll to properties table on same page
-            const propertiesTable = document.querySelector('[data-properties-table]')
-            if (propertiesTable) {
-              propertiesTable.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            }
-          }}
+          onClick={() => setBulkEditOpen(true)}
+          disabled={data.summary.propertiesWithIssues === 0}
         >
-          Zobacz szczegóły w tabeli nieruchomości
-          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          {data.summary.propertiesWithIssues > 0 ? (
+            <>
+              Edycja zbiorcza brakujących pól
+              <Edit3 className="ml-2 h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Wszystkie dane kompletne
+              <CheckCircle className="ml-2 h-4 w-4" />
+            </>
+          )}
         </Button>
+
+        {/* Bulk Edit Dialog */}
+        <BulkEditDialog
+          open={bulkEditOpen}
+          onOpenChange={setBulkEditOpen}
+          validationData={data}
+          onSuccess={() => {
+            // Refresh validation data after bulk edit
+            fetchValidationData()
+          }}
+        />
       </CardContent>
     </Card>
   )
