@@ -3418,7 +3418,7 @@
         "id": "91",
         "title": "Build missing fields warning banner for dashboard",
         "description": "Build bulk edit functionality for fixing missing required fields across multiple properties. Create modal/dialog for bulk field editing allowing users to fill missing fields (e.g., kod_pocztowy, ulica) for selected properties at once and integrate with existing DataQualityWidget.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "90"
         ],
@@ -3459,15 +3459,16 @@
               2
             ],
             "details": "Update DataQualityWidget action button to open bulk edit dialog instead of current scroll behavior. Implement callback system to refresh validation data from /api/validation/missing-fields after successful bulk edit operations. Update compliance scores and missing field counts in real-time. Add success/error toast notifications for bulk edit results. Ensure smooth user experience with loading states during API operations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test integration between DataQualityWidget and bulk edit dialog, verify real-time validation refresh after bulk edits, test success/error notifications, validate loading states and user feedback.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:58:27.833Z"
           }
         ],
         "complexity": 4,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Divide into: 1) Building the banner component and fetching validation data, 2) Implementing real-time updates and action buttons, 3) Ensuring responsive design and accessibility compliance.",
-        "updatedAt": "2025-10-15T10:57:37.369Z"
+        "updatedAt": "2025-10-15T10:58:27.833Z"
       },
       {
         "id": "92",
@@ -3618,9 +3619,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T10:57:37.370Z",
+      "lastModified": "2025-10-15T10:58:27.834Z",
       "taskCount": 60,
-      "completedCount": 50,
+      "completedCount": 51,
       "tags": [
         "master"
       ]
