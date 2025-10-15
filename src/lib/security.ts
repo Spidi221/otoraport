@@ -213,6 +213,11 @@ export function validateUploadFile(file: File): { valid: boolean; error?: string
     return { valid: false, error: 'Nie wybrano pliku' };
   }
 
+  // TASK #84.2: Reject empty files (security best practice)
+  if (file.size === 0) {
+    return { valid: false, error: 'Plik jest pusty (0 bajtów)' };
+  }
+
   if (file.size > MAX_FILE_SIZE) {
     return { valid: false, error: 'Plik jest za duży. Maksymalny rozmiar to 10MB' };
   }

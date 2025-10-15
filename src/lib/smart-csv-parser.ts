@@ -1797,6 +1797,7 @@ export function validateMinistryCompliance(data: ParsedProperty[]): ValidationRe
   const missingCriticalFields: string[] = []
   const rowErrors: RowValidationError[] = []
 
+  // TASK #84.2: Fix edge case - empty data array should return totalRows: 0
   if (data.length === 0) {
     errors.push('Brak danych nieruchomości do przetworzenia')
     return {
@@ -1805,6 +1806,7 @@ export function validateMinistryCompliance(data: ParsedProperty[]): ValidationRe
       warnings,
       complianceScore: 0,
       totalRequiredFields: 58,
+      totalRows: 0, // FIXED: Add totalRows for empty data
       missingCriticalFields: ['property_data'],
       rowErrors: [],
       fieldValidation: {
