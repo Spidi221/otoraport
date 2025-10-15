@@ -398,35 +398,35 @@ function generateMinistryCSV(developer: Developer, properties: PropertyWithRawDa
 
   const rows = properties.map((property) => {
     return [
-      // TASK #85.1: Developer fields now read from raw_csv_data with fallback to developers table
-      escapeCSV(getDeveloperFieldValue('nazwa_dewelopera', 'company_name')),                              // 1
-      escapeCSV(getDeveloperFieldValue('forma_prawna', 'legal_form', 'Spółka z o.o.')),                   // 2
-      escapeCSV(getDeveloperFieldValue('nr_krs', 'krs_number')),                                          // 3
-      escapeCSV(getDeveloperFieldValue('nr_ceidg', 'ceidg_number')),                                      // 4
-      escapeCSV(getDeveloperFieldValue('nip', 'nip')),                                                    // 5
-      escapeCSV(getDeveloperFieldValue('regon', 'regon')),                                                // 6
-      escapeCSV(getDeveloperFieldValue('telefon', 'phone')),                                              // 7
-      escapeCSV(getDeveloperFieldValue('email', 'email')),                                                // 8
-      escapeCSV(getDeveloperFieldValue('nr_faxu', 'phone')),                                              // 9 - nr_faxu (not in database, will be empty from raw_csv_data)
-      escapeCSV(getDeveloperFieldValue('adres_strony_www', 'website')),                                   // 10
-      escapeCSV(getDeveloperFieldValue('wojewodztwo_siedziby', 'headquarters_voivodeship')),              // 11
-      escapeCSV(getDeveloperFieldValue('powiat_siedziby', 'headquarters_county')),                        // 12
-      escapeCSV(getDeveloperFieldValue('gmina_siedziby', 'headquarters_municipality')),                   // 13
-      escapeCSV(getDeveloperFieldValue('miejscowosc_siedziby', 'headquarters_city')),                     // 14
-      escapeCSV(getDeveloperFieldValue('ulica_siedziby', 'headquarters_street')),                         // 15
-      escapeCSV(getDeveloperFieldValue('nr_budynku_siedziby', 'headquarters_building_number')),           // 16
-      escapeCSV(getDeveloperFieldValue('nr_lokalu_siedziby', 'headquarters_apartment_number')),           // 17
-      escapeCSV(getDeveloperFieldValue('kod_pocztowy_siedziby', 'headquarters_postal_code')),             // 18
-      escapeCSV(getDeveloperFieldValue('wojewodztwo_lokalu_sprzedazy', 'sales_office_voivodeship')),      // 19
-      escapeCSV(getDeveloperFieldValue('powiat_lokalu_sprzedazy', 'sales_office_county')),                // 20
-      escapeCSV(getDeveloperFieldValue('gmina_lokalu_sprzedazy', 'sales_office_municipality')),           // 21
-      escapeCSV(getDeveloperFieldValue('miejscowosc_lokalu_sprzedazy', 'sales_office_city')),             // 22
-      escapeCSV(getDeveloperFieldValue('ulica_lokalu_sprzedazy', 'sales_office_street')),                 // 23
-      escapeCSV(getDeveloperFieldValue('nr_budynku_lokalu_sprzedazy', 'sales_office_building_number')),   // 24
-      escapeCSV(getDeveloperFieldValue('nr_lokalu_sprzedazy', 'sales_office_apartment_number')),          // 25
-      escapeCSV(getDeveloperFieldValue('kod_pocztowy_lokalu_sprzedazy', 'sales_office_postal_code')),     // 26
-      escapeCSV(getDeveloperFieldValue('dodatkowe_lokalizacje_sprzedazy', 'additional_sales_locations')), // 27
-      escapeCSV(getDeveloperFieldValue('sposob_kontaktu', 'contact_method', 'email, telefon')),           // 28
+      // TASK #86.2: Developer fields - use FULL ministerial column names from uploaded CSV
+      escapeCSV(getDeveloperFieldValue('Nazwa dewelopera', 'company_name')),                              // 1
+      escapeCSV(getDeveloperFieldValue('Forma prawna dewelopera', 'legal_form', 'Spółka z o.o.')),        // 2
+      escapeCSV(getDeveloperFieldValue('Nr KRS', 'krs_number')),                                          // 3
+      escapeCSV(getDeveloperFieldValue('Nr wpisu do CEiDG', 'ceidg_number')),                             // 4
+      escapeCSV(getDeveloperFieldValue('Nr NIP', 'nip')),                                                 // 5
+      escapeCSV(getDeveloperFieldValue('Nr REGON', 'regon')),                                             // 6
+      escapeCSV(getDeveloperFieldValue('Nr telefonu', 'phone')),                                          // 7
+      escapeCSV(getDeveloperFieldValue('Adres poczty elektronicznej', 'email')),                          // 8
+      escapeCSV(getDeveloperFieldValue('Nr faxu', 'phone')),                                              // 9 - nr_faxu (will come from raw_csv_data)
+      escapeCSV(getDeveloperFieldValue('Adres strony internetowej dewelopera', 'website')),               // 10
+      escapeCSV(getDeveloperFieldValue('Województwo adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_voivodeship')),  // 11
+      escapeCSV(getDeveloperFieldValue('Powiat adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_county')),            // 12
+      escapeCSV(getDeveloperFieldValue('Gmina adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_municipality')),       // 13
+      escapeCSV(getDeveloperFieldValue('Miejscowość adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_city')),         // 14
+      escapeCSV(getDeveloperFieldValue('Ulica adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_street')),             // 15
+      escapeCSV(getDeveloperFieldValue('Nr nieruchomości adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_building_number')),  // 16
+      escapeCSV(getDeveloperFieldValue('Nr lokalu adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_apartment_number')),        // 17
+      escapeCSV(getDeveloperFieldValue('Kod pocztowy adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_postal_code')),          // 18
+      escapeCSV(getDeveloperFieldValue('Województwo adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_voivodeship')),      // 19
+      escapeCSV(getDeveloperFieldValue('Powiat adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_county')),                // 20
+      escapeCSV(getDeveloperFieldValue('Gmina adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_municipality')),           // 21
+      escapeCSV(getDeveloperFieldValue('Miejscowość adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_city')),             // 22
+      escapeCSV(getDeveloperFieldValue('Ulica adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_street')),                 // 23
+      escapeCSV(getDeveloperFieldValue('Nr nieruchomości adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_building_number')),   // 24
+      escapeCSV(getDeveloperFieldValue('Nr lokalu adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_apartment_number')),          // 25
+      escapeCSV(getDeveloperFieldValue('Kod pocztowy adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_postal_code')),     // 26
+      escapeCSV(getDeveloperFieldValue('Dodatkowe lokalizacje, w których prowadzona jest sprzedaż', 'additional_sales_locations')),       // 27
+      escapeCSV(getDeveloperFieldValue('Sposób kontaktu nabywcy z deweloperem', 'contact_method', 'email, telefon')),                     // 28
       // TASK #85.2: Investment location - use COLUMN_PATTERNS to match short CSV column names
       escapeCSV(getFieldValue(property, '', 'wojewodztwo')),       // wojewodztwo_inwestycji
       escapeCSV(getFieldValue(property, '', 'powiat')),             // powiat_inwestycji

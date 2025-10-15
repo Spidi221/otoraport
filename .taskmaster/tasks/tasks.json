@@ -3098,9 +3098,10 @@
             "description": "Instrument the data.csv export route with detailed logging to capture the exact SQL queries and parameters used for the raw_csv_data LEFT JOIN.",
             "dependencies": [],
             "details": "Insert logging statements before and after the LEFT JOIN execution to record the full query, input parameters, and returned results. Ensure logs capture cases where empty arrays or nulls are returned. Use console.log or a structured logger as appropriate for the codebase.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Trigger the export route and verify that logs show the executed JOIN queries, parameters, and returned data for several test cases, including those that previously returned empty arrays.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-14T20:47:48.523Z"
           },
           {
             "id": 2,
@@ -3110,9 +3111,10 @@
               1
             ],
             "details": "Check that the JOIN condition matches the correct columns and that foreign keys exist and are indexed. Use EXPLAIN or similar tools to inspect the query plan. Confirm that the JOIN does not unintentionally filter out rows or return nulls due to incorrect keys or missing relationships.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Run the JOIN query directly in the database with sample data, verify that expected rows are returned, and inspect the execution plan for anomalies.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T08:33:24.773Z"
           },
           {
             "id": 3,
@@ -3142,7 +3144,7 @@
         "complexity": 6,
         "recommendedSubtasks": 4,
         "expansionPrompt": "Break down the debugging process into: 1) Adding logging to trace JOIN queries, 2) Verifying SQL JOIN syntax and foreign key relationships, 3) Checking is_latest filter logic, 4) Testing with real user data and confirming output.",
-        "updatedAt": "2025-10-14T20:44:45.214Z"
+        "updatedAt": "2025-10-15T08:33:24.773Z"
       },
       {
         "id": "87",
@@ -3576,7 +3578,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-14T20:44:45.216Z",
+      "lastModified": "2025-10-15T08:33:24.775Z",
       "taskCount": 60,
       "completedCount": 44,
       "tags": [
