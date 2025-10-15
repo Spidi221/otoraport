@@ -3390,9 +3390,10 @@
               1
             ],
             "details": "Implement the endpoint handler to authenticate requests, fetch all properties for the given developerId, and invoke the ministry-validation service for each property. Aggregate results to compute totalProperties, propertiesWithIssues, missingFieldsSummary, and detailed breakdowns. Ensure robust error handling and informative error messages. Follow RESTful API best practices for endpoint naming, HTTP methods, and response codes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit test endpoint logic with mock validation service; integration test with real data; verify error handling and response accuracy.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:35:16.693Z"
           },
           {
             "id": 3,
@@ -3410,7 +3411,7 @@
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on create missing fields detection api endpoint.",
-        "updatedAt": "2025-10-15T10:32:53.700Z"
+        "updatedAt": "2025-10-15T10:35:16.693Z"
       },
       {
         "id": "91",
@@ -3600,7 +3601,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T10:32:53.701Z",
+      "lastModified": "2025-10-15T10:35:16.694Z",
       "taskCount": 60,
       "completedCount": 49,
       "tags": [
