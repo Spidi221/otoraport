@@ -14,7 +14,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateClientId, applySecurityHeaders } from '@/lib/security'
 import { rateLimit, publicRateLimit, getCachedValue, setCachedValue, getMinistryCacheKey, MINISTRY_CACHE_TTL } from '@/lib/redis-rate-limit'
-import { COLUMN_PATTERNS } from '@/lib/smart-csv-parser'
+import { getMinistryFieldValue } from '@/lib/ministry-field-lookup'
 import type { Database } from '@/types/database'
 
 type Developer = Database['public']['Tables']['developers']['Row']
@@ -168,119 +168,10 @@ export async function GET(
 }
 
 /**
- * TASK #81.9: Generate CSV preserving raw CSV data as primary source
- * Priority: raw_csv_data > properties (manual fills) > developer (auto-import) > defaults
+ * TASK #88.2: Generate CSV using 3-tier field lookup system
+ * Priority: manual_overrides > raw_csv_data > properties/developers > defaults
  */
 function generateMinistryCSV(developer: Developer, properties: PropertyWithRawData[]): string {
-  // Mapping: Ministry CSV column name → internal field name
-  const FIELD_MAPPING: Record<string, string> = {
-    'Województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'wojewodztwo',
-    'Powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'powiat',
-    'Gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'gmina',
-    'Miejscowość lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'miejscowosc',
-    'Ulica lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'ulica',
-    'Nr budynku lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'nr_budynku',
-    'Kod pocztowy lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego': 'kod_pocztowy',
-    'Rodzaj nieruchomości: lokal mieszkalny, dom jednorodzinny': 'property_type',
-    'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera': 'apartment_number',
-    'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]': 'price_per_m2',
-    'Data obowiązywania ceny m 2': 'price_valid_from',
-    'Cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]': 'final_price',
-    'Data obowiązywania ceny lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni': 'final_price_valid_from',
-  }
-
-  /**
-   * Normalize string for column name matching (same as SmartCSVParser)
-   */
-  const normalizeString = (str: string): string => {
-    return str
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-      .replace(/ł/g, 'l')
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '')
-  }
-
-  /**
-   * TASK #85.1: Get developer field value with priority: raw CSV > developer table > default
-   * Uses first property's raw_csv_data (developer fields are same across all properties from one CSV)
-   */
-  const getDeveloperFieldValue = (ministryFieldName: string, developerFieldName: keyof Developer, defaultValue: string = ''): string => {
-    // Get first property's raw_csv_data (developer fields are same for all properties)
-    const firstProperty = properties[0]
-    const rawData = firstProperty?.raw_csv_data?.[0]?.raw_data || {}
-
-    // 1. Try raw CSV data (PRIMARY SOURCE)
-    if (ministryFieldName) {
-      const rawValue = rawData[ministryFieldName]
-      if (rawValue !== undefined && rawValue !== null && rawValue !== '') {
-        return String(rawValue)
-      }
-    }
-
-    // 2. Try developer table (FALLBACK)
-    const devValue = developer[developerFieldName]
-    if (devValue !== undefined && devValue !== null && devValue !== '') {
-      return String(devValue)
-    }
-
-    // 3. Return default
-    return defaultValue
-  }
-
-  /**
-   * Get field value with priority: raw CSV > property table > default
-   * ENHANCED: If ministryFieldName is empty, search through COLUMN_PATTERNS variations
-   */
-  const getFieldValue = (property: PropertyWithRawData, ministryFieldName: string, internalFieldName: string, defaultValue: string = ''): string => {
-    const rawData = property.raw_csv_data?.[0]?.raw_data || {}
-
-    // 1. Try raw CSV data (PRIMARY SOURCE)
-    if (ministryFieldName) {
-      // Direct match with provided ministry field name
-      const rawValue = rawData[ministryFieldName]
-      if (rawValue !== undefined && rawValue !== null && rawValue !== '') {
-        return String(rawValue)
-      }
-    } else if (internalFieldName && COLUMN_PATTERNS[internalFieldName as keyof typeof COLUMN_PATTERNS]) {
-      // No ministry field name provided - search through COLUMN_PATTERNS variations
-      const patterns = COLUMN_PATTERNS[internalFieldName as keyof typeof COLUMN_PATTERNS]
-
-      // Try exact match first (case-sensitive)
-      for (const pattern of patterns) {
-        if (rawData[pattern] !== undefined && rawData[pattern] !== null && rawData[pattern] !== '') {
-          return String(rawData[pattern])
-        }
-      }
-
-      // Try normalized match (case-insensitive, diacritic-insensitive)
-      const normalizedPatterns = patterns.map(p => normalizeString(p))
-      const rawDataKeys = Object.keys(rawData)
-
-      for (let i = 0; i < patterns.length; i++) {
-        const normalizedPattern = normalizedPatterns[i]
-
-        for (const key of rawDataKeys) {
-          if (normalizeString(key) === normalizedPattern) {
-            const rawValue = rawData[key]
-            if (rawValue !== undefined && rawValue !== null && rawValue !== '') {
-              return String(rawValue)
-            }
-          }
-        }
-      }
-    }
-
-    // 2. Try properties table (MANUAL FILLS)
-    const propertyValue = property[internalFieldName as keyof Property]
-    if (propertyValue !== undefined && propertyValue !== null && propertyValue !== '') {
-      return String(propertyValue)
-    }
-
-    // 3. Return default
-    return defaultValue
-  }
   // CSV Header (59 kolumn według wymagań ministerstwa - Ministry Schema 1.13)
   const headers = [
     // Dane dewelopera (1-27) - FIXED: Added nr_faxu at position 9, moved adres_strony_www to position 10
@@ -348,71 +239,71 @@ function generateMinistryCSV(developer: Developer, properties: PropertyWithRawDa
 
   const rows = properties.map((property) => {
     return [
-      // TASK #86.2: Developer fields - use FULL ministerial column names from uploaded CSV
-      escapeCSV(getDeveloperFieldValue('Nazwa dewelopera', 'company_name')),                              // 1
-      escapeCSV(getDeveloperFieldValue('Forma prawna dewelopera', 'legal_form', 'Spółka z o.o.')),        // 2
-      escapeCSV(getDeveloperFieldValue('Nr KRS', 'krs_number')),                                          // 3
-      escapeCSV(getDeveloperFieldValue('Nr wpisu do CEiDG', 'ceidg_number')),                             // 4
-      escapeCSV(getDeveloperFieldValue('Nr NIP', 'nip')),                                                 // 5
-      escapeCSV(getDeveloperFieldValue('Nr REGON', 'regon')),                                             // 6
-      escapeCSV(getDeveloperFieldValue('Nr telefonu', 'phone')),                                          // 7
-      escapeCSV(getDeveloperFieldValue('Adres poczty elektronicznej', 'email')),                          // 8
-      escapeCSV(getDeveloperFieldValue('Nr faxu', 'phone')),                                              // 9 - nr_faxu (will come from raw_csv_data)
-      escapeCSV(getDeveloperFieldValue('Adres strony internetowej dewelopera', 'website')),               // 10
-      escapeCSV(getDeveloperFieldValue('Województwo adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_voivodeship')),  // 11
-      escapeCSV(getDeveloperFieldValue('Powiat adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_county')),            // 12
-      escapeCSV(getDeveloperFieldValue('Gmina adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_municipality')),       // 13
-      escapeCSV(getDeveloperFieldValue('Miejscowość adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_city')),         // 14
-      escapeCSV(getDeveloperFieldValue('Ulica adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_street')),             // 15
-      escapeCSV(getDeveloperFieldValue('Nr nieruchomości adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_building_number')),  // 16
-      escapeCSV(getDeveloperFieldValue('Nr lokalu adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_apartment_number')),        // 17
-      escapeCSV(getDeveloperFieldValue('Kod pocztowy adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_postal_code')),          // 18
-      escapeCSV(getDeveloperFieldValue('Województwo adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_voivodeship')),      // 19
-      escapeCSV(getDeveloperFieldValue('Powiat adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_county')),                // 20
-      escapeCSV(getDeveloperFieldValue('Gmina adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_municipality')),           // 21
-      escapeCSV(getDeveloperFieldValue('Miejscowość adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_city')),             // 22
-      escapeCSV(getDeveloperFieldValue('Ulica adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_street')),                 // 23
-      escapeCSV(getDeveloperFieldValue('Nr nieruchomości adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_building_number')),   // 24
-      escapeCSV(getDeveloperFieldValue('Nr lokalu adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_apartment_number')),          // 25
-      escapeCSV(getDeveloperFieldValue('Kod pocztowy adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_postal_code')),     // 26
-      escapeCSV(getDeveloperFieldValue('Dodatkowe lokalizacje, w których prowadzona jest sprzedaż', 'additional_sales_locations')),       // 27
-      escapeCSV(getDeveloperFieldValue('Sposób kontaktu nabywcy z deweloperem', 'contact_method', 'email, telefon')),                     // 28
-      // TASK #85.2: Investment location - use COLUMN_PATTERNS to match short CSV column names
-      escapeCSV(getFieldValue(property, '', 'wojewodztwo')),       // wojewodztwo_inwestycji
-      escapeCSV(getFieldValue(property, '', 'powiat')),             // powiat_inwestycji
-      escapeCSV(getFieldValue(property, '', 'gmina')),              // gmina_inwestycji
-      escapeCSV(getFieldValue(property, '', 'miejscowosc')),        // miejscowosc_inwestycji
-      escapeCSV(getFieldValue(property, '', 'ulica')),              // ulica_inwestycji
-      escapeCSV(getFieldValue(property, '', 'numer_nieruchomosci')), // nr_budynku_inwestycji - FIXED: each apartment has unique building number
-      escapeCSV(getFieldValue(property, '', 'kod_pocztowy')),       // kod_pocztowy_inwestycji
-      // Dane mieszkania - TASK #81.9: Preserve raw CSV data
-      escapeCSV(getFieldValue(property, 'Rodzaj nieruchomości: lokal mieszkalny, dom jednorodzinny', 'property_type', 'mieszkanie')),
-      escapeCSV(getFieldValue(property, 'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera', 'apartment_number')),
-      escapeCSV(getFieldValue(property, 'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]', 'price_per_m2')),
-      escapeCSV(getFieldValue(property, 'Data obowiązywania ceny m 2', 'price_valid_from', new Date().toISOString().split('T')[0])),
-      // TASK #85.3: Base price and final price - use COLUMN_PATTERNS to match cena_bazowa and cena_koncowa
-      escapeCSV(getFieldValue(property, '', 'base_price')), // cena_bazowa
-      escapeCSV(getFieldValue(property, '', 'base_price_valid_from', new Date().toISOString().split('T')[0])),
-      escapeCSV(getFieldValue(property, '', 'final_price')), // cena_koncowa - FIXED: now reads from raw CSV
-      escapeCSV(getFieldValue(property, '', 'final_price_valid_from', new Date().toISOString().split('T')[0])),
+      // TASK #88.2: Developer fields - use getMinistryFieldValue with properties[0] (shared developer data)
+      escapeCSV(getMinistryFieldValue(properties[0], 'Nazwa dewelopera', 'company_name', developer)),                              // 1
+      escapeCSV(getMinistryFieldValue(properties[0], 'Forma prawna dewelopera', 'legal_form', developer, 'Spółka z o.o.')),        // 2
+      escapeCSV(getMinistryFieldValue(properties[0], 'Nr KRS', 'krs_number', developer)),                                          // 3
+      escapeCSV(getMinistryFieldValue(properties[0], 'Nr wpisu do CEiDG', 'ceidg_number', developer)),                             // 4
+      escapeCSV(getMinistryFieldValue(properties[0], 'Nr NIP', 'nip', developer)),                                                 // 5
+      escapeCSV(getMinistryFieldValue(properties[0], 'Nr REGON', 'regon', developer)),                                             // 6
+      escapeCSV(getMinistryFieldValue(properties[0], 'Nr telefonu', 'phone', developer)),                                          // 7
+      escapeCSV(getMinistryFieldValue(properties[0], 'Adres poczty elektronicznej', 'email', developer)),                          // 8
+      escapeCSV(getMinistryFieldValue(properties[0], 'Nr faxu', 'phone', developer)),                                              // 9 - nr_faxu (will come from raw_csv_data)
+      escapeCSV(getMinistryFieldValue(properties[0], 'Adres strony internetowej dewelopera', 'website', developer)),               // 10
+      escapeCSV(getMinistryFieldValue(properties[0], 'Województwo adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_voivodeship', developer)),  // 11
+      escapeCSV(getMinistryFieldValue(properties[0], 'Powiat adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_county', developer)),            // 12
+      escapeCSV(getMinistryFieldValue(properties[0], 'Gmina adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_municipality', developer)),       // 13
+      escapeCSV(getMinistryFieldValue(properties[0], 'Miejscowość adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_city', developer)),         // 14
+      escapeCSV(getMinistryFieldValue(properties[0], 'Ulica adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_street', developer)),             // 15
+      escapeCSV(getMinistryFieldValue(properties[0], 'Nr nieruchomości adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_building_number', developer)),  // 16
+      escapeCSV(getMinistryFieldValue(properties[0], 'Nr lokalu adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_apartment_number', developer)),        // 17
+      escapeCSV(getMinistryFieldValue(properties[0], 'Kod pocztowy adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera', 'headquarters_postal_code', developer)),          // 18
+      escapeCSV(getMinistryFieldValue(properties[0], 'Województwo adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_voivodeship', developer)),      // 19
+      escapeCSV(getMinistryFieldValue(properties[0], 'Powiat adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_county', developer)),                // 20
+      escapeCSV(getMinistryFieldValue(properties[0], 'Gmina adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_municipality', developer)),           // 21
+      escapeCSV(getMinistryFieldValue(properties[0], 'Miejscowość adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_city', developer)),             // 22
+      escapeCSV(getMinistryFieldValue(properties[0], 'Ulica adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_street', developer)),                 // 23
+      escapeCSV(getMinistryFieldValue(properties[0], 'Nr nieruchomości adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_building_number', developer)),   // 24
+      escapeCSV(getMinistryFieldValue(properties[0], 'Nr lokalu adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_apartment_number', developer)),          // 25
+      escapeCSV(getMinistryFieldValue(properties[0], 'Kod pocztowy adresu lokalu, w którym prowadzona jest sprzedaż', 'sales_office_postal_code', developer)),     // 26
+      escapeCSV(getMinistryFieldValue(properties[0], 'Dodatkowe lokalizacje, w których prowadzona jest sprzedaż', 'additional_sales_locations', developer)),       // 27
+      escapeCSV(getMinistryFieldValue(properties[0], 'Sposób kontaktu nabywcy z deweloperem', 'contact_method', developer, 'email, telefon')),                     // 28
+      // TASK #88.2: Investment location - use getMinistryFieldValue with COLUMN_PATTERNS matching
+      escapeCSV(getMinistryFieldValue(property, '', 'wojewodztwo')),       // wojewodztwo_inwestycji
+      escapeCSV(getMinistryFieldValue(property, '', 'powiat')),             // powiat_inwestycji
+      escapeCSV(getMinistryFieldValue(property, '', 'gmina')),              // gmina_inwestycji
+      escapeCSV(getMinistryFieldValue(property, '', 'miejscowosc')),        // miejscowosc_inwestycji
+      escapeCSV(getMinistryFieldValue(property, '', 'ulica')),              // ulica_inwestycji
+      escapeCSV(getMinistryFieldValue(property, '', 'numer_nieruchomosci')), // nr_budynku_inwestycji - FIXED: each apartment has unique building number
+      escapeCSV(getMinistryFieldValue(property, '', 'kod_pocztowy')),       // kod_pocztowy_inwestycji
+      // Dane mieszkania - TASK #88.2: Use getMinistryFieldValue for all property fields
+      escapeCSV(getMinistryFieldValue(property, 'Rodzaj nieruchomości: lokal mieszkalny, dom jednorodzinny', 'property_type', undefined, 'mieszkanie')),
+      escapeCSV(getMinistryFieldValue(property, 'Nr lokalu lub domu jednorodzinnego nadany przez dewelopera', 'apartment_number')),
+      escapeCSV(getMinistryFieldValue(property, 'Cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]', 'price_per_m2')),
+      escapeCSV(getMinistryFieldValue(property, 'Data obowiązywania ceny m 2', 'price_valid_from', undefined, new Date().toISOString().split('T')[0])),
+      // TASK #88.2: Base price and final price
+      escapeCSV(getMinistryFieldValue(property, '', 'base_price')), // cena_bazowa
+      escapeCSV(getMinistryFieldValue(property, '', 'base_price_valid_from', undefined, new Date().toISOString().split('T')[0])),
+      escapeCSV(getMinistryFieldValue(property, '', 'final_price')), // cena_koncowa
+      escapeCSV(getMinistryFieldValue(property, '', 'final_price_valid_from', undefined, new Date().toISOString().split('T')[0])),
       // Additional property data - preserve from raw CSV or manual fills
-      escapeCSV(getFieldValue(property, '', 'parking_type')),
-      escapeCSV(getFieldValue(property, '', 'parking_designation')),
-      escapeCSV(getFieldValue(property, '', 'parking_price')),
-      escapeCSV(getFieldValue(property, '', 'parking_date')),
-      escapeCSV(getFieldValue(property, '', 'storage_type')),
-      escapeCSV(getFieldValue(property, '', 'storage_designation')),
-      escapeCSV(getFieldValue(property, '', 'storage_price')),
-      escapeCSV(getFieldValue(property, '', 'storage_date')),
-      // TASK #85.4 & #85.5: Necessary rights and prospectus - use COLUMN_PATTERNS
-      escapeCSV(getFieldValue(property, '', 'necessary_rights')),       // 52 - prawa_niezbedne_wyszczegolnienie (single combined field)
-      escapeCSV(getFieldValue(property, '', 'necessary_rights_price')), // 53
-      escapeCSV(getFieldValue(property, '', 'necessary_rights_date')),  // 54
+      escapeCSV(getMinistryFieldValue(property, '', 'parking_type')),
+      escapeCSV(getMinistryFieldValue(property, '', 'parking_designation')),
+      escapeCSV(getMinistryFieldValue(property, '', 'parking_price')),
+      escapeCSV(getMinistryFieldValue(property, '', 'parking_date')),
+      escapeCSV(getMinistryFieldValue(property, '', 'storage_type')),
+      escapeCSV(getMinistryFieldValue(property, '', 'storage_designation')),
+      escapeCSV(getMinistryFieldValue(property, '', 'storage_price')),
+      escapeCSV(getMinistryFieldValue(property, '', 'storage_date')),
+      // TASK #88.2: Necessary rights and prospectus
+      escapeCSV(getMinistryFieldValue(property, '', 'necessary_rights')),       // 52 - prawa_niezbedne_wyszczegolnienie (single combined field)
+      escapeCSV(getMinistryFieldValue(property, '', 'necessary_rights_price')), // 53
+      escapeCSV(getMinistryFieldValue(property, '', 'necessary_rights_date')),  // 54
       // Other services
-      escapeCSV(getFieldValue(property, '', 'other_services_type')),    // 55 - inne_swiadczenia_wyszczegolnienie
-      escapeCSV(getFieldValue(property, '', 'other_services_price')),   // 56
-      escapeCSV(getFieldValue(property, '', 'other_services_date')),    // 57
-      escapeCSV(getFieldValue(property, '', 'prospectus_url', developer.website || '')), // 58 - adres_prospektu
+      escapeCSV(getMinistryFieldValue(property, '', 'other_services_type')),    // 55 - inne_swiadczenia_wyszczegolnienie
+      escapeCSV(getMinistryFieldValue(property, '', 'other_services_price')),   // 56
+      escapeCSV(getMinistryFieldValue(property, '', 'other_services_date')),    // 57
+      escapeCSV(getMinistryFieldValue(property, '', 'prospectus_url', undefined, developer.website || '')), // 58 - adres_prospektu
     ].join(';')  // TASK #83.3: Changed separator from comma to semicolon (Ministry requirement)
   })
 

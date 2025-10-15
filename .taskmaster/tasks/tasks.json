@@ -3214,7 +3214,7 @@
         "dependencies": [
           "87"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -3222,9 +3222,10 @@
             "description": "Create a unified field getter function that resolves ministry field values using manual_overrides, raw_csv_data, developer-level data, and default values in priority order.",
             "dependencies": [],
             "details": "Implement getMinistryFieldValue(ministryFieldName, property, developer?, defaultValue) to check property.manual_overrides, then property.raw_csv_data[0].raw_data, then developer.raw_csv_data (for developer fields), and finally defaultValue. Ensure the logic strictly follows the specified priority.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit test each priority tier and fallback logic with mock data for all input scenarios.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T09:17:48.516Z"
           },
           {
             "id": 2,
@@ -3234,9 +3235,10 @@
               1
             ],
             "details": "Identify all 59 field references in the data.csv route and update them to use getMinistryFieldValue. Ensure all usages of getDeveloperFieldValue and getFieldValue are replaced and no legacy calls remain.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Automated search for legacy function calls, manual verification of replacements, and regression testing of affected routes.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T09:24:25.555Z"
           },
           {
             "id": 3,
@@ -3246,9 +3248,10 @@
               1
             ],
             "details": "Integrate normalization (e.g., case insensitivity, whitespace trimming, alias mapping) into getMinistryFieldValue so that field lookups are robust against naming inconsistencies.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests for various column name formats, including edge cases and alias scenarios.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T09:24:27.715Z"
           },
           {
             "id": 4,
@@ -3279,7 +3282,8 @@
         ],
         "complexity": 7,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "Divide implementation into: 1) Designing the unified getMinistryFieldValue function, 2) Refactoring all field references to use the new function, 3) Removing legacy getter functions, 4) Writing unit tests for all priority tiers and fallback logic, 5) Validating with real CSV data and edge cases."
+        "expansionPrompt": "Divide implementation into: 1) Designing the unified getMinistryFieldValue function, 2) Refactoring all field references to use the new function, 3) Removing legacy getter functions, 4) Writing unit tests for all priority tiers and fallback logic, 5) Validating with real CSV data and edge cases.",
+        "updatedAt": "2025-10-15T09:24:27.715Z"
       },
       {
         "id": "89",
@@ -3584,7 +3588,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T09:14:46.832Z",
+      "lastModified": "2025-10-15T09:24:27.717Z",
       "taskCount": 60,
       "completedCount": 46,
       "tags": [
