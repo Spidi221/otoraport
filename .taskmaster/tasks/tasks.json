@@ -2941,7 +2941,7 @@
         "id": "84",
         "title": "Update Auto-Import to Always Overwrite Developer Data from CSV Uploads",
         "description": "Modify the auto-import logic so that CSV uploads always overwrite developer profile data, enabling fast, frictionless onboarding and eliminating the need for manual profile edits after upload.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "80",
           "83"
@@ -2969,9 +2969,10 @@
               1
             ],
             "details": "The codebase already uses SmartCSVParser and robust encoding detection (lines 274-282, 388-396) with proper validation. Ensure the existing validation in validateMinistryCompliance() (lines 291-330, 399-438) continues to work after the auto-import changes. Verify client-side validation remains intact.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test with valid and invalid CSV files (wrong type, too large, malformed data) to ensure only proper files are processed and errors are handled gracefully.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T09:44:04.428Z"
           },
           {
             "id": 3,
@@ -2981,9 +2982,10 @@
               1
             ],
             "details": "After the import process completes (around line 341-345), enhance the response object (lines 510-526) to include autoImportedFields count. Update the success message to inform users about profile updates, e.g., 'Profil dewelopera zaktualizowany z CSV (X pól)' when autoImportedFields > 0.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify that the notification appears after a successful upload and accurately reflects the number of fields updated.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:08:00.936Z"
           },
           {
             "id": 4,
@@ -2995,12 +2997,13 @@
               3
             ],
             "details": "Update the user guide to explain that CSV uploads now always overwrite developer profile data (except for empty fields), describe the notification feature, and provide best practices for preparing CSV files. Update API documentation to reflect the new autoImportedFields behavior in the response.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review documentation for completeness and clarity; have a non-developer follow the updated guide to verify accuracy.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:13:14.934Z"
           }
         ],
-        "updatedAt": "2025-10-14T16:52:31.106Z"
+        "updatedAt": "2025-10-15T10:13:14.934Z"
       },
       {
         "id": "85",
@@ -3214,7 +3217,7 @@
         "dependencies": [
           "87"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3262,9 +3265,10 @@
               3
             ],
             "details": "Create test cases covering manual overrides, raw CSV data, developer-level data, and default values. Include tests for missing data at each tier and for column normalization logic.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Automated unit test suite with coverage reports for all logical branches and fallback paths.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T09:32:28.895Z"
           },
           {
             "id": 5,
@@ -3275,15 +3279,16 @@
               4
             ],
             "details": "Load real-world CSV datasets and simulate edge cases (e.g., missing fields, conflicting overrides, developer-specific fields) to verify correct operation and error handling.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Integration tests with production-like CSV data, manual QA for edge cases, and verification of expected outputs.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T09:29:13.943Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 5,
         "expansionPrompt": "Divide implementation into: 1) Designing the unified getMinistryFieldValue function, 2) Refactoring all field references to use the new function, 3) Removing legacy getter functions, 4) Writing unit tests for all priority tiers and fallback logic, 5) Validating with real CSV data and edge cases.",
-        "updatedAt": "2025-10-15T09:24:27.715Z"
+        "updatedAt": "2025-10-15T09:32:28.895Z"
       },
       {
         "id": "89",
@@ -3295,7 +3300,7 @@
         "dependencies": [
           "88"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3303,9 +3308,10 @@
             "description": "Enumerate all 59 schema columns, specifying which are required, recommended, optional, and which are conditionally required based on business logic (e.g., nr_krs vs nr_ceidg depending on legal form).",
             "dependencies": [],
             "details": "Create a ruleset object or schema definition (e.g., using Zod or a custom structure) that clearly marks each field's validation requirements, including conditional logic for fields like nr_krs and nr_ceidg. Document the logic for maintainability.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review the ruleset for completeness and correctness against ministry documentation; peer review for logic accuracy.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:26:19.488Z"
           },
           {
             "id": 2,
@@ -3315,9 +3321,10 @@
               1
             ],
             "details": "For each field, implement regex or algorithmic checks as appropriate. Integrate these checks into the validateProperty function. Ensure extensibility for future format changes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit test each format validator with valid and invalid examples, including edge cases (e.g., malformed emails, short/long NIP/REGON).",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:26:20.373Z"
           },
           {
             "id": 3,
@@ -3328,9 +3335,10 @@
               2
             ],
             "details": "Add logic to check cross-field dependencies (e.g., at least one price field present). Build the ValidationResult structure to categorize missing fields by severity and include detailed error messages for each property.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test with sample data covering all business rules, including cases where multiple rules fail simultaneously. Verify ValidationResult structure matches requirements.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:26:21.237Z"
           },
           {
             "id": 4,
@@ -3340,14 +3348,16 @@
               3
             ],
             "details": "Create test cases for all 28 developer and 30 property required fields, conditional requirements, format errors, and business logic. Include tests for empty, malformed, and borderline-valid data.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run all tests and ensure 100% coverage of validation logic. Manually review test results for accuracy and completeness.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:26:22.136Z"
           }
         ],
         "complexity": 8,
         "recommendedSubtasks": 6,
-        "expansionPrompt": "Expand into: 1) Defining validation rules for required and conditionally required fields, 2) Implementing format validation for all field types, 3) Coding business logic checks, 4) Building the ValidationResult structure, 5) Writing comprehensive unit tests for edge cases, 6) Documenting validation logic for future maintenance."
+        "expansionPrompt": "Expand into: 1) Defining validation rules for required and conditionally required fields, 2) Implementing format validation for all field types, 3) Coding business logic checks, 4) Building the ValidationResult structure, 5) Writing comprehensive unit tests for edge cases, 6) Documenting validation logic for future maintenance.",
+        "updatedAt": "2025-10-15T10:26:22.136Z"
       },
       {
         "id": "90",
@@ -3359,7 +3369,7 @@
         "dependencies": [
           "89"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -3367,9 +3377,10 @@
             "description": "Define the GET /api/validation/missing-fields endpoint contract, including required query parameters, authentication, and detailed JSON response structure.",
             "dependencies": [],
             "details": "Specify the endpoint path, required query parameters (developerId), authentication requirements (e.g., JWT in Authorization header), and the full response schema: totalProperties, propertiesWithIssues, missingFieldsSummary, and detailed property breakdowns. Ensure the schema includes apartment numbers, missing field lists, and validation errors. Document the contract using OpenAPI/Swagger for clarity and future maintenance.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review OpenAPI/Swagger documentation for completeness and accuracy; validate schema with example payloads.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:32:53.700Z"
           },
           {
             "id": 2,
@@ -3398,7 +3409,8 @@
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on create missing fields detection api endpoint."
+        "expansionPrompt": "Break down this task with a focus on create missing fields detection api endpoint.",
+        "updatedAt": "2025-10-15T10:32:53.700Z"
       },
       {
         "id": "91",
@@ -3588,9 +3600,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T09:24:27.717Z",
+      "lastModified": "2025-10-15T10:32:53.701Z",
       "taskCount": 60,
-      "completedCount": 46,
+      "completedCount": 49,
       "tags": [
         "master"
       ]

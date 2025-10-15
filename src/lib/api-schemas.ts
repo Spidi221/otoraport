@@ -29,6 +29,9 @@ export const ParsedPropertySchema = z.object({
   area: z.union([z.string(), z.number()]).optional().nullable(),
   rooms: z.union([z.string(), z.number()]).optional().nullable(),
   floor: z.union([z.string(), z.number()]).optional().nullable(),
+  liczba_pokoi: z.union([z.string(), z.number()]).optional().nullable(), // Task #90.1: For ministry validation
+  kondygnacja: z.union([z.string(), z.number()]).optional().nullable(), // Task #90.1: For ministry validation
+  construction_year: z.union([z.string(), z.number()]).optional().nullable(), // Task #90.1: For ministry validation
 
   // Prices
   price_per_m2: z.union([z.string(), z.number()]).optional().nullable(),
@@ -63,6 +66,9 @@ export const ParsedPropertySchema = z.object({
 
   // Project info (for upload-parsed)
   project_name: z.string().optional(),
+
+  // Raw CSV data (Task #90.1: For ministry validation service)
+  raw_data: z.record(z.string(), z.unknown()).optional(),
 }).passthrough() // Allow additional fields from CSV
 
 export type ParsedProperty = z.infer<typeof ParsedPropertySchema>
@@ -145,6 +151,79 @@ export const ErrorResponseSchema = z.object({
 })
 
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>
+
+// ===================================
+// Validation API Schemas (Task #90.1)
+// ===================================
+
+/**
+ * Schema for validation missing-fields query params
+ */
+export const ValidationMissingFieldsQuerySchema = z.object({
+  developerId: z.string().uuid().optional(), // If missing, use authenticated user's developer
+})
+
+export type ValidationMissingFieldsQuery = z.infer<typeof ValidationMissingFieldsQuerySchema>
+
+/**
+ * Schema for field validation error from ministry-validation service
+ */
+export const FieldValidationErrorSchema = z.object({
+  field: z.string(),
+  message: z.string(),
+  severity: z.enum(['critical', 'warning', 'info']),
+  value: z.union([z.string(), z.number()]).optional(),
+})
+
+export type FieldValidationError = z.infer<typeof FieldValidationErrorSchema>
+
+/**
+ * Schema for property validation result in missing-fields response
+ */
+export const PropertyValidationItemSchema = z.object({
+  id: z.string().uuid(),
+  propertyNumber: z.string(),
+  address: z.string(),
+  status: z.enum(['valid', 'invalid']),
+  errors: z.array(FieldValidationErrorSchema),
+  warnings: z.array(FieldValidationErrorSchema),
+  missingRequired: z.array(z.string()),
+  missingRecommended: z.array(z.string()),
+  invalidFormats: z.array(z.string()),
+})
+
+export type PropertyValidationItem = z.infer<typeof PropertyValidationItemSchema>
+
+/**
+ * Schema for missing field summary entry
+ */
+export const MissingFieldSummaryEntrySchema = z.object({
+  count: z.number().int().nonnegative(),
+  percentage: z.number().min(0).max(100),
+  severity: z.enum(['critical', 'warning', 'info']),
+  fieldLabel: z.string(),
+})
+
+export type MissingFieldSummaryEntry = z.infer<typeof MissingFieldSummaryEntrySchema>
+
+/**
+ * Schema for validation missing-fields response
+ */
+export const ValidationMissingFieldsResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.object({
+    summary: z.object({
+      totalProperties: z.number().int().nonnegative(),
+      propertiesWithIssues: z.number().int().nonnegative(),
+      propertiesValid: z.number().int().nonnegative(),
+      complianceScore: z.number().int().min(0).max(100), // 0-100%
+    }),
+    missingFieldsSummary: z.record(z.string(), MissingFieldSummaryEntrySchema),
+    properties: z.array(PropertyValidationItemSchema),
+  }),
+})
+
+export type ValidationMissingFieldsResponse = z.infer<typeof ValidationMissingFieldsResponseSchema>
 
 // ===================================
 // Helper Functions
