@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
       .select(`
         id,
         developer_id,
-        property_number,
+        apartment_number,
         property_type,
         wojewodztwo,
         powiat,
@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
 
       return {
         // Basic identification
-        property_number: dbProp.property_number || undefined,
+        property_number: dbProp.apartment_number || undefined,
         property_type: dbProp.property_type || undefined,
 
         // Location (from database columns)
