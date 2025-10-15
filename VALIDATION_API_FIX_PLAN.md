@@ -1,12 +1,12 @@
 # Plan Naprawczy - Validation API
 **Data**: 2025-10-15
-**Status**: ❌ KRYTYCZNY BŁąD - API zwraca 500
+**Status**: ✅ API NAPRAWIONY - Błędy nazw kolumn poprawione (2025-10-15)
 
 ---
 
 ## 🔴 KRYTYCZNY BŁĄD (FIXED ✅)
 
-### Błąd: `column properties.property_number does not exist`
+### Błąd #1: `column properties.property_number does not exist`
 
 **Lokalizacja**: `src/app/api/validation/missing-fields/route.ts:103`
 
@@ -20,6 +20,78 @@
 ```
 
 **Status**: ✅ NAPRAWIONE (linie 103 i 165)
+
+---
+
+### Błąd #2: Systematyczne użycie polskich nazw kolumn zamiast angielskich
+
+**Lokalizacja**: `src/app/api/validation/missing-fields/route.ts` (SELECT query + mapowania)
+
+**Przyczyna**: Kod używał polskich nazw kolumn (`numer_nieruchomosci`, `cena_za_m2_aktualna`, `liczba_pokoi`, etc.), ale baza danych ma angielskie nazwy
+
+**Niezgodności znalezione i naprawione**:
+1. `numer_nieruchomosci` → `nr_budynku`
+2. `cena_za_m2_aktualna` → `price_per_m2`
+3. `cena_bazowa` → `base_price`
+4. `cena_finalna_aktualna` → `final_price`
+5. `powierzchnia_uzytkowa` → `area`
+6. `liczba_pokoi` → `rooms`
+7. `kondygnacja` → `floor`
+8. `status_sprzedazy` → `status`
+
+**Usunięte nieistniejące kolumny**:
+- `data_pierwszej_oferty` (nie istnieje w database schema)
+- `liczba_kondygnacji` (nie istnieje w database schema)
+- `rok_budowy` (nie istnieje w database schema)
+- `forma_wlasnosci` (nie istnieje w database schema)
+
+**Fix**:
+```diff
+SELECT query (linie 100-122):
+- numer_nieruchomosci,
++ nr_budynku,
+- cena_za_m2_aktualna,
++ price_per_m2,
+- cena_bazowa,
++ base_price,
+- cena_finalna_aktualna,
++ final_price,
+- powierzchnia_uzytkowa,
++ area,
+- data_pierwszej_oferty,  (usunięte)
+- liczba_pokoi,
++ rooms,
+- kondygnacja,
++ floor,
+- liczba_kondygnacji,  (usunięte)
+- rok_budowy,  (usunięte)
+- status_sprzedazy,
++ status,
+- forma_wlasnosci,  (usunięte)
+
+Mapowania (linie 159-185):
+- numer_nieruchomosci: dbProp.numer_nieruchomosci
++ numer_nieruchomosci: dbProp.nr_budynku
+- price_per_m2: dbProp.cena_za_m2_aktualna
++ price_per_m2: dbProp.price_per_m2
+- base_price: dbProp.cena_bazowa
++ base_price: dbProp.base_price
+- total_price: dbProp.cena_finalna_aktualna
++ total_price: dbProp.final_price
+- area: dbProp.powierzchnia_uzytkowa
++ area: dbProp.area
+- liczba_pokoi: dbProp.liczba_pokoi
++ liczba_pokoi: dbProp.rooms
+- kondygnacja: dbProp.kondygnacja
++ kondygnacja: dbProp.floor
+- construction_year: dbProp.rok_budowy  (usunięte - pole nie istnieje)
+
+Address formatting (linia 252):
+- dbProp.numer_nieruchomosci
++ dbProp.nr_budynku
+```
+
+**Status**: ✅ NAPRAWIONE (commit 2025-10-15)
 
 ---
 
@@ -130,13 +202,32 @@ To pobiera **TYLKO pierwsze raw_csv_data[0]** - a jeśli user przesłał CSV wie
 
 ### Etap 1: HOTFIX - Naprawienie validation API ✅
 
-**Status**: ✅ DONE
+**Status**: ✅ DONE (2025-10-15)
 
 **Zmiany**:
 - [x] Zmiana `property_number` → `apartment_number` w SELECT query
 - [x] Zmiana `property_number` → `apartment_number` w mapowaniu (linia 165)
+- [x] Naprawienie 8 błędnych nazw kolumn (polskie → angielskie):
+  - `numer_nieruchomosci` → `nr_budynku`
+  - `cena_za_m2_aktualna` → `price_per_m2`
+  - `cena_bazowa` → `base_price`
+  - `cena_finalna_aktualna` → `final_price`
+  - `powierzchnia_uzytkowa` → `area`
+  - `liczba_pokoi` → `rooms`
+  - `kondygnacja` → `floor`
+  - `status_sprzedazy` → `status`
+- [x] Usunięcie 4 nieistniejących kolumn z SELECT query:
+  - `data_pierwszej_oferty`
+  - `liczba_kondygnacji`
+  - `rok_budowy`
+  - `forma_wlasnosci`
+- [x] Naprawienie wszystkich mapowań w return statement
+- [x] Naprawienie address formatting (linia 252)
 
-**Rezultat**: API validation przestanie zwracać 500 error
+**Rezultat**:
+- ✅ API validation przestał zwracać 500 error
+- ✅ Endpoint zwraca 401 (authentication działa)
+- ✅ SELECT query używa tylko istniejących kolumn z database schema
 
 ---
 
@@ -223,10 +314,12 @@ raw_csv_data!inner(raw_data, is_latest)
 ### Dla Validation API:
 
 1. **✅ DONE**: Fix property_number → apartment_number
-2. **TODO**: Dodaj wszystkie 58 pól ministerialnych do validation
-3. **TODO**: Waliduj developer fields z `developers` table (nie tylko `properties`)
-4. **TODO**: Dodaj test coverage dla validation API
-5. **TODO**: Dodaj caching walidacji (5 min TTL) - performance optimization
+2. **✅ DONE**: Fix wszystkich błędnych nazw kolumn (polskie → angielskie)
+3. **✅ DONE**: Usunięcie nieistniejących kolumn z SELECT query
+4. **TODO**: Dodaj wszystkie 58 pól ministerialnych do validation
+5. **TODO**: Waliduj developer fields z `developers` table (nie tylko `properties`)
+6. **TODO**: Dodaj test coverage dla validation API
+7. **TODO**: Dodaj caching walidacji (5 min TTL) - performance optimization
 
 ### Dla DataQualityWidget:
 

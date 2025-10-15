@@ -107,19 +107,15 @@ export async function GET(request: NextRequest) {
         gmina,
         miejscowosc,
         ulica,
-        numer_nieruchomosci,
+        nr_budynku,
         kod_pocztowy,
-        cena_za_m2_aktualna,
-        cena_bazowa,
-        cena_finalna_aktualna,
-        powierzchnia_uzytkowa,
-        data_pierwszej_oferty,
-        liczba_pokoi,
-        kondygnacja,
-        liczba_kondygnacji,
-        rok_budowy,
-        status_sprzedazy,
-        forma_wlasnosci,
+        price_per_m2,
+        base_price,
+        final_price,
+        area,
+        rooms,
+        floor,
+        status,
         raw_csv_data(raw_data)
       `)
       .eq('developer_id', developerId)
@@ -171,19 +167,18 @@ export async function GET(request: NextRequest) {
         gmina: dbProp.gmina || undefined,
         miejscowosc: dbProp.miejscowosc || undefined,
         ulica: dbProp.ulica || undefined,
-        numer_nieruchomosci: dbProp.numer_nieruchomosci || undefined,
+        numer_nieruchomosci: dbProp.nr_budynku || undefined,
         kod_pocztowy: dbProp.kod_pocztowy || undefined,
 
         // Pricing (from database columns)
-        price_per_m2: dbProp.cena_za_m2_aktualna || undefined,
-        base_price: dbProp.cena_bazowa || undefined,
-        total_price: dbProp.cena_finalna_aktualna || undefined,
-        area: dbProp.powierzchnia_uzytkowa || undefined,
+        price_per_m2: dbProp.price_per_m2 || undefined,
+        base_price: dbProp.base_price || undefined,
+        total_price: dbProp.final_price || undefined,
+        area: dbProp.area || undefined,
 
         // Additional fields
-        liczba_pokoi: dbProp.liczba_pokoi || undefined,
-        kondygnacja: dbProp.kondygnacja || undefined,
-        construction_year: dbProp.rok_budowy || undefined,
+        liczba_pokoi: dbProp.rooms || undefined,
+        kondygnacja: dbProp.floor || undefined,
 
         // Raw CSV data (contains ALL ministry fields including developer info)
         raw_data: rawCsvData as Record<string, unknown>,
@@ -254,7 +249,7 @@ export async function GET(request: NextRequest) {
       const addressParts = [
         dbProp.miejscowosc,
         dbProp.ulica,
-        dbProp.numer_nieruchomosci,
+        dbProp.nr_budynku,
       ].filter(Boolean)
 
       const address = addressParts.length > 0
