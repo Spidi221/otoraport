@@ -91,9 +91,6 @@ export async function GET(
       return new NextResponse('Developer not found', { status: 404 })
     }
 
-    // TASK #86.1: DEBUG LOGGING - Before LEFT JOIN
-    console.log(`[DEBUG #86.1] Before LEFT JOIN - Developer ID: ${developer.id}, Client ID: ${clientId}`)
-
     // TASK #81.9: Get all properties WITH raw_csv_data for preserving source data
     // Use LEFT JOIN to include manually added properties (without CSV)
     const { data: properties, error: propsError } = await supabase
@@ -114,28 +111,6 @@ export async function GET(
       return new NextResponse(`Error fetching properties: ${propsError.message}`, { status: 500 })
     }
 
-    // TASK #86.1: DEBUG LOGGING - After LEFT JOIN
-    console.log(`[DEBUG #86.1] After LEFT JOIN - Found ${properties?.length || 0} properties`)
-    if (properties && properties.length > 0) {
-      const firstProp = properties[0]
-      console.log(`[DEBUG #86.1] First property ID: ${firstProp.id}, Apartment: ${firstProp.apartment_number}`)
-      console.log(`[DEBUG #86.1] First property has raw_csv_data:`, firstProp.raw_csv_data ? 'YES' : 'NO')
-      if (firstProp.raw_csv_data) {
-        console.log(`[DEBUG #86.1] raw_csv_data array length:`, Array.isArray(firstProp.raw_csv_data) ? firstProp.raw_csv_data.length : 'NOT AN ARRAY')
-        if (Array.isArray(firstProp.raw_csv_data) && firstProp.raw_csv_data.length > 0) {
-          const firstRaw = firstProp.raw_csv_data[0]
-          console.log(`[DEBUG #86.1] First raw_csv_data entry:`, {
-            has_raw_data: !!firstRaw.raw_data,
-            is_latest: firstRaw.is_latest,
-            raw_data_keys_count: firstRaw.raw_data ? Object.keys(firstRaw.raw_data).length : 0,
-            sample_keys: firstRaw.raw_data ? Object.keys(firstRaw.raw_data).slice(0, 5) : []
-          })
-        }
-      }
-    } else {
-      console.log(`[DEBUG #86.1] No properties found for developer ${developer.id}`)
-    }
-
     // TASK #81.9: Filter to only latest raw_csv_data version (if exists)
     const propertiesWithLatestRaw = (properties || []).map(prop => {
       if (Array.isArray(prop.raw_csv_data) && prop.raw_csv_data.length > 0) {
@@ -148,14 +123,6 @@ export async function GET(
       }
       return prop
     })
-
-    // TASK #86.1: DEBUG LOGGING - After filtering to latest
-    const propsWithRaw = propertiesWithLatestRaw.filter(p => p.raw_csv_data && p.raw_csv_data.length > 0)
-    console.log(`[DEBUG #86.1] After is_latest filter - ${propsWithRaw.length}/${propertiesWithLatestRaw.length} properties have raw_csv_data`)
-    if (propsWithRaw.length > 0 && propsWithRaw[0].raw_csv_data?.[0]?.raw_data) {
-      const sampleKeys = Object.keys(propsWithRaw[0].raw_csv_data[0].raw_data).slice(0, 10)
-      console.log(`[DEBUG #86.1] Sample raw_data keys from first property:`, sampleKeys)
-    }
 
     // Generate CSV with 59 ministry fields (preserving raw CSV data)
     const csvContent = generateMinistryCSV(developer, propertiesWithLatestRaw)
@@ -239,27 +206,10 @@ function generateMinistryCSV(developer: Developer, properties: PropertyWithRawDa
    * TASK #85.1: Get developer field value with priority: raw CSV > developer table > default
    * Uses first property's raw_csv_data (developer fields are same across all properties from one CSV)
    */
-  let debugLoggedOnce = false // TASK #86.1: Flag to log only once
   const getDeveloperFieldValue = (ministryFieldName: string, developerFieldName: keyof Developer, defaultValue: string = ''): string => {
     // Get first property's raw_csv_data (developer fields are same for all properties)
     const firstProperty = properties[0]
     const rawData = firstProperty?.raw_csv_data?.[0]?.raw_data || {}
-
-    // TASK #86.1: DEBUG LOGGING - First call only
-    if (!debugLoggedOnce) {
-      debugLoggedOnce = true
-      console.log(`[DEBUG #86.1] getDeveloperFieldValue - First call`)
-      console.log(`[DEBUG #86.1] - firstProperty exists:`, !!firstProperty)
-      console.log(`[DEBUG #86.1] - firstProperty.raw_csv_data exists:`, !!firstProperty?.raw_csv_data)
-      console.log(`[DEBUG #86.1] - raw_csv_data is array:`, Array.isArray(firstProperty?.raw_csv_data))
-      console.log(`[DEBUG #86.1] - rawData keys count:`, Object.keys(rawData).length)
-      console.log(`[DEBUG #86.1] - rawData sample keys:`, Object.keys(rawData).slice(0, 10))
-      console.log(`[DEBUG #86.1] - Looking for ministry field: "${ministryFieldName}"`)
-      console.log(`[DEBUG #86.1] - Field exists in rawData:`, ministryFieldName in rawData)
-      if (ministryFieldName in rawData) {
-        console.log(`[DEBUG #86.1] - Field value:`, rawData[ministryFieldName])
-      }
-    }
 
     // 1. Try raw CSV data (PRIMARY SOURCE)
     if (ministryFieldName) {

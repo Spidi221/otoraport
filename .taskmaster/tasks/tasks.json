@@ -3090,7 +3090,7 @@
         "testStrategy": "Add console.log statements to trace raw_csv_data lookups, verify data exists in database with direct SQL queries, test export with user's CSV file, compare exported CSV columns J-AA with uploaded CSV data",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3111,10 +3111,10 @@
               1
             ],
             "details": "Check that the JOIN condition matches the correct columns and that foreign keys exist and are indexed. Use EXPLAIN or similar tools to inspect the query plan. Confirm that the JOIN does not unintentionally filter out rows or return nulls due to incorrect keys or missing relationships.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Run the JOIN query directly in the database with sample data, verify that expected rows are returned, and inspect the execution plan for anomalies.",
             "parentId": "undefined",
-            "updatedAt": "2025-10-15T08:33:24.773Z"
+            "updatedAt": "2025-10-15T08:36:16.625Z"
           },
           {
             "id": 3,
@@ -3124,9 +3124,10 @@
               2
             ],
             "details": "Review the SQL WHERE or ON clause to confirm that is_latest is filtered in a way that preserves the intended rows. Test with and without the filter to observe its effect on the result set. Adjust the filter placement if necessary to avoid excluding valid JOIN results.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Modify test data to include both is_latest=true and is_latest=false records, run the export, and confirm only the correct records are joined and exported.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T08:52:13.824Z"
           },
           {
             "id": 4,
@@ -3136,15 +3137,16 @@
               3
             ],
             "details": "After implementing fixes, perform an end-to-end test of the CSV export. Inspect columns J-AA and AX-BE in the output to ensure they contain the expected data. Compare against the source data and check that getDeveloperFieldValue receives populated raw_data objects.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Export a CSV with known populated data, open the file, and verify that all relevant columns are filled. Cross-check with the database to ensure accuracy.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T08:52:15.905Z"
           }
         ],
         "complexity": 6,
         "recommendedSubtasks": 4,
         "expansionPrompt": "Break down the debugging process into: 1) Adding logging to trace JOIN queries, 2) Verifying SQL JOIN syntax and foreign key relationships, 3) Checking is_latest filter logic, 4) Testing with real user data and confirming output.",
-        "updatedAt": "2025-10-15T08:33:24.773Z"
+        "updatedAt": "2025-10-15T08:52:15.905Z"
       },
       {
         "id": "87",
@@ -3578,9 +3580,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T08:33:24.775Z",
+      "lastModified": "2025-10-15T08:52:15.906Z",
       "taskCount": 60,
-      "completedCount": 44,
+      "completedCount": 45,
       "tags": [
         "master"
       ]
