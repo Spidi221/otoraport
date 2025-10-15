@@ -3369,7 +3369,7 @@
         "dependencies": [
           "89"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3403,15 +3403,16 @@
               2
             ],
             "details": "Update the dashboard to call the new API endpoint, parse the response, and display validation summaries and detailed warnings per property. Ensure users can easily identify and act on missing required fields. Provide clear UI feedback for properties with issues and support for large datasets. Coordinate with frontend developers to ensure seamless integration.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "End-to-end test with dashboard UI; verify warnings display correctly for various data scenarios; test usability with large property lists.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T10:42:40.636Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on create missing fields detection api endpoint.",
-        "updatedAt": "2025-10-15T10:35:16.693Z"
+        "updatedAt": "2025-10-15T10:42:40.636Z"
       },
       {
         "id": "91",
@@ -3601,9 +3602,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T10:35:16.694Z",
+      "lastModified": "2025-10-15T10:42:40.637Z",
       "taskCount": 60,
-      "completedCount": 49,
+      "completedCount": 50,
       "tags": [
         "master"
       ]

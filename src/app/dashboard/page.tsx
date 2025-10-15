@@ -15,6 +15,7 @@ const ProjectsList = lazy(() => import("@/components/dashboard/projects-list").t
 const PropertiesTable = lazy(() => import("@/components/dashboard/properties-table").then(m => ({ default: m.PropertiesTable })));
 const ChatWidget = lazy(() => import("@/components/ChatWidget").then(m => ({ default: m.ChatWidget })));
 const StatisticsCards = lazy(() => import("@/components/dashboard/statistics-cards").then(m => ({ default: m.StatisticsCards })));
+const DataQualityWidget = lazy(() => import("@/components/dashboard/data-quality-widget").then(m => ({ default: m.DataQualityWidget })));
 
 export default function HomePage() {
   // Use unified auth hook
@@ -76,6 +77,11 @@ export default function HomePage() {
           {/* Statistics Cards */}
           <Suspense fallback={<LoadingState message="Ładowanie statystyk..." />}>
             <StatisticsCards />
+          </Suspense>
+
+          {/* Data Quality Widget */}
+          <Suspense fallback={<LoadingState message="Ładowanie walidacji..." />}>
+            <DataQualityWidget />
           </Suspense>
 
           {/* Upload Widget */}
