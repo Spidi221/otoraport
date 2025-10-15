@@ -12,33 +12,115 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
+      admin_audit_logs: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          target_user_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target_user_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target_user_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      admin_roles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          changes: Json | null
+          created_at: string
+          developer_id: string | null
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          changes?: Json | null
+          created_at?: string
+          developer_id?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          changes?: Json | null
+          created_at?: string
+          developer_id?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       csv_generation_logs: {
         Row: {
           csv_url: string | null
@@ -92,14 +174,27 @@ export type Database = {
       developers: {
         Row: {
           additional_contact_info: string | null
+          additional_projects_count: number
           additional_sales_locations: string | null
+          address: string | null
+          branding_logo_url: string | null
+          branding_primary_color: string | null
+          branding_secondary_color: string | null
           ceidg_number: string | null
           client_id: string
           company_name: string
           contact_method: string | null
           created_at: string | null
           csv_url: string | null
+          custom_domain: string | null
+          custom_domain_added_to_vercel: boolean
+          custom_domain_dns_configured: boolean
+          custom_domain_registered_at: string | null
+          custom_domain_verification_token: string | null
+          custom_domain_verified: boolean
+          custom_domain_verified_at: string | null
           email: string
+          email_notifications_enabled: boolean
           headquarters_apartment_number: string | null
           headquarters_building_number: string | null
           headquarters_city: string | null
@@ -109,11 +204,16 @@ export type Database = {
           headquarters_street: string | null
           headquarters_voivodeship: string | null
           id: string
+          is_admin: boolean
           krs_number: string | null
           last_login_at: string | null
+          last_trial_email_sent: string | null
           legal_form: string | null
           md5_url: string | null
           nip: string
+          notification_frequency: string
+          onboarding_completed: boolean
+          payment_method_attached: boolean
           phone: string | null
           regon: string | null
           sales_office_apartment_number: string | null
@@ -126,45 +226,44 @@ export type Database = {
           sales_office_voivodeship: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
+          subdomain: string | null
+          subscription_current_period_end: string | null
           subscription_ends_at: string | null
           subscription_plan: string | null
           subscription_starts_at: string | null
-          subscription_status: 'trialing' | 'active' | 'inactive' | 'cancelled' | 'expired' | 'past_due' | null
+          subscription_status: string | null
+          tax_id: string | null
           trial_ends_at: string | null
-          trial_status: 'active' | 'expired' | 'converted' | 'cancelled'
-          trial_stage: 'day_0' | 'day_7' | 'day_11' | 'day_14_success' | 'day_14_failed' | 'completed' | null
-          last_trial_email_sent: string | null
-          current_period_end: string | null
+          trial_stage: Database["public"]["Enums"]["trial_stage_enum"] | null
+          trial_status: Database["public"]["Enums"]["trial_status_enum"]
           updated_at: string | null
           user_id: string | null
           website: string | null
           xml_url: string | null
-          email_notifications_enabled: boolean
-          notification_frequency: 'daily' | 'weekly' | 'never'
-          is_admin: boolean
-          additional_projects_count: number
-          subdomain: string | null
-          branding_logo_url: string | null
-          branding_primary_color: string | null
-          branding_secondary_color: string | null
-          custom_domain: string | null
-          custom_domain_verified: boolean
-          custom_domain_verification_token: string | null
-          custom_domain_added_to_vercel: boolean
-          custom_domain_dns_configured: boolean
-          custom_domain_registered_at: string | null
-          custom_domain_verified_at: string | null
         }
         Insert: {
           additional_contact_info?: string | null
+          additional_projects_count?: number
           additional_sales_locations?: string | null
+          address?: string | null
+          branding_logo_url?: string | null
+          branding_primary_color?: string | null
+          branding_secondary_color?: string | null
           ceidg_number?: string | null
           client_id: string
           company_name: string
           contact_method?: string | null
           created_at?: string | null
           csv_url?: string | null
+          custom_domain?: string | null
+          custom_domain_added_to_vercel?: boolean
+          custom_domain_dns_configured?: boolean
+          custom_domain_registered_at?: string | null
+          custom_domain_verification_token?: string | null
+          custom_domain_verified?: boolean
+          custom_domain_verified_at?: string | null
           email: string
+          email_notifications_enabled?: boolean
           headquarters_apartment_number?: string | null
           headquarters_building_number?: string | null
           headquarters_city?: string | null
@@ -174,11 +273,16 @@ export type Database = {
           headquarters_street?: string | null
           headquarters_voivodeship?: string | null
           id?: string
+          is_admin?: boolean
           krs_number?: string | null
           last_login_at?: string | null
+          last_trial_email_sent?: string | null
           legal_form?: string | null
           md5_url?: string | null
           nip: string
+          notification_frequency?: string
+          onboarding_completed?: boolean
+          payment_method_attached?: boolean
           phone?: string | null
           regon?: string | null
           sales_office_apartment_number?: string | null
@@ -191,45 +295,44 @@ export type Database = {
           sales_office_voivodeship?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          subdomain?: string | null
+          subscription_current_period_end?: string | null
           subscription_ends_at?: string | null
           subscription_plan?: string | null
           subscription_starts_at?: string | null
-          subscription_status?: 'trialing' | 'active' | 'inactive' | 'cancelled' | 'expired' | 'past_due' | null
+          subscription_status?: string | null
+          tax_id?: string | null
           trial_ends_at?: string | null
-          trial_status?: 'active' | 'expired' | 'converted' | 'cancelled'
-          trial_stage?: 'day_0' | 'day_7' | 'day_11' | 'day_14_success' | 'day_14_failed' | 'completed' | null
-          last_trial_email_sent?: string | null
-          current_period_end?: string | null
+          trial_stage?: Database["public"]["Enums"]["trial_stage_enum"] | null
+          trial_status?: Database["public"]["Enums"]["trial_status_enum"]
           updated_at?: string | null
           user_id?: string | null
           website?: string | null
           xml_url?: string | null
-          email_notifications_enabled?: boolean
-          notification_frequency?: 'daily' | 'weekly' | 'never'
-          is_admin?: boolean
-          additional_projects_count?: number
-          subdomain?: string | null
-          branding_logo_url?: string | null
-          branding_primary_color?: string | null
-          branding_secondary_color?: string | null
-          custom_domain?: string | null
-          custom_domain_verified?: boolean
-          custom_domain_verification_token?: string | null
-          custom_domain_added_to_vercel?: boolean
-          custom_domain_dns_configured?: boolean
-          custom_domain_registered_at?: string | null
-          custom_domain_verified_at?: string | null
         }
         Update: {
           additional_contact_info?: string | null
+          additional_projects_count?: number
           additional_sales_locations?: string | null
+          address?: string | null
+          branding_logo_url?: string | null
+          branding_primary_color?: string | null
+          branding_secondary_color?: string | null
           ceidg_number?: string | null
           client_id?: string
           company_name?: string
           contact_method?: string | null
           created_at?: string | null
           csv_url?: string | null
+          custom_domain?: string | null
+          custom_domain_added_to_vercel?: boolean
+          custom_domain_dns_configured?: boolean
+          custom_domain_registered_at?: string | null
+          custom_domain_verification_token?: string | null
+          custom_domain_verified?: boolean
+          custom_domain_verified_at?: string | null
           email?: string
+          email_notifications_enabled?: boolean
           headquarters_apartment_number?: string | null
           headquarters_building_number?: string | null
           headquarters_city?: string | null
@@ -239,11 +342,16 @@ export type Database = {
           headquarters_street?: string | null
           headquarters_voivodeship?: string | null
           id?: string
+          is_admin?: boolean
           krs_number?: string | null
           last_login_at?: string | null
+          last_trial_email_sent?: string | null
           legal_form?: string | null
           md5_url?: string | null
           nip?: string
+          notification_frequency?: string
+          onboarding_completed?: boolean
+          payment_method_attached?: boolean
           phone?: string | null
           regon?: string | null
           sales_office_apartment_number?: string | null
@@ -256,66 +364,130 @@ export type Database = {
           sales_office_voivodeship?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          subdomain?: string | null
+          subscription_current_period_end?: string | null
           subscription_ends_at?: string | null
           subscription_plan?: string | null
           subscription_starts_at?: string | null
-          subscription_status?: 'trialing' | 'active' | 'inactive' | 'cancelled' | 'expired' | 'past_due' | null
+          subscription_status?: string | null
+          tax_id?: string | null
           trial_ends_at?: string | null
-          trial_status?: 'active' | 'expired' | 'converted' | 'cancelled'
-          trial_stage?: 'day_0' | 'day_7' | 'day_11' | 'day_14_success' | 'day_14_failed' | 'completed' | null
-          last_trial_email_sent?: string | null
-          current_period_end?: string | null
+          trial_stage?: Database["public"]["Enums"]["trial_stage_enum"] | null
+          trial_status?: Database["public"]["Enums"]["trial_status_enum"]
           updated_at?: string | null
           user_id?: string | null
           website?: string | null
           xml_url?: string | null
-          email_notifications_enabled?: boolean
-          notification_frequency?: 'daily' | 'weekly' | 'never'
-          is_admin?: boolean
-          additional_projects_count?: number
-          subdomain?: string | null
-          branding_logo_url?: string | null
-          branding_primary_color?: string | null
-          branding_secondary_color?: string | null
-          custom_domain?: string | null
-          custom_domain_verified?: boolean
-          custom_domain_verification_token?: string | null
-          custom_domain_added_to_vercel?: boolean
-          custom_domain_dns_configured?: boolean
-          custom_domain_registered_at?: string | null
-          custom_domain_verified_at?: string | null
+        }
+        Relationships: []
+      }
+      health_checks: {
+        Row: {
+          checked_at: string
+          component: string
+          created_at: string
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          response_time_ms: number | null
+          status: string
+        }
+        Insert: {
+          checked_at?: string
+          component: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          response_time_ms?: number | null
+          status: string
+        }
+        Update: {
+          checked_at?: string
+          component?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          response_time_ms?: number | null
+          status?: string
+        }
+        Relationships: []
+      }
+      incidents: {
+        Row: {
+          affected_components: string[]
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          resolved_at: string | null
+          severity: string
+          started_at: string
+          status: string
+          title: string
+          updated_at: string
+          updates: Json | null
+        }
+        Insert: {
+          affected_components?: string[]
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          resolved_at?: string | null
+          severity: string
+          started_at: string
+          status: string
+          title: string
+          updated_at?: string
+          updates?: Json | null
+        }
+        Update: {
+          affected_components?: string[]
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          resolved_at?: string | null
+          severity?: string
+          started_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          updates?: Json | null
         }
         Relationships: []
       }
       notifications: {
         Row: {
-          id: string
+          created_at: string
           developer_id: string
-          type: 'upload_complete' | 'upload_error' | 'ministry_sync' | 'system_announcement'
-          title: string
+          id: string
           message: string
           read: boolean
-          created_at: string
+          title: string
+          type: string
           updated_at: string
         }
         Insert: {
-          id?: string
+          created_at?: string
           developer_id: string
-          type: 'upload_complete' | 'upload_error' | 'ministry_sync' | 'system_announcement'
-          title: string
+          id?: string
           message: string
           read?: boolean
-          created_at?: string
+          title: string
+          type: string
           updated_at?: string
         }
         Update: {
-          id?: string
+          created_at?: string
           developer_id?: string
-          type?: 'upload_complete' | 'upload_error' | 'ministry_sync' | 'system_announcement'
-          title?: string
+          id?: string
           message?: string
           read?: boolean
-          created_at?: string
+          title?: string
+          type?: string
           updated_at?: string
         }
         Relationships: [
@@ -328,60 +500,36 @@ export type Database = {
           },
         ]
       }
-      admin_roles: {
+      onboarding_progress: {
         Row: {
-          id: string
-          user_id: string
-          role: 'super_admin' | 'admin' | 'support'
+          completed_steps: number[]
           created_at: string
-          created_by: string | null
+          current_step: number
+          has_csv: boolean
+          has_logo: boolean
+          skipped_steps: number[]
+          updated_at: string
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          role: 'super_admin' | 'admin' | 'support'
+          completed_steps?: number[]
           created_at?: string
-          created_by?: string | null
+          current_step?: number
+          has_csv?: boolean
+          has_logo?: boolean
+          skipped_steps?: number[]
+          updated_at?: string
+          user_id: string
         }
         Update: {
-          id?: string
+          completed_steps?: number[]
+          created_at?: string
+          current_step?: number
+          has_csv?: boolean
+          has_logo?: boolean
+          skipped_steps?: number[]
+          updated_at?: string
           user_id?: string
-          role?: 'super_admin' | 'admin' | 'support'
-          created_at?: string
-          created_by?: string | null
-        }
-        Relationships: []
-      }
-      admin_audit_logs: {
-        Row: {
-          id: string
-          admin_user_id: string
-          action: string
-          target_user_id: string | null
-          details: any | null
-          ip_address: string | null
-          user_agent: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          admin_user_id: string
-          action: string
-          target_user_id?: string | null
-          details?: any | null
-          ip_address?: string | null
-          user_agent?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          admin_user_id?: string
-          action?: string
-          target_user_id?: string | null
-          details?: any | null
-          ip_address?: string | null
-          user_agent?: string | null
-          created_at?: string
         }
         Relationships: []
       }
@@ -434,60 +582,60 @@ export type Database = {
       }
       price_history: {
         Row: {
-          id: string
-          property_id: string
-          developer_id: string
-          old_base_price: number | null
-          new_base_price: number | null
-          old_final_price: number | null
-          new_final_price: number | null
-          old_price_per_m2: number | null
-          new_price_per_m2: number | null
           change_reason: string | null
           changed_at: string
           created_by: string | null
+          developer_id: string
+          id: string
+          new_base_price: number | null
+          new_final_price: number | null
+          new_price_per_m2: number | null
+          old_base_price: number | null
+          old_final_price: number | null
+          old_price_per_m2: number | null
+          property_id: string
         }
         Insert: {
-          id?: string
-          property_id: string
-          developer_id: string
-          old_base_price?: number | null
-          new_base_price?: number | null
-          old_final_price?: number | null
-          new_final_price?: number | null
-          old_price_per_m2?: number | null
-          new_price_per_m2?: number | null
           change_reason?: string | null
           changed_at?: string
           created_by?: string | null
+          developer_id: string
+          id?: string
+          new_base_price?: number | null
+          new_final_price?: number | null
+          new_price_per_m2?: number | null
+          old_base_price?: number | null
+          old_final_price?: number | null
+          old_price_per_m2?: number | null
+          property_id: string
         }
         Update: {
-          id?: string
-          property_id?: string
-          developer_id?: string
-          old_base_price?: number | null
-          new_base_price?: number | null
-          old_final_price?: number | null
-          new_final_price?: number | null
-          old_price_per_m2?: number | null
-          new_price_per_m2?: number | null
           change_reason?: string | null
           changed_at?: string
           created_by?: string | null
+          developer_id?: string
+          id?: string
+          new_base_price?: number | null
+          new_final_price?: number | null
+          new_price_per_m2?: number | null
+          old_base_price?: number | null
+          old_final_price?: number | null
+          old_price_per_m2?: number | null
+          property_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "price_history_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "price_history_developer_id_fkey"
             columns: ["developer_id"]
             isOneToOne: false
             referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_history_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
         ]
@@ -509,6 +657,7 @@ export type Database = {
           postal_code: string | null
           presentation_enabled: boolean | null
           slug: string
+          status: Database["public"]["Enums"]["project_status"]
           street: string | null
           updated_at: string | null
           voivodeship: string | null
@@ -529,6 +678,7 @@ export type Database = {
           postal_code?: string | null
           presentation_enabled?: boolean | null
           slug: string
+          status?: Database["public"]["Enums"]["project_status"]
           street?: string | null
           updated_at?: string | null
           voivodeship?: string | null
@@ -549,6 +699,7 @@ export type Database = {
           postal_code?: string | null
           presentation_enabled?: boolean | null
           slug?: string
+          status?: Database["public"]["Enums"]["project_status"]
           street?: string | null
           updated_at?: string | null
           voivodeship?: string | null
@@ -577,6 +728,7 @@ export type Database = {
           gmina: string
           id: string
           kod_pocztowy: string | null
+          manual_overrides: Json | null
           miejscowosc: string | null
           necessary_rights_date: string | null
           necessary_rights_description: string | null
@@ -596,7 +748,7 @@ export type Database = {
           property_type: string | null
           prospectus_url: string | null
           rooms: number | null
-          status: string | null
+          status: Database["public"]["Enums"]["property_status"]
           storage_date: string | null
           storage_designation: string | null
           storage_price: number | null
@@ -618,6 +770,7 @@ export type Database = {
           gmina: string
           id?: string
           kod_pocztowy?: string | null
+          manual_overrides?: Json | null
           miejscowosc?: string | null
           necessary_rights_date?: string | null
           necessary_rights_description?: string | null
@@ -637,7 +790,7 @@ export type Database = {
           property_type?: string | null
           prospectus_url?: string | null
           rooms?: number | null
-          status?: string | null
+          status?: Database["public"]["Enums"]["property_status"]
           storage_date?: string | null
           storage_designation?: string | null
           storage_price?: number | null
@@ -659,6 +812,7 @@ export type Database = {
           gmina?: string
           id?: string
           kod_pocztowy?: string | null
+          manual_overrides?: Json | null
           miejscowosc?: string | null
           necessary_rights_date?: string | null
           necessary_rights_description?: string | null
@@ -678,7 +832,7 @@ export type Database = {
           property_type?: string | null
           prospectus_url?: string | null
           rooms?: number | null
-          status?: string | null
+          status?: Database["public"]["Enums"]["property_status"]
           storage_date?: string | null
           storage_designation?: string | null
           storage_price?: number | null
@@ -704,12 +858,165 @@ export type Database = {
           },
         ]
       }
+      raw_csv_data: {
+        Row: {
+          created_at: string | null
+          developer_id: string | null
+          file_name: string
+          id: string
+          is_latest: boolean
+          project_id: string | null
+          property_id: string | null
+          raw_data: Json
+          row_number: number | null
+          updated_at: string | null
+          uploaded_at: string | null
+          version: number
+        }
+        Insert: {
+          created_at?: string | null
+          developer_id?: string | null
+          file_name: string
+          id?: string
+          is_latest?: boolean
+          project_id?: string | null
+          property_id?: string | null
+          raw_data: Json
+          row_number?: number | null
+          updated_at?: string | null
+          uploaded_at?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string | null
+          developer_id?: string | null
+          file_name?: string
+          id?: string
+          is_latest?: boolean
+          project_id?: string | null
+          property_id?: string | null
+          raw_data?: Json
+          row_number?: number | null
+          updated_at?: string | null
+          uploaded_at?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raw_csv_data_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raw_csv_data_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raw_csv_data_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reserved_custom_domains: {
+        Row: {
+          created_at: string
+          domain: string
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          reason?: string
+        }
+        Relationships: []
+      }
+      reserved_subdomains: {
+        Row: {
+          created_at: string
+          reason: string | null
+          subdomain: string
+        }
+        Insert: {
+          created_at?: string
+          reason?: string | null
+          subdomain: string
+        }
+        Update: {
+          created_at?: string
+          reason?: string | null
+          subdomain?: string
+        }
+        Relationships: []
+      }
+      uptime_summaries: {
+        Row: {
+          avg_response_time_ms: number | null
+          component: string
+          created_at: string
+          date: string
+          id: string
+          successful_checks: number
+          total_checks: number
+          uptime_percentage: number
+        }
+        Insert: {
+          avg_response_time_ms?: number | null
+          component: string
+          created_at?: string
+          date: string
+          id?: string
+          successful_checks?: number
+          total_checks?: number
+          uptime_percentage?: number
+        }
+        Update: {
+          avg_response_time_ms?: number | null
+          component?: string
+          created_at?: string
+          date?: string
+          id?: string
+          successful_checks?: number
+          total_checks?: number
+          uptime_percentage?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      generate_client_id: {
+      calculate_daily_uptime_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      check_trial_expiration: {
+        Args: { developer_id_param: string }
+        Returns: {
+          days_remaining: number
+          is_active: boolean
+          trial_ends_at: string
+          trial_status: Database["public"]["Enums"]["trial_status_enum"]
+        }[]
+      }
+      claim_subdomain: {
+        Args: { developer_id_param: string; subdomain_param: string }
+        Returns: Json
+      }
+      generate_domain_verification_token: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -720,6 +1027,33 @@ export type Database = {
           registration_completed: boolean
           subscription_plan: string
           subscription_status: string
+        }[]
+      }
+      get_subscription_status: {
+        Args: { developer_id_param: string }
+        Returns: {
+          has_active_subscription: boolean
+          has_payment_method: boolean
+          has_stripe_customer: boolean
+          needs_onboarding: boolean
+          subscription_ends_at: string
+          subscription_plan: string
+          subscription_status: string
+          trial_days_remaining: number
+          trial_status: string
+        }[]
+      }
+      get_trial_stage_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          count: number
+          trial_stage: Database["public"]["Enums"]["trial_stage_enum"]
+        }[]
+      }
+      get_user_admin_roles: {
+        Args: { check_user_id: string }
+        Returns: {
+          role: string
         }[]
       }
       gtrgm_compress: {
@@ -741,6 +1075,22 @@ export type Database = {
       gtrgm_out: {
         Args: { "": unknown }
         Returns: unknown
+      }
+      is_custom_domain_available: {
+        Args: { check_domain: string }
+        Returns: boolean
+      }
+      is_subdomain_available: {
+        Args: { check_subdomain: string }
+        Returns: boolean
+      }
+      is_user_admin: {
+        Args: { check_user_id: string }
+        Returns: boolean
+      }
+      register_custom_domain: {
+        Args: { developer_id_param: string; domain_param: string }
+        Returns: Json
       }
       set_limit: {
         Args: { "": number }
@@ -764,9 +1114,22 @@ export type Database = {
         }
         Returns: boolean
       }
+      verify_custom_domain: {
+        Args: { developer_id_param: string }
+        Returns: Json
+      }
     }
     Enums: {
-      [_ in never]: never
+      project_status: "active" | "inactive" | "archived"
+      property_status: "available" | "sold" | "reserved"
+      trial_stage_enum:
+        | "day_0"
+        | "day_7"
+        | "day_11"
+        | "day_14_success"
+        | "day_14_failed"
+        | "completed"
+      trial_status_enum: "active" | "expired" | "converted" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -892,10 +1255,19 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
-    Enums: {},
+    Enums: {
+      project_status: ["active", "inactive", "archived"],
+      property_status: ["available", "sold", "reserved"],
+      trial_stage_enum: [
+        "day_0",
+        "day_7",
+        "day_11",
+        "day_14_success",
+        "day_14_failed",
+        "completed",
+      ],
+      trial_status_enum: ["active", "expired", "converted", "cancelled"],
+    },
   },
 } as const

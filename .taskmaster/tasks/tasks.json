@@ -3158,7 +3158,7 @@
         "dependencies": [
           "86"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -3166,9 +3166,10 @@
             "description": "Write and apply a database migration that adds the manual_overrides JSONB column to the properties table and creates a GIN index for efficient querying.",
             "dependencies": [],
             "details": "Implement a Supabase migration with: ALTER TABLE properties ADD COLUMN manual_overrides JSONB DEFAULT '{}'; and CREATE INDEX idx_properties_manual_overrides ON properties USING gin(manual_overrides); Ensure the migration is reversible and tested on a staging environment.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run migration up/down, verify column exists with default, and check index presence using database introspection.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T09:10:46.609Z"
           },
           {
             "id": 2,
@@ -3178,9 +3179,10 @@
               1
             ],
             "details": "Update the Property type/interface to add manual_overrides: Record<string, any> or a more specific type. Ensure all code paths that read/write properties are updated to handle the new field, including API DTOs and validation logic.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Type-check the codebase, ensure no type errors, and write unit tests to verify correct serialization/deserialization of manual_overrides.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T09:12:11.663Z"
           },
           {
             "id": 3,
@@ -3191,14 +3193,16 @@
               2
             ],
             "details": "Write SQL queries and application logic to filter properties based on manual_overrides fields (e.g., properties where manual_overrides->>'email' IS NOT NULL). Benchmark query performance with and without the index on sample data. Document best practices for JSONB usage in the codebase.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Use EXPLAIN ANALYZE to confirm index usage, run integration tests for all query scenarios, and validate performance on large datasets.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T09:12:13.841Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on add manual_overrides jsonb column to properties table."
+        "expansionPrompt": "Break down this task with a focus on add manual_overrides jsonb column to properties table.",
+        "updatedAt": "2025-10-15T09:12:13.841Z"
       },
       {
         "id": "88",
@@ -3580,7 +3584,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T08:52:15.906Z",
+      "lastModified": "2025-10-15T09:12:13.843Z",
       "taskCount": 60,
       "completedCount": 45,
       "tags": [
