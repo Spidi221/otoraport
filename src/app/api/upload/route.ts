@@ -502,9 +502,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // TASK #84.3: Build user notification message with profile update info
+    const profileUpdateMessage = autoImportedFields > 0
+      ? ` Profil dewelopera zaktualizowany z CSV (${autoImportedFields} pól).`
+      : ''
+
     const response = NextResponse.json({
       success: true,
-      message: `Plik został pomyślnie przesłany i przetworzony. ${savedToDatabase ? 'Dane zapisane w bazie.' : ''}`,
+      message: `Plik został pomyślnie przesłany i przetworzony. ${savedToDatabase ? 'Dane zapisane w bazie.' : ''}${profileUpdateMessage}`,
       data: {
         fileName: file.name,
         recordsCount: propertiesCount,
