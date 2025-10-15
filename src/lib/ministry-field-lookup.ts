@@ -137,9 +137,24 @@ export function getMinistryFieldValue(
   // ==========================================
   const rawData = property.raw_csv_data?.[0]?.raw_data || {}
 
-  // Try exact match with ministry field name
+  // Try exact match with ministry field name (case-sensitive)
   if (ministryFieldName && isValidValue(rawData[ministryFieldName])) {
     return String(rawData[ministryFieldName])
+  }
+
+  // Try normalized match with ministry field name (case-insensitive, diacritic-insensitive)
+  if (ministryFieldName) {
+    const normalizedMinistryName = normalizeString(ministryFieldName)
+    const rawDataKeys = Object.keys(rawData)
+
+    for (const key of rawDataKeys) {
+      if (normalizeString(key) === normalizedMinistryName) {
+        const rawValue = rawData[key]
+        if (isValidValue(rawValue)) {
+          return String(rawValue)
+        }
+      }
+    }
   }
 
   // Try COLUMN_PATTERNS fuzzy matching (for short CSV column names)
