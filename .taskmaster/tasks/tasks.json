@@ -3158,7 +3158,7 @@
         "dependencies": [
           "86"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3193,16 +3193,16 @@
               2
             ],
             "details": "Write SQL queries and application logic to filter properties based on manual_overrides fields (e.g., properties where manual_overrides->>'email' IS NOT NULL). Benchmark query performance with and without the index on sample data. Document best practices for JSONB usage in the codebase.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Use EXPLAIN ANALYZE to confirm index usage, run integration tests for all query scenarios, and validate performance on large datasets.",
             "parentId": "undefined",
-            "updatedAt": "2025-10-15T09:12:13.841Z"
+            "updatedAt": "2025-10-15T09:14:46.831Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on add manual_overrides jsonb column to properties table.",
-        "updatedAt": "2025-10-15T09:12:13.841Z"
+        "updatedAt": "2025-10-15T09:14:46.831Z"
       },
       {
         "id": "88",
@@ -3584,9 +3584,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T09:12:13.843Z",
+      "lastModified": "2025-10-15T09:14:46.832Z",
       "taskCount": 60,
-      "completedCount": 45,
+      "completedCount": 46,
       "tags": [
         "master"
       ]
