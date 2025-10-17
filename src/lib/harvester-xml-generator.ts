@@ -14,7 +14,8 @@ import crypto from 'crypto'
 
 export interface HarvesterXMLParams {
   developer: {
-    name: string
+    company_name?: string  // Optional - will use fallback if missing
+    email?: string         // Fallback if company_name missing
     client_id: string
   }
   csvUrl: string
@@ -40,12 +41,15 @@ export function generateHarvesterXML(params: HarvesterXMLParams): string {
   // Generate filename for the CSV resource
   const csvFileName = `Ceny-ofertowe-mieszkan-${developer.client_id}-${date}.csv`
 
+  // Determine company name with fallback chain
+  const companyName = developer.company_name || developer.email || 'Deweloper'
+
   // Build XML with proper namespace and structure
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <ns2:datasets xmlns:ns2="urn:otwarte-dane:harvester:1.13">
   <dataset status="published">
     <extIdent>${extIdent}</extIdent>
-    <extTitle>Ceny ofertowe mieszkań - ${developer.company_name || developer.email} - ${date}</extTitle>
+    <extTitle>Ceny ofertowe mieszkań - ${companyName} - ${date}</extTitle>
     <extSchemaType>mieszkania</extSchemaType>
     <extSchemaVersion>1.13</extSchemaVersion>
     <resources>
