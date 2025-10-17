@@ -564,6 +564,12 @@ export class SmartCSVParser {
 
     // Try to map each required field
     for (const [fieldName, patterns] of Object.entries(COLUMN_PATTERNS)) {
+      // SKIP MAPPING 'area' FOR MINISTERIAL FORMAT - it's always calculated, never mapped
+      if (fieldName === 'area' && formatDetection.format === 'ministerial') {
+        console.log(`🔍 PARSER: Skipping 'area' mapping for ministerial format (will be calculated from base_price / price_per_m2)`)
+        continue
+      }
+
       const matches: Array<{header: string, score: number}> = []
 
       // Score each header against patterns
@@ -875,28 +881,44 @@ export class SmartCSVParser {
       }
 
       // MINISTRY CSV FIX: Calculate area if missing OR if mapped to wrong column (e.g. row_number)
-      // Ministry CSV NEVER has "powierzchnia" column - must calculate from total_price / price_per_m2
+      // Ministry CSV NEVER has "powierzchnia" column - must calculate from base_price / price_per_m2
+      // Use base_price (ministry column 41) or total_price (INPRO) for calculation
+      const priceForCalculation = (property as Record<string, unknown>).base_price as number || property.total_price
+
       const shouldCalculateArea = (
         !property.area || // No area at all
-        (property.area && property.area < 10 && property.total_price && property.total_price > 100000) // Area suspiciously small for expensive property (probably mapped to row_number)
+        (property.area && property.area < 10 && priceForCalculation && priceForCalculation > 100000) // Area suspiciously small for expensive property (probably mapped to row_number)
       )
 
-      if (shouldCalculateArea && property.total_price && property.price_per_m2 && property.price_per_m2 > 0) {
-        const calculatedArea = Math.round((property.total_price / property.price_per_m2) * 100) / 100
-        console.log(`🔢 PARSER: Calculated area for ${property.property_number || 'unknown'}: ${property.total_price} / ${property.price_per_m2} = ${calculatedArea} m² (replacing old value: ${property.area})`)
+      if (shouldCalculateArea && priceForCalculation && property.price_per_m2 && property.price_per_m2 > 0) {
+        const calculatedArea = Math.round((priceForCalculation / property.price_per_m2) * 100) / 100
+        console.log(`🔢 PARSER: Calculated area for ${property.property_number || 'unknown'}: ${priceForCalculation} / ${property.price_per_m2} = ${calculatedArea} m² (replacing old value: ${property.area})`)
         property.area = calculatedArea
       } else if (!property.area) {
-        console.log(`⚠️ PARSER: Cannot calculate area for ${property.property_number || 'unknown'}: area=${property.area}, total_price=${property.total_price}, price_per_m2=${property.price_per_m2}`)
+        const basePrice = (property as Record<string, unknown>).base_price
+        console.log(`⚠️ PARSER: Cannot calculate area for ${property.property_number || 'unknown'}: area=${property.area}, base_price=${basePrice}, total_price=${property.total_price}, price_per_m2=${property.price_per_m2}`)
       }
 
       // MINISTRY CSV FIX: Calculate price_per_m2 if missing
-      if (!property.price_per_m2 && property.total_price && property.area && property.area > 0) {
-        property.price_per_m2 = Math.round((property.total_price / property.area) * 100) / 100
+      // Use base_price (ministry) or total_price (INPRO) for calculation
+      const priceForM2Calculation = (property as Record<string, unknown>).base_price as number || property.total_price
+      if (!property.price_per_m2 && priceForM2Calculation && property.area && property.area > 0) {
+        property.price_per_m2 = Math.round((priceForM2Calculation / property.area) * 100) / 100
       }
 
-      // MINISTRY CSV FIX: Calculate total_price if missing
-      if (!property.total_price && property.price_per_m2 && property.area && property.area > 0) {
-        property.total_price = Math.round(property.price_per_m2 * property.area * 100) / 100
+      // MINISTRY CSV FIX: Calculate total_price if missing (and base_price if missing)
+      if (property.price_per_m2 && property.area && property.area > 0) {
+        const calculatedPrice = Math.round(property.price_per_m2 * property.area * 100) / 100
+
+        // Set total_price if missing
+        if (!property.total_price) {
+          property.total_price = calculatedPrice
+        }
+
+        // Set base_price if missing (for ministry compliance)
+        if (!(property as Record<string, unknown>).base_price) {
+          (property as Record<string, unknown>).base_price = calculatedPrice
+        }
       }
 
       // VALIDATION 4: Check critical fields before including

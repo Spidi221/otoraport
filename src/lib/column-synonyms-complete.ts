@@ -1144,24 +1144,16 @@ export const COMPLETE_COLUMN_PATTERNS = {
   // SECTION 6: ADDITIONAL INPRO FIELDS (Non-Ministry)
   // ========================================
 
-  // Field: powierzchnia (area) - INPRO specific, calculated in TAMBUD/ATAL
+  // Field: powierzchnia (area) - ONLY for INPRO format (has explicit area column)
+  // NOTE: For Ministry CSV, area is CALCULATED from base_price / price_per_m2 (never mapped from CSV)
+  // This field should ONLY match if the CSV has a standalone "powierzchnia" column (INPRO format only)
+  // ULTRA-NARROW matching to prevent fuzzy matches with ministry column names containing "powierzchni"
   area: [
-    // INPRO exact
-    'powierzchnia',
-    // Generic variations
-    'powierzchnia użytkowa',
-    'powierzchnia uzytkowa',
-    'powierzchnia m²',
-    'powierzchnia m2',
-    'area',
-    'size',
-    'metraż',
-    'metraz',
-    'pow',
-    'powierzchnia_uzytkowa',
-    'm2',
-    'm²',
-    'metry kwadratowe'
+    // INPRO exact ONLY - VERY specific to avoid ANY fuzzy matches
+    'powierzchnia',  // Exact match only
+    'powierzchnia użytkowa',  // Full term
+    'powierzchnia uzytkowa',  // Without Polish chars
+    // NO partial terms like 'pow', 'm2', 'metraż' - they cause false matches
   ],
 
   // Field: pietro (floor) - INPRO specific
