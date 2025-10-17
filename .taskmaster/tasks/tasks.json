@@ -2457,7 +2457,66 @@
           "76"
         ],
         "priority": "medium",
-        "subtasks": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add oto-raport.pl as Primary Domain in Vercel Project Settings",
+            "description": "Log into the Vercel Dashboard, navigate to the relevant project, and add 'oto-raport.pl' as the primary domain in the Domains section.",
+            "dependencies": [],
+            "details": "Access the Vercel Dashboard, select the project, go to Settings > Domains, and add 'oto-raport.pl' as the primary domain. Ensure the domain is assigned to the correct project and appears in the Domains list.",
+            "status": "pending",
+            "testStrategy": "Verify that 'oto-raport.pl' appears as the primary domain in the Vercel project settings and is not duplicated across other projects.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Configure DNS Records at Domain Registrar",
+            "description": "Update DNS settings at the domain registrar to point the apex domain and www subdomain to Vercel, ensuring no conflicting records exist.",
+            "dependencies": [
+              1
+            ],
+            "details": "At the domain registrar, add an A record for 'oto-raport.pl' pointing to 76.76.21.21 and a CNAME record for 'www' pointing to cname.vercel-dns.com. Remove or update any conflicting DNS records and set TTL to 300 seconds for quick propagation.",
+            "status": "pending",
+            "testStrategy": "Use DNS lookup tools to confirm correct A and CNAME records are set and propagate as expected.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Verify SSL Certificate Provisioning and HTTPS Functionality",
+            "description": "Ensure Vercel provisions an SSL certificate for oto-raport.pl and verify that HTTPS access and HTTP-to-HTTPS redirection work correctly.",
+            "dependencies": [
+              2
+            ],
+            "details": "Wait for Vercel to automatically issue an SSL certificate (typically 5-15 minutes). Access https://oto-raport.pl to confirm HTTPS is active, check for valid certificate, and test that HTTP requests redirect to HTTPS.",
+            "status": "pending",
+            "testStrategy": "Use browser and SSL testing tools to verify HTTPS access, certificate validity, and proper HTTP-to-HTTPS redirection.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Update Environment Variables and Redeploy Application",
+            "description": "Update environment variables in Vercel to reference the new domain and redeploy the application to apply changes.",
+            "dependencies": [
+              3
+            ],
+            "details": "In the Vercel Dashboard, update NEXT_PUBLIC_APP_URL and NEXT_PUBLIC_BASE_URL to 'https://oto-raport.pl', remove old .vercel.app references, and trigger a redeploy to apply the new settings.",
+            "status": "pending",
+            "testStrategy": "Check deployed environment variables and confirm the application uses the new domain in all relevant places.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Test Domain Integration in Codebase and Middleware",
+            "description": "Verify that the codebase, including any Vercel Domains API integrations and middleware, correctly handles the new primary domain and subdomain routing.",
+            "dependencies": [
+              4
+            ],
+            "details": "Test the src/lib/vercel-domains.ts integration, ensure custom domain and subdomain features work, and confirm middleware logic routes requests appropriately for oto-raport.pl.",
+            "status": "pending",
+            "testStrategy": "Run integration and end-to-end tests to confirm domain routing, middleware behavior, and API integration function as expected.",
+            "parentId": "undefined"
+          }
+        ],
         "updatedAt": "2025-10-15T12:01:14.357Z"
       },
       {
@@ -3612,17 +3671,770 @@
           "94"
         ],
         "status": "pending",
-        "subtasks": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design and Document Comprehensive Integration Test Cases for Ministry Compliance",
+            "description": "Define and document all required end-to-end integration test cases covering the ministry CSV data flow, including edge cases, encodings, and compliance scenarios.",
+            "dependencies": [],
+            "details": "Analyze ministry CSV requirements and compliance rules. Create detailed test cases for each specified flow: missing fields/banner/bulk edit/export, manual edit/re-upload/edit preservation, property upload/re-upload/sold marking, export blocking on validation errors, and 3-tier data priority. Include tests for Polish characters, various encodings, and edge cases. Document acceptance criteria and expected outcomes for each scenario.",
+            "status": "pending",
+            "testStrategy": "Peer review test case documentation for completeness and accuracy; validate coverage against ministry compliance checklist.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Automated Integration Test Suite Covering All Compliance Scenarios",
+            "description": "Develop and automate the integration test suite based on the documented cases, ensuring realistic data and production-like environment.",
+            "dependencies": [
+              1
+            ],
+            "details": "Set up a test environment mirroring production, including ministry CSV format and realistic data volumes. Use automation tools (e.g., Cypress, Playwright, or similar) to implement the test flows. Ensure tests cover all 59 ministerial columns, handle large datasets, and verify correct handling of encodings and special characters. Integrate tests into CI/CD pipeline for continuous execution.",
+            "status": "pending",
+            "testStrategy": "Run automated tests on staging with real ministry CSVs; verify all flows execute as expected; log and triage any failures for root cause analysis.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Validate Test Results and Ensure Ministry Schema Compliance",
+            "description": "Analyze test execution results, confirm compliance with Ministry Schema 1.13, and address any detected issues or gaps.",
+            "dependencies": [
+              2
+            ],
+            "details": "Review test run reports for pass/fail status and compliance with all ministry requirements. Cross-check exported data against Ministry Schema 1.13. Investigate and resolve any discrepancies or failures. Update tests or implementation as needed to achieve full compliance. Prepare summary report for stakeholders.",
+            "status": "pending",
+            "testStrategy": "Manual review of export files for schema compliance; automated schema validation scripts; stakeholder sign-off on compliance report.",
+            "parentId": "undefined"
+          }
+        ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on create comprehensive integration tests for ministry compliance."
+      },
+      {
+        "id": "96",
+        "title": "Fix normalizeString() to Preserve Polish Characters",
+        "description": "Update the normalizeString function in smart-csv-parser.ts to correctly preserve all Polish diacritical characters, ensuring fuzzy matching works for all column names.",
+        "details": "Replace the regex in normalizeString from `/[^\u0000-]/g` or `/[^\u0000-]/g` to `/[^a-z0-9\\sąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/gi` to retain all Polish characters. Add unit tests for normalization with various Polish inputs. Use TypeScript 5.x for best Unicode support.",
+        "testStrategy": "Write unit tests for normalizeString with a variety of Polish and non-Polish strings. Validate that all diacritical marks are preserved and that fuzzy matching returns correct results for sample INPRO/ATAL columns.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Analyze Current normalizeString Implementation and Identify Issues",
+            "description": "Review the existing normalizeString function in smart-csv-parser.ts to understand its current logic and identify why Polish diacritical characters are not preserved.",
+            "dependencies": [],
+            "details": "Examine the current regex and normalization approach. Document which Polish characters are lost or incorrectly handled, referencing the specific Unicode points and any edge cases (e.g., 'ł', 'ń', 'ś').\n<info added on 2025-10-15T16:49:48.594Z>\nBug analysis complete. Located in smart-csv-parser.ts at lines 1096-1102, the normalizeString() function uses regex /[^\\w\\s]/g which strips Polish diacritical characters (ą,ć,ę,ł,ń,ó,ś,ź,ż) because \\w only matches [A-Za-z0-9_] in JavaScript. This causes 'piętro' to become 'pitro', breaking fuzzy matching for real CSV headers from INPRO/ATAL developers. Column patterns like 'kondygnacja', 'piętro', 'powierzchnia balkonu' have special characters incorrectly removed. Recommended solution: Replace with Unicode-aware regex that explicitly preserves Polish characters or use alternative normalization approach that maintains diacritical marks while still cleaning unwanted punctuation.\n</info added on 2025-10-15T16:49:48.594Z>",
+            "status": "done",
+            "testStrategy": "List test cases where the current function fails to preserve or match Polish diacritical characters.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T16:50:53.717Z"
+          },
+          {
+            "id": 2,
+            "title": "Update Regex to Preserve Polish Diacritical Characters",
+            "description": "Modify the regex in normalizeString to retain all Polish diacritical characters while still normalizing other input as required.",
+            "dependencies": [
+              1
+            ],
+            "details": "Replace the existing regex (e.g., /[^\\x00-\\x7F]/g) with /[^a-z0-9\\sąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/gi to ensure all Polish letters are preserved. Ensure the regex is case-insensitive and supports Unicode normalization.",
+            "status": "done",
+            "testStrategy": "Verify that the updated regex allows all Polish diacritical characters and blocks unwanted characters using targeted string tests.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T16:51:56.421Z"
+          },
+          {
+            "id": 3,
+            "title": "Integrate Unicode Normalization Using String.prototype.normalize",
+            "description": "Ensure the function uses String.prototype.normalize with the appropriate form (e.g., NFC) to handle composed and decomposed Unicode representations.",
+            "dependencies": [
+              2
+            ],
+            "details": "Apply .normalize('NFC') or .normalize('NFD') as needed before or after regex filtering to ensure all Polish characters are consistently represented, preventing issues with different Unicode forms.",
+            "status": "done",
+            "testStrategy": "Test with both composed and decomposed forms of Polish characters to confirm normalization yields consistent results.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T16:52:51.135Z"
+          },
+          {
+            "id": 4,
+            "title": "Write Comprehensive Unit Tests for Polish and Non-Polish Inputs",
+            "description": "Develop unit tests covering a wide range of Polish and non-Polish strings to validate the updated normalizeString function.",
+            "dependencies": [
+              3
+            ],
+            "details": "Create test cases for all Polish diacritical characters (lowercase and uppercase), mixed-language inputs, and edge cases (e.g., empty strings, numbers, symbols). Include tests for fuzzy matching scenarios relevant to column names.",
+            "status": "done",
+            "testStrategy": "Automate tests using a framework like Jest. Ensure all tests pass and that Polish characters are preserved while unwanted characters are removed.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T16:57:33.430Z"
+          },
+          {
+            "id": 5,
+            "title": "Document Changes and Update Usage Examples",
+            "description": "Update code comments, documentation, and usage examples to reflect the new normalization logic and its support for Polish characters.",
+            "dependencies": [
+              4
+            ],
+            "details": "Revise function documentation in smart-csv-parser.ts, add inline comments explaining the regex and normalization choices, and provide before/after examples for typical Polish inputs.",
+            "status": "done",
+            "testStrategy": "Review documentation for clarity and accuracy. Confirm that examples match actual function behavior.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T17:01:13.301Z"
+          }
+        ],
+        "updatedAt": "2025-10-15T17:01:13.301Z"
+      },
+      {
+        "id": "97",
+        "title": "Expand COLUMN_PATTERNS with Comprehensive Synonyms",
+        "description": "Extend the COLUMN_PATTERNS mapping to include at least 5 synonyms per ministry field, covering all real-world variants from INPRO, ATAL, and other developer CSVs.",
+        "details": "Aggregate all column name variants from sample CSVs and ministry schema 1.13. For each of the 58 fields, add: INPRO/ATAL variants, full/short ministry names, generic Polish, English, and fallback names. Use a priority-ordered array for each field. Store in a TypeScript object, and ensure easy extensibility. Document the mapping structure for future maintenance.",
+        "testStrategy": "Write integration tests that parse all three sample CSVs and verify ≥95% mapping accuracy. Add unit tests for COLUMN_PATTERNS lookup and fallback logic.",
+        "priority": "high",
+        "dependencies": [
+          "96"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Aggregate Column Name Variants from All Sources",
+            "description": "Collect all unique column name variants for each of the 58 ministry fields from sample CSVs (INPRO, ATAL, other developer files) and ministry schema 1.13.",
+            "dependencies": [],
+            "details": "Manually or programmatically extract column headers from each provided CSV and the schema documentation. Compile a comprehensive list of all observed variants, including full/short ministry names, generic Polish, English, and fallback names. Store raw data in a structured format (e.g., JSON) for further processing.",
+            "status": "done",
+            "testStrategy": "Verify that all expected CSV sources and schema fields are included. Cross-check with a sample of files to ensure no variants are missed.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T17:27:52.271Z"
+          },
+          {
+            "id": 2,
+            "title": "Define Priority-Ordered Synonym Arrays per Field",
+            "description": "For each of the 58 fields, create a priority-ordered array of at least 5 synonyms, covering all real-world variants.",
+            "dependencies": [
+              1
+            ],
+            "details": "For each field, analyze the aggregated variants and assign a priority order (e.g., exact ministry name first, then common abbreviations, Polish/English generics, and finally fallback names). Ensure each array has at least 5 entries, even if some are synthetic for completeness. Document the rationale for ordering.\n<info added on 2025-10-15T17:32:41.448Z>\nI'll analyze the codebase to understand the current structure and then provide the update text based on your request.**Implementation Status**: Successfully completed comprehensive synonym mappings file. Created `column-synonyms-complete.ts` with 65 total fields (58 ministry + 7 INPRO extras), where each field contains 8-15 priority-ordered synonyms covering TAMBUD, ATAL, and INPRO formats plus Polish/English variations. Total of approximately 520 unique synonyms have been defined across all fields. The file includes full TypeScript type safety with `MinistryFieldKey` type, inline JSDoc documentation explaining the priority ordering strategy, and helper functions `getSynonymsForField()` and `getSynonymStats()` for programmatic access and analysis. All patterns follow the established priority order: INPRO exact matches first (highest divergence), ATAL abbreviated forms, Ministry official names, generic Polish variations, and English equivalents last. The implementation covers all critical gaps identified in the analysis including developer HQ address fields, sales office address fields, parking/storage fields, necessary rights, and other monetary obligations, ensuring 100% coverage of Ministry Schema 1.13 requirements.\n</info added on 2025-10-15T17:32:41.448Z>",
+            "status": "done",
+            "testStrategy": "Review a sample of fields to confirm the ordering logic and minimum synonym count. Check for consistency in prioritization across fields.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T17:32:49.185Z"
+          },
+          {
+            "id": 3,
+            "title": "Implement TypeScript Object for COLUMN_PATTERNS",
+            "description": "Translate the priority-ordered synonym arrays into a TypeScript object, ensuring the structure supports easy future extension.",
+            "dependencies": [
+              2
+            ],
+            "details": "Design a TypeScript interface for COLUMN_PATTERNS that maps each ministry field to its synonym array. Use a modular structure (e.g., nested objects or enums) to allow straightforward addition of new fields or synonyms. Include JSDoc comments for maintainability.",
+            "status": "done",
+            "testStrategy": "Validate the TypeScript object compiles without errors. Confirm that new fields/synonyms can be added without breaking existing code.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T17:35:56.699Z"
+          },
+          {
+            "id": 4,
+            "title": "Document Mapping Structure and Maintenance Guidelines",
+            "description": "Create clear, detailed documentation for the COLUMN_PATTERNS mapping structure and how to extend it.",
+            "dependencies": [
+              3
+            ],
+            "details": "Write documentation explaining the object structure, the meaning of each synonym type, and the priority logic. Include examples and step-by-step instructions for adding new fields or synonyms. Store documentation alongside the code and in the project wiki.",
+            "status": "done",
+            "testStrategy": "Ask a team member unfamiliar with the task to follow the documentation to add a new field; verify the process is clear and works as intended.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T17:42:04.576Z"
+          },
+          {
+            "id": 5,
+            "title": "Develop and Execute Integration Tests for Mapping Accuracy",
+            "description": "Write and run integration tests that parse all sample CSVs and verify ≥95% of column names are correctly mapped using COLUMN_PATTERNS.",
+            "dependencies": [
+              3
+            ],
+            "details": "Create test cases that load each sample CSV, attempt to map every column using COLUMN_PATTERNS, and check that the correct ministry field is identified. Include edge cases (e.g., columns with extra spaces, mixed case). Measure and report mapping accuracy, ensuring it meets the 95% threshold.\n<info added on 2025-10-15T17:51:07.064Z>\nI'll analyze the codebase to provide specific details about the integration test implementation.Integration tests successfully implemented in `/src/lib/__tests__/column-patterns-integration.test.ts` with comprehensive test coverage. Created 27 test cases across 5 test suites covering TAMBUD (ministerial format), ATAL (abbreviated ministry names), and INPRO (custom developer software) formats. Test framework configured with Vitest in `/vitest.config.ts` with coverage reporting and alias support. Test fixtures include all three CSV formats with realistic data samples. Testing validates format detection accuracy, column mapping confidence scores, developer info extraction, and cross-format consistency. COMPLETE_COLUMN_PATTERNS verified to have ≥5 synonyms per field with 100% coverage for all 58 ministry fields plus 8 INPRO-specific extra fields. All tests structured to verify ≥95% mapping accuracy threshold with detailed console logging for debugging and performance monitoring.\n</info added on 2025-10-15T17:51:07.064Z>",
+            "status": "done",
+            "testStrategy": "Automate tests to run against all provided CSVs. Generate a coverage report showing which columns were successfully mapped and which were not. Investigate and fix any mappings below the target threshold.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-15T17:50:05.507Z"
+          }
+        ],
+        "updatedAt": "2025-10-15T17:50:05.507Z"
+      },
+      {
+        "id": "98",
+        "title": "Implement Fuzzy Matching with Levenshtein Distance (Polish Support)",
+        "description": "Integrate a fuzzy string matching algorithm (Levenshtein distance) that supports Polish diacritics and applies a 0.6 similarity threshold for column mapping.",
+        "details": "Use the 'fastest-levenshtein' (v1.0.16+) or 'fuzzball.js' (v2.0+) library for fuzzy matching. Ensure Unicode normalization (NFC) before comparison. Implement priority-based matching: exact > contains > fuzzy. Expose mapping confidence and suggestions in the parser output.",
+        "testStrategy": "Unit test fuzzy matching with edge-case Polish strings. Integration test with all sample CSVs to ensure correct mapping and confidence scoring. Validate that no mapping below 0.6 threshold is accepted.",
+        "priority": "high",
+        "dependencies": [
+          "97"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate Levenshtein-Based Fuzzy Matching Library",
+            "description": "Install and configure either 'fastest-levenshtein' (v1.0.16+) or 'fuzzball.js' (v2.0+) for fuzzy string matching.",
+            "dependencies": [],
+            "details": "Add the chosen library to the project dependencies. Set up a utility function that exposes Levenshtein distance and similarity scoring for string pairs.",
+            "status": "pending",
+            "testStrategy": "Unit test the utility with basic string pairs to verify correct distance and similarity outputs.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Unicode Normalization (NFC) for Input Strings",
+            "description": "Ensure all input strings are normalized to Unicode NFC form before any matching to support Polish diacritics.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use JavaScript's String.prototype.normalize('NFC') on all strings before passing them to the matching logic. Add normalization to the utility function.",
+            "status": "pending",
+            "testStrategy": "Test with Polish strings containing diacritics to confirm normalization and correct matching behavior.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Develop Priority-Based Matching Logic (Exact > Contains > Fuzzy)",
+            "description": "Implement a matching function that applies exact match, then substring containment, then fuzzy matching with a 0.6 similarity threshold.",
+            "dependencies": [
+              2
+            ],
+            "details": "Create a function that first checks for exact equality, then substring inclusion, and finally applies the fuzzy matching algorithm if needed. Only accept fuzzy matches with similarity >= 0.6.",
+            "status": "pending",
+            "testStrategy": "Unit test with various string pairs to verify correct prioritization and threshold enforcement.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Expose Mapping Confidence and Suggestions in Parser Output",
+            "description": "Modify the parser to include mapping confidence scores and alternative suggestions in its output structure.",
+            "dependencies": [
+              3
+            ],
+            "details": "Extend the parser's output schema to include a confidence score for each mapping and a list of alternative suggestions when confidence is below a certain threshold.",
+            "status": "pending",
+            "testStrategy": "Integration test with sample CSVs to verify that confidence and suggestions are present and accurate in the output.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Comprehensive Testing with Polish Edge Cases and CSV Integration",
+            "description": "Test the full matching pipeline with edge-case Polish strings and real-world CSV samples to ensure correct mapping and confidence scoring.",
+            "dependencies": [
+              4
+            ],
+            "details": "Prepare test cases with Polish diacritics, ambiguous matches, and near-threshold similarities. Validate that no mapping below 0.6 similarity is accepted and that confidence and suggestions are correct.",
+            "status": "pending",
+            "testStrategy": "Run automated and manual tests with all sample CSVs and edge-case strings. Confirm correct handling of Polish diacritics and threshold logic.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-15T18:04:34.311Z"
+      },
+      {
+        "id": "99",
+        "title": "Enhance Validation Logic for All 58 Ministry Fields",
+        "description": "Update ministry-validation.ts and the Validation API to check all 58 required, recommended, developer, and optional fields, returning detailed missing field feedback.",
+        "details": "Expand REQUIRED_FIELDS, RECOMMENDED_FIELDS, and add DEVELOPER_FIELDS (28 fields) as per PRD. Implement sectioned validation (developer, location, pricing, technical). Ensure the API returns a structured summary, missingFieldsSummary, and section completion percentages. Use Zod v3.x for schema validation.",
+        "testStrategy": "Write unit tests for validation logic covering all field categories. Integration test with partial and complete CSVs to verify correct missing field reporting and section breakdown.",
+        "priority": "high",
+        "dependencies": [
+          "98"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Expand and Refine Field Definitions in ministry-validation.ts",
+            "description": "Update ministry-validation.ts to include all 58 fields, categorizing them as required, recommended, developer, and optional according to the PRD.",
+            "dependencies": [],
+            "details": "Review the PRD to ensure all 58 fields are accounted for. Update the REQUIRED_FIELDS, RECOMMENDED_FIELDS, and add DEVELOPER_FIELDS (28 fields). Ensure each field is correctly categorized and documented in the code.",
+            "status": "pending",
+            "testStrategy": "Verify that all 58 fields are present and correctly categorized by reviewing the exported field lists and cross-referencing with the PRD.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Sectioned Validation Logic Using Zod v3.x",
+            "description": "Develop Zod schemas for each section (developer, location, pricing, technical) and integrate them into the validation logic.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create Zod object schemas for each section, grouping relevant fields. Use Zod's refinement and transformation features to handle complex validation rules. Integrate these schemas into the ministry-validation.ts logic to validate incoming data by section.",
+            "status": "pending",
+            "testStrategy": "Write unit tests for each section schema, ensuring that valid and invalid data are correctly accepted or rejected. Test edge cases and custom refinements.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Update Validation API to Return Structured Feedback",
+            "description": "Modify the Validation API to return a structured summary, including missingFieldsSummary and section completion percentages.",
+            "dependencies": [
+              2
+            ],
+            "details": "Adjust the API response format to include a detailed missingFieldsSummary object and section completion percentages. Ensure the API aggregates validation results from all sections and presents them in a clear, structured format.",
+            "status": "pending",
+            "testStrategy": "Integration test the API with various payloads (complete, partial, and invalid data) to verify the structure and accuracy of the feedback.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Implement Detailed Missing Field Feedback Mechanism",
+            "description": "Enhance the validation logic to provide detailed feedback for each missing or invalid field, including field names, categories, and error messages.",
+            "dependencies": [
+              3
+            ],
+            "details": "For each failed validation, collect the field name, its category (required, recommended, developer, optional), and a descriptive error message. Aggregate this information into the missingFieldsSummary for API consumers.",
+            "status": "pending",
+            "testStrategy": "Test with payloads missing various combinations of fields to ensure the feedback is accurate, complete, and user-friendly.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Write Comprehensive Unit and Integration Tests for Validation Logic",
+            "description": "Develop unit and integration tests covering all field categories, sectioned validation, and API feedback structure.",
+            "dependencies": [
+              4
+            ],
+            "details": "Write unit tests for each Zod schema and the overall validation logic. Create integration tests for the Validation API, using both partial and complete datasets to verify correct missing field reporting and section breakdown.",
+            "status": "pending",
+            "testStrategy": "Run all tests and ensure 100% coverage for validation logic. Manually verify edge cases and review test output for accuracy.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-16T06:03:15.485Z"
+      },
+      {
+        "id": "100",
+        "title": "Database Schema Migration for Developer Fields",
+        "description": "Alter the developers table to add all missing ministry fields, including siedziba, punkt sprzedaży, and other developer-specific columns.",
+        "details": "Write SQL migration scripts using ALTER TABLE ... ADD COLUMN IF NOT EXISTS for each new field as specified in the PRD. Use VARCHAR and TEXT types as appropriate. Test migrations on staging and ensure backward compatibility. Use a migration tool like Prisma Migrate or Knex.js if available.",
+        "testStrategy": "Run migration scripts on a test database. Verify schema with SELECT and information_schema queries. Ensure no data loss and that new fields accept and store data correctly.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Review PRD and Identify Missing Ministry Fields for Developers Table",
+            "description": "Analyze the Product Requirements Document (PRD) to determine all ministry fields (e.g., siedziba, punkt sprzedaży) that are missing from the developers table.",
+            "dependencies": [],
+            "details": "Carefully read the PRD and create a comprehensive list of all required new columns, including their expected data types and any constraints. Document this list for reference in subsequent steps.",
+            "status": "pending",
+            "testStrategy": "Cross-check the compiled list with the PRD and confirm with stakeholders that all required fields are included.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Design Migration Plan and Ensure Backward Compatibility",
+            "description": "Plan the migration approach, ensuring that new columns are added in a backward-compatible manner and that no existing data or functionality is disrupted.",
+            "dependencies": [
+              1
+            ],
+            "details": "Decide on column types (VARCHAR, TEXT, etc.), set columns as nullable or with safe defaults, and avoid destructive changes. Prepare a rollback plan and document the migration strategy.",
+            "status": "pending",
+            "testStrategy": "Review migration plan with team; verify that all changes are non-breaking and reversible.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Write SQL Migration Scripts Using Migration Tool",
+            "description": "Develop SQL migration scripts to add the identified fields to the developers table, using ALTER TABLE ... ADD COLUMN IF NOT EXISTS, and leverage a migration tool such as Prisma Migrate or Knex.js.",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement migration scripts for each new field, ensuring correct data types and constraints. Use the chosen migration tool to manage versioning and script execution.",
+            "status": "pending",
+            "testStrategy": "Run scripts on a local development database and verify that columns are added as expected without errors.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Test Migration Scripts on Staging Environment",
+            "description": "Apply the migration scripts to a staging database to validate schema changes, data integrity, and backward compatibility.",
+            "dependencies": [
+              3
+            ],
+            "details": "Deploy migration scripts to the staging environment. Use SELECT and information_schema queries to confirm schema updates. Test application functionality to ensure no regressions.",
+            "status": "pending",
+            "testStrategy": "Verify new columns exist and accept data; run automated and manual tests to confirm application stability.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Document Migration and Update Team on Changes",
+            "description": "Document the migration process, updated schema, and any relevant considerations. Communicate changes and next steps to the development team.",
+            "dependencies": [
+              4
+            ],
+            "details": "Update internal documentation with details of the new fields, migration steps, and rollback procedures. Notify stakeholders and developers of the changes and any required actions.",
+            "status": "pending",
+            "testStrategy": "Review documentation for completeness and clarity; confirm team members acknowledge and understand the updates.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-16T06:29:21.818Z"
+      },
+      {
+        "id": "101",
+        "title": "Update and Document Validation API Endpoints",
+        "description": "Expand and document the /api/validation/missing-fields endpoint to support all 58 fields and add new endpoints for developer updates and completion status.",
+        "details": "Update the existing endpoint to return the new validation structure. Implement PATCH /api/developers/update and GET /api/developers/{id}/completion-status. Use OpenAPI/Swagger for endpoint documentation. Ensure endpoints are typed with TypeScript and validated with Zod.",
+        "testStrategy": "Write API integration tests for all endpoints, including edge cases (missing/invalid data). Validate OpenAPI docs with Swagger UI.",
+        "priority": "high",
+        "dependencies": [
+          "99",
+          "100"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-16T06:39:07.173Z"
+      },
+      {
+        "id": "102",
+        "title": "Implement Enhanced Data Quality Widget (React + TailwindCSS)",
+        "description": "Redesign the Data Quality Widget to show 4 progress bars, expandable sections, color coding, and direct links to field editing.",
+        "details": "Build a new EnhancedDataQualityWidget component in React (v18+) using TailwindCSS (v3.x) and shadcn/ui. Fetch validation data from the API. Implement expandable sections, color logic (green/yellow/red), and clickable fields that open BulkEditDialog. Add Storybook stories for all widget states.",
+        "testStrategy": "Write component unit tests with React Testing Library. Visual regression tests in Storybook. Manual QA for responsiveness and accessibility.",
+        "priority": "medium",
+        "dependencies": [
+          "101"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up EnhancedDataQualityWidget Component Structure",
+            "description": "Create the initial React component structure for EnhancedDataQualityWidget using TailwindCSS and shadcn/ui.",
+            "dependencies": [],
+            "details": "Generate a new React component file (EnhancedDataQualityWidget.tsx). Set up the basic JSX structure, import TailwindCSS classes, and integrate shadcn/ui primitives as needed. Ensure the component is ready to receive props and render placeholder content for progress bars and sections.",
+            "status": "pending",
+            "testStrategy": "Verify component renders without errors and matches initial structure in Storybook.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement API Data Fetching and State Management",
+            "description": "Integrate API calls to fetch validation data and manage component state.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use React hooks (useEffect, useState) or a data-fetching library to retrieve validation data from the backend API. Store the data in component state and handle loading/error states. Ensure the data structure supports rendering progress bars and field lists.",
+            "status": "pending",
+            "testStrategy": "Mock API responses in Storybook and unit tests to confirm correct state updates and error handling.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Render Progress Bars with Color Coding and Expandable Sections",
+            "description": "Display four progress bars with dynamic color coding and implement expandable/collapsible sections for detailed field lists.",
+            "dependencies": [
+              2
+            ],
+            "details": "Map API data to four progress bars, applying TailwindCSS classes for green/yellow/red color logic based on thresholds. Implement expandable sections using shadcn/ui or custom logic, showing detailed fields when expanded.",
+            "status": "pending",
+            "testStrategy": "Write unit tests for color logic and expansion behavior. Use Storybook to visually verify all states.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Add Clickable Fields to Trigger BulkEditDialog",
+            "description": "Make individual fields within expandable sections clickable to open the BulkEditDialog for direct editing.",
+            "dependencies": [
+              3
+            ],
+            "details": "Attach click handlers to each field row. On click, open the BulkEditDialog component with the correct field context. Ensure dialog integration works and passes the correct data for editing.",
+            "status": "pending",
+            "testStrategy": "Simulate clicks in unit tests and Storybook to confirm dialog opens with correct data.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Create Comprehensive Storybook Stories and Tests",
+            "description": "Document all widget states in Storybook and implement unit/visual regression tests.",
+            "dependencies": [
+              4
+            ],
+            "details": "Add Storybook stories for all major widget states: loading, error, empty, all color states, expanded/collapsed sections, and dialog open. Write unit tests with React Testing Library and set up visual regression tests for UI consistency.",
+            "status": "pending",
+            "testStrategy": "Review Storybook for coverage, run automated tests, and perform manual QA for responsiveness and accessibility.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-16T06:54:58.375Z"
+      },
+      {
+        "id": "103",
+        "title": "Develop Manual Data Completion Wizard (React, React Hook Form, Zod)",
+        "description": "Create a 4-step wizard interface for manual completion of missing fields, with auto-save, real-time validation, and progress tracking.",
+        "details": "Use React Hook Form (v7+) and Zod (v3+) for form state and validation. Implement auto-save (debounced 3s) to developers and manual_overrides tables via PATCH API. Show only missing fields per step. Add progress bar and draft save/restore. Validate NIP, REGON, postal code formats in real time.",
+        "testStrategy": "E2E test: upload CSV → complete wizard → 100% compliance. Unit tests for form validation and auto-save logic. Manual QA for draft save/restore and progress tracking.",
+        "priority": "medium",
+        "dependencies": [
+          "101",
+          "100"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design and Implement 4-Step Wizard UI with Progress Bar",
+            "description": "Create a multi-step wizard interface in React that displays only missing fields per step and includes a progress bar.",
+            "dependencies": [],
+            "details": "Use React to build a 4-step wizard component. Each step should dynamically render only the missing fields for that stage. Integrate a progress bar that updates as the user completes each step. Ensure navigation between steps is smooth and state is preserved.",
+            "status": "pending",
+            "testStrategy": "Manual UI walkthrough to verify step transitions, field rendering, and progress bar accuracy.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Integrate React Hook Form and Zod for Form State and Validation",
+            "description": "Set up React Hook Form (v7+) with Zod (v3+) for managing form state and real-time validation, including NIP, REGON, and postal code formats.",
+            "dependencies": [
+              1
+            ],
+            "details": "Define Zod schemas for all required fields, including custom validation for NIP, REGON, and postal code. Use zodResolver to connect Zod with React Hook Form. Configure validation to trigger on change for real-time feedback. Display validation errors inline.",
+            "status": "pending",
+            "testStrategy": "Unit tests for schema validation; manual testing for real-time error display.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Auto-Save with Debounced PATCH API Calls",
+            "description": "Add auto-save functionality that debounces input changes and sends PATCH requests to developers and manual_overrides tables.",
+            "dependencies": [
+              2
+            ],
+            "details": "Monitor form changes and trigger a debounced (3s) auto-save using PATCH API calls. Ensure only changed and valid data is sent. Handle API errors gracefully and provide user feedback on save status.",
+            "status": "pending",
+            "testStrategy": "Unit tests for debounce logic; integration tests for API calls and error handling.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Add Draft Save and Restore Functionality",
+            "description": "Enable users to save their progress as a draft and restore it later, preserving all entered data and validation state.",
+            "dependencies": [
+              3
+            ],
+            "details": "Store draft data locally (e.g., localStorage or IndexedDB) and provide UI controls for saving/restoring drafts. Ensure restored data is re-validated and correctly populates the wizard steps.",
+            "status": "pending",
+            "testStrategy": "Manual QA to verify draft save/restore across sessions and correct state restoration.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Comprehensive Testing: E2E, Unit, and Manual QA",
+            "description": "Develop and execute a comprehensive test suite covering E2E flows, unit validation, auto-save, draft, and progress tracking.",
+            "dependencies": [
+              4
+            ],
+            "details": "Write E2E tests simulating CSV upload and full wizard completion to 100% compliance. Add unit tests for Zod validation and auto-save logic. Perform manual QA for draft save/restore and progress bar accuracy.",
+            "status": "pending",
+            "testStrategy": "E2E automation, unit test coverage reports, and manual QA checklists.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-16T07:22:16.709Z"
+      },
+      {
+        "id": "104",
+        "title": "Implement Upload Feedback Modal with Mapping Summary",
+        "description": "Show a modal after CSV upload summarizing mapping results, listing missing fields, and linking to the manual completion wizard.",
+        "details": "Build UploadFeedbackModal in React with TailwindCSS. Integrate with POST /api/properties/upload. Display mapping stats, top missing fields, and action buttons. Modal should be non-blocking and set notification badge if user skips completion.",
+        "testStrategy": "Integration test: upload CSV and verify modal behavior. Unit tests for modal logic and notification badge. Manual UX testing with 5 users.",
+        "priority": "low",
+        "dependencies": [
+          "103",
+          "102"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-16T08:40:27.468Z"
+      },
+      {
+        "id": "105",
+        "title": "Comprehensive Testing and Documentation",
+        "description": "Ensure ≥80% test coverage, performance testing, and complete developer/user documentation for all new features and APIs.",
+        "details": "Write E2E tests for all CSV formats (TAMBUD, ATAL, INPRO) using Playwright or Cypress. Add unit/integration tests for parser, validation, and UI. Conduct performance tests for 1000+ row CSVs. Document APIs with Swagger/OpenAPI. Write user and developer guides in Notion or GitBook.",
+        "testStrategy": "Run automated test suites and generate coverage reports. Manual performance testing. Review documentation for completeness and clarity.",
+        "priority": "low",
+        "dependencies": [
+          "104",
+          "103",
+          "102",
+          "101",
+          "100",
+          "99",
+          "98",
+          "97",
+          "96"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Develop and Execute E2E Tests for All CSV Formats Using Playwright or Cypress",
+            "description": "Create and run end-to-end tests for TAMBUD, ATAL, and INPRO CSV formats to validate user flows and integration points.",
+            "dependencies": [],
+            "details": "Implement E2E test scripts in Playwright or Cypress covering upload, parsing, and validation for each CSV format. Ensure tests simulate real user interactions and edge cases.",
+            "status": "pending",
+            "testStrategy": "Automated E2E test runs with coverage reports; manual review of test results for completeness.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Unit and Integration Tests for Parser, Validation Logic, and UI Components",
+            "description": "Write comprehensive unit and integration tests to achieve at least 80% code coverage for core modules.",
+            "dependencies": [],
+            "details": "Add unit tests for CSV parser and validation logic, and integration tests for UI components interacting with backend. Use coverage tools to monitor and report coverage percentage.",
+            "status": "pending",
+            "testStrategy": "Run automated test suites and generate code coverage reports; verify coverage meets threshold.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Conduct Performance Testing for Large CSV Files (1000+ Rows)",
+            "description": "Assess and document system performance when processing large CSV files to ensure acceptable response times and resource usage.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Design and execute performance tests simulating uploads and processing of CSV files with 1000+ rows. Measure processing time, memory, and CPU usage. Identify bottlenecks.",
+            "status": "pending",
+            "testStrategy": "Automated and manual performance tests; collect and analyze metrics; document findings.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Document All APIs Using Swagger/OpenAPI",
+            "description": "Create and maintain up-to-date API documentation using Swagger or OpenAPI standards for all new and updated endpoints.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Define API schemas, request/response models, and example payloads in Swagger/OpenAPI. Ensure documentation is accessible and reviewed for accuracy.",
+            "status": "pending",
+            "testStrategy": "Validate documentation with Swagger/OpenAPI tools; peer review for completeness and correctness.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Write and Publish User and Developer Guides in Notion or GitBook",
+            "description": "Prepare comprehensive user and developer documentation covering feature usage, setup, and troubleshooting.",
+            "dependencies": [
+              1,
+              2,
+              4
+            ],
+            "details": "Draft guides with clear instructions, screenshots, and examples. Organize content in Notion or GitBook. Review for clarity, accuracy, and completeness.",
+            "status": "pending",
+            "testStrategy": "Internal review and feedback; ensure documentation is accessible and understandable to target audiences.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-16T08:44:03.310Z"
+      },
+      {
+        "id": "106",
+        "title": "Integration & Polish of Tasks 96-105 Features",
+        "description": "Complete the integration and polish all features developed in Tasks 96-105, including test infrastructure setup, component connections, and UI enhancements.",
+        "details": "This task integrates and polishes all features from Tasks 96-105:\n\n**1. Test Infrastructure Setup:**\n- Install @testing-library/react for React component testing (required by 3 test files)\n- Install @vitest/coverage-v8 for comprehensive test coverage reports\n- Set up Playwright for end-to-end testing with proper TypeScript configuration\n- Update vitest.config.ts to include React component testing environment\n- Configure coverage thresholds and reporting\n\n**2. Wizard-Upload Integration:**\n- Connect data completion wizard to upload modal by passing onStartCompletion callback\n- Update UploadWidget component (src/components/dashboard/upload-widget.tsx) to pass onStartDataCompletion prop to UploadFeedbackModal\n- Ensure wizard opens when user clicks completion button in upload success modal\n- Test integration flow: upload CSV → see success modal → click 'Complete Data' → wizard opens\n\n**3. Dashboard Notification Badge:**\n- Add notification badge to dashboard header using existing useDataCompletionBadge hook\n- Import and integrate badge component in dashboard layout\n- Display unread count for missing fields notifications\n- Style badge with proper positioning and colors matching UI design\n\n**4. Component Polish & Testing:**\n- Run all existing tests (11 test files) with new @testing-library/react setup\n- Ensure enhanced-data-quality-widget.test.ts, data-completion-wizard.test.ts, and upload-feedback-modal.test.tsx pass\n- Add E2E tests for complete upload-to-completion workflow\n- Fix any TypeScript errors in test files\n\n**5. Documentation & Cleanup:**\n- Update component documentation for new integrations\n- Clean up any temporary feature flags or debug code\n- Ensure all components follow consistent TypeScript patterns\n- Verify accessibility compliance for all new UI elements",
+        "testStrategy": "1. **Unit Tests**: Run `npm run test` to verify all 11 test files pass with @testing-library/react integration. 2. **Component Integration**: Test upload widget → feedback modal → wizard flow manually. 3. **E2E Tests**: Create Playwright tests for complete user journey from CSV upload to data completion. 4. **Coverage**: Run `npm run test:coverage` and ensure >80% coverage for all new components. 5. **Manual Testing**: Upload CSV files, verify success modal appears, click completion button, confirm wizard opens, check dashboard badge displays correctly. 6. **Accessibility**: Use screen reader to verify all components are accessible. 7. **Performance**: Verify no memory leaks in wizard modal lifecycle.",
+        "status": "done",
+        "dependencies": [
+          "96",
+          "97",
+          "98",
+          "99",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104",
+          "105"
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up and Configure Test Infrastructure",
+            "description": "Install and configure all required testing tools and environments for React component, coverage, and E2E testing.",
+            "dependencies": [],
+            "details": "Install @testing-library/react for component testing, @vitest/coverage-v8 for coverage reports, and Playwright for E2E tests. Update vitest.config.ts for React environment, set coverage thresholds, and ensure TypeScript compatibility for all test tools.",
+            "status": "done",
+            "testStrategy": "Verify installation by running sample tests for each tool. Check coverage reports and ensure Playwright E2E tests execute with TypeScript.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-17T07:29:02.600Z"
+          },
+          {
+            "id": 2,
+            "title": "Integrate Data Completion Wizard with Upload Modal",
+            "description": "Connect the data completion wizard to the upload modal, ensuring seamless user flow from upload to data completion.",
+            "dependencies": [
+              1
+            ],
+            "details": "Update UploadWidget to pass onStartDataCompletion prop to UploadFeedbackModal. Ensure the wizard opens when the user clicks 'Complete Data' in the upload success modal. Test the flow: upload CSV → success modal → 'Complete Data' → wizard opens.",
+            "status": "done",
+            "testStrategy": "Write integration tests using @testing-library/react to simulate the upload and wizard flow. Manually verify the UI sequence.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-17T07:12:41.880Z"
+          },
+          {
+            "id": 3,
+            "title": "Add and Style Dashboard Notification Badge",
+            "description": "Implement and style a notification badge in the dashboard header to display unread data completion notifications.",
+            "dependencies": [
+              2
+            ],
+            "details": "Import and integrate the badge component using useDataCompletionBadge hook. Display unread count for missing fields, and style the badge according to UI design specifications for positioning and colors.",
+            "status": "done",
+            "testStrategy": "Write component tests to verify badge rendering and count updates. Manually check badge appearance and positioning in the dashboard.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-17T07:19:35.663Z"
+          },
+          {
+            "id": 4,
+            "title": "Polish Components and Expand Test Coverage",
+            "description": "Run and update all tests, add E2E coverage for upload-to-completion workflow, and fix any TypeScript errors in test files.",
+            "dependencies": [
+              3
+            ],
+            "details": "Execute all 11 test files with the new setup, ensure key tests pass, add Playwright E2E tests for the full user journey, and resolve any TypeScript issues in test files.",
+            "status": "done",
+            "testStrategy": "Run npm test and Playwright E2E suite. Confirm all tests pass and TypeScript errors are resolved. Review coverage reports for completeness.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-17T07:28:31.077Z"
+          },
+          {
+            "id": 5,
+            "title": "Update Documentation and Perform Final Cleanup",
+            "description": "Document new integrations, remove temporary code, enforce TypeScript consistency, and verify accessibility for all UI changes.",
+            "dependencies": [
+              4
+            ],
+            "details": "Update component documentation to reflect integrations. Remove feature flags and debug code. Ensure all components follow consistent TypeScript patterns and check accessibility compliance for new UI elements.",
+            "status": "done",
+            "testStrategy": "Review documentation for completeness, run accessibility checks, and confirm codebase is free of temporary/debug code.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-17T08:15:15.359Z"
+          }
+        ],
+        "updatedAt": "2025-10-17T08:15:15.359Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-15T12:01:14.359Z",
-      "taskCount": 60,
-      "completedCount": 51,
+      "lastModified": "2025-10-17T08:15:15.361Z",
+      "taskCount": 71,
+      "completedCount": 62,
       "tags": [
         "master"
       ]

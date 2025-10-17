@@ -44,6 +44,8 @@ next-env.d.ts
 test-create-developer.mjs
 ceny-mieszkan-*.csv
 *.OLD_PROJECT_BACKUP
+verify_migration_*.ts
+check_postal_codes.sql
 
 # Logs
 logs

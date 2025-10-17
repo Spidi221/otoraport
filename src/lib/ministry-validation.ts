@@ -1,5 +1,5 @@
 /**
- * Ministry Field Validation Service (Task #89)
+ * Ministry Field Validation Service (Task #89 & #99)
  *
  * Comprehensive validation service for Polish ministry compliance
  * Based on: ustawa z dnia 21 maja 2025 r. o jawności cen mieszkań
@@ -11,21 +11,52 @@
  * - Format validation (postal codes, NIP, REGON, email, dates)
  * - Business logic validation (price consistency, area ranges)
  * - Severity categorization (critical/recommended/optional)
+ * - Sectioned validation with Zod v4.x (Task #99.2)
+ * - Detailed missing field feedback (Task #99.4)
  */
 
+import { z } from 'zod'
 import { ParsedProperty } from './api-schemas'
 
 // ============================================================================
-// TYPES & INTERFACES
+// TYPES & INTERFACES (Task #99.3 & #99.4)
 // ============================================================================
 
+/**
+ * Detailed field validation error with category and section
+ */
 export interface FieldValidationError {
   field: string
   message: string
   severity: 'critical' | 'warning' | 'info'
   value?: string | number
+  category?: 'required' | 'recommended' | 'developer'
+  section?: 'developer' | 'location' | 'pricing' | 'technical'
 }
 
+/**
+ * Section breakdown for compliance reporting
+ */
+export interface SectionBreakdown {
+  total: number
+  valid: number
+  percentage: number
+}
+
+/**
+ * Detailed missing field information (Task #99.4)
+ */
+export interface MissingFieldInfo {
+  fieldName: string
+  displayName: string
+  category: 'required' | 'recommended' | 'developer'
+  section: 'developer' | 'location' | 'pricing' | 'technical'
+  severity: 'critical' | 'warning'
+}
+
+/**
+ * Property validation result with section breakdown
+ */
 export interface PropertyValidationResult {
   valid: boolean
   propertyNumber: string
@@ -34,8 +65,20 @@ export interface PropertyValidationResult {
   missingRequired: string[]
   missingRecommended: string[]
   invalidFormats: string[]
+  // NEW: Section breakdown (Task #99.3)
+  sectionBreakdown?: {
+    developer: SectionBreakdown
+    location: SectionBreakdown
+    pricing: SectionBreakdown
+    technical: SectionBreakdown
+  }
+  // NEW: Detailed missing fields (Task #99.4)
+  missingFieldsDetailed?: MissingFieldInfo[]
 }
 
+/**
+ * Batch validation result with aggregated section breakdown
+ */
 export interface BatchValidationResult {
   valid: boolean
   totalProperties: number
@@ -45,14 +88,71 @@ export interface BatchValidationResult {
   globalErrors: string[]
   globalWarnings: string[]
   propertyResults: PropertyValidationResult[]
+  // NEW: Aggregated section breakdown (Task #99.3)
+  sectionBreakdown?: {
+    developer: SectionBreakdown
+    location: SectionBreakdown
+    pricing: SectionBreakdown
+    technical: SectionBreakdown
+  }
+  // NEW: Aggregated missing fields summary (Task #99.4)
+  missingFieldsSummary?: {
+    developer: string[]
+    location: string[]
+    pricing: string[]
+    technical: string[]
+  }
 }
 
 // ============================================================================
-// CONSTANTS & FIELD DEFINITIONS
+// CONSTANTS & FIELD DEFINITIONS (Task #99.1)
 // ============================================================================
 
 /**
+ * Developer information fields (Ministry columns 1-28)
+ * All developer data required by Ministry Schema 1.13
+ */
+export const DEVELOPER_FIELDS = {
+  // Basic company info (columns 1-10)
+  nazwa_dewelopera: 'Nazwa dewelopera',
+  forma_prawna: 'Forma prawna dewelopera',
+  nr_krs: 'Nr KRS',
+  nr_ceidg: 'Nr wpisu do CEiDG',
+  nip: 'Nr NIP',
+  regon: 'Nr REGON',
+  telefon: 'Nr telefonu',
+  email: 'Adres poczty elektronicznej',
+  fax: 'Nr faxu',
+  strona_www: 'Adres strony internetowej dewelopera',
+
+  // Headquarters address (columns 11-18)
+  siedziba_wojewodztwo: 'Województwo adresu siedziby',
+  siedziba_powiat: 'Powiat adresu siedziby',
+  siedziba_gmina: 'Gmina adresu siedziby',
+  siedziba_miejscowosc: 'Miejscowość adresu siedziby',
+  siedziba_ulica: 'Ulica adresu siedziby',
+  siedziba_numer_budynku: 'Nr nieruchomości adresu siedziby',
+  siedziba_numer_lokalu: 'Nr lokalu adresu siedziby',
+  siedziba_kod_pocztowy: 'Kod pocztowy adresu siedziby',
+
+  // Sales office address (columns 19-26)
+  biuro_wojewodztwo: 'Województwo adresu lokalu sprzedaży',
+  biuro_powiat: 'Powiat adresu lokalu sprzedaży',
+  biuro_gmina: 'Gmina adresu lokalu sprzedaży',
+  biuro_miejscowosc: 'Miejscowość adresu lokalu sprzedaży',
+  biuro_ulica: 'Ulica adresu lokalu sprzedaży',
+  biuro_numer_budynku: 'Nr nieruchomości adresu lokalu sprzedaży',
+  biuro_numer_lokalu: 'Nr lokalu adresu lokalu sprzedaży',
+  biuro_kod_pocztowy: 'Kod pocztowy adresu lokalu sprzedaży',
+
+  // Additional info (columns 27-28)
+  dodatkowe_lokalizacje: 'Dodatkowe lokalizacje sprzedaży',
+  sposob_kontaktu: 'Sposób kontaktu nabywcy z deweloperem'
+} as const
+
+/**
  * Required fields for ministry compliance (Schema 1.13)
+ * These are CRITICAL fields that MUST be present
  */
 export const REQUIRED_FIELDS = {
   // Location (required by ministry)
@@ -138,6 +238,94 @@ const KRS_REQUIRED_LEGAL_FORMS = [
   'spółka jawna',
   's.j.'
 ]
+
+// ============================================================================
+// ZOD VALIDATION SCHEMAS (Task #99.2)
+// ============================================================================
+
+/**
+ * Zod schema for developer information (columns 1-28)
+ */
+export const DeveloperInfoSchema = z.object({
+  // Basic company info (required)
+  nazwa_dewelopera: z.string().min(1, 'Nazwa dewelopera jest wymagana'),
+  forma_prawna: z.string().optional(),
+  nr_krs: z.string().optional(),
+  nr_ceidg: z.string().optional(),
+  nip: z.string().regex(/^\d{10}$/, 'NIP musi składać się z 10 cyfr'),
+  regon: z.string().optional(),
+  telefon: z.string().optional(),
+  email: z.string().email('Nieprawidłowy format email').optional(),
+  fax: z.string().optional(),
+  strona_www: z.string().url('Nieprawidłowy format URL').optional(),
+
+  // Headquarters address
+  siedziba_wojewodztwo: z.string().optional(),
+  siedziba_powiat: z.string().optional(),
+  siedziba_gmina: z.string().optional(),
+  siedziba_miejscowosc: z.string().optional(),
+  siedziba_ulica: z.string().optional(),
+  siedziba_numer_budynku: z.string().optional(),
+  siedziba_numer_lokalu: z.string().optional(),
+  siedziba_kod_pocztowy: z.string().regex(/^\d{2}-\d{3}$/, 'Kod pocztowy musi być w formacie XX-XXX').optional(),
+
+  // Sales office address
+  biuro_wojewodztwo: z.string().optional(),
+  biuro_powiat: z.string().optional(),
+  biuro_gmina: z.string().optional(),
+  biuro_miejscowosc: z.string().optional(),
+  biuro_ulica: z.string().optional(),
+  biuro_numer_budynku: z.string().optional(),
+  biuro_numer_lokalu: z.string().optional(),
+  biuro_kod_pocztowy: z.string().regex(/^\d{2}-\d{3}$/, 'Kod pocztowy musi być w formacie XX-XXX').optional(),
+
+  // Additional info
+  dodatkowe_lokalizacje: z.string().optional(),
+  sposob_kontaktu: z.string().optional()
+})
+
+/**
+ * Zod schema for location information (columns 29-35)
+ */
+export const LocationSchema = z.object({
+  wojewodztwo: z.string().min(1, 'Województwo jest wymagane'),
+  powiat: z.string().min(1, 'Powiat jest wymagany'),
+  gmina: z.string().min(1, 'Gmina jest wymagana'),
+  miejscowosc: z.string().min(1, 'Miejscowość jest wymagana'),
+  ulica: z.string().optional(),
+  numer: z.string().optional(),
+  kod_pocztowy: z.string().regex(/^\d{2}-\d{3}$/, 'Kod pocztowy musi być w formacie XX-XXX')
+})
+
+/**
+ * Zod schema for pricing information (columns 39-43)
+ */
+export const PricingSchema = z.object({
+  price_per_m2: z.number().positive('Cena za m² musi być > 0'),
+  total_price: z.number().positive('Cena całkowita musi być > 0'),
+  final_price: z.number().positive('Cena finalna musi być > 0').optional()
+}).refine(
+  (data) => {
+    // Price consistency check: total_price ≈ price_per_m2 × area
+    // (area will be validated separately)
+    return true // Will be validated in business logic
+  },
+  { message: 'Niezgodność cen' }
+)
+
+/**
+ * Zod schema for technical property details
+ */
+export const TechnicalSchema = z.object({
+  property_number: z.string().min(1, 'Nr lokalu/domu jest wymagany'),
+  property_type: z.string().optional(),
+  area: z.number().positive('Powierzchnia musi być > 0').min(10, 'Powierzchnia zbyt mała').max(500, 'Powierzchnia zbyt duża'),
+  liczba_pokoi: z.number().int().min(1).max(20).optional(),
+  kondygnacja: z.number().int().optional(),
+  construction_year: z.number().int().min(1900).max(new Date().getFullYear() + 5).optional(),
+  energy_class: z.string().optional(),
+  data_pierwszej_oferty: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data musi być w formacie RRRR-MM-DD').optional()
+})
 
 // ============================================================================
 // FORMAT VALIDATION FUNCTIONS (Task #89.2)
@@ -414,7 +602,141 @@ export function validateDateNotFuture(date: string | undefined, fieldName: strin
 }
 
 // ============================================================================
-// MAIN VALIDATION FUNCTION (Task #89.1 & #89.3)
+// SECTION BREAKDOWN HELPERS (Task #99.3)
+// ============================================================================
+
+/**
+ * Calculate section breakdown for a property
+ */
+function calculateSectionBreakdown(property: ParsedProperty): {
+  developer: SectionBreakdown
+  location: SectionBreakdown
+  pricing: SectionBreakdown
+  technical: SectionBreakdown
+} {
+  // Developer section (28 fields)
+  const developerFields = Object.keys(DEVELOPER_FIELDS)
+  const developerValid = developerFields.filter(field => {
+    const rawDataKey = DEVELOPER_FIELDS[field as keyof typeof DEVELOPER_FIELDS]
+    const value = property.raw_data?.[rawDataKey]
+    return value !== undefined && value !== null && value !== ''
+  }).length
+
+  // Location section (7 fields)
+  const locationFields = ['wojewodztwo', 'powiat', 'gmina', 'miejscowosc', 'ulica', 'numer', 'kod_pocztowy']
+  const locationValid = locationFields.filter(field => {
+    if (field === 'wojewodztwo') return !!property.raw_data?.['Województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego']
+    if (field === 'powiat') return !!property.raw_data?.['Powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego']
+    if (field === 'gmina') return !!property.raw_data?.['Gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego']
+    if (field === 'miejscowosc') return !!property.raw_data?.['Miejscowość lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego']
+    if (field === 'ulica') return !!property.raw_data?.['Ulica lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego']
+    if (field === 'numer') return !!property.raw_data?.['Nr nieruchomości lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego']
+    if (field === 'kod_pocztowy') return !!property.raw_data?.['Kod pocztowy lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego']
+    return false
+  }).length
+
+  // Pricing section (3 fields)
+  const pricingFields = ['price_per_m2', 'total_price', 'final_price']
+  const pricingValid = pricingFields.filter(field => {
+    const value = property[field as keyof ParsedProperty]
+    return value !== undefined && value !== null && (typeof value !== 'number' || value > 0)
+  }).length
+
+  // Technical section (8 fields)
+  const technicalFields = ['property_number', 'property_type', 'area', 'liczba_pokoi', 'kondygnacja', 'construction_year', 'energy_class', 'data_pierwszej_oferty']
+  const technicalValid = technicalFields.filter(field => {
+    const value = property[field as keyof ParsedProperty]
+    if (field === 'property_type') return !!property.raw_data?.['Rodzaj nieruchomości: lokal mieszkalny, dom jednorodzinny']
+    if (field === 'data_pierwszej_oferty') return !!property.raw_data?.['Data pierwszej oferty']
+    return value !== undefined && value !== null && value !== ''
+  }).length
+
+  return {
+    developer: {
+      total: developerFields.length,
+      valid: developerValid,
+      percentage: Math.round((developerValid / developerFields.length) * 100)
+    },
+    location: {
+      total: locationFields.length,
+      valid: locationValid,
+      percentage: Math.round((locationValid / locationFields.length) * 100)
+    },
+    pricing: {
+      total: pricingFields.length,
+      valid: pricingValid,
+      percentage: Math.round((pricingValid / pricingFields.length) * 100)
+    },
+    technical: {
+      total: technicalFields.length,
+      valid: technicalValid,
+      percentage: Math.round((technicalValid / technicalFields.length) * 100)
+    }
+  }
+}
+
+/**
+ * Generate detailed missing field information (Task #99.4)
+ */
+function generateMissingFieldsInfo(
+  missingRequired: string[],
+  missingRecommended: string[],
+  property: ParsedProperty
+): MissingFieldInfo[] {
+  const missingFields: MissingFieldInfo[] = []
+
+  // Map field names to sections
+  const fieldSectionMap: Record<string, 'developer' | 'location' | 'pricing' | 'technical'> = {
+    // Developer fields
+    nazwa_dewelopera: 'developer',
+    nip: 'developer',
+    forma_prawna: 'developer',
+    // Location fields
+    wojewodztwo: 'location',
+    powiat: 'location',
+    gmina: 'location',
+    miejscowosc: 'location',
+    kod_pocztowy: 'location',
+    ulica: 'location',
+    // Pricing fields
+    price_per_m2: 'pricing',
+    total_price: 'pricing',
+    final_price: 'pricing',
+    // Technical fields
+    property_number: 'technical',
+    area: 'technical',
+    property_type: 'technical',
+    liczba_pokoi: 'technical',
+    construction_year: 'technical'
+  }
+
+  // Add missing required fields
+  for (const field of missingRequired) {
+    missingFields.push({
+      fieldName: field,
+      displayName: REQUIRED_FIELDS[field as keyof typeof REQUIRED_FIELDS] || field,
+      category: 'required',
+      section: fieldSectionMap[field] || 'technical',
+      severity: 'critical'
+    })
+  }
+
+  // Add missing recommended fields
+  for (const field of missingRecommended) {
+    missingFields.push({
+      fieldName: field,
+      displayName: RECOMMENDED_FIELDS[field as keyof typeof RECOMMENDED_FIELDS] || field,
+      category: 'recommended',
+      section: fieldSectionMap[field] || 'technical',
+      severity: 'warning'
+    })
+  }
+
+  return missingFields
+}
+
+// ============================================================================
+// MAIN VALIDATION FUNCTION (Task #89.1 & #89.3 & #99)
 // ============================================================================
 
 /**
@@ -509,14 +831,14 @@ export function validateProperty(property: ParsedProperty): PropertyValidationRe
   }
 
   // Pricing fields
-  if (!property.price_per_m2 || property.price_per_m2 <= 0) {
+  if (!property.price_per_m2 || (typeof property.price_per_m2 === 'number' && property.price_per_m2 <= 0)) {
     missingRequired.push('price_per_m2')
     errors.push({
       field: 'price_per_m2',
       message: 'Brak lub nieprawidłowa cena za m² (musi być > 0)',
       severity: 'critical'
     })
-  } else {
+  } else if (typeof property.price_per_m2 === 'number') {
     // Price range validation
     const priceRangeValidation = validatePriceRange(property.price_per_m2)
     if (!priceRangeValidation.valid) {
@@ -529,7 +851,7 @@ export function validateProperty(property: ParsedProperty): PropertyValidationRe
     }
   }
 
-  if (!property.total_price || property.total_price <= 0) {
+  if (!property.total_price || (typeof property.total_price === 'number' && property.total_price <= 0)) {
     missingRequired.push('total_price')
     errors.push({
       field: 'total_price',
@@ -539,14 +861,14 @@ export function validateProperty(property: ParsedProperty): PropertyValidationRe
   }
 
   // Area
-  if (!property.area || property.area <= 0) {
+  if (!property.area || (typeof property.area === 'number' && property.area <= 0)) {
     missingRequired.push('area')
     errors.push({
       field: 'area',
       message: 'Brak lub nieprawidłowa powierzchnia (musi być > 0)',
       severity: 'critical'
     })
-  } else {
+  } else if (typeof property.area === 'number') {
     // Area range validation
     const areaRangeValidation = validateAreaRange(property.area)
     if (!areaRangeValidation.valid) {
@@ -560,17 +882,19 @@ export function validateProperty(property: ParsedProperty): PropertyValidationRe
   }
 
   // Price consistency check
-  const priceConsistencyValidation = validatePriceConsistency(
-    property.price_per_m2,
-    property.area,
-    property.total_price
-  )
-  if (!priceConsistencyValidation.valid) {
-    warnings.push({
-      field: 'price_consistency',
-      message: priceConsistencyValidation.warning!,
-      severity: 'warning'
-    })
+  if (typeof property.price_per_m2 === 'number' && typeof property.area === 'number' && typeof property.total_price === 'number') {
+    const priceConsistencyValidation = validatePriceConsistency(
+      property.price_per_m2,
+      property.area,
+      property.total_price
+    )
+    if (!priceConsistencyValidation.valid) {
+      warnings.push({
+        field: 'price_consistency',
+        message: priceConsistencyValidation.warning!,
+        severity: 'warning'
+      })
+    }
   }
 
   // Developer information
@@ -674,25 +998,29 @@ export function validateProperty(property: ParsedProperty): PropertyValidationRe
   }
 
   // Rooms count validation
-  const roomsValidation = validateRoomsCount(property.liczba_pokoi)
-  if (!roomsValidation.valid) {
-    warnings.push({
-      field: 'liczba_pokoi',
-      message: roomsValidation.warning!,
-      severity: 'warning',
-      value: property.liczba_pokoi
-    })
+  if (typeof property.liczba_pokoi === 'number') {
+    const roomsValidation = validateRoomsCount(property.liczba_pokoi)
+    if (!roomsValidation.valid) {
+      warnings.push({
+        field: 'liczba_pokoi',
+        message: roomsValidation.warning!,
+        severity: 'warning',
+        value: property.liczba_pokoi
+      })
+    }
   }
 
   // Construction year validation
-  const yearValidation = validateConstructionYear(property.construction_year)
-  if (!yearValidation.valid) {
-    warnings.push({
-      field: 'construction_year',
-      message: yearValidation.warning!,
-      severity: 'warning',
-      value: property.construction_year
-    })
+  if (typeof property.construction_year === 'number') {
+    const yearValidation = validateConstructionYear(property.construction_year)
+    if (!yearValidation.valid) {
+      warnings.push({
+        field: 'construction_year',
+        message: yearValidation.warning!,
+        severity: 'warning',
+        value: property.construction_year
+      })
+    }
   }
 
   // Date validation
@@ -721,6 +1049,13 @@ export function validateProperty(property: ParsedProperty): PropertyValidationRe
   }
 
   // ========================================================================
+  // SECTION BREAKDOWN & DETAILED MISSING FIELDS (Task #99.3 & #99.4)
+  // ========================================================================
+
+  const sectionBreakdown = calculateSectionBreakdown(property)
+  const missingFieldsDetailed = generateMissingFieldsInfo(missingRequired, missingRecommended, property)
+
+  // ========================================================================
   // RETURN RESULT
   // ========================================================================
 
@@ -733,7 +1068,9 @@ export function validateProperty(property: ParsedProperty): PropertyValidationRe
     warnings,
     missingRequired,
     missingRecommended,
-    invalidFormats
+    invalidFormats,
+    sectionBreakdown,
+    missingFieldsDetailed
   }
 }
 
@@ -760,13 +1097,17 @@ export function validateProperties(properties: ParsedProperty[]): BatchValidatio
 
   // Compliance score calculation
   const totalFields = Object.keys(REQUIRED_FIELDS).length + Object.keys(RECOMMENDED_FIELDS).length
-  const avgFieldsPresent = propertyResults.reduce((acc, r) => {
-    const presentRequired = Object.keys(REQUIRED_FIELDS).length - r.missingRequired.length
-    const presentRecommended = Object.keys(RECOMMENDED_FIELDS).length - r.missingRecommended.length
-    return acc + presentRequired + presentRecommended
-  }, 0) / propertyResults.length
+  const avgFieldsPresent = propertyResults.length > 0
+    ? propertyResults.reduce((acc, r) => {
+        const presentRequired = Object.keys(REQUIRED_FIELDS).length - r.missingRequired.length
+        const presentRecommended = Object.keys(RECOMMENDED_FIELDS).length - r.missingRecommended.length
+        return acc + presentRequired + presentRecommended
+      }, 0) / propertyResults.length
+    : 0
 
-  const complianceScore = Math.round((avgFieldsPresent / totalFields) * 100)
+  const complianceScore = propertyResults.length > 0
+    ? Math.round((avgFieldsPresent / totalFields) * 100)
+    : 0
 
   // Global aggregation
   const propertiesWithMissingLocation = propertyResults.filter(r =>
@@ -792,6 +1133,89 @@ export function validateProperties(properties: ParsedProperty[]): BatchValidatio
     )
   }
 
+  // ========================================================================
+  // AGGREGATED SECTION BREAKDOWN (Task #99.3)
+  // ========================================================================
+
+  const aggregateSectionBreakdown = (): {
+    developer: SectionBreakdown
+    location: SectionBreakdown
+    pricing: SectionBreakdown
+    technical: SectionBreakdown
+  } => {
+    if (propertyResults.length === 0) {
+      return {
+        developer: { total: 28, valid: 0, percentage: 0 },
+        location: { total: 7, valid: 0, percentage: 0 },
+        pricing: { total: 3, valid: 0, percentage: 0 },
+        technical: { total: 8, valid: 0, percentage: 0 }
+      }
+    }
+
+    const avgDeveloper = Math.round(
+      propertyResults.reduce((sum, r) => sum + (r.sectionBreakdown?.developer.percentage || 0), 0) / propertyResults.length
+    )
+    const avgLocation = Math.round(
+      propertyResults.reduce((sum, r) => sum + (r.sectionBreakdown?.location.percentage || 0), 0) / propertyResults.length
+    )
+    const avgPricing = Math.round(
+      propertyResults.reduce((sum, r) => sum + (r.sectionBreakdown?.pricing.percentage || 0), 0) / propertyResults.length
+    )
+    const avgTechnical = Math.round(
+      propertyResults.reduce((sum, r) => sum + (r.sectionBreakdown?.technical.percentage || 0), 0) / propertyResults.length
+    )
+
+    return {
+      developer: {
+        total: 28,
+        valid: Math.round((avgDeveloper / 100) * 28),
+        percentage: avgDeveloper
+      },
+      location: {
+        total: 7,
+        valid: Math.round((avgLocation / 100) * 7),
+        percentage: avgLocation
+      },
+      pricing: {
+        total: 3,
+        valid: Math.round((avgPricing / 100) * 3),
+        percentage: avgPricing
+      },
+      technical: {
+        total: 8,
+        valid: Math.round((avgTechnical / 100) * 8),
+        percentage: avgTechnical
+      }
+    }
+  }
+
+  // ========================================================================
+  // MISSING FIELDS SUMMARY (Task #99.4)
+  // ========================================================================
+
+  const missingFieldsSummary = {
+    developer: [] as string[],
+    location: [] as string[],
+    pricing: [] as string[],
+    technical: [] as string[]
+  }
+
+  // Aggregate missing fields across all properties
+  for (const result of propertyResults) {
+    if (result.missingFieldsDetailed) {
+      for (const field of result.missingFieldsDetailed) {
+        const fieldList = missingFieldsSummary[field.section]
+        if (!fieldList.includes(field.displayName)) {
+          fieldList.push(field.displayName)
+        }
+      }
+    }
+  }
+
+  // ========================================================================
+  // RETURN RESULT
+  // ========================================================================
+
   // Overall validity
   const valid = globalErrors.length === 0 && invalidProperties === 0
 
@@ -803,6 +1227,8 @@ export function validateProperties(properties: ParsedProperty[]): BatchValidatio
     complianceScore,
     globalErrors,
     globalWarnings,
-    propertyResults
+    propertyResults,
+    sectionBreakdown: aggregateSectionBreakdown(),
+    missingFieldsSummary
   }
 }

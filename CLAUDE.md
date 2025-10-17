@@ -28,6 +28,63 @@ interface CoreMission {
 
 ---
 
+## 🤖 AUTONOMOUS WORK PROTOCOL - TASKI 96-105
+
+**KRYTYCZNA INSTRUKCJA**: Ten protokół nadpisuje standardowy workflow dla tasków 96-105!
+
+### Cel: Zrealizować taski 96-105 bez przerwy, autonomicznie
+
+**Workflow dla KAŻDEGO taska (96-105):**
+
+1. **REALIZUJ WSZYSTKIE SUBTASKI**
+   - Użyj specialized agents (TYLKO JEDEN NA RAZ! Nigdy paralelnie!)
+   - Używaj task-executor, code-debugger, data-parser-validator, performance-optimizer według potrzeb
+   - Oznacz każdy subtask jako done po ukończeniu
+
+2. **CODERABBIT REVIEW #1 (po wszystkich subtaskach)**
+   - Uruchom w tle: `coderabbit review --plain <zmienione pliki> &`
+   - CZEKAJ aż CodeRabbit skończy (może trwać kilka minut)
+   - Przeczytaj WSZYSTKIE sugestie
+
+3. **POPRAWKI #1**
+   - Nanieś WSZYSTKIE poprawki z CodeRabbit
+   - Poprawiaj kod bezpośrednio (Edit tool), NIE przez agentów (oszczędność czasu)
+
+4. **CODERABBIT REVIEW #2 (weryfikacja)**
+   - Uruchom ponownie: `coderabbit review --plain <zmienione pliki>`
+   - CZEKAJ aż CodeRabbit skończy
+   - Sprawdź czy są nowe sugestie
+
+5. **POPRAWKI #2 (jeśli potrzebne)**
+   - Nanieś kolejne poprawki
+   - Powtarzaj CodeRabbit → poprawki dopóki nie będzie ✅ clean
+
+6. **TEST MANUALNY**
+   - Uruchom dev server jeśli nie działa
+   - Przetestuj zaimplementowaną funkcjonalność
+   - Sprawdź czy nie ma błędów TypeScript/runtime
+
+7. **OZNACZ TASK JAKO DONE**
+   - `task-master set-status --id=<task-id> --status=done`
+
+8. **PRZEJDŹ DO KOLEJNEGO TASKA**
+   - `task-master next`
+   - Powtórz workflow od kroku 1
+
+### Zasady:
+
+- ✅ **Pracuj NON-STOP** - nie czekaj na zgodę między taskami
+- ✅ **TYLKO JEDEN AGENT NA RAZ** - nigdy paralelnie!
+- ✅ **CODERABBIT MUSI ZAAKCEPTOWAĆ** - dopiero wtedy task done
+- ✅ **TEST MUSI PRZEJŚĆ** - sprawdź czy kod działa
+- ❌ **NIE raportuj do usera** między taskami (user odszedł)
+- ✅ **ZAPISUJ problemy** w SESSION LOG jeśli coś wymaga uwagi usera
+
+### Nagroda:
+Po ukończeniu wszystkich 10 tasków (96-105) bez błędów → sowita nagroda! 🎁
+
+---
+
 ## 🔄 MANDATORY WORKFLOW - ZAWSZE PRZESTRZEGAJ
 
 ### Workflow dla każdego taska:
@@ -269,7 +326,211 @@ To **marketing** - prawdopodobnie oznacza:
 
 ---
 
-## 📝 SESSION LOG - OSTATNIA SESJA (2025-10-13)
+## 📝 SESSION LOG - BIEŻĄCA SESJA (2025-10-15)
+
+### Task #96: Fix Polish Character Handling in smart-csv-parser.ts
+
+#### Subtask #96.1: Analysis - normalizeString() Bug Identification
+
+**Status**: ✅ Analysis Complete
+**File**: `/Users/bartlomiejchudzik/Documents/Agencja AI/Real Estate App/otoraport-v2/src/lib/smart-csv-parser.ts`
+**Lines**: 1096-1102
+
+##### Current Implementation (BUGGY CODE):
+
+```typescript
+/**
+ * Normalize string for comparison - removes Polish special chars and normalizes whitespace
+ */
+private normalizeString(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^\w\s]/g, '') // Remove special chars (including Polish ł, ą, ć, etc.)
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .trim()
+}
+```
+
+##### Bug Explanation:
+
+**Root Cause**: The regex `/[^\w\s]/g` removes ALL characters that are NOT word characters (`\w`) or whitespace (`\s`).
+
+**JavaScript \w Definition**: In JavaScript (without Unicode flag), `\w` only matches:
+- `[A-Za-z0-9_]` (ASCII letters, digits, underscore)
+- Does NOT include Polish diacritical characters: `ą`, `ć`, `ę`, `ł`, `ń`, `ó`, `ś`, `ź`, `ż`
+
+**Result**: The regex `[^\w\s]` matches and REMOVES all Polish special characters.
+
+##### Impact on Real CSV Data:
+
+**Example 1: Floor/Story Column**
+- Pattern in COLUMN_PATTERNS: `'piętro'`
+- Real CSV header from INPRO: `"Piętro nieruchomości"`
+- After normalizeString(): `"pitro nieruchomoci"` (loses ę and ś)
+- Fuzzy match score: SIGNIFICANTLY LOWER (may fail to match)
+
+**Example 2: Balcony Surface Column**
+- Pattern in COLUMN_PATTERNS: `'powierzchnia balkonu'`
+- After normalizeString(): `"powierzchnia balkonu"` (unchanged - no special chars)
+- Real CSV header with typo: `"Powierzchnia bałkonu"` (intentional test)
+- After normalizeString(): `"powierzchnia bakonu"` (loses ł)
+- Fuzzy match score: LOWER (may miss match)
+
+**Example 3: Ministry Official Column Names**
+- Pattern: `'cena m 2 powierzchni użytkowej lokalu mieszkalnego'`
+- After normalizeString(): `"cena m 2 powierzchni uytkowej lokalu mieszkalnego"` (loses ż)
+- Impact: Ministry-format CSVs may not be recognized correctly
+
+##### Affected COLUMN_PATTERNS (from code inspection):
+
+From `COLUMN_PATTERNS` object (lines 148+):
+- `'piętro'` → becomes `'pitro'`
+- `'kondygnacja'` → unchanged (no special chars)
+- `'powierzchnia użytkowa'` → becomes `'powierzchnia uytkowa'`
+- `'cena za m²'` → becomes `'cena za m2'` (loses ²)
+- `'metraż'` → becomes `'metra'` (loses ż)
+
+##### Why This Breaks Column Matching:
+
+1. **normalizeString()** is called on BOTH:
+   - Pattern strings from COLUMN_PATTERNS (line 1133)
+   - CSV header strings from uploaded files (line 1118, 1641)
+
+2. **fuzzyMatch()** function (not shown in code) compares normalized strings
+   - If pattern has Polish chars → they're removed
+   - If CSV header has Polish chars → they're removed
+   - BUT: Removal is INCONSISTENT if chars differ (e.g., `ę` vs `e`)
+
+3. **Example Failure Scenario**:
+   ```
+   CSV Header:    "Piętro"          → normalized: "pitro"
+   Pattern #1:    "piętro"          → normalized: "pitro"     ✅ MATCH
+   Pattern #2:    "pietro"          → normalized: "pietro"    ✅ MATCH
+
+   BUT if CSV has:
+   CSV Header:    "Piętro mieszkania" → normalized: "pitro mieszkania"
+   Pattern:       "pietro mieszkania" → normalized: "pietro mieszkania"
+   Fuzzy score: LOWER (because 'pitro' != 'pietro')
+   ```
+
+##### Recommended Fix:
+
+Replace the regex with one that preserves Polish diacritical characters:
+
+**Option 1: Explicit Polish Character Preservation**
+```typescript
+private normalizeString(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^a-ząćęłńóśźż0-9\s]/g, '') // Keep Polish chars + ASCII + digits + spaces
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+```
+
+**Option 2: Unicode-Aware Regex (ES2018+)**
+```typescript
+private normalizeString(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, '') // Keep all letters (including Polish) + numbers + spaces
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+```
+
+**Recommended**: Option 2 (Unicode-aware) for future-proofing and handling other languages.
+
+##### Files Affected by This Bug:
+
+All CSV parsing functionality relies on `normalizeString()`:
+- `detectFormat()` (line 1019, 1024, 1032) - Format detection for MINISTERIAL/INPRO/CUSTOM
+- `analyzeColumns()` (line 1118, 1133) - Column mapping
+- `extractDeveloperInfo()` (line 1641, 1646) - Developer info extraction
+
+##### Test Cases to Verify After Fix:
+
+1. Upload INPRO CSV with column: `"Piętro nieruchomości"`
+2. Upload ATAL CSV with column: `"Metraż użytkowy"`
+3. Upload Ministry CSV with: `"Cena m² powierzchni użytkowej"`
+4. Verify all columns are correctly matched with confidence > 0.8
+
+---
+
+#### Subtask #96.5: Documentation and Usage Examples ✅ COMPLETED
+
+**Status**: ✅ Done
+**What Was Done**:
+1. Enhanced JSDoc comment for normalizeString() method with:
+   - Full algorithm explanation (5-step process)
+   - Usage examples with Polish text
+   - Technical details about Unicode patterns (\p{L}, \p{N})
+   - Real-world CSV column examples
+
+2. Added comprehensive inline code comments explaining:
+   - Unicode NFC normalization (step 1)
+   - Case normalization (step 2)
+   - Regex pattern details with \p{L} and \p{N} (step 3)
+   - Whitespace normalization (step 4)
+   - Trim operation (step 5)
+
+3. Created comprehensive documentation file: `src/lib/CSV_PARSER_DOCS.md`
+   - Overview of recent changes (Task #96)
+   - Detailed explanation of normalizeString() algorithm
+   - Unicode normalization (NFC) explanation
+   - Polish character preservation guide
+   - Usage examples for INPRO, ATAL, and Ministry formats
+   - Edge cases documentation
+   - Test coverage summary (38 test cases passing)
+   - Performance considerations
+   - Debugging tips
+   - Migration notes
+   - References to Unicode standards
+
+**Files Modified**:
+- `/Users/bartlomiejchudzik/Documents/Agencja AI/Real Estate App/otoraport-v2/src/lib/smart-csv-parser.ts` (enhanced JSDoc + inline comments)
+- `/Users/bartlomiejchudzik/Documents/Agencja AI/Real Estate App/otoraport-v2/src/lib/CSV_PARSER_DOCS.md` (new comprehensive documentation)
+
+**Test Results**:
+- All 38 unit tests passing (verified)
+- Test file: `src/lib/__tests__/smart-csv-parser.test.ts`
+
+**Quality Check**:
+- ✅ Clear JSDoc with examples
+- ✅ Inline comments explain each step
+- ✅ Comprehensive documentation file created
+- ✅ Test coverage documented
+- ✅ Usage examples for all CSV formats
+
+---
+
+### Task #96 Summary - Complete Fix for Polish Character Handling
+
+**Problem**: CSV parser was stripping Polish diacritical characters (ą, ć, ę, ł, ń, ó, ś, ź, ż) during column normalization, causing failed matches when developers uploaded CSV files with proper Polish characters.
+
+**Solution**:
+1. Fixed normalizeString() regex to preserve ALL Unicode letters using `\p{L}` pattern
+2. Added Unicode NFC normalization to handle composed vs decomposed characters
+3. Created comprehensive test suite (38 test cases)
+4. Documented the fix extensively
+
+**Impact**:
+- ✅ Polish characters now preserved correctly
+- ✅ "Piętro nieruchomości" → "piętro nieruchomości" (not "pitro nieruchomoci")
+- ✅ "Województwo" → "województwo" (not "wojewodztwo")
+- ✅ Ministry Schema 1.13 compliance maintained
+- ✅ INPRO/ATAL format CSV parsing now works correctly
+
+**Files Changed**:
+- `src/lib/smart-csv-parser.ts` (normalizeString method)
+- `src/lib/__tests__/smart-csv-parser.test.ts` (38 test cases)
+- `src/lib/CSV_PARSER_DOCS.md` (comprehensive documentation)
+
+**Status**: ✅ Task #96 COMPLETE - All subtasks done, tests passing, documentation complete
+
+---
+
+## 📝 SESSION LOG - POPRZEDNIA SESJA (2025-10-13)
 
 ### ✅ Ukończone Taski
 

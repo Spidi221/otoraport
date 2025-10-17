@@ -1,6 +1,8 @@
 // Smart CSV/Excel parser with intelligent column mapping for Polish real estate data
 // Updated for Ministry Schema 1.13 compliance (all 58 required fields)
 import * as XLSX from 'xlsx';
+import { distance as levenshteinDistance } from 'fastest-levenshtein';
+import { COMPLETE_COLUMN_PATTERNS, type MinistryFieldKey } from './column-synonyms-complete';
 
 interface ColumnMapping {
   // Basic property info
@@ -144,611 +146,15 @@ interface ColumnMapping {
   prospectus_url: string[]  // adres_prospektu
 }
 
-// Polish real estate field variations - COMPLETE 58+ field mapping
-export const COLUMN_PATTERNS: ColumnMapping = {
-  // Basic property info
-  property_number: [
-    // INPRO FORMAT (highest priority - exact match required)
-    'nr nieruchomości nadany przez dewelopera',
-    'nr nieruchomosci nadany przez dewelopera',
-    // MINISTRY OFFICIAL NAMES:
-    'nr lokalu lub domu jednorodzinnego nadany przez dewelopera',
-    'oznaczenie lokalu nadane przez dewelopera',
-    // GENERIC NAMES (lower priority)
-    'nr lokalu', 'numer lokalu', 'nr mieszkania', 'numer mieszkania',
-    'lokal', 'mieszkanie', 'property_number', 'apartment_number',
-    'nr_lokalu', 'numer_lokalu', 'mieszkanie_nr',
-    // FALLBACK (avoid these if better match exists)
-    'nr' // Too generic, only as last resort
-  ],
-  property_type: [
-    'typ', 'typ lokalu', 'typ mieszkania', 'rodzaj', 'property_type',
-    'type', 'kategoria', 'typ_lokalu', 'rodzaj_lokalu'
-  ],
-  
-  // Prices
-  price_per_m2: [
-    // INPRO FORMAT (highest priority)
-    'cena za m2 nieruchomości',
-    'cena za m2 nieruchomosci',
-    // MINISTRY OFFICIAL NAMES (ze spacją!):
-    'cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego [zł]',
-    'cena metra kwadratowego powierzchni użytkowej',
-    // GENERIC NAMES
-    'cena za m²', 'cena za m2', 'cena m2', 'cena m²', 'cena/m2', 'cena/m²',
-    'cena za m 2', 'cena m 2', 'cena/m 2', // warianty ze spacją
-    'price_per_m2', 'price_per_sqm', 'cena_za_m2', 'cena_m2', 'cena za metr'
-  ],
-  total_price: [
-    // INPRO FORMAT (highest priority)
-    'cena nieruchomości',
-    'cena nieruchomosci',
-    // MINISTRY OFFICIAL NAMES:
-    'cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]',
-    'cena będąca iloczynem powierzchni oraz metrażu',
-    // GENERIC NAMES
-    'cena całkowita', 'cena calkowita', 'cena', 'cena brutto', 'cena bazowa',
-    'total_price', 'price', 'cena_calkowita', 'cena_bazowa', 'cena_brutto'
-  ],
-  // TASK #85.3: Base price (cena bazowa = price_per_m2 * area, without extras)
-  base_price: [
-    'cena bazowa', 'cena_bazowa', 'base_price', 'cena podstawowa', 'cena_podstawowa',
-    // MINISTRY OFFICIAL NAMES (column 40):
-    'cena lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni [zł]',
-    'cena będąca iloczynem powierzchni oraz metrażu'
-  ],
-  base_price_valid_from: [
-    'data bazowa', 'data_bazowa', 'data ceny bazowej', 'data_ceny_bazowej', 'base_price_date',
-    // MINISTRY OFFICIAL NAMES (column 41):
-    'data obowiązywania ceny lokalu mieszkalnego lub domu jednorodzinnego będących przedmiotem umowy stanowiąca iloczyn ceny m2 oraz powierzchni',
-    'data obowiazywania ceny bazowej'
-  ],
-  final_price: [
-    'cena finalna', 'cena końcowa', 'cena ostateczna', 'cena_koncowa', 'final_price',
-    'cena_finalna', 'cena_ostateczna',
-    // MINISTRY OFFICIAL NAMES (column 42):
-    'cena lokalu mieszkalnego lub domu jednorodzinnego uwzględniająca cenę lokalu stanowiącą iloczyn powierzchni oraz metrażu i innych składowych ceny, o których mowa w art. 19a ust. 1 pkt 1), 2) lub 3) [zł]',
-    'cena uwzględniająca wszystkie składowe'
-  ],
-  final_price_valid_from: [
-    'data finalna', 'data_finalna', 'data ceny finalnej', 'data_ceny_finalnej', 'final_price_date',
-    'data końcowa', 'data_koncowa',
-    // MINISTRY OFFICIAL NAMES (column 43):
-    'data obowiązywania ceny lokalu mieszkalnego lub domu jednorodzinnego uwzględniająca cenę lokalu stanowiącą iloczyn powierzchni oraz metrażu i innych składowych ceny, o których mowa w art. 19a ust. 1 pkt 1), 2) lub 3)',
-    'data obowiazywania ceny finalnej', 'data obowiazywania ceny koncowej'
-  ],
-
-  // Areas and spaces
-  // ⚠️ UWAGA: Ministerstwo NIE MA kolumny "Powierzchnia" w CSV!
-  // Powierzchnia obliczana: area = total_price / price_per_m2 (kolumna 40 / kolumna 38)
-  // Parser akceptuje surface area TYLKO jeśli user ma ją w swoim CSV
-  area: [
-    'powierzchnia', 'powierzchnia użytkowa', 'powierzchnia m²', 'powierzchnia m2',
-    'area', 'size', 'metraż', 'pow', 'powierzchnia_uzytkowa', 'm2', 'm²'
-    // ❌ USUNIĘTO nieistniejące oficjalne nazwy ministerstwa
-    // Ministerstwo: kolumna NIE ISTNIEJE, trzeba obliczyć!
-  ],
-  powierzchnia_balkon: [
-    'balkon', 'powierzchnia balkonu', 'balcony', 'powierzchnia_balkon',
-    'pow balkonu', 'balkon m2', 'balkon m²'
-  ],
-  powierzchnia_taras: [
-    'taras', 'powierzchnia tarasu', 'terrace', 'powierzchnia_taras',
-    'pow tarasu', 'taras m2', 'taras m²'
-  ],
-  powierzchnia_loggia: [
-    'loggia', 'powierzchnia loggii', 'powierzchnia_loggia',
-    'pow loggii', 'loggia m2', 'loggia m²'
-  ],
-  powierzchnia_ogrod: [
-    'ogród', 'ogrod', 'powierzchnia ogrodu', 'garden', 'powierzchnia_ogrod',
-    'pow ogrodu', 'ogród m2', 'ogród m²'
-  ],
-  
-  // Property details
-  kondygnacja: [
-    'kondygnacja', 'piętro', 'pietro', 'floor', 'level',
-    'poziom', 'kondygnacja_nr', 'nr_pietra'
-  ],
-  liczba_pokoi: [
-    'pokoje', 'liczba pokoi', 'rooms', 'liczba_pokoi', 'ilosc_pokoi',
-    'nr pokoi', 'rooms_count', 'pokoi'
-    // ❌ USUNIĘTO nieistniejącą nazwę ministerstwa
-    // Ministerstwo: kolumna "Liczba pokoi" NIE ISTNIEJE w schemacie 58 kolumn!
-    // Parser akceptuje rooms TYLKO jeśli user ma tę kolumnę w swoim CSV
-  ],
-  
-  // Location fields
-  wojewodztwo: [
-    'województwo', 'wojewodztwo', 'voivodeship', 'region',
-    'woj', 'woj.', 'province',
-    // MINISTRY SHORT NAMES (TASK #85.2):
-    'wojewodztwo_inwestycji', 'województwo_inwestycji',
-    // MINISTRY OFFICIAL NAMES:
-    'województwo lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
-    'województwo adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
-  ],
-  powiat: [
-    'powiat', 'county', 'district', 'pow', 'pow.',
-    // MINISTRY SHORT NAMES (TASK #85.2):
-    'powiat_inwestycji',
-    // MINISTRY OFFICIAL NAMES:
-    'powiat lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
-    'powiat adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
-  ],
-  gmina: [
-    'gmina', 'municipality', 'commune', 'gm', 'gm.',
-    // MINISTRY SHORT NAMES (TASK #85.2):
-    'gmina_inwestycji',
-    // MINISTRY OFFICIAL NAMES:
-    'gmina lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
-    'gmina adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
-  ],
-  miejscowosc: [
-    'miejscowość', 'miejscowosc', 'miasto', 'city', 'town',
-    'locality', 'place',
-    // MINISTRY SHORT NAMES (TASK #85.2):
-    'miejscowosc_inwestycji', 'miejscowość_inwestycji',
-    // MINISTRY OFFICIAL NAMES:
-    'miejscowość lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
-    'miejscowość adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
-  ],
-  ulica: [
-    'ulica', 'ul', 'ul.', 'street', 'adres', 'address',
-    // MINISTRY SHORT NAMES (TASK #85.2):
-    'ulica_inwestycji',
-    // MINISTRY OFFICIAL NAMES:
-    'ulica lokalizacji przedsięwzięcia deweloperskiego lub zadania inwestycyjnego',
-    'ulica adresu siedziby/głównego miejsca wykonywania działalności gospodarczej dewelopera'
-  ],
-  numer_nieruchomosci: [
-    'numer nieruchomości', 'nr nieruchomości', 'numer_nieruchomosci',
-    'nr budynku', 'building_number', 'house_number',
-    // MINISTRY SHORT NAMES (TASK #85.2):
-    'nr_budynku_inwestycji'
-  ],
-  kod_pocztowy: [
-    'kod pocztowy', 'kod_pocztowy', 'postal_code', 'zip_code',
-    'zip', 'postal',
-    // MINISTRY SHORT NAMES (TASK #85.2):
-    'kod_pocztowy_inwestycji'
-  ],
-  
-  // Price history and dates
-  cena_za_m2_poczatkowa: [
-    'cena początkowa za m²', 'cena startowa m2', 'initial_price_m2',
-    'cena_za_m2_poczatkowa', 'first_price_m2'
-  ],
-  cena_bazowa_poczatkowa: [
-    'cena bazowa początkowa', 'cena startowa', 'initial_price',
-    'cena_bazowa_poczatkowa', 'starting_price'
-  ],
-  data_pierwszej_oferty: [
-    'data pierwszej oferty', 'first_offer_date', 'offer_date',
-    'data_pierwszej_oferty', 'data oferty'
-  ],
-  data_pierwszej_sprzedazy: [
-    'data pierwszej sprzedaży', 'first_sale_date', 'sale_date',
-    'data_pierwszej_sprzedazy', 'data sprzedaży'
-  ],
-  price_valid_from: [
-    'data od', 'obowiązuje od', 'price_valid_from', 'valid_from',
-    'cena od', 'od kiedy',
-    // MINISTRY OFFICIAL NAMES:
-    'data od której cena obowiązuje cena m 2 powierzchni użytkowej lokalu mieszkalnego / domu jednorodzinnego',
-    'data od której obowiązuje cena lokalu mieszkalnego lub domu jednorodzinnego uwzględniająca cenę lokalu stanowiącą iloczyn powierzchni oraz metrażu i innych składowych ceny, o których mowa w art. 19a ust. 1 pkt 1), 2) lub 3)',
-    'data od której cena obowiązuje'
-  ],
-  price_valid_to: [
-    'data do', 'obowiązuje do', 'price_valid_to', 'valid_to',
-    'cena do', 'do kiedy'
-  ],
-  
-  // Parking and storage
-  parking_space: [
-    'parking', 'miejsce parkingowe', 'garaż', 'parking space', 'parking_space',
-    'miejsce_parkingowe', 'mp', 'parking_spot', 'garage',
-    // MINISTRY OFFICIAL NAMES:
-    'nr przypisanego miejsca parkingowego / garażu [1]',
-    'numer miejsca parkingowego garażu'
-  ],
-  parking_type: [
-    // Existing patterns
-    'miejsce postojowe', 'parking type', 'rodzaj parkingu',
-    // MINISTRY OFFICIAL PATTERNS (columns 44):
-    'rodzaj części nieruchomości będących przedmiotem umowy',
-    'rodzaj czesci nieruchomosci bedacych przedmiotem umowy'
-  ],
-  parking_designation: [
-    // Existing patterns
-    'oznaczenie parkingu', 'parking designation', 'nr parkingu',
-    // MINISTRY OFFICIAL PATTERNS (column 45):
-    'oznaczenie części nieruchomości nadane przez dewelopera',
-    'oznaczenie czesci nieruchomosci nadane przez dewelopera'
-  ],
-  parking_price: [
-    'cena parkingu', 'cena garażu', 'parking price', 'parking_price',
-    'cena_parkingu', 'cena_garazu', 'parking_cost',
-    // MINISTRY OFFICIAL NAMES:
-    'cena przypisanego miejsca parkingowego / garażu [1]',
-    'cena miejsca parkingowego garażu',
-    // MINISTRY OFFICIAL PATTERNS (column 46):
-    'cena części nieruchomości',
-    'cena czesci nieruchomosci'
-  ],
-  parking_date: [
-    // Existing patterns
-    'data parkingu', 'parking date',
-    // MINISTRY OFFICIAL PATTERNS (column 47 or 63-64):
-    'data od której obowiązuje cena części nieruchomości',
-    'data obowiązywania ceny części nieruchomości',
-    'data obowiazywania ceny czesci nieruchomosci',
-    'data od ktorej obowiazuje cena czesci nieruchomosci'
-  ],
-  miejsca_postojowe_nr: [
-    'nr miejsc parkingowych', 'parking_numbers', 'parking_spaces',
-    'miejsca_postojowe_nr', 'numery parkingów',
-    // MINISTRY OFFICIAL NAMES:
-    'nr przypisanego miejsca parkingowego / garażu [1]'
-  ],
-  miejsca_postojowe_ceny: [
-    'ceny miejsc parkingowych', 'parking_prices', 'parking_costs',
-    'miejsca_postojowe_ceny', 'ceny parkingów',
-    // MINISTRY OFFICIAL NAMES:
-    'cena przypisanego miejsca parkingowego / garażu [1]'
-  ],
-  storage_type: [
-    // Existing patterns
-    'komórka lokatorska', 'storage type', 'rodzaj komórki',
-    // MINISTRY OFFICIAL PATTERNS (column 48):
-    'rodzaj pomieszczeń przynależnych, o których mowa w art. 2 ust. 4',
-    'rodzaj pomieszczen przynaleznych'
-  ],
-  storage_designation: [
-    // Existing patterns
-    'oznaczenie komórki', 'storage designation', 'nr komórki',
-    // MINISTRY OFFICIAL PATTERNS (column 49):
-    'oznaczenie pomieszczeń przynależnych, o których mowa w art. 2 ust. 4',
-    'oznaczenie pomieszczen przynaleznych'
-  ],
-  storage_price: [
-    // Existing patterns
-    'cena komórki', 'storage price', 'koszt komórki',
-    // MINISTRY OFFICIAL PATTERNS (column 50 or 69-70):
-    'wyszczególnienie cen pomieszczeń przynależnych',
-    'cena pomieszczeń przynależnych, o których mowa w art. 2 ust. 4',
-    'cena pomieszczen przynaleznych',
-    'wyszczegolnienie cen pomieszczen przynaleznych'
-  ],
-  storage_date: [
-    // Existing patterns
-    'data komórki', 'storage date',
-    // MINISTRY OFFICIAL PATTERNS (column 51 or 71-72):
-    'data od której obowiązuje cena wyszczególnionych pomieszczeń przynależnych',
-    'data obowiązywania ceny pomieszczeń przynależnych, o których mowa w art. 2 ust. 4',
-    'data obowiazywania ceny pomieszczen przynaleznych',
-    'data od ktorej obowiazuje cena wyszczegolnionych pomieszczen przynaleznych'
-  ],
-  komorki_nr: [
-    'nr komórek', 'storage_numbers', 'komorki_nr',
-    'numery komórek', 'storage_rooms'
-  ],
-  komorki_ceny: [
-    'ceny komórek', 'storage_prices', 'komorki_ceny',
-    'ceny pomieszczeń', 'storage_costs'
-  ],
-  
-  // Status and availability
-  status: [
-    'status', 'dostępność', 'stan', 'availability', 'dostepnosc',
-    'stan_sprzedaży', 'stan_sprzedazy'
-  ],
-  status_dostepnosci: [
-    'status dostępności', 'availability_status', 'dostępny',
-    'status_dostepnosci', 'current_status'
-  ],
-  data_rezerwacji: [
-    'data rezerwacji', 'reservation_date', 'data_rezerwacji',
-    'zarezerwowano', 'reserved_date'
-  ],
-  data_sprzedazy: [
-    'data sprzedaży', 'sale_date', 'data_sprzedazy',
-    'sprzedano', 'sold_date'
-  ],
-  
-  // Building compliance (expanded for Ministry Schema 1.13)
-  construction_year: [
-    'rok budowy', 'construction_year', 'year_built',
-    'rok_budowy', 'built_year'
-  ],
-  building_permit_number: [
-    'nr pozwolenia na budowę', 'pozwolenie budowlane', 'building_permit',
-    'building_permit_number', 'permit_number'
-  ],
-  energy_class: [
-    'klasa energetyczna', 'energy_class', 'energy_rating',
-    'efektywność energetyczna', 'energia'
-  ],
-  certyfikat_energetyczny: [
-    'certyfikat energetyczny', 'energy_certificate',
-    'certyfikat_energetyczny', 'certificate'
-  ],
-
-  // NEW MINISTRY-SPECIFIC FIELDS
-  rok_budowy: [
-    'rok budowy', 'rok zakończenia budowy', 'year_built', 'construction_year',
-    'data oddania', 'rok_budowy', 'year_of_construction'
-  ],
-  klasa_energetyczna: [
-    'klasa energetyczna', 'energy_class', 'certyfikat energetyczny',
-    'energy_rating', 'klasa_energetyczna', 'efektywność'
-  ],
-  system_grzewczy: [
-    'system grzewczy', 'ogrzewanie', 'heating_system', 'grzewczy',
-    'system_grzewczy', 'typ ogrzewania'
-  ],
-  standard_wykonczenia: [
-    'standard wykończenia', 'standard', 'wykończenie', 'finishing_standard',
-    'standard_wykonczenia', 'stan wykończenia'
-  ],
-  typ_budynku: [
-    'typ budynku', 'rodzaj budynku', 'building_type', 'typ_budynku',
-    'kategoria budynku', 'forma zabudowy'
-  ],
-  rodzaj_wlasnosci: [
-    'rodzaj własności', 'własność', 'prawo własności', 'ownership_type',
-    'rodzaj_wlasnosci', 'status prawny'
-  ],
-  dostep_dla_niepelnosprawnych: [
-    'dostęp dla niepełnosprawnych', 'niepełnosprawni', 'accessibility',
-    'dostep_dla_niepelnosprawnych', 'przystosowanie'
-  ],
-  powierzchnia_piwnica: [
-    'piwnica', 'powierzchnia piwnicy', 'basement', 'powierzchnia_piwnica',
-    'piwnica m2', 'pomieszczenie piwniczna'
-  ],
-  powierzchnia_strych: [
-    'strych', 'powierzchnia strychu', 'attic', 'powierzchnia_strych',
-    'strych m2', 'poddasze'
-  ],
-  powierzchnia_garaz: [
-    'garaż', 'powierzchnia garażu', 'garage', 'powierzchnia_garaz',
-    'garaż m2', 'garaż wewnętrzny'
-  ],
-  ekspozycja: [
-    'ekspozycja', 'strony świata', 'orientation', 'nasłonecznienie',
-    'kierunki świata', 'exposure'
-  ],
-  nr_ksiegi_wieczystej: [
-    'księga wieczysta', 'nr księgi', 'land_registry', 'nr_ksiegi_wieczystej',
-    'numer księgi wieczystej'
-  ],
-
-  // Building permits (Ministry required)
-  nr_pozwolenia_budowlanego: [
-    'nr pozwolenia na budowę', 'pozwolenie budowlane', 'building_permit',
-    'nr_pozwolenia_budowlanego', 'permit_number'
-  ],
-  data_wydania_pozwolenia: [
-    'data pozwolenia', 'data wydania pozwolenia', 'permit_date',
-    'data_wydania_pozwolenia', 'kiedy wydane pozwolenie'
-  ],
-  organ_wydajacy_pozwolenie: [
-    'organ wydający', 'urząd', 'building_authority', 'organ_wydajacy_pozwolenie',
-    'kto wydał pozwolenie'
-  ],
-  nr_decyzji_uzytkowej: [
-    'decyzja użytkowa', 'pozwolenie na użytkowanie', 'occupancy_permit',
-    'nr_decyzji_uzytkowej', 'użytkowanie'
-  ],
-  data_decyzji_uzytkowej: [
-    'data decyzji użytkowej', 'kiedy użytkowanie', 'occupancy_date',
-    'data_decyzji_uzytkowej', 'data oddania do użytku'
-  ],
-  
-  // Additional costs and legal
-  additional_costs: [
-    'koszty dodatkowe', 'additional_costs', 'extra_costs',
-    'opłaty dodatkowe', 'fees'
-  ],
-  vat_rate: [
-    'stawka VAT', 'VAT', 'vat_rate', 'tax_rate',
-    'podatek', 'vat %'
-  ],
-  legal_status: [
-    'status prawny', 'legal_status', 'ownership',
-    'własność', 'prawo własności'
-  ],
-  
-  // Developer info (Ministry compliance enhanced)
-  developer_name: [
-    'deweloper', 'nazwa dewelopera', 'developer', 'developer_name',
-    'firma', 'nazwa_dewelopera',
-    // MINISTRY OFFICIAL NAMES:
-    'nazwa dewelopera'
-  ],
-  company_name: [
-    'nazwa firmy', 'company', 'company_name', 'nazwa_firmy',
-    'firma', 'spółka', 'spolka',
-    // MINISTRY OFFICIAL NAMES:
-    'nazwa dewelopera'
-  ],
-  nip: [
-    'nip', 'nr nip', 'numer nip', 'tax_id', 'vat_id', 'nr_nip',
-    // MINISTRY OFFICIAL NAMES:
-    'nr nip'
-  ],
-  phone: [
-    'telefon', 'tel', 'phone', 'numer telefonu', 'kontakt',
-    'tel.', 'telefon_kontaktowy', 'numer_telefonu'
-  ],
-  email: [
-    'email', 'e-mail', 'mail', 'adres email', 'contact_email',
-    'email_kontaktowy', 'adres_email'
-  ],
-
-  // Enhanced developer fields (Ministry required)
-  forma_prawna: [
-    'forma prawna', 'typ spółki', 'legal_form', 'forma_prawna',
-    'rodzaj działalności', 'status prawny firmy',
-    // MINISTRY OFFICIAL NAMES:
-    'forma prawna dewelopera'
-  ],
-  adres_siedziby: [
-    'adres siedziby', 'siedziba', 'headquarters_address', 'adres_siedziby',
-    'adres firmy', 'adres główny'
-  ],
-  strona_internetowa: [
-    'strona internetowa', 'www', 'website', 'strona_internetowa',
-    'adres www', 'portal'
-  ],
-  osoba_kontaktowa: [
-    'osoba kontaktowa', 'kontakt', 'contact_person', 'osoba_kontaktowa',
-    'przedstawiciel', 'odpowiedzialny'
-  ],
-  
-  // Investment info
-  investment_name: [
-    'inwestycja', 'nazwa inwestycji', 'project', 'investment',
-    'investment_name', 'projekt', 'nazwa_inwestycji', 'osiedle'
-  ],
-  investment_address: [
-    'adres', 'adres inwestycji', 'address',
-    'investment_address', 'adres_inwestycji', 'lokalizacja'
-  ],
-  investment_city: [
-    'miasto', 'miejscowość', 'city', 'town', 'gmina',
-    'miejscowosc', 'investment_city'
-  ],
-
-  // Additional Ministry-required fields
-  budynek: [
-    'budynek', 'numer budynku', 'building', 'building_number',
-    'nr budynku', 'budynek_nr'
-  ],
-  klatka: [
-    'klatka', 'klatka schodowa', 'staircase', 'nr klatki',
-    'klatka_schodowa', 'entrance'
-  ],
-  stan_wykonczenia: [
-    'stan wykończenia', 'wykończenie', 'finishing', 'standard',
-    'stan_wykonczenia', 'stan wykończenia'
-  ],
-  technologia_budowy: [
-    'technologia budowy', 'konstrukcja', 'building_technology',
-    'technologia_budowy', 'typ konstrukcji'
-  ],
-  powierzchnia_calkowita: [
-    'powierzchnia całkowita', 'pow całkowita', 'total_area',
-    'powierzchnia_calkowita', 'całkowita m2'
-  ],
-  powierzchnia_piwnicy: [
-    'powierzchnia piwnicy', 'piwnica m2', 'basement_area',
-    'powierzchnia_piwnicy', 'piwnica'
-  ],
-  powierzchnia_strychu: [
-    'powierzchnia strychu', 'strych m2', 'attic_area',
-    'powierzchnia_strychu', 'poddasze'
-  ],
-  miejsca_postojowe_liczba: [
-    'liczba miejsc parkingowych', 'liczba parkingów', 'parking_count',
-    'miejsca_postojowe_liczba', 'ile parkingów'
-  ],
-  miejsca_postojowe_rodzaj: [
-    'rodzaj parkingu', 'typ parkingu', 'parking_type',
-    'miejsca_postojowe_rodzaj', 'typ miejsc parkingowych'
-  ],
-  komorki_lokatorskie_liczba: [
-    'liczba komórek', 'ile komórek', 'storage_count',
-    'komorki_lokatorskie_liczba', 'liczba pomieszczeń'
-  ],
-  komorki_lokatorskie_powierzchnie: [
-    'powierzchnie komórek', 'komórki m2', 'storage_areas',
-    'komorki_lokatorskie_powierzchnie', 'powierzchnia komórek'
-  ],
-  winda: [
-    'winda', 'elevator', 'lift', 'dostęp windą',
-    'czy winda', 'wind'
-  ],
-  klimatyzacja: [
-    'klimatyzacja', 'klima', 'air_conditioning', 'AC',
-    'czy klimatyzacja', 'klimatyzowana'
-  ],
-  ogrzewanie: [
-    'ogrzewanie', 'heating', 'system grzewczy', 'typ ogrzewania',
-    'źródło ciepła', 'heating_type'
-  ],
-  dostep_dla_niepelnosprawnych: [
-    'dostęp dla niepełnosprawnych', 'niepełnosprawni', 'accessibility',
-    'dostep_dla_niepelnosprawnych', 'przystosowanie'
-  ],
-  ekspozycja: [
-    'ekspozycja', 'strony świata', 'orientation', 'nasłonecznienie',
-    'kierunki świata', 'exposure'
-  ],
-  widok_z_okien: [
-    'widok z okien', 'widok', 'view', 'panorama',
-    'widok_z_okien', 'na co widok'
-  ],
-  data_rezerwacji: [
-    'data rezerwacji', 'rezerwacja', 'reserved_date',
-    'data_rezerwacji', 'zarezerwowano'
-  ],
-  data_sprzedazy: [
-    'data sprzedaży', 'sprzedaż', 'sale_date',
-    'data_sprzedazy', 'sprzedano'
-  ],
-  data_przekazania: [
-    'data przekazania', 'przekazanie', 'handover_date',
-    'data_przekazania', 'oddano'
-  ],
-  forma_wlasnosci: [
-    'forma własności', 'typ własności', 'ownership_type',
-    'forma_wlasnosci', 'własność'
-  ],
-  ksiega_wieczysta: [
-    'księga wieczysta', 'nr księgi', 'land_registry',
-    'ksiega_wieczysta', 'numer księgi wieczystej'
-  ],
-  udzial_w_gruncie: [
-    'udział w gruncie', 'udział gruntu', 'land_share',
-    'udzial_w_gruncie', 'procent gruntu'
-  ],
-  waluta: [
-    'waluta', 'currency', 'PLN', 'EUR', 'USD',
-    'w jakiej walucie', 'symbol waluty'
-  ],
-
-  // TASK #85.4: Necessary rights (prawa niezbędne) - Ministry columns 52-54
-  necessary_rights: [
-    'prawa niezbędne', 'prawa_niezbedne', 'prawa niezbedne wyszczególnienie', 'prawa_niezbedne_wyszczegolnienie',
-    'necessary_rights', 'rights', 'udzial w gruncie', 'udział w gruncie',
-    // MINISTRY OFFICIAL NAMES (column 52):
-    'wyszczególnienie praw niezbędnych do korzystania z nieruchomości wspólnych',
-    'wyszczegolnienie praw niezbednych'
-  ],
-  necessary_rights_price: [
-    'prawa cena', 'prawa_niezbedne_cena', 'necessary_rights_price',
-    // MINISTRY OFFICIAL NAMES (column 53):
-    'cena praw niezbędnych',
-    'cena praw niezbednych'
-  ],
-  necessary_rights_date: [
-    'prawa data', 'prawa_niezbedne_data', 'necessary_rights_date',
-    // MINISTRY OFFICIAL NAMES (column 54):
-    'data obowiązywania ceny praw niezbędnych',
-    'data obowiazywania ceny praw niezbednych'
-  ],
-
-  // TASK #85.5: Prospectus address (adres prospektu) - Ministry column 58
-  prospectus_url: [
-    'adres prospektu', 'adres_prospektu', 'prospekt', 'prospectus',
-    'prospectus_url', 'url prospektu', 'link do prospektu',
-    // MINISTRY OFFICIAL NAMES (column 58):
-    'adres strony internetowej prospektu informacyjnego',
-    'adres prospektu informacyjnego'
-  ]
-}
+/**
+ * Column pattern mapping using comprehensive synonym database from column-synonyms-complete.ts
+ * 
+ * This provides 520+ synonyms covering all 58 ministry fields plus INPRO extras.
+ * Priority order: INPRO exact → ATAL exact → Ministry official → Generic Polish → English
+ * 
+ * @see column-synonyms-complete.ts for full documentation and synonym mappings
+ */
+export const COLUMN_PATTERNS: ColumnMapping = COMPLETE_COLUMN_PATTERNS as unknown as ColumnMapping
 
 export interface RowValidationStats {
   tooFewColumns: number
@@ -1091,13 +497,49 @@ export class SmartCSVParser {
   }
 
   /**
-   * Normalize string for comparison - removes Polish special chars and normalizes whitespace
+   * Normalizes a string for fuzzy column matching by:
+   * 1. Converting to Unicode NFC (Normalized Form Composed) to handle composed vs decomposed characters
+   * 2. Converting to lowercase for case-insensitive matching
+   * 3. Removing punctuation while preserving all letters (including Polish ą, ć, ę, ł, ń, ó, ś, ź, ż) and numbers
+   * 4. Normalizing whitespace (multiple spaces → single space, trim)
+   *
+   * This ensures reliable matching of CSV column headers that may use:
+   * - Different Unicode representations (NFC vs NFD)
+   * - Mixed case (WOJEWÓDZTWO vs województwo)
+   * - Extra whitespace or punctuation (Pow. użytkowa vs Powierzchnia użytkowa)
+   * - Polish diacritical marks (Piętro vs piętro)
+   *
+   * @param str - The string to normalize
+   * @returns Normalized string suitable for fuzzy matching
+   *
+   * @example
+   * normalizeString('Piętro nieruchomości')  // 'piętro nieruchomości'
+   * normalizeString('WOJEWÓDZTWO ŁÓDZKIE')   // 'województwo łódzkie'
+   * normalizeString('Pow. użytkowa [m²]')    // 'pow użytkowa m²'
+   * normalizeString('Nr.   mieszkania')      // 'nr mieszkania'
+   * normalizeString('CENA M² POWIERZCHNI')   // 'cena m² powierzchni'
    */
   private normalizeString(str: string): string {
     return str
+      // Step 1: Unicode NFC normalization - converts decomposed characters (o + ´) to composed (ó)
+      // This ensures "ó" (U+00F3) and "o´" (U+006F + U+0301) are treated identically
+      .normalize('NFC')
+
+      // Step 2: Case normalization - enables case-insensitive matching
       .toLowerCase()
-      .replace(/[^\w\s]/g, '') // Remove special chars (including Polish ł, ą, ć, etc.)
-      .replace(/\s+/g, ' ') // Normalize whitespace
+
+      // Step 3: Remove punctuation while preserving letters and numbers
+      // \p{L} - matches ALL Unicode letters (including ą, ć, ę, ł, ń, ó, ś, ź, ż)
+      // \p{N} - matches ALL Unicode numbers (including ², ³, etc.)
+      // \s - matches whitespace
+      // 'u' flag - enables Unicode mode for \p{} patterns
+      // 'g' flag - global replacement
+      .replace(/[^\p{L}\p{N}\s]/gu, '')
+
+      // Step 4: Normalize whitespace - collapse multiple spaces/tabs/newlines to single space
+      .replace(/\s+/g, ' ')
+
+      // Step 5: Remove leading/trailing whitespace
       .trim()
   }
 
@@ -1197,42 +639,46 @@ export class SmartCSVParser {
   }
 
   /**
-   * Fuzzy string matching for column detection
+   * Fuzzy string matching for column detection using optimized Levenshtein distance
+   *
+   * Priority-based matching strategy:
+   * 1. Exact match: 1.0 (100% confidence)
+   * 2. Contains match: 0.9 (90% confidence)
+   * 3. Levenshtein similarity: Normalized distance score (0.0 - 1.0)
+   *
+   * Uses fastest-levenshtein library for O(min(n,m)) performance instead of O(n*m) native implementation.
+   * This provides significant speedup for large CSV files with many columns.
+   *
+   * @param str1 - First normalized string to compare
+   * @param str2 - Second normalized string to compare
+   * @returns Similarity score from 0.0 (completely different) to 1.0 (identical)
+   *
+   * @example
+   * fuzzyMatch('piętro', 'piętro')          // 1.0 (exact)
+   * fuzzyMatch('powierzchnia', 'pow')        // 0.9 (contains)
+   * fuzzyMatch('piętro', 'pietro')           // ~0.83 (1 char difference)
    */
   private fuzzyMatch(str1: string, str2: string): number {
-    // Exact match
+    // Priority 1: Exact match
     if (str1 === str2) return 1.0
 
-    // Contains match
+    // Edge case: Empty string handling (before contains check)
+    // JavaScript `.includes('')` returns true, but semantically empty string matches nothing
+    if (str1.length === 0 || str2.length === 0) {
+      return 0 // Empty string has no similarity to non-empty string
+    }
+
+    // Priority 2: Contains match (one string is substring of the other)
     if (str1.includes(str2) || str2.includes(str1)) {
       return 0.9
     }
 
-    // Levenshtein distance normalized
-    const distance = this.levenshteinDistance(str1, str2)
+    // Priority 3: Levenshtein distance similarity (optimized with fastest-levenshtein)
+    const distance = levenshteinDistance(str1, str2)
     const maxLength = Math.max(str1.length, str2.length)
+
+    // Normalize to 0-1 range (1 = identical, 0 = completely different)
     return 1 - (distance / maxLength)
-  }
-
-  private levenshteinDistance(str1: string, str2: string): number {
-    const matrix = Array.from({ length: str2.length + 1 }, (_, i) => [i])
-    matrix[0] = Array.from({ length: str1.length + 1 }, (_, i) => i)
-
-    for (let i = 1; i <= str2.length; i++) {
-      for (let j = 1; j <= str1.length; j++) {
-        if (str2[i - 1] === str1[j - 1]) {
-          matrix[i][j] = matrix[i - 1][j - 1]
-        } else {
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1, // substitution
-            matrix[i][j - 1] + 1,     // insertion
-            matrix[i - 1][j] + 1      // deletion
-          )
-        }
-      }
-    }
-    
-    return matrix[str2.length][str1.length]
   }
 
   private findClosestMatch(fieldName: string, headers: string[]): string[] {

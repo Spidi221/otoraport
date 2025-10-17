@@ -1,0 +1,845 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "OTO-RAPORT API - Ministry Compliance & Developer Management",
+    "version": "1.0.0",
+    "description": "REST API for OTO-RAPORT SaaS platform. Provides endpoints for Ministry Schema 1.13 compliance validation, developer profile management, and property data validation.\n\n**Authentication**: All endpoints require Supabase Auth session (JWT token in Authorization header).\n\n**Ministry Compliance**: Based on Polish law 'ustawa z dnia 21 maja 2025 r. o jawności cen mieszkań'.",
+    "contact": {
+      "name": "OTO-RAPORT Support",
+      "email": "support@oto-raport.pl"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://otoraport-v2.vercel.app/api",
+      "description": "Production server"
+    },
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Validation",
+      "description": "Ministry compliance validation endpoints"
+    },
+    {
+      "name": "Developers",
+      "description": "Developer profile management"
+    }
+  ],
+  "paths": {
+    "/validation/missing-fields": {
+      "get": {
+        "tags": ["Validation"],
+        "summary": "Get missing fields validation report",
+        "description": "Analyzes developer's properties for missing Ministry-required fields. Returns comprehensive validation summary with section breakdown (developer, location, pricing, technical).",
+        "operationId": "getMissingFields",
+        "parameters": [
+          {
+            "name": "developerId",
+            "in": "query",
+            "description": "Developer UUID (optional, defaults to authenticated user's developer)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "includeSections",
+            "in": "query",
+            "description": "Include detailed section breakdown (developer, location, pricing, technical)",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation report successfully generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationMissingFieldsResponse"
+                },
+                "examples": {
+                  "withSections": {
+                    "summary": "Response with section breakdown",
+                    "value": {
+                      "success": true,
+                      "data": {
+                        "summary": {
+                          "totalProperties": 150,
+                          "propertiesWithIssues": 23,
+                          "propertiesValid": 127,
+                          "complianceScore": 85
+                        },
+                        "sectionBreakdown": {
+                          "developer": {
+                            "total": 28,
+                            "valid": 20,
+                            "percentage": 71
+                          },
+                          "location": {
+                            "total": 7,
+                            "valid": 7,
+                            "percentage": 100
+                          },
+                          "pricing": {
+                            "total": 3,
+                            "valid": 3,
+                            "percentage": 100
+                          },
+                          "technical": {
+                            "total": 8,
+                            "valid": 6,
+                            "percentage": 75
+                          }
+                        },
+                        "missingFieldsSummary": {
+                          "regon": {
+                            "count": 150,
+                            "percentage": 100,
+                            "severity": "info",
+                            "fieldLabel": "Nr REGON"
+                          }
+                        },
+                        "detailedMissingFields": [
+                          {
+                            "fieldName": "regon",
+                            "displayName": "Nr REGON",
+                            "category": "developer",
+                            "section": "developer",
+                            "severity": "warning"
+                          }
+                        ],
+                        "properties": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "SupabaseAuth": []
+          }
+        ]
+      }
+    },
+    "/developers/update": {
+      "patch": {
+        "tags": ["Developers"],
+        "summary": "Update developer profile",
+        "description": "Updates developer profile with Ministry Schema 1.13 fields. All 28 developer fields can be updated. Returns updated profile with validation status.",
+        "operationId": "updateDeveloper",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeveloperUpdateRequest"
+              },
+              "examples": {
+                "basicUpdate": {
+                  "summary": "Update basic company info",
+                  "value": {
+                    "updates": {
+                      "company_name": "Deweloper XYZ Sp. z o.o.",
+                      "nip": "1234567890",
+                      "phone": "+48 123 456 789",
+                      "email": "kontakt@deweloper.pl"
+                    }
+                  }
+                },
+                "fullUpdate": {
+                  "summary": "Update all sections",
+                  "value": {
+                    "updates": {
+                      "company_name": "Deweloper XYZ Sp. z o.o.",
+                      "legal_form": "Spółka z ograniczoną odpowiedzialnością",
+                      "nip": "1234567890",
+                      "headquarters_city": "Warszawa",
+                      "headquarters_street": "Marszałkowska",
+                      "headquarters_building_number": "100",
+                      "headquarters_postal_code": "00-001",
+                      "sales_office_city": "Warszawa",
+                      "contact_method": "telefon, email, formularz"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Developer profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeveloperUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "Conflict - duplicate data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Duplicate value - this data already exists"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "SupabaseAuth": []
+          }
+        ]
+      }
+    },
+    "/developers/{id}/completion-status": {
+      "get": {
+        "tags": ["Developers"],
+        "summary": "Get developer profile completion status",
+        "description": "Returns detailed completion status including section breakdown, missing fields, and actionable next steps.",
+        "operationId": "getDeveloperCompletionStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Developer UUID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Completion status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletionStatusResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "developerId": "123e4567-e89b-12d3-a456-426614174000",
+                    "companyName": "Deweloper XYZ Sp. z o.o.",
+                    "overallCompletion": 72,
+                    "sectionCompletion": {
+                      "basicInfo": {
+                        "complete": true,
+                        "percentage": 100
+                      },
+                      "headquarters": {
+                        "complete": false,
+                        "percentage": 75
+                      },
+                      "salesOffice": {
+                        "complete": false,
+                        "percentage": 50
+                      },
+                      "contact": {
+                        "complete": true,
+                        "percentage": 100
+                      }
+                    },
+                    "missingCriticalFields": [],
+                    "missingRecommendedFields": [
+                      "REGON",
+                      "Ulica siedziby",
+                      "Miasto biura sprzedaży"
+                    ],
+                    "nextSteps": [
+                      "📋 Uzupełnij podstawowe informacje o firmie (75% gotowe)",
+                      "🏪 Dodaj adres biura sprzedaży (50% gotowe)"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "SupabaseAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ValidationMissingFieldsResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "required": ["summary", "missingFieldsSummary", "properties"],
+            "properties": {
+              "summary": {
+                "type": "object",
+                "properties": {
+                  "totalProperties": {
+                    "type": "integer",
+                    "example": 150
+                  },
+                  "propertiesWithIssues": {
+                    "type": "integer",
+                    "example": 23
+                  },
+                  "propertiesValid": {
+                    "type": "integer",
+                    "example": 127
+                  },
+                  "complianceScore": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "example": 85
+                  }
+                }
+              },
+              "sectionBreakdown": {
+                "type": "object",
+                "description": "Section breakdown (only if includeSections=true)",
+                "properties": {
+                  "developer": {
+                    "$ref": "#/components/schemas/SectionBreakdown"
+                  },
+                  "location": {
+                    "$ref": "#/components/schemas/SectionBreakdown"
+                  },
+                  "pricing": {
+                    "$ref": "#/components/schemas/SectionBreakdown"
+                  },
+                  "technical": {
+                    "$ref": "#/components/schemas/SectionBreakdown"
+                  }
+                }
+              },
+              "missingFieldsSummary": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/MissingFieldSummaryEntry"
+                }
+              },
+              "detailedMissingFields": {
+                "type": "array",
+                "description": "Detailed missing fields (only if includeSections=true)",
+                "items": {
+                  "$ref": "#/components/schemas/MissingFieldInfo"
+                }
+              },
+              "properties": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PropertyValidationItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "SectionBreakdown": {
+        "type": "object",
+        "required": ["total", "valid", "percentage"],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "Total fields in section",
+            "example": 28
+          },
+          "valid": {
+            "type": "integer",
+            "description": "Number of valid fields",
+            "example": 20
+          },
+          "percentage": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Completion percentage",
+            "example": 71
+          }
+        }
+      },
+      "MissingFieldSummaryEntry": {
+        "type": "object",
+        "required": ["count", "percentage", "severity", "fieldLabel"],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "description": "Number of properties missing this field",
+            "example": 150
+          },
+          "percentage": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Percentage of properties missing this field",
+            "example": 100
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "warning", "info"],
+            "example": "info"
+          },
+          "fieldLabel": {
+            "type": "string",
+            "description": "Human-readable field name",
+            "example": "Nr REGON"
+          }
+        }
+      },
+      "MissingFieldInfo": {
+        "type": "object",
+        "required": ["fieldName", "displayName", "category", "section", "severity"],
+        "properties": {
+          "fieldName": {
+            "type": "string",
+            "example": "regon"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Nr REGON"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["required", "recommended", "developer"],
+            "example": "developer"
+          },
+          "section": {
+            "type": "string",
+            "enum": ["developer", "location", "pricing", "technical"],
+            "example": "developer"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "warning"],
+            "example": "warning"
+          }
+        }
+      },
+      "PropertyValidationItem": {
+        "type": "object",
+        "required": ["id", "propertyNumber", "address", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "propertyNumber": {
+            "type": "string",
+            "example": "M-101"
+          },
+          "address": {
+            "type": "string",
+            "example": "Warszawa, Marszałkowska 100"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["valid", "invalid"],
+            "example": "valid"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "missingRequired": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "missingRecommended": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "invalidFormats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DeveloperUpdateRequest": {
+        "type": "object",
+        "required": ["updates"],
+        "properties": {
+          "developerId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional developer ID (defaults to authenticated user's developer)"
+          },
+          "updates": {
+            "type": "object",
+            "description": "Fields to update (partial updates supported)",
+            "properties": {
+              "company_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255,
+                "example": "Deweloper XYZ Sp. z o.o."
+              },
+              "legal_form": {
+                "type": "string",
+                "maxLength": 100,
+                "example": "Spółka z ograniczoną odpowiedzialnością"
+              },
+              "nip": {
+                "type": "string",
+                "pattern": "^\\d{10}$",
+                "example": "1234567890"
+              },
+              "regon": {
+                "type": "string",
+                "pattern": "^\\d{9}$|^\\d{14}$",
+                "example": "123456789"
+              },
+              "phone": {
+                "type": "string",
+                "maxLength": 50,
+                "example": "+48 123 456 789"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "kontakt@deweloper.pl"
+              },
+              "headquarters_city": {
+                "type": "string",
+                "maxLength": 100,
+                "example": "Warszawa"
+              },
+              "headquarters_postal_code": {
+                "type": "string",
+                "pattern": "^\\d{2}-\\d{3}$",
+                "example": "00-001"
+              }
+            }
+          }
+        }
+      },
+      "DeveloperUpdateResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "developer": {
+                "type": "object",
+                "description": "Updated developer profile (all fields)"
+              },
+              "validationStatus": {
+                "type": "object",
+                "properties": {
+                  "complianceScore": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "example": 80
+                  },
+                  "missingFields": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": ["regon", "headquarters_street"]
+                  },
+                  "completionPercentage": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "example": 75
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "CompletionStatusResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "required": ["developerId", "companyName", "overallCompletion", "sectionCompletion", "missingCriticalFields", "missingRecommendedFields", "nextSteps"],
+            "properties": {
+              "developerId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "companyName": {
+                "type": "string",
+                "example": "Deweloper XYZ Sp. z o.o."
+              },
+              "overallCompletion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "example": 72
+              },
+              "sectionCompletion": {
+                "type": "object",
+                "properties": {
+                  "basicInfo": {
+                    "$ref": "#/components/schemas/SectionCompletionStatus"
+                  },
+                  "headquarters": {
+                    "$ref": "#/components/schemas/SectionCompletionStatus"
+                  },
+                  "salesOffice": {
+                    "$ref": "#/components/schemas/SectionCompletionStatus"
+                  },
+                  "contact": {
+                    "$ref": "#/components/schemas/SectionCompletionStatus"
+                  }
+                }
+              },
+              "missingCriticalFields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": []
+              },
+              "missingRecommendedFields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": ["REGON", "Ulica siedziby"]
+              },
+              "nextSteps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "📋 Uzupełnij podstawowe informacje o firmie (75% gotowe)",
+                  "🏪 Dodaj adres biura sprzedaży (50% gotowe)"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "SectionCompletionStatus": {
+        "type": "object",
+        "required": ["complete", "percentage"],
+        "properties": {
+          "complete": {
+            "type": "boolean",
+            "example": false
+          },
+          "percentage": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 75
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["success", "error"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Internal server error"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad Request - validation errors",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "error": "Validation failed",
+              "details": [
+                {
+                  "field": "updates.nip",
+                  "message": "NIP musi składać się z 10 cyfr"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized - missing or invalid authentication",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "error": "Unauthorized"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden - insufficient permissions",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "error": "Forbidden - not your developer profile"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not Found - resource does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "error": "Developer not found"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "error": "Internal server error"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "SupabaseAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Supabase JWT token obtained from authentication. Include in Authorization header: `Bearer {token}`"
+      }
+    }
+  }
+}

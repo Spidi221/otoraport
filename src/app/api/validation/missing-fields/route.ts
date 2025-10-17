@@ -1,11 +1,16 @@
 /**
  * VALIDATION API - Ministry Compliance Missing Fields Detection
  * Task #90.2 - Implement API endpoint using ministry-validation service
+ * Task #101.1 - Enhanced with section breakdown and detailed missing fields
  *
- * GET /api/validation/missing-fields?developerId={uuid}
+ * GET /api/validation/missing-fields?developerId={uuid}&includeSections={boolean}
  *
  * Analyzes developer's properties for missing required/recommended ministerial fields
  * and format errors. Returns comprehensive validation summary with actionable warnings.
+ *
+ * Query Parameters:
+ * - developerId: UUID of developer (optional, defaults to authenticated user)
+ * - includeSections: boolean (optional, adds detailed section breakdown)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -17,6 +22,7 @@ import type {
   MissingFieldSummaryEntry,
   PropertyValidationItem,
 } from '@/lib/api-schemas'
+import type { MissingFieldInfo, SectionBreakdown } from '@/lib/ministry-validation'
 import { REQUIRED_FIELDS, RECOMMENDED_FIELDS } from '@/lib/ministry-validation'
 
 export const dynamic = 'force-dynamic'
@@ -42,9 +48,10 @@ export async function GET(request: NextRequest) {
     // DEVELOPER IDENTIFICATION
     // ========================================================================
 
-    // Get developerId from query param (for admin access) or use authenticated user's developer
+    // Get query parameters
     const searchParams = request.nextUrl.searchParams
     const requestedDeveloperId = searchParams.get('developerId')
+    const includeSections = searchParams.get('includeSections') === 'true'
 
     let developerId: string
 
@@ -270,21 +277,66 @@ export async function GET(request: NextRequest) {
     })
 
     // ========================================================================
-    // BUILD FINAL RESPONSE
+    // BUILD FINAL RESPONSE (Task #101.1 - Enhanced)
     // ========================================================================
+
+    // Base response structure
+    const responseData: {
+      summary: {
+        totalProperties: number
+        propertiesWithIssues: number
+        propertiesValid: number
+        complianceScore: number
+      }
+      missingFieldsSummary: Record<string, MissingFieldSummaryEntry>
+      properties: PropertyValidationItem[]
+      sectionBreakdown?: {
+        developer: SectionBreakdown
+        location: SectionBreakdown
+        pricing: SectionBreakdown
+        technical: SectionBreakdown
+      }
+      detailedMissingFields?: Array<{
+        fieldName: string
+        displayName: string
+        category: 'required' | 'recommended' | 'developer'
+        section: 'developer' | 'location' | 'pricing' | 'technical'
+        severity: 'critical' | 'warning'
+      }>
+    } = {
+      summary: {
+        totalProperties: validationResult.totalProperties,
+        propertiesWithIssues: validationResult.invalidProperties,
+        propertiesValid: validationResult.validProperties,
+        complianceScore: validationResult.complianceScore,
+      },
+      missingFieldsSummary,
+      properties,
+    }
+
+    // Add section breakdown if requested (Task #101.1)
+    if (includeSections && validationResult.sectionBreakdown) {
+      responseData.sectionBreakdown = validationResult.sectionBreakdown
+
+      // Aggregate detailed missing fields from all properties
+      const allMissingFields = new Map<string, MissingFieldInfo>()
+
+      validationResult.propertyResults.forEach((propResult) => {
+        if (propResult.missingFieldsDetailed) {
+          propResult.missingFieldsDetailed.forEach((field) => {
+            if (!allMissingFields.has(field.fieldName)) {
+              allMissingFields.set(field.fieldName, field)
+            }
+          })
+        }
+      })
+
+      responseData.detailedMissingFields = Array.from(allMissingFields.values())
+    }
 
     const response: ValidationMissingFieldsResponse = {
       success: true,
-      data: {
-        summary: {
-          totalProperties: validationResult.totalProperties,
-          propertiesWithIssues: validationResult.invalidProperties,
-          propertiesValid: validationResult.validProperties,
-          complianceScore: validationResult.complianceScore,
-        },
-        missingFieldsSummary,
-        properties,
-      },
+      data: responseData,
     }
 
     console.log(`✅ VALIDATION API: Analyzed ${validationResult.totalProperties} properties, compliance: ${validationResult.complianceScore}%`)

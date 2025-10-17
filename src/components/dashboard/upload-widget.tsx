@@ -5,11 +5,18 @@ import { Button } from "../ui/button";
 import { useCSVParserWorker } from "@/hooks/use-csv-parser-worker";
 import { trackUploadSuccess } from "@/lib/ga4-tracking";
 import { trackFileUpload } from "@/lib/analytics-events";
+import { UploadFeedbackModal } from "@/components/upload";
+import type { UploadResponseData } from "@/components/upload";
 
 interface UploadResult {
   fileName: string;
   propertiesAdded: number;
   autoImportedFields?: number;
+}
+
+interface UploadWidgetProps {
+  developerId?: string;
+  onStartDataCompletion?: () => void;
 }
 
 interface ValidationError {
@@ -36,7 +43,7 @@ interface ValidationError {
 // TEMPORARY FIX: Disabled to use server-side parser with Polish char fix
 const USE_WEB_WORKER_FOR_CSV = false; // typeof window !== 'undefined' && 'Worker' in window;
 
-export function UploadWidget() {
+export function UploadWidget({ developerId, onStartDataCompletion }: UploadWidgetProps = {}) {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
@@ -44,6 +51,10 @@ export function UploadWidget() {
   const [validationError, setValidationError] = useState<ValidationError | null>(null);
   const [parsingStatus, setParsingStatus] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Task #104: Upload feedback modal state
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [uploadResponseData, setUploadResponseData] = useState<UploadResponseData | null>(null);
 
   // Web Worker for CSV parsing
   const csvWorker = useCSVParserWorker();
@@ -102,11 +113,27 @@ export function UploadWidget() {
       }
 
       const autoImportedFields = data?.data?.autoImportedFields || 0;
-      setUploadResult({
-        fileName: 'parsed-data.csv',
-        propertiesAdded: validRows,
-        autoImportedFields: autoImportedFields
-      });
+
+      // Task #104: Open feedback modal instead of simple success message
+      if (data?.data && developerId) {
+        setUploadResponseData({
+          fileName: 'parsed-data.csv',
+          recordsCount: validRows,
+          validRecords: validRows,
+          autoImportedFields: autoImportedFields,
+          savedToDatabase: true,
+          preview: null,
+          trackingData: data.data.trackingData,
+        });
+        setShowFeedbackModal(true);
+      } else {
+        // Fallback to simple success message if no developerId
+        setUploadResult({
+          fileName: 'parsed-data.csv',
+          propertiesAdded: validRows,
+          autoImportedFields: autoImportedFields
+        });
+      }
 
       // Track successful upload in GA4 and PostHog
       if (data?.data?.trackingData) {
@@ -227,14 +254,29 @@ export function UploadWidget() {
         return;
       }
 
-      // Simplified result: just filename and count
+      // Task #104: Open feedback modal instead of simple success message
       const recordsCount = data?.data?.validRecords || data?.data?.recordsCount || 0;
       const autoImportedFields = data?.data?.autoImportedFields || 0;
-      setUploadResult({
-        fileName: file.name,
-        propertiesAdded: recordsCount,
-        autoImportedFields: autoImportedFields
-      });
+
+      if (data?.data && developerId) {
+        setUploadResponseData({
+          fileName: file.name,
+          recordsCount: data.data.recordsCount || recordsCount,
+          validRecords: recordsCount,
+          autoImportedFields: autoImportedFields,
+          savedToDatabase: data.data.savedToDatabase ?? true,
+          preview: data.data.preview || null,
+          trackingData: data.data.trackingData,
+        });
+        setShowFeedbackModal(true);
+      } else {
+        // Fallback to simple success message if no developerId
+        setUploadResult({
+          fileName: file.name,
+          propertiesAdded: recordsCount,
+          autoImportedFields: autoImportedFields
+        });
+      }
 
       // Track successful upload in GA4 and PostHog
       if (data?.data?.trackingData) {
@@ -355,14 +397,35 @@ export function UploadWidget() {
   };
 
   return (
-    <Card className="col-span-full lg:col-span-2">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Upload className="h-5 w-5" />
-          Upload Cennika
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <>
+      {/* Task #104: Upload Feedback Modal */}
+      {showFeedbackModal && uploadResponseData && developerId && (
+        <UploadFeedbackModal
+          isOpen={showFeedbackModal}
+          onClose={() => {
+            setShowFeedbackModal(false);
+            setUploadResponseData(null);
+          }}
+          uploadData={uploadResponseData}
+          developerId={developerId}
+          onStartCompletion={() => {
+            if (onStartDataCompletion) {
+              onStartDataCompletion();
+            } else {
+              console.warn('UploadWidget: onStartDataCompletion callback not provided');
+            }
+          }}
+        />
+      )}
+
+      <Card className="col-span-full lg:col-span-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Upload Cennika
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
         <div
           className={`relative rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
             dragActive 
@@ -520,5 +583,6 @@ export function UploadWidget() {
         )}
       </CardContent>
     </Card>
+    </>
   );
 }

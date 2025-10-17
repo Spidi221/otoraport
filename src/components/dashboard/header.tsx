@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Settings, User, Shield, Menu, X, TrendingUp } from "lucide-react";
+import { Bell, Settings, User, Shield, Menu, X, TrendingUp, AlertCircle } from "lucide-react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
@@ -15,6 +15,7 @@ import { OtoRaportLogo } from "../icons/oto-raport-logo";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth-simple";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useDataCompletionBadge } from "@/components/upload/use-data-completion-badge";
 import { useState } from "react";
 
 interface HeaderProps {
@@ -98,6 +99,7 @@ export function PublicHeader() {
 function AuthenticatedHeader() {
   const { user, developer, signOut, isAdmin } = useAuth();
   const { unreadCount } = useNotifications();
+  const { hasBadge, badgeData, clearBadge } = useDataCompletionBadge();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = () => {
@@ -112,6 +114,28 @@ function AuthenticatedHeader() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-4">
+          {/* Data Completion Badge - Task #106.3 */}
+          {hasBadge && badgeData && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={() => {
+                // Dispatch event to open wizard
+                window.dispatchEvent(new CustomEvent('open-data-completion-wizard'));
+              }}
+              title="Uzupełnij dane firmy"
+            >
+              <AlertCircle className="h-5 w-5 text-orange-600" />
+              <Badge
+                variant="default"
+                className="absolute -right-1 -top-1 h-5 min-w-[28px] rounded-full px-1 text-xs bg-orange-600 hover:bg-orange-700"
+              >
+                {badgeData.complianceScore}%
+              </Badge>
+            </Button>
+          )}
+
           {/* Notifications Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
